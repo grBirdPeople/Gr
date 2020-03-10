@@ -7,5 +7,6 @@ Gruvlig/build/intermediates/
 *.iobj
 *.ipdb
 *.idb
+*.obj
 
 *.vcxproj.filters
