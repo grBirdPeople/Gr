@@ -1,0 +1,355 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <ProjectGuid>{4BB9CA73-8879-4FD6-B234-B637897B959E}</ProjectGuid>
+    <RootNamespace>Gruvlig</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)build\$(Platform)$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)build\intermediates\$(Platform)$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)build\$(Platform)$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)build\intermediates\$(Platform)$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)build\$(Platform)$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)build\intermediates\$(Platform)$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)build\$(Platform)$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)build\intermediates\$(Platform)$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)code;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib\SFML;$(SolutionDir)lib\Box2D\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>sfml-audio-d.lib;sfml-graphics-d.lib;sfml-network-d.lib;sfml-system-d.lib;sfml-window-d.lib;Box2D.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)code;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib\SFML;$(SolutionDir)lib\Box2D\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>sfml-audio-d.lib;sfml-graphics-d.lib;sfml-network-d.lib;sfml-system-d.lib;sfml-window-d.lib;Box2D.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)code;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib\SFML;$(SolutionDir)lib\Box2D\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>sfml-audio.lib;sfml-graphics.lib;sfml-network.lib;sfml-system.lib;sfml-window.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)code;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib\SFML;$(SolutionDir)lib\Box2D\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>sfml-audio.lib;sfml-graphics.lib;sfml-network.lib;sfml-system.lib;sfml-window.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="code\gr\grBBox.cpp" />
+    <ClCompile Include="code\gr\grCore.cpp" />
+    <ClCompile Include="code\gr\grCtrlPlayer.cpp" />
+    <ClCompile Include="code\gr\grDebugManager.cpp" />
+    <ClCompile Include="code\gr\grEntityEnemy.cpp" />
+    <ClCompile Include="code\gr\grEntityManager.cpp" />
+    <ClCompile Include="code\gr\grEntityPlayer.cpp" />
+    <ClCompile Include="code\gr\grIEntity.cpp" />
+    <ClCompile Include="code\gr\grInput.cpp" />
+    <ClCompile Include="code\gr\grMap.cpp" />
+    <ClCompile Include="code\gr\grMapManager.cpp" />
+    <ClCompile Include="code\gr\grNavMesh.cpp" />
+    <ClCompile Include="code\gr\grNavMeshManager.cpp" />
+    <ClCompile Include="code\gr\main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="code\Box2D\b2_block_allocator.h" />
+    <ClInclude Include="code\Box2D\b2_body.h" />
+    <ClInclude Include="code\Box2D\b2_broad_phase.h" />
+    <ClInclude Include="code\Box2D\b2_chain_shape.h" />
+    <ClInclude Include="code\Box2D\b2_circle_shape.h" />
+    <ClInclude Include="code\Box2D\b2_collision.h" />
+    <ClInclude Include="code\Box2D\b2_contact.h" />
+    <ClInclude Include="code\Box2D\b2_contact_manager.h" />
+    <ClInclude Include="code\Box2D\b2_distance.h" />
+    <ClInclude Include="code\Box2D\b2_distance_joint.h" />
+    <ClInclude Include="code\Box2D\b2_draw.h" />
+    <ClInclude Include="code\Box2D\b2_dynamic_tree.h" />
+    <ClInclude Include="code\Box2D\b2_edge_shape.h" />
+    <ClInclude Include="code\Box2D\b2_fixture.h" />
+    <ClInclude Include="code\Box2D\b2_friction_joint.h" />
+    <ClInclude Include="code\Box2D\b2_gear_joint.h" />
+    <ClInclude Include="code\Box2D\b2_growable_stack.h" />
+    <ClInclude Include="code\Box2D\b2_joint.h" />
+    <ClInclude Include="code\Box2D\b2_math.h" />
+    <ClInclude Include="code\Box2D\b2_motor_joint.h" />
+    <ClInclude Include="code\Box2D\b2_mouse_joint.h" />
+    <ClInclude Include="code\Box2D\b2_polygon_shape.h" />
+    <ClInclude Include="code\Box2D\b2_prismatic_joint.h" />
+    <ClInclude Include="code\Box2D\b2_pulley_joint.h" />
+    <ClInclude Include="code\Box2D\b2_revolute_joint.h" />
+    <ClInclude Include="code\Box2D\b2_rope.h" />
+    <ClInclude Include="code\Box2D\b2_rope_joint.h" />
+    <ClInclude Include="code\Box2D\b2_settings.h" />
+    <ClInclude Include="code\Box2D\b2_shape.h" />
+    <ClInclude Include="code\Box2D\b2_stack_allocator.h" />
+    <ClInclude Include="code\Box2D\b2_timer.h" />
+    <ClInclude Include="code\Box2D\b2_time_of_impact.h" />
+    <ClInclude Include="code\Box2D\b2_time_step.h" />
+    <ClInclude Include="code\Box2D\b2_weld_joint.h" />
+    <ClInclude Include="code\Box2D\b2_wheel_joint.h" />
+    <ClInclude Include="code\Box2D\b2_world.h" />
+    <ClInclude Include="code\Box2D\b2_world_callbacks.h" />
+    <ClInclude Include="code\Box2D\box2d.h" />
+    <ClInclude Include="code\gr\grActor.h" />
+    <ClInclude Include="code\gr\grAlgo.h" />
+    <ClInclude Include="code\gr\grBBox.h" />
+    <ClInclude Include="code\gr\grBox2D.h" />
+    <ClInclude Include="code\gr\grCommon.h" />
+    <ClInclude Include="code\gr\grCore.h" />
+    <ClInclude Include="code\gr\grCtrlPlayer.h" />
+    <ClInclude Include="code\gr\grDebugManager.h" />
+    <ClInclude Include="code\gr\grDefine.h" />
+    <ClInclude Include="code\gr\grEntityEnemy.h" />
+    <ClInclude Include="code\gr\grEntityManager.h" />
+    <ClInclude Include="code\gr\grEntityPlayer.h" />
+    <ClInclude Include="code\gr\grICtrlObj.h" />
+    <ClInclude Include="code\gr\grIEntity.h" />
+    <ClInclude Include="code\gr\grInput.h" />
+    <ClInclude Include="code\gr\grMap.h" />
+    <ClInclude Include="code\gr\grMapManager.h" />
+    <ClInclude Include="code\gr\grMath.h" />
+    <ClInclude Include="code\gr\grNavMesh.h" />
+    <ClInclude Include="code\gr\grNavMeshManager.h" />
+    <ClInclude Include="code\gr\grNavNode.h" />
+    <ClInclude Include="code\gr\grSingleton.h" />
+    <ClInclude Include="code\gr\grV2.h" />
+    <ClInclude Include="code\SFML\Audio.hpp" />
+    <ClInclude Include="code\SFML\Audio\AlResource.hpp" />
+    <ClInclude Include="code\SFML\Audio\Export.hpp" />
+    <ClInclude Include="code\SFML\Audio\InputSoundFile.hpp" />
+    <ClInclude Include="code\SFML\Audio\Listener.hpp" />
+    <ClInclude Include="code\SFML\Audio\Music.hpp" />
+    <ClInclude Include="code\SFML\Audio\OutputSoundFile.hpp" />
+    <ClInclude Include="code\SFML\Audio\Sound.hpp" />
+    <ClInclude Include="code\SFML\Audio\SoundBuffer.hpp" />
+    <ClInclude Include="code\SFML\Audio\SoundBufferRecorder.hpp" />
+    <ClInclude Include="code\SFML\Audio\SoundFileFactory.hpp" />
+    <ClInclude Include="code\SFML\Audio\SoundFileReader.hpp" />
+    <ClInclude Include="code\SFML\Audio\SoundFileWriter.hpp" />
+    <ClInclude Include="code\SFML\Audio\SoundRecorder.hpp" />
+    <ClInclude Include="code\SFML\Audio\SoundSource.hpp" />
+    <ClInclude Include="code\SFML\Audio\SoundStream.hpp" />
+    <ClInclude Include="code\SFML\Config.hpp" />
+    <ClInclude Include="code\SFML\GpuPreference.hpp" />
+    <ClInclude Include="code\SFML\Graphics.hpp" />
+    <ClInclude Include="code\SFML\Graphics\BlendMode.hpp" />
+    <ClInclude Include="code\SFML\Graphics\CircleShape.hpp" />
+    <ClInclude Include="code\SFML\Graphics\Color.hpp" />
+    <ClInclude Include="code\SFML\Graphics\ConvexShape.hpp" />
+    <ClInclude Include="code\SFML\Graphics\Drawable.hpp" />
+    <ClInclude Include="code\SFML\Graphics\Export.hpp" />
+    <ClInclude Include="code\SFML\Graphics\Font.hpp" />
+    <ClInclude Include="code\SFML\Graphics\Glsl.hpp" />
+    <ClInclude Include="code\SFML\Graphics\Glyph.hpp" />
+    <ClInclude Include="code\SFML\Graphics\Image.hpp" />
+    <ClInclude Include="code\SFML\Graphics\PrimitiveType.hpp" />
+    <ClInclude Include="code\SFML\Graphics\Rect.hpp" />
+    <ClInclude Include="code\SFML\Graphics\RectangleShape.hpp" />
+    <ClInclude Include="code\SFML\Graphics\RenderStates.hpp" />
+    <ClInclude Include="code\SFML\Graphics\RenderTarget.hpp" />
+    <ClInclude Include="code\SFML\Graphics\RenderTexture.hpp" />
+    <ClInclude Include="code\SFML\Graphics\RenderWindow.hpp" />
+    <ClInclude Include="code\SFML\Graphics\Shader.hpp" />
+    <ClInclude Include="code\SFML\Graphics\Shape.hpp" />
+    <ClInclude Include="code\SFML\Graphics\Sprite.hpp" />
+    <ClInclude Include="code\SFML\Graphics\Text.hpp" />
+    <ClInclude Include="code\SFML\Graphics\Texture.hpp" />
+    <ClInclude Include="code\SFML\Graphics\Transform.hpp" />
+    <ClInclude Include="code\SFML\Graphics\Transformable.hpp" />
+    <ClInclude Include="code\SFML\Graphics\Vertex.hpp" />
+    <ClInclude Include="code\SFML\Graphics\VertexArray.hpp" />
+    <ClInclude Include="code\SFML\Graphics\VertexBuffer.hpp" />
+    <ClInclude Include="code\SFML\Graphics\View.hpp" />
+    <ClInclude Include="code\SFML\Main.hpp" />
+    <ClInclude Include="code\SFML\Network.hpp" />
+    <ClInclude Include="code\SFML\Network\Export.hpp" />
+    <ClInclude Include="code\SFML\Network\Ftp.hpp" />
+    <ClInclude Include="code\SFML\Network\Http.hpp" />
+    <ClInclude Include="code\SFML\Network\IpAddress.hpp" />
+    <ClInclude Include="code\SFML\Network\Packet.hpp" />
+    <ClInclude Include="code\SFML\Network\Socket.hpp" />
+    <ClInclude Include="code\SFML\Network\SocketHandle.hpp" />
+    <ClInclude Include="code\SFML\Network\SocketSelector.hpp" />
+    <ClInclude Include="code\SFML\Network\TcpListener.hpp" />
+    <ClInclude Include="code\SFML\Network\TcpSocket.hpp" />
+    <ClInclude Include="code\SFML\Network\UdpSocket.hpp" />
+    <ClInclude Include="code\SFML\OpenGL.hpp" />
+    <ClInclude Include="code\SFML\System.hpp" />
+    <ClInclude Include="code\SFML\System\Clock.hpp" />
+    <ClInclude Include="code\SFML\System\Err.hpp" />
+    <ClInclude Include="code\SFML\System\Export.hpp" />
+    <ClInclude Include="code\SFML\System\FileInputStream.hpp" />
+    <ClInclude Include="code\SFML\System\InputStream.hpp" />
+    <ClInclude Include="code\SFML\System\Lock.hpp" />
+    <ClInclude Include="code\SFML\System\MemoryInputStream.hpp" />
+    <ClInclude Include="code\SFML\System\Mutex.hpp" />
+    <ClInclude Include="code\SFML\System\NativeActivity.hpp" />
+    <ClInclude Include="code\SFML\System\NonCopyable.hpp" />
+    <ClInclude Include="code\SFML\System\Sleep.hpp" />
+    <ClInclude Include="code\SFML\System\String.hpp" />
+    <ClInclude Include="code\SFML\System\Thread.hpp" />
+    <ClInclude Include="code\SFML\System\ThreadLocal.hpp" />
+    <ClInclude Include="code\SFML\System\ThreadLocalPtr.hpp" />
+    <ClInclude Include="code\SFML\System\Time.hpp" />
+    <ClInclude Include="code\SFML\System\Utf.hpp" />
+    <ClInclude Include="code\SFML\System\Vector2.hpp" />
+    <ClInclude Include="code\SFML\System\Vector3.hpp" />
+    <ClInclude Include="code\SFML\Window.hpp" />
+    <ClInclude Include="code\SFML\Window\Clipboard.hpp" />
+    <ClInclude Include="code\SFML\Window\Context.hpp" />
+    <ClInclude Include="code\SFML\Window\ContextSettings.hpp" />
+    <ClInclude Include="code\SFML\Window\Cursor.hpp" />
+    <ClInclude Include="code\SFML\Window\Event.hpp" />
+    <ClInclude Include="code\SFML\Window\Export.hpp" />
+    <ClInclude Include="code\SFML\Window\GlResource.hpp" />
+    <ClInclude Include="code\SFML\Window\Joystick.hpp" />
+    <ClInclude Include="code\SFML\Window\Keyboard.hpp" />
+    <ClInclude Include="code\SFML\Window\Mouse.hpp" />
+    <ClInclude Include="code\SFML\Window\Sensor.hpp" />
+    <ClInclude Include="code\SFML\Window\Touch.hpp" />
+    <ClInclude Include="code\SFML\Window\VideoMode.hpp" />
+    <ClInclude Include="code\SFML\Window\Window.hpp" />
+    <ClInclude Include="code\SFML\Window\WindowHandle.hpp" />
+    <ClInclude Include="code\SFML\Window\WindowStyle.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="code\SFML\Audio\SoundFileFactory.inl" />
+    <None Include="code\SFML\Graphics\Glsl.inl" />
+    <None Include="code\SFML\Graphics\Rect.inl" />
+    <None Include="code\SFML\System\String.inl" />
+    <None Include="code\SFML\System\Thread.inl" />
+    <None Include="code\SFML\System\ThreadLocalPtr.inl" />
+    <None Include="code\SFML\System\Utf.inl" />
+    <None Include="code\SFML\System\Vector2.inl" />
+    <None Include="code\SFML\System\Vector3.inl" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

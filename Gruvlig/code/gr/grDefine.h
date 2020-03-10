@@ -1,0 +1,11 @@
+#ifndef		_H_GRDEFINE_
+#define		_H_GRDEFINE_
+
+//////////////////////////////////////////////////
+
+#define		DEBUG
+#define		DEL_NULL(x)	delete x, x = nullptr
+
+//////////////////////////////////////////////////
+
+#endif		//_H_GRDEFINE_
