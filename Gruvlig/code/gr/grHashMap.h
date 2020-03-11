@@ -53,13 +53,19 @@ public:
 
 	// Get / Set
 	//////////////////////////////////////////////////
-	uInt
+	inline	uInt
 	Size		( void )
 	{
 		return m_NowSize;
 	}
 
-	std::vector<uInt>
+	inline	bool
+	Exists( const uInt key )
+	{
+		return ( HashKey( key ) == true ) ? true : false;
+	}
+
+	inline	std::vector<uInt>
 	UsedKeys	( void )
 	{
 		std::vector<uInt> keys;
@@ -77,7 +83,7 @@ public:
 
 	// Put
 	//////////////////////////////////////////////////
-	void
+	inline	void
 	Put			( const uInt key, const T value )
 	{
 		if ( m_NowSize == m_MaxSize )
@@ -113,7 +119,7 @@ public:
 
 	// Get
 	//////////////////////////////////////////////////
-	T
+	inline	T
 	Get			( const uInt key )
 	{
 		HashNode<T>* pNode = Find( key );
@@ -132,7 +138,7 @@ public:
 	// Get
 	//////////////////////////////////////////////////
 
-	void
+	inline	void
 	Del			( const uInt key )
 	{
 		HashNode<T>* pNode = Find( key );
@@ -156,7 +162,7 @@ private:
 
 	// HashKey
 	//////////////////////////////////////////////////
-	sInt
+	inline	sInt
 	HashKey		( const uInt key )
 	{
 		return key % m_MaxSize;
@@ -164,7 +170,7 @@ private:
 
 	// Find
 	//////////////////////////////////////////////////
-	HashNode<T>*
+	inline	HashNode<T>*
 	Find		( const uInt key )
 	{
 		uInt count = 0;
