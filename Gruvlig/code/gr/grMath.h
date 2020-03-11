@@ -68,7 +68,7 @@ namespace grMath
 		return ( value < 0.0f ) ? -1.0f : ( value > 0.0f ) ? 1.0f : 0.0f;
 	}
 
-	// Sqrt // Babylonian method stolen from overflow reworked from doubles to floats
+	// Sqrt // Babylonian method stolen from overflow, changed from doubles to floats
 	//////////////////////////////////////////////////
 	float
 	Sqrt( const float value )

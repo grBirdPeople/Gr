@@ -228,6 +228,7 @@
     <ClInclude Include="code\gr\grEntityEnemy.h" />
     <ClInclude Include="code\gr\grEntityManager.h" />
     <ClInclude Include="code\gr\grEntityPlayer.h" />
+    <ClInclude Include="code\gr\grHashMap.h" />
     <ClInclude Include="code\gr\grICtrlObj.h" />
     <ClInclude Include="code\gr\grIEntity.h" />
     <ClInclude Include="code\gr\grInput.h" />

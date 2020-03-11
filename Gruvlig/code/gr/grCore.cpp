@@ -18,6 +18,7 @@
 #include	"grEntityPlayer.h"
 #include	"grEntityManager.h"
 #include	"grMapManager.h"
+#include	"grHashMap.h"
 // TEST
 
 
@@ -81,6 +82,13 @@ grCore::grCore( const uInt winWidth, const uInt winHeight, const uInt frameRate,
 
 	//m_pPlayer->SetEnable( false );
 	//entityMan.DestroyEntity( pEnemy_1 );
+
+
+	// HashMap
+	grHashMap<grIEntity*> map( 5 );
+	map.Put( 3, m_pPlayer );
+	map.Put( 3, m_pEnemy );
+	grIEntity* tmp = map.Get( 7 );
 
 
 
