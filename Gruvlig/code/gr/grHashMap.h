@@ -4,7 +4,6 @@
 #include	"grCommon.h"
 
 
-
 // HashNode
 //////////////////////////////////////////////////
 template<typename T>
@@ -27,7 +26,9 @@ class grHashMap
 {
 public:
 
-	grHashMap( const uInt maxSize )
+	// cTor
+	//////////////////////////////////////////////////
+	grHashMap	( const uInt maxSize )
 		: m_MaxSize	( maxSize )
 		, m_NowSize	( 0 )
 	{
@@ -38,11 +39,46 @@ public:
 		}
 
 		m_vecUsedKeys.reserve( m_MaxSize );
+		for ( uInt i = 0; i < m_MaxSize; ++i )
+		{
+			m_vecUsedKeys.push_back( -1 );
+		}
 	}
 
-	~grHashMap( void ) {}
 
-	void	Put	( const uInt key, const T value )
+	// dTor
+	//////////////////////////////////////////////////
+	~grHashMap	( void )	{}
+
+
+	// Get / Set
+	//////////////////////////////////////////////////
+	uInt
+	Size		( void )
+	{
+		return m_NowSize;
+	}
+
+	std::vector<uInt>
+	UsedKeys	( void )
+	{
+		std::vector<uInt> keys;
+		for ( uInt i = 0; i < m_vecUsedKeys.size(); ++i )
+		{
+			if ( m_vecUsedKeys[ i ] > -1 )
+			{
+				keys.push_back( ( uInt )m_vecUsedKeys[ i ] );
+			}
+		}
+
+		return keys;
+	}
+
+
+	// Put
+	//////////////////////////////////////////////////
+	void
+	Put			( const uInt key, const T value )
 	{
 		if ( m_NowSize == m_MaxSize )
 		{
@@ -53,40 +89,92 @@ public:
 		}
 
 		sInt hashIdx = HashKey( key );
-		HashNode<T>* pNode = m_vecNode[ hashIdx ];
+		if ( m_vecUsedKeys[ hashIdx ] != -1 )
+		{
+#ifdef DEBUG
+			std::cerr << "grHashMap::Insert(): Key already exists" << std::endl;
+#endif // DEBUG
+			return;
+		}
 
+		HashNode<T>* pNode = m_vecNode[ hashIdx ];
 		while ( pNode->m_Key != -1 )
 		{
-			if ( pNode->m_Key == key )
-			{
-#ifdef DEBUG
-				std::cerr << "grHashMap::Insert(): Key already exists" << std::endl;
-#endif // DEBUG
-				return;
-			}
-
 			++hashIdx;
 			hashIdx %= m_MaxSize;
 			pNode = m_vecNode[ hashIdx ];
 		}
 
+		++m_NowSize;
 		m_vecNode[ hashIdx ] = new HashNode<T>( key, value );
-		m_vecUsedKeys.push_back( key );
+		m_vecUsedKeys[ hashIdx ] = key;
 	}
 
-	T		Get	( const uInt key )
+
+	// Get
+	//////////////////////////////////////////////////
+	T
+	Get			( const uInt key )
+	{
+		HashNode<T>* pNode = Find( key );
+		if ( pNode == nullptr )
+		{
+#ifdef DEBUG
+			std::cerr << "grHashMap::Get(): Key does not exist" << std::endl;
+#endif // DEBUG
+			return nullptr;
+		}
+
+		return pNode->m_Value;
+	}
+
+
+	// Get
+	//////////////////////////////////////////////////
+
+	void
+	Del			( const uInt key )
+	{
+		HashNode<T>* pNode = Find( key );
+		if ( pNode == nullptr )
+		{
+#ifdef DEBUG
+			std::cerr << "grHashMap::Del(): key does not exist" << std::endl;
+#endif // DEBUG
+			return;
+		}
+
+		--m_NowSize;
+		pNode->m_Key = -1;
+		pNode->m_Value = nullptr;
+		m_vecUsedKeys[ HashKey( key ) ] = -1;
+	}
+
+	//////////////////////////////////////////////////
+
+private:
+
+	// HashKey
+	//////////////////////////////////////////////////
+	sInt
+	HashKey		( const uInt key )
+	{
+		return key % m_MaxSize;
+	}
+
+	// Find
+	//////////////////////////////////////////////////
+	HashNode<T>*
+	Find		( const uInt key )
 	{
 		uInt count = 0;
-		sInt hashIdx = HashKey( key );
+		uInt hashIdx = HashKey( key );
 		HashNode<T>* pNode = m_vecNode[ hashIdx ];
 		while ( pNode->m_Key == -1 || pNode->m_Key != key )
 		{
 			++count;
 			if ( count == m_MaxSize )
 			{
-#ifdef DEBUG
-				std::cerr << "grHashMap::Get(): Key does not exist" << std::endl;
-#endif // DEBUG
 				return nullptr;
 			}
 
@@ -95,29 +183,16 @@ public:
 			pNode = m_vecNode[ hashIdx ];
 		}
 
-		return pNode->m_Value;
+		return pNode;
 	}
 
 	//////////////////////////////////////////////////
 
-private:
-
-
-
-	//////////////////////////////////////////////////
-
-	uInt HashKey( const uInt key )
-	{
-		return key % m_MaxSize;
-	}
-
-	//////////////////////////////////////////////////
-
-	uInt				m_MaxSize,
-						m_NowSize;
+	uInt						m_MaxSize,
+								m_NowSize;
 
 	std::vector<HashNode<T>*>	m_vecNode;
-	std::vector<uInt>			m_vecUsedKeys;
+	std::vector<sInt>			m_vecUsedKeys;
 
 };
 

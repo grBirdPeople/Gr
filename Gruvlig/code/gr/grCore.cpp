@@ -88,7 +88,12 @@ grCore::grCore( const uInt winWidth, const uInt winHeight, const uInt frameRate,
 	grHashMap<grIEntity*> map( 5 );
 	map.Put( 3, m_pPlayer );
 	map.Put( 3, m_pEnemy );
-	grIEntity* tmp = map.Get( 7 );
+	grIEntity* pTmp = map.Get( 7 );
+	pTmp = map.Get( 3 );
+	std::vector<uInt> used = map.UsedKeys();
+	map.Del( 7 );
+	map.Del( 3 );
+	map.Put( 3, m_pPlayer );
 
 
 
