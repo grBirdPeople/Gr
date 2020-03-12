@@ -19,12 +19,12 @@ struct HashNode
 };
 
 
-// grHashMap
+// grHashMap // Open adress where only unsigned int's that are unique are allowed
 //////////////////////////////////////////////////
 template<typename T>
 class grHashMap
 {
-public:
+public:	// TODO: Now linera probing is used for search (if non unique keys where allowed). Perhaps add alts. dependent of map size like Plus 3 Rehash, Qaudratic Probing (failed)^2 or Double Hashing
 
 	// cTor
 	//////////////////////////////////////////////////
@@ -60,7 +60,7 @@ public:
 	}
 
 	inline	bool
-	Exists( const uInt key )
+	Exists		( const uInt key )
 	{
 		return ( HashKey( key ) == true ) ? true : false;
 	}
@@ -104,12 +104,12 @@ public:
 		}
 
 		HashNode<T>* pNode = m_vecNode[ hashIdx ];
-		while ( pNode->m_Key != -1 )
-		{
-			++hashIdx;
-			hashIdx %= m_MaxSize;
-			pNode = m_vecNode[ hashIdx ];
-		}
+		//while ( pNode->m_Key != -1 )
+		//{
+		//	++hashIdx;
+		//	hashIdx %= m_MaxSize;
+		//	pNode = m_vecNode[ hashIdx ];
+		//}
 
 		++m_NowSize;
 		m_vecNode[ hashIdx ] = new HashNode<T>( key, value );
