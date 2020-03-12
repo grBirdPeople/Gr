@@ -85,16 +85,15 @@ grCore::grCore( const uInt winWidth, const uInt winHeight, const uInt frameRate,
 
 
 	// HashMap
-	grHashMap<grIEntity*>* pMap = new grHashMap<grIEntity*>( 5 );
-	pMap->Set( 3, m_pPlayer );
-	pMap->Set( 3, m_pEnemy );
-	grIEntity* pTmp = pMap->Get( 7 );
-	pTmp = pMap->Get( 3 );
-	std::vector<uInt> used = pMap->UsedKeys();
-	pMap->Del( 7 );
-	pMap->Del( 3 );
-	pMap->Set( 3, m_pPlayer );
-	DEL_NULL( pMap );
+	grHashMap<grIEntity*> map( 5 );
+	map.Put( 3, m_pPlayer );
+	map.Put( 3, m_pEnemy );
+	grIEntity* pTmp = map.Get( 7 );
+	pTmp = map.Get( 3 );
+	std::vector<uInt> used = map.UsedKeys();
+	map.Del( 7 );
+	map.Del( 3 );
+	map.Put( 3, m_pPlayer );
 
 
 
