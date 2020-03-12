@@ -9,28 +9,30 @@
 // cTor
 //////////////////////////////////////////////////
 grEntityManager::grEntityManager( void )
-	: m_pArrEnemy		{}
-	, m_EnemiesActive	( 0 )
+	: m_EnemiesActive	( 0 )
 	, m_EnemyQuantity	( 0 )
+	, m_pArrEnemySorted	{}
+	, m_pEntityHashMap	( new grHashMap<grIEntity*>( MAX_ENTITY ) )
 	, m_pPlayerEntity	( nullptr )
 {
-	for( uInt i = 0; i < MAX_ENEMY; ++i )
+	for( uInt i = 0; i < MAX_ENEMY; ++i )	// TODO: Create dummy instances and reuse them
 	{
-		m_pArrEnemy[ i ] = nullptr;
+		m_pArrEnemySorted[ i ] = nullptr;
 	}
 }
 
 
 // dTor
 //////////////////////////////////////////////////
-grEntityManager::~grEntityManager(void)
+grEntityManager::~grEntityManager( void )
 {
+	DEL_NULL( m_pEntityHashMap );
+	DEL_NULL( m_pPlayerEntity );
+
 	for( uInt i = 0; i < m_EnemyQuantity; ++i )
 	{
-		DEL_NULL(m_pArrEnemy[ i ] );
+		DEL_NULL( m_pArrEnemySorted[ i ] );
 	}
-
-	DEL_NULL( m_pPlayerEntity );
 }
 
 
@@ -41,9 +43,8 @@ grEntityManager::CreateEntity( const grIEntity::EEntityType type, const str& rUn
 {
 	switch (type)
 	{
-	case grIEntity::EEntityType::PLAYER: return CreatePlayer( type, rUniqueName, rPos ); break;
-	case grIEntity::EEntityType::ENEMY: return CreateEnemy( type, rUniqueName, rPos ); break;
-	default: std::cerr << "grEntityManager::CreateEntity(): Something broke" << std::endl;
+	case grIEntity::EEntityType::PLAYER:	return CreatePlayer( type, rUniqueName, rPos );	break;
+	case grIEntity::EEntityType::ENEMY:		return CreateEnemy( type, rUniqueName, rPos );	break;
 	}
 
 #ifdef DEBUG
@@ -61,7 +62,6 @@ grEntityManager::DestroyEntity( grIEntity* pEntity )
 {
 	grIEntity::EEntityType entityType = pEntity->GetType();
 	uInt entityId = pEntity->GetId();
-
 	switch ( entityType )
 	{
 	case grIEntity::EEntityType::ENEMY:
@@ -69,21 +69,22 @@ grEntityManager::DestroyEntity( grIEntity* pEntity )
 		grEntityEnemy* pEnemy = (grEntityEnemy*)pEntity;
 		for ( uInt i = 0; i < m_EnemyQuantity; ++i )
 		{
-			if ( m_pArrEnemy[ i ]->GetId() == entityId )
+			if ( m_pArrEnemySorted[ i ]->GetId() == entityId )	// TODO: Get from hash map instead
 			{
-				pEnemy = m_pArrEnemy[ i ];
+				pEnemy = m_pArrEnemySorted[ i ];
 
 				if ( pEnemy->GetEnable() == true )
 				{
-					m_pArrEnemy[ i ] = m_pArrEnemy[ m_EnemiesActive - 1 ];
-					m_pArrEnemy[ m_EnemiesActive - 1 ] = m_pArrEnemy[ m_EnemyQuantity - 1 ];
+					m_pArrEnemySorted[ i ] = m_pArrEnemySorted[ m_EnemiesActive - 1 ];
+					m_pArrEnemySorted[ m_EnemiesActive - 1 ] = m_pArrEnemySorted[ m_EnemyQuantity - 1 ];
 				}
 				else
 				{
-					m_pArrEnemy[ i ] = m_pArrEnemy[ m_EnemyQuantity - 1 ];
+					m_pArrEnemySorted[ i ] = m_pArrEnemySorted[ m_EnemyQuantity - 1 ];
 				}
 
-				m_pArrEnemy[ m_EnemyQuantity - 1 ] = nullptr;
+				m_pArrEnemySorted[ m_EnemyQuantity - 1 ] = nullptr;
+				m_pEntityHashMap->Del( entityId );
 				--m_EnemiesActive;
 				--m_EnemyQuantity;
 				DEL_NULL( pEnemy );
@@ -95,7 +96,6 @@ grEntityManager::DestroyEntity( grIEntity* pEntity )
 			}
 #endif
 		}
-
 	}
 	break;
 
@@ -103,6 +103,7 @@ grEntityManager::DestroyEntity( grIEntity* pEntity )
 	{
 		if ( m_pPlayerEntity != nullptr )
 		{
+			m_pEntityHashMap->Del( m_pPlayerEntity->GetId() );
 			DEL_NULL( m_pPlayerEntity );
 		}
 #ifdef DEBUG
@@ -132,11 +133,11 @@ grEntityManager::Update( const float deltaT )
 
 	for( uInt i = 0; i < m_EnemyQuantity; ++i )
 	{
-		if ( m_pArrEnemy[ i ] != nullptr )
+		if ( m_pArrEnemySorted[ i ] != nullptr )
 		{
-			if ( m_pArrEnemy[ i ]->GetEnable() == true )
+			if ( m_pArrEnemySorted[ i ]->GetEnable() == true )
 			{
-				m_pArrEnemy[ i ]->Update( deltaT );
+				m_pArrEnemySorted[ i ]->Update( deltaT );
 			}
 		}
 	}
@@ -151,9 +152,9 @@ grEntityManager::Enable( grIEntity* pEntity )
 	uInt id = pEntity->GetId();
 	for ( uInt i = m_EnemiesActive; i < m_EnemyQuantity; ++i )
 	{
-		if ( m_pArrEnemy[ i ]->GetId() == id )
+		if ( m_pArrEnemySorted[ i ]->GetId() == id )
 		{
-			grEntityEnemy* tmp = m_pArrEnemy[ i ];
+			grEntityEnemy* tmp = m_pArrEnemySorted[ i ];
 
 			if ( i == m_EnemiesActive )
 			{
@@ -163,8 +164,8 @@ grEntityManager::Enable( grIEntity* pEntity )
 
 			for ( uInt j = 0; j < m_EnemyQuantity; ++j )
 			{
-				m_pArrEnemy[ i ] = m_pArrEnemy[ j ];
-				m_pArrEnemy[ j ] = tmp;
+				m_pArrEnemySorted[ i ] = m_pArrEnemySorted[ j ];
+				m_pArrEnemySorted[ j ] = tmp;
 
 				++m_EnemiesActive;
 				return;
@@ -182,9 +183,9 @@ grEntityManager::Disable( grIEntity* pEntity )
 	uInt id = pEntity->GetId();
 	for ( uInt i = 0; i < m_EnemiesActive; ++i )
 	{
-		if ( m_pArrEnemy[ i ]->GetId() == id )
+		if ( m_pArrEnemySorted[ i ]->GetId() == id )
 		{
-			grEntityEnemy* tmp = m_pArrEnemy[ i ];
+			grEntityEnemy* pEntity = m_pArrEnemySorted[ i ];
 
 			if ( i == m_EnemiesActive )
 			{
@@ -192,8 +193,8 @@ grEntityManager::Disable( grIEntity* pEntity )
 				return;
 			}
 
-			m_pArrEnemy[ i ] = m_pArrEnemy[ m_EnemiesActive - 1 ];
-			m_pArrEnemy[ m_EnemiesActive - 1 ] = tmp;
+			m_pArrEnemySorted[ i ] = m_pArrEnemySorted[ m_EnemiesActive - 1 ];
+			m_pArrEnemySorted[ m_EnemiesActive - 1 ] = pEntity;
 			--m_EnemiesActive;
 			return;
 		}
@@ -214,7 +215,9 @@ grEntityManager::CreatePlayer( const grIEntity::EEntityType type, const str& rUn
 	}
 #endif
 	
-	m_pPlayerEntity = new grEntityPlayer( type, rUniqueName, rPos, CreateAndGetId() );
+	uInt id = CreateId();
+	m_pPlayerEntity = new grEntityPlayer( type, rUniqueName, rPos, id );
+	m_pEntityHashMap->Set( id, (grIEntity*)m_pPlayerEntity );
 	return m_pPlayerEntity;
 }
 
@@ -230,11 +233,14 @@ grEntityManager::CreateEnemy( const grIEntity::EEntityType type, const str& rUni
 		return nullptr;
 	}
 	
-	m_pArrEnemy[ m_EnemyQuantity ] = new grEntityEnemy( type, rUniqueName, rPos, CreateAndGetId() );
+	uInt id = CreateId();
+	grEntityEnemy* pEnemy = new grEntityEnemy( type, rUniqueName, rPos, id );
+	m_pArrEnemySorted[ m_EnemyQuantity ] = pEnemy;
+	m_pEntityHashMap->Set( id, (grIEntity*)pEnemy );
 	++m_EnemiesActive;
 	++m_EnemyQuantity;
 	
-	return m_pArrEnemy[ m_EnemyQuantity - 1 ];
+	return m_pArrEnemySorted[ m_EnemyQuantity - 1 ];
 }
 
 

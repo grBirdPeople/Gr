@@ -7,9 +7,9 @@
 // HashNode
 //////////////////////////////////////////////////
 template<typename T>
-struct HashNode
+struct grHashNode
 {
-	HashNode	( const uInt key = -1, T value = nullptr )
+	grHashNode	( const uInt key = -1, T value = nullptr )
 		: m_Key		( key )
 		, m_Value	( value )
 	{}
@@ -19,12 +19,12 @@ struct HashNode
 };
 
 
-// grHashMap // Open adress where only unsigned int's that are unique are allowed
+// grHashMap // Open adress where only unsigned int's that are unique are allowed as keys
 //////////////////////////////////////////////////
 template<typename T>
 class grHashMap
 {
-public:	// TODO: Linera probing is used for search (if non unique keys where allowed). Perhaps add alts. dependent of map size like Plus 3 Rehash, Qaudratic Probing (failed)^2 or Double Hashing
+public:	// TODO: No search is used atm as unique keys are only allowed, but perhaps add alts. for Linera Probing dependent of map size like Plus 3 Rehash, Qaudratic Probing (failed)^2 or Double Hashing
 
 	// cTor
 	//////////////////////////////////////////////////
@@ -35,7 +35,7 @@ public:	// TODO: Linera probing is used for search (if non unique keys where all
 		m_vecNode.reserve( m_MaxSize );
 		for ( uInt i = 0; i < m_MaxSize; ++i )
 		{
-			m_vecNode.push_back( new HashNode<T>() );
+			m_vecNode.push_back( new grHashNode<T>() );
 		}
 
 		m_vecUsedKeys.reserve( m_MaxSize );
@@ -48,7 +48,23 @@ public:	// TODO: Linera probing is used for search (if non unique keys where all
 
 	// dTor
 	//////////////////////////////////////////////////
-	~grHashMap	( void )	{}
+	~grHashMap	( void )
+	{
+		grHashNode<T>* pNode = nullptr;
+		for ( uInt i = 0; i < m_vecNode.size(); ++i )
+		{
+			pNode = m_vecNode[ i ];
+			if ( pNode->m_Key != -1 )
+			{
+				pNode->m_Value = nullptr;
+			}
+		}
+
+		for ( uInt i = 0; i < m_vecNode.size(); ++i )
+		{
+			DEL_NULL( m_vecNode[ i ] );
+		}
+	}
 
 
 	// Get / Set
@@ -86,7 +102,7 @@ public:	// TODO: Linera probing is used for search (if non unique keys where all
 	// Put
 	//////////////////////////////////////////////////
 	inline	void
-	Put			( const uInt key, const T value )
+	Set			( const uInt key, const T value )
 	{
 		if ( m_NowSize == m_MaxSize )
 		{
@@ -105,14 +121,7 @@ public:	// TODO: Linera probing is used for search (if non unique keys where all
 			return;
 		}
 
-		HashNode<T>* pNode = m_vecNode[ hashIdx ];
-		//while ( pNode->m_Key != -1 )
-		//{
-		//	++hashIdx;
-		//	hashIdx %= m_MaxSize;
-		//	pNode = m_vecNode[ hashIdx ];
-		//}
-
+		grHashNode<T>* pNode = m_vecNode[ hashIdx ];
 		pNode->m_Key = key;
 		pNode->m_Value = value;
 		m_vecUsedKeys[ hashIdx ] = key;
@@ -125,7 +134,7 @@ public:	// TODO: Linera probing is used for search (if non unique keys where all
 	inline	T
 	Get			( const uInt key )
 	{
-		HashNode<T>* pNode = Find( key );
+		grHashNode<T>* pNode = Find( key );
 		if ( pNode == nullptr )
 		{
 #ifdef DEBUG
@@ -144,7 +153,7 @@ public:	// TODO: Linera probing is used for search (if non unique keys where all
 	inline	void
 	Del			( const uInt key )
 	{
-		HashNode<T>* pNode = Find( key );
+		grHashNode<T>* pNode = Find( key );
 		if ( pNode == nullptr )
 		{
 #ifdef DEBUG
@@ -173,31 +182,40 @@ private:
 
 	// Find
 	//////////////////////////////////////////////////
-	inline	HashNode<T>*
+	inline	grHashNode<T>*
 	Find		( const uInt key )
 	{
-		uInt count = 0;
-		uInt hashIdx = HashKey( key );
-		HashNode<T>* pNode = m_vecNode[ hashIdx ];
-		while ( pNode->m_Key == -1 || pNode->m_Key != key )
+		grHashNode<T>* pNode = m_vecNode[ HashKey( key ) ];
+		if ( pNode->m_Key == -1 )
 		{
-			++count;
-			if ( count == m_MaxSize )
-			{
-				return nullptr;
-			}
-
-			hashIdx %= m_MaxSize;
-			pNode = m_vecNode[ hashIdx ];
-			++hashIdx;
+			return nullptr;
 		}
 
 		return pNode;
+
+		// Linear probing saved if non-unique keys would be implemented
+		//uInt count = 0;
+		//uInt hashIdx = HashKey( key );
+		//HashNode<T>* pNode = m_vecNode[ hashIdx ];
+		//while ( pNode->m_Key == -1 || pNode->m_Key != key )
+		//{
+		//	++count;
+		//	if ( count == m_MaxSize )
+		//	{
+		//		return nullptr;
+		//	}
+
+		//	hashIdx %= m_MaxSize;
+		//	pNode = m_vecNode[ hashIdx ];
+		//	++hashIdx;
+		//}
+
+		//return pNode;
 	}
 
 	//////////////////////////////////////////////////
 
-	std::vector<HashNode<T>*>	m_vecNode;
+	std::vector<grHashNode<T>*>	m_vecNode;
 	std::vector<sInt>			m_vecUsedKeys;
 
 	uInt						m_MaxSize,
