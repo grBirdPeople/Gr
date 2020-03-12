@@ -9,7 +9,7 @@
 template<typename T>
 struct HashNode
 {
-	HashNode	( const uInt key, T value )
+	HashNode	( const uInt key = -1, T value = nullptr )
 		: m_Key		( key )
 		, m_Value	( value )
 	{}
@@ -24,7 +24,7 @@ struct HashNode
 template<typename T>
 class grHashMap
 {
-public:	// TODO: Now linera probing is used for search (if non unique keys where allowed). Perhaps add alts. dependent of map size like Plus 3 Rehash, Qaudratic Probing (failed)^2 or Double Hashing
+public:	// TODO: Linera probing is used for search (if non unique keys where allowed). Perhaps add alts. dependent of map size like Plus 3 Rehash, Qaudratic Probing (failed)^2 or Double Hashing
 
 	// cTor
 	//////////////////////////////////////////////////
@@ -35,7 +35,7 @@ public:	// TODO: Now linera probing is used for search (if non unique keys where
 		m_vecNode.reserve( m_MaxSize );
 		for ( uInt i = 0; i < m_MaxSize; ++i )
 		{
-			m_vecNode.push_back( new HashNode<T>( -1, nullptr ) );
+			m_vecNode.push_back( new HashNode<T>() );
 		}
 
 		m_vecUsedKeys.reserve( m_MaxSize );
@@ -59,11 +59,13 @@ public:	// TODO: Now linera probing is used for search (if non unique keys where
 		return m_NowSize;
 	}
 
+
 	inline	bool
 	Exists		( const uInt key )
 	{
 		return ( HashKey( key ) == true ) ? true : false;
 	}
+
 
 	inline	std::vector<uInt>
 	UsedKeys	( void )
@@ -111,9 +113,10 @@ public:	// TODO: Now linera probing is used for search (if non unique keys where
 		//	pNode = m_vecNode[ hashIdx ];
 		//}
 
-		++m_NowSize;
-		m_vecNode[ hashIdx ] = new HashNode<T>( key, value );
+		pNode->m_Key = key;
+		pNode->m_Value = value;
 		m_vecUsedKeys[ hashIdx ] = key;
+		++m_NowSize;
 	}
 
 
@@ -150,10 +153,10 @@ public:	// TODO: Now linera probing is used for search (if non unique keys where
 			return;
 		}
 
-		--m_NowSize;
 		pNode->m_Key = -1;
 		pNode->m_Value = nullptr;
 		m_vecUsedKeys[ HashKey( key ) ] = -1;
+		--m_NowSize;
 	}
 
 	//////////////////////////////////////////////////
@@ -184,9 +187,9 @@ private:
 				return nullptr;
 			}
 
-			++hashIdx;
 			hashIdx %= m_MaxSize;
 			pNode = m_vecNode[ hashIdx ];
+			++hashIdx;
 		}
 
 		return pNode;
@@ -194,11 +197,11 @@ private:
 
 	//////////////////////////////////////////////////
 
-	uInt						m_MaxSize,
-								m_NowSize;
-
 	std::vector<HashNode<T>*>	m_vecNode;
 	std::vector<sInt>			m_vecUsedKeys;
+
+	uInt						m_MaxSize,
+								m_NowSize;
 
 };
 
