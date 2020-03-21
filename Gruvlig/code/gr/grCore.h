@@ -77,8 +77,6 @@ private:
 	// TEST
 	grMap*		m_pMap;
 	grActor*	m_pActor;
-	bool		m_SinglePressL = false;
-	bool		m_SinglePressR = false;
 
 	grIEntity* m_pPlayer;
 	grIEntity* m_pEnemy;

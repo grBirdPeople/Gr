@@ -154,15 +154,12 @@ grCore::~grCore( void )
 void
 grCore::HandleInput( void )
 {
-	if ( ( sf::Mouse::isButtonPressed( sf::Mouse::Left ) == false ) && ( m_SinglePressL == true ) )		{ m_SinglePressL = false; }
-	if ( ( sf::Mouse::isButtonPressed( sf::Mouse::Right ) == false ) && ( m_SinglePressR == true ) )	{ m_SinglePressR = false; }
-
+	// TEST
+	grInput& input = grInput::Instance();
 
 	// SceneGraph stuff
-	if ( ( sf::Mouse::isButtonPressed( sf::Mouse::Left ) == true ) && ( m_SinglePressL == false ) )
+	if ( input.GetMouseDown( sf::Mouse::Left ) )
 	{
-		m_SinglePressL = true;
-
 		//m_pPlayer->ReleaseChildByIdx( 0 );		
 		//grEntityManager::Instance().DestroyEntity( m_pPlayer );
 		//grEntityManager::Instance().DestroyEntity( m_pEnemy );
@@ -171,27 +168,28 @@ grCore::HandleInput( void )
 		//m_pEnemy->SetEnable( hej );
 		//m_pPlayer->SetEnable( hej );
 
-		( hej == false ) ? m_pPlayer->ReleaseChildById( m_pEnemy->GetId() ) : m_pPlayer->AddChild( m_pEnemy );
+		(hej == false) ? m_pPlayer->ReleaseChildById(m_pEnemy->GetId()) : m_pPlayer->AddChild(m_pEnemy);
 	}
 
 
 	// A*
 	if ( m_pMap != nullptr )
 	{
-		if ( sf::Mouse::isButtonPressed( sf::Mouse::Left ) )
+		if ( input.GetMouse( sf::Mouse::Button::Left ) )
 		{
 			grV2f mousePos = grV2f( (float)sf::Mouse::getPosition( *m_pRenderWin ).x, (float)sf::Mouse::getPosition( *m_pRenderWin ).y );
 			m_pActor->SetEnd( m_pMap, mousePos );
 			m_pActor->FindPath( m_pMap );
 		}
 
-		if ( sf::Mouse::isButtonPressed( sf::Mouse::Right ) )
+		if ( input.GetMouse( sf::Mouse::Button::Right ) )
 		{
 			grV2f mousePos = grV2f( (float )sf::Mouse::getPosition( *m_pRenderWin ).x, (float)sf::Mouse::getPosition( *m_pRenderWin ).y );
 			m_pActor->SetStart( m_pMap, mousePos );
 			m_pActor->FindPath( m_pMap );
 		}
 	}
+
 	// TEST
 }
 
@@ -242,9 +240,11 @@ grCore::Run( void )
 		{
 			switch( m_pSfEvent->type )
 			{
-				case eEvent::Closed:		Terminate();								break;
-				case eEvent::KeyPressed:	rInput.SetKeyDown( m_pSfEvent->key.code );	break;
-				case eEvent::KeyReleased:	rInput.SetKeyUp( m_pSfEvent->key.code );	break;
+				case eEvent::Closed:				Terminate();											break;
+				case eEvent::KeyPressed:			rInput.SetKeyDown( m_pSfEvent->key.code );				break;
+				case eEvent::KeyReleased:			rInput.SetKeyUp( m_pSfEvent->key.code );				break;
+				case eEvent::MouseButtonPressed:	rInput.SetMouseDown( m_pSfEvent->mouseButton.button );	break;
+				case eEvent::MouseButtonReleased:	rInput.SetMouseUp( m_pSfEvent->mouseButton.button );	break;
 			};
 		}
 		
