@@ -19,7 +19,7 @@ class grNavMeshManager : public grSingleton<grNavMeshManager>
 public:
 
 						grNavMeshManager	( void )				{ m_VecNavMesh.reserve( MAX_NAVMESH ); }
-						~grNavMeshManager	( void )				{ for ( auto& i : m_VecNavMesh ) { DEL_NULL( i ); } }
+						~grNavMeshManager	( void )				{ for ( auto& i : m_VecNavMesh ) { DELANDNULL( i ); } }
 	
 	//////////////////////////////////////////////////
 	

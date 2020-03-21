@@ -28,7 +28,7 @@ grEntityPlayer::~grEntityPlayer( void )
 {
 	if ( m_pCtrl != nullptr )
 	{
-		DEL_NULL( m_pCtrl );
+		DELANDNULL( m_pCtrl );
 	}
 }
 

@@ -140,12 +140,12 @@ grCore::~grCore( void )
 			m_pRenderWin->close();
 		}
 
-		DEL_NULL( m_pRenderWin );
+		DELANDNULL( m_pRenderWin );
 	}
 
-	if ( m_pSfEvent )		{ DEL_NULL( m_pSfEvent ); }
-	if ( m_pEngineClock )	{ DEL_NULL( m_pEngineClock ); }
-	if ( m_pCSettings )		{ DEL_NULL( m_pCSettings ); }
+	if ( m_pSfEvent )		{ DELANDNULL( m_pSfEvent ); }
+	if ( m_pEngineClock )	{ DELANDNULL( m_pEngineClock ); }
+	if ( m_pCSettings )		{ DELANDNULL( m_pCSettings ); }
 }
 
 

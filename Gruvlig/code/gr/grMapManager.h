@@ -17,7 +17,7 @@ class grMapManager : public grSingleton<grMapManager>
 {
 public:
 			grMapManager	( void )						{ m_pVecMap.reserve( MAX_MAP );	CreateMaps(); }
-			~grMapManager	( void )						{ for ( auto& i : m_pVecMap ) { if ( i != nullptr ) { DEL_NULL( i ); } } }
+			~grMapManager	( void )						{ for ( auto& i : m_pVecMap ) { if ( i != nullptr ) { DELANDNULL( i ); } } }
 	
 	//////////////////////////////////////////////////
 	

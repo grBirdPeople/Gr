@@ -27,10 +27,10 @@ grEntityManager::~grEntityManager(void)
 {
 	for( uInt i = 0; i < m_EnemyQuantity; ++i )
 	{
-		DEL_NULL(m_pArrEnemy[ i ] );
+		DELANDNULL(m_pArrEnemy[ i ] );
 	}
 
-	DEL_NULL( m_pPlayerEntity );
+	DELANDNULL( m_pPlayerEntity );
 }
 
 
@@ -86,7 +86,7 @@ grEntityManager::DestroyEntity( grIEntity* pEntity )
 				m_pArrEnemy[ m_EnemyQuantity - 1 ] = nullptr;
 				--m_EnemiesActive;
 				--m_EnemyQuantity;
-				DEL_NULL( pEnemy );
+				DELANDNULL( pEnemy );
 			}
 #ifdef DEBUG
 			else
@@ -103,7 +103,7 @@ grEntityManager::DestroyEntity( grIEntity* pEntity )
 	{
 		if ( m_pPlayerEntity != nullptr )
 		{
-			DEL_NULL( m_pPlayerEntity );
+			DELANDNULL( m_pPlayerEntity );
 		}
 #ifdef DEBUG
 		else
