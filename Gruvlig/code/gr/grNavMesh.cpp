@@ -1,5 +1,6 @@
 #include	"grNavMesh.h"
 
+#include	"grBBox.h"
 #include	"grDebugManager.h"
 #include	"grDefine.h"
 #include	"grMap.h"

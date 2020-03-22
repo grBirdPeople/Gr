@@ -53,6 +53,6 @@ grEntityPlayer::Update( const float deltaT )
 #ifdef DEBUG
 	// Debug draw
 	grBBox box( grV2f( 10.0f, 10.0f ), GetPosition() );
-	grDebugManager::Instance().AddBBox( box, sf::Color::Green );
+	grDebugManager::Instance( ).AddBBox( box, sf::Color::Green );
 #endif // DEBUG
 }

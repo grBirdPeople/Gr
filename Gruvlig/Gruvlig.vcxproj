@@ -173,6 +173,7 @@
     <ClCompile Include="code\gr\grInput.cpp" />
     <ClCompile Include="code\gr\grMap.cpp" />
     <ClCompile Include="code\gr\grMapManager.cpp" />
+    <ClCompile Include="code\gr\grMath.cpp" />
     <ClCompile Include="code\gr\grNavMesh.cpp" />
     <ClCompile Include="code\gr\grNavMeshManager.cpp" />
     <ClCompile Include="code\gr\main.cpp" />

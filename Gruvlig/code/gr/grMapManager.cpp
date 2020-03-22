@@ -71,5 +71,5 @@ grMapManager::CreateMaps( void )
 					"..................................."
 					;
 						
-	m_pVecMap.push_back( new grMap( "m_02", m_02, grV2f( 5.0f, 5.0f ), 35, 27 ) );
+	m_pVecMap.push_back( new grMap( "m_02", m_02, grV2f( 8.0f, 8.0f ), 35, 27 ) );
 }
