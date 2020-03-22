@@ -25,8 +25,8 @@ grBBox::Intersect( const grBBox& rBBox )
 bool
 grBBox::PointInside(const grV2f& rPoint)
 {
-	if( ( rPoint.x > ( m_Pos.x - m_Dimension.x ) ) && ( rPoint.x < (m_Pos.x + m_Dimension.x ) ) &&
-		( rPoint.y > ( m_Pos.y - m_Dimension.y ) ) && ( rPoint.y < (m_Pos.y + m_Dimension.y ) ) )
+	if( ( rPoint.x > ( m_MidPos.x - m_Dimension.x ) ) && ( rPoint.x < (m_MidPos.x + m_Dimension.x ) ) &&
+		( rPoint.y > ( m_MidPos.y - m_Dimension.y ) ) && ( rPoint.y < (m_MidPos.y + m_Dimension.y ) ) )
 	{
 		return true;
 	}

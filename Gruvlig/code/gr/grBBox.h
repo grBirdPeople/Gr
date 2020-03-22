@@ -11,17 +11,17 @@ class grBBox
 {
 public:
 
-	grBBox( const grV2f& rDimension, const grV2f& rPos ) : m_Dimension( rDimension ), m_Pos( rPos ), m_TopLeftCorner( grV2f() )
+	grBBox( const grV2f& rDimension, const grV2f& rPos ) : m_Dimension( rDimension ), m_MidPos( rPos ), m_TopLeftCorner( grV2f() )
 	{
-		SetTopLeftCorner( m_Dimension, m_Pos );
+		SetTopLeftCorner( m_Dimension, m_MidPos );
 	}
 	
 	//////////////////////////////////////////////////
 	
 	inline	grV2f&	GetDimension		( void )									{ return m_Dimension; }
 	inline	void	SetDimension		( const grV2f& rDmension )					{ m_Dimension = rDmension; }
-	inline	grV2f&	GetPos				( void )									{ return m_Pos; }
-	inline	void	SetPos				( const grV2f& rPos )						{ m_Pos = rPos;	SetTopLeftCorner(m_Dimension, m_Pos); }
+	inline	grV2f&	GetPos				( void )									{ return m_MidPos; }
+	inline	void	SetPos				( const grV2f& rPos )						{ m_MidPos = rPos;	SetTopLeftCorner(m_Dimension, m_MidPos); }
 	inline	grV2f&	GetTopLeftCorner	( void )									{ return m_TopLeftCorner; }
 	
 	//////////////////////////////////////////////////
@@ -42,7 +42,7 @@ private:
 	//////////////////////////////////////////////////
 	
 	grV2f	m_Dimension,
-			m_Pos,				// Origo
+			m_MidPos,				// Origo
 			m_TopLeftCorner;
 
 };
