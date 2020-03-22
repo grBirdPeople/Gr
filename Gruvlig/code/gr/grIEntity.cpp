@@ -177,7 +177,7 @@ grIEntity::EnableDisableRecursively( grIEntity& rEntity )
 {
 	if ( rEntity.m_vecChildren.size() > 0 )
 	{
-		for ( sInt i = ( sInt )rEntity.m_vecChildren.size() - 1; i >= 0; --i )	// TODO: Fix loop as this only works because of casting
+		for ( sInt i = ( sInt )rEntity.m_vecChildren.size() - 1; i >= 0; --i )	// TODO: Fix loop as this only works because of casting which also is stupid overhead anyway
 		{
 			grIEntity& ent = *rEntity.m_vecChildren[ i ];
 			if ( ent.m_vecChildren.size() > 0 )
@@ -201,13 +201,13 @@ grIEntity::UpdatePosRecursively( grIEntity& rEntity )
 	{
 		for ( uInt i = 0; i < rEntity.m_vecChildren.size(); ++i )
 		{
-			grIEntity& ent = *rEntity.m_vecChildren[ i ];
-			grV2f parentPos = ent.m_pParent->GetPosition();
-			ent.m_PosWorld = parentPos + ent.m_PosLocal;
+			grIEntity& rEnt = *rEntity.m_vecChildren[ i ];
+			grV2f parentPos = rEnt.m_pParent->GetPosition();
+			rEnt.m_PosWorld = parentPos + rEnt.m_PosLocal;
 
-			if ( ent.m_vecChildren.size() > 0 )
+			if ( rEnt.m_vecChildren.size() > 0 )
 			{
-				UpdatePosRecursively( ent );
+				UpdatePosRecursively( rEnt );
 			}
 		}
 	}

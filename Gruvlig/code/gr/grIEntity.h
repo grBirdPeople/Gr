@@ -57,6 +57,8 @@ protected:
 
 			void		SetType						( const EEntityType type )	{ m_Type = type; }
 
+			//////////////////////////////////////////////////
+
 private:
 
 			void		EnableDisableRecursively	( grIEntity& rEntity );
