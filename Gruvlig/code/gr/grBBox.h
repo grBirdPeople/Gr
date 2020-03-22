@@ -27,7 +27,7 @@ public:
 	//////////////////////////////////////////////////
 	
 			bool	Intersect			( const grBBox& rBBox );
-			bool	PointInside			( const grV2f& rPoint );
+			bool	IsPointInside			( const grV2f& rPoint );
 	
 	//////////////////////////////////////////////////
 	
