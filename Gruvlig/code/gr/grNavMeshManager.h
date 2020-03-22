@@ -4,9 +4,9 @@
 #define		MAX_NAVMESH	128
 
 #include	"grCommon.h"
+#include	"grNavMesh.h"
 #include	"grSingleton.h"
 
-class		grNavMesh;
 class		grMap;
 
 typedef		std::vector<grNavMesh*>	vecNavMesh;
@@ -19,7 +19,12 @@ class grNavMeshManager : public grSingleton<grNavMeshManager>
 public:
 
 						grNavMeshManager	( void )				{ m_VecNavMesh.reserve( MAX_NAVMESH ); }
-						~grNavMeshManager	( void )				{ for ( auto& i : m_VecNavMesh ) { DELANDNULL( i ); } }
+						~grNavMeshManager	( void )				{
+																		for ( uInt i = 0; i < m_VecNavMesh.size(); ++ i )
+																		{
+																			DELANDNULL( m_VecNavMesh[ i ] );
+																		}
+																	}
 	
 	//////////////////////////////////////////////////
 	

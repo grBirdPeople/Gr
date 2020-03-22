@@ -6,6 +6,22 @@
 #include	"grNavNode.h"
 
 
+// dTor
+//////////////////////////////////////////////////
+grNavMesh::~grNavMesh(void)
+{
+	for ( auto& node : m_VecPath )
+	{
+		node = nullptr;
+	}
+
+	for ( uInt i = 0; i < m_VecNode.size(); ++i )
+	{
+		DELANDNULL( m_VecNode[ i ] );
+	}
+}
+
+
 // CreateNavMesh
 //////////////////////////////////////////////////
 void
@@ -20,8 +36,9 @@ grNavMesh::CreateNavMesh()
 	uInt mapIndex	= 0;
 	uInt nodeIndex	= 0;
 	
-	m_VecNode.reserve( nodesX * nodesY );
-	m_VecPath.reserve( nodesX * nodesY );
+	uInt reserveSize = nodesX * nodesY;
+	m_VecNode.reserve( reserveSize );
+	m_VecPath.reserve( reserveSize );
 	
 	for( uInt y = 0; y < nodesY; ++y )
 	{
@@ -58,7 +75,7 @@ grNavMesh::CreateNavMesh()
 			if ( j == i ) { continue; }
 			
 			pNeighbourNode			= m_VecNode[ j ];
-			float dist				= ( pNeighbourNode->m_Pos - pCurrentNode->m_Pos ).Magnitude();
+			float dist				= ( pNeighbourNode->m_MidPos - pCurrentNode->m_MidPos ).Magnitude();
 			uInt numOfNeighbours	= pCurrentNode->m_NumOfNeighbours;
 			
 			if( dist < maxPossibleNeighbourDist )
@@ -105,19 +122,19 @@ grNavMesh::DebugRender( void )
 		// Map
 		for( auto& node : m_VecNode )
 		{
-			grBBox box( tileSize, node->m_Pos );
+			grBBox box( tileSize, node->m_MidPos );
 			grDebugManager::Instance().AddBBox( box, sf::Color::Red );
 		}
 
 		// A*
-		grBBox startBox( tileSize, m_VecPath[ 0 ]->m_Pos );
-		grBBox endBox(tileSize, m_VecPath[ m_VecPath.size() - 1 ]->m_Pos );
+		grBBox startBox( tileSize, m_VecPath[ 0 ]->m_MidPos );
+		grBBox endBox(tileSize, m_VecPath[ m_VecPath.size() - 1 ]->m_MidPos );
 		grDebugManager::Instance().AddBBox( startBox, sf::Color::Yellow );
 		grDebugManager::Instance().AddBBox( endBox, sf::Color::Yellow );
 
 		for ( int i = 1; i < m_VecPath.size() - 1; ++i )
 		{
-			grBBox box(tileSize, m_VecPath[ i ]->m_Pos );
+			grBBox box(tileSize, m_VecPath[ i ]->m_MidPos );
 			grDebugManager::Instance().AddBBox( box, sf::Color::Green );
 		}
 	}
@@ -192,7 +209,7 @@ grNavMesh::Heuristic( grNavNode* pNode, grNavNode* pEndNode )
 {
 	// TODO: Make better math
 	//return grMath::Abs( pNode->m_Pos.x - pEndNode->m_Pos.x ) + grMath::Abs( pNode->m_Pos.y - pEndNode->m_Pos.y );
-	return ( pEndNode->m_Pos - pNode->m_Pos ).Magnitude();
+	return ( pEndNode->m_MidPos - pNode->m_MidPos ).Magnitude();
 }
 
 
