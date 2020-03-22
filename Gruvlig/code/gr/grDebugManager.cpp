@@ -2,6 +2,7 @@
 
 #include	<SFML/System/Vector2.hpp>
 
+#include	"grBBox.h"
 #include	"grDefine.h"
 #include	"grNavMeshManager.h"
 
@@ -9,26 +10,20 @@
 // AddBox
 //////////////////////////////////////////////////
 void
-grDebugManager::AddBBox( const grBBox& rBBox, const sf::Color color )
+grDebugManager::AddBBox( grBBox& rBBox, const sf::Color color )
 {
-	grBBox box = rBBox;
-	
-	sf::Vector2f topLeft( box.GetTopLeftCorner().x, box.GetTopLeftCorner().y );
-	sf::Vector2f topRight		= topLeft;
-	sf::Vector2f bottomRight	= topLeft;
-	sf::Vector2f bottomLeft		= topLeft;
-	
-	topRight.x		+= box.GetDimension().x;
-	bottomRight.x	+= box.GetDimension().x;
-	bottomRight.y	+= box.GetDimension().y;
-	bottomLeft.y	+= box.GetDimension().y;
+	const grBBox::Corners& corners = rBBox.GetCorners();
+	sf::Vector2f topLeft( corners.TopLeft.x, corners.TopLeft.y );
+	sf::Vector2f topRight( corners.TopRight.x, corners.TopRight.y );
+	sf::Vector2f botRight( corners.BotRight.x, corners.BotRight.y );
+	sf::Vector2f botLeft( corners.BotLeft.x, corners.BotLeft.y );
 	
 	sf::VertexArray vertexBox( sf::LinesStrip, 5 );
 	
 	vertexBox[ 0 ].position	= topLeft;
 	vertexBox[ 1 ].position	= topRight;
-	vertexBox[ 2 ].position	= bottomRight;
-	vertexBox[ 3 ].position	= bottomLeft;
+	vertexBox[ 2 ].position	= botRight;
+	vertexBox[ 3 ].position	= botLeft;
 	vertexBox[ 4 ].position	= topLeft;
 	
 	vertexBox[ 0 ].color	= color;

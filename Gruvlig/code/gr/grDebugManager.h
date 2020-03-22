@@ -4,11 +4,12 @@
 #include	<SFML/Graphics/RenderWindow.hpp>
 #include	<SFML/Graphics/VertexArray.hpp>
 
-#include	"grBBox.h"
 #include	"grCommon.h"
 #include	"grSingleton.h"
 
 typedef		std::vector<sf::VertexArray>	vecVertexArray;
+
+class		grBBox;
 
 
 // grDebugManager
@@ -17,7 +18,7 @@ class grDebugManager : public grSingleton<grDebugManager>
 {
 public:
 	
-			void	AddBBox		( const grBBox& rBBox, const sf::Color color );
+			void	AddBBox		( grBBox& rBBox, const sf::Color color );
 
 	inline	void	DebugRender	( sf::RenderWindow& rRenderWin )
 								{
