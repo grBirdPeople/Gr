@@ -43,10 +43,10 @@ grMap::FindValidPos(const grV2f& pos)
 
 		for(uInt node = 0; node < m_pNavMesh->GetNavNodes().size(); ++node)
 		{
-			float minX = m_pNavMesh->GetNavNodes()[node]->m_Pos.x - halfTileX;
-			float maxX = m_pNavMesh->GetNavNodes()[node]->m_Pos.x + halfTileX;
-			float minY = m_pNavMesh->GetNavNodes()[node]->m_Pos.y - halfTileY;
-			float maxY = m_pNavMesh->GetNavNodes()[node]->m_Pos.y + halfTileY;
+			float minX = m_pNavMesh->GetNavNodes()[node]->m_MidPos.x - halfTileX;
+			float maxX = m_pNavMesh->GetNavNodes()[node]->m_MidPos.x + halfTileX;
+			float minY = m_pNavMesh->GetNavNodes()[node]->m_MidPos.y - halfTileY;
+			float maxY = m_pNavMesh->GetNavNodes()[node]->m_MidPos.y + halfTileY;
 		
 			if((pos.x > minX) && (pos.x < maxX) &&
 				(pos.y > minY) && (pos.y < maxY))

@@ -23,13 +23,13 @@ public:
 	
 	//////////////////////////////////////////////////
 
-					grNavMesh			( grMap* pOwnerMap ) : m_pOwnerMap(*pOwnerMap )	{ CreateNavMesh(); }
-					~grNavMesh			( void )										{}
+					grNavMesh			( grMap* pOwnerMap ) : m_pOwnerMap( *pOwnerMap )	{ CreateNavMesh(); }
+					~grNavMesh			( void );
 
 	//////////////////////////////////////////////////
 
-	grMap*			GetOwnerMap			( void )										{ return &m_pOwnerMap; }
-	vecNavNode&		GetNavNodes			( void )										{ return m_VecNode; }
+	grMap*			GetOwnerMap			( void )											{ return &m_pOwnerMap; }
+	vecNavNode&		GetNavNodes			( void )											{ return m_VecNode; }
 
 	//////////////////////////////////////////////////
 	
