@@ -22,11 +22,11 @@ grEntityManager::grEntityManager( void )
 
 // dTor
 //////////////////////////////////////////////////
-grEntityManager::~grEntityManager(void)
+grEntityManager::~grEntityManager( void )
 {
 	for( uInt i = 0; i < m_EnemyQuantity; ++i )
 	{
-		DELANDNULL(m_pArrEnemy[ i ] );
+		DELANDNULL( m_pArrEnemy[ i ] );
 	}
 
 	DELANDNULL( m_pPlayerEntity );

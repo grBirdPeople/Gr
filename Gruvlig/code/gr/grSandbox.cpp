@@ -1,6 +1,7 @@
 #include "grSandbox.h"
 
 #include	<SFML/Window/Mouse.hpp>
+#include	<SFML/Graphics/Sprite.hpp>
 
 #include	"grCore.h"
 #include	"grBox2D.h"
@@ -16,6 +17,8 @@
 #include	"grEntityManager.h"
 #include	"grMapManager.h"
 #include	"grHashMap.h"
+#include	"grParticleManager.h"
+#include	"grParticleSystem.h"
 
 
 // cTor
@@ -50,8 +53,6 @@ grSandbox::grSandbox( void )
 	//m_pPlayer->SetEnable( false );
 	//entityMan.DestroyEntity( pEnemy_1 );
 
-
-
 	//// HashMap
 	//grHashMap<grIEntity*> map( 5 );
 	//map.Put( 3, m_pPlayer );
@@ -62,8 +63,6 @@ grSandbox::grSandbox( void )
 	//map.Del( 7 );
 	//map.Del( 3 );
 	//map.Put( 3, m_pPlayer );
-
-
 
 	//// Box2D test
 	//b2World* pWorld = new b2World( b2Vec2( 0.0f, -9.8f ) );
@@ -82,6 +81,11 @@ grSandbox::grSandbox( void )
 	//fixDef.density = 1.0f;
 	//fixDef.friction = 0.5f;
 	//b2Fixture* pFix = pBody->CreateFixture( &fixDef );
+
+	// Particles
+	m_pParticleSys = grParticleManager::Instance().CreateParticleSystem();
+	m_pParticleSys->Init( grV2f( 350.0f, 150.0f ), grV2f( 0.0f, -1.0f ), 50.0f, 2.0f, 4 );
+
 }
 
 
@@ -90,37 +94,40 @@ grSandbox::grSandbox( void )
 void
 grSandbox::Update( const float deltaT )
 {
-	grCore& core = grCore::Instance();
-	grInput& input = grInput::Instance();
+	grCore& coreMan = grCore::Instance();
+	grParticleManager& particleMan = grParticleManager::Instance();
+	grInput& inputMan = grInput::Instance();
 
-	// SceneGraph stuff
-	if ( input.GetMouseDown( sf::Mouse::Left ) )
+	// Particle things
+	particleMan.Update( deltaT );
+
+	// Scenegraph things
+	if ( inputMan.GetMouseDown( sf::Mouse::Left ) )
 	{
 		//m_pPlayer->ReleaseChildByIdx( 0 );		
 		//grEntityManager::Instance().DestroyEntity( m_pPlayer );
 		//grEntityManager::Instance().DestroyEntity( m_pEnemy );
 
-		hej = !hej;
+		m_bFlipFlop = !m_bFlipFlop;
 		//m_pEnemy->SetEnable( hej );
 		//m_pPlayer->SetEnable( hej );
 
-		( hej == false ) ? m_pPlayer->ReleaseChildById( m_pEnemy->GetId() ) : m_pPlayer->AddChild( m_pEnemy );
+		( m_bFlipFlop == false ) ? m_pPlayer->ReleaseChildById( m_pEnemy->GetId() ) : m_pPlayer->AddChild( m_pEnemy );
 	}
 
-
-	// A*
+	// Navmesh things
 	if ( m_pMap != nullptr )
 	{
-		if ( input.GetMouse( sf::Mouse::Button::Left ) )
+		if ( inputMan.GetMouse( sf::Mouse::Button::Left ) )
 		{
-			grV2f mousePos = grV2f( ( float )sf::Mouse::getPosition( core.GetRenderWin() ).x, ( float )sf::Mouse::getPosition( core.GetRenderWin() ).y );
+			grV2f mousePos = grV2f( ( float )sf::Mouse::getPosition( coreMan.GetRenderWin() ).x, ( float )sf::Mouse::getPosition( coreMan.GetRenderWin() ).y );
 			m_pActor->SetEnd( m_pMap, mousePos );
 			m_pActor->FindPath( m_pMap );
 		}
 
-		if ( input.GetMouse( sf::Mouse::Button::Right ) )
+		if ( inputMan.GetMouse( sf::Mouse::Button::Right ) )
 		{
-			grV2f mousePos = grV2f( ( float )sf::Mouse::getPosition( core.GetRenderWin() ).x, ( float )sf::Mouse::getPosition( core.GetRenderWin() ).y );
+			grV2f mousePos = grV2f( ( float )sf::Mouse::getPosition( coreMan.GetRenderWin() ).x, ( float )sf::Mouse::getPosition( coreMan.GetRenderWin() ).y );
 			m_pActor->SetStart( m_pMap, mousePos );
 			m_pActor->FindPath( m_pMap );
 		}

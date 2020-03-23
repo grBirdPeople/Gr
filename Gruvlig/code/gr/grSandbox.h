@@ -6,6 +6,7 @@
 class		grActor;
 class		grMap;
 class		grIEntity;
+class		grParticleSystem;
 
 
 // grSandbox
@@ -30,7 +31,9 @@ private:
 
 	grIEntity* m_pPlayer;
 	grIEntity* m_pEnemy;
-	bool hej = true;
+	bool m_bFlipFlop = true;
+
+	grParticleSystem* m_pParticleSys;
 
 };
 

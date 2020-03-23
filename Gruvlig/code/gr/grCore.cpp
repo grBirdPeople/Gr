@@ -2,10 +2,11 @@
 
 #include	"grDebugManager.h"
 #include	"grDefine.h"
-#include	"grInput.h"
 #include	"grEntityManager.h"
+#include	"grInput.h"
 #include	"grMapManager.h"
 #include	"grNavMeshManager.h"
+#include	"grParticleManager.h"
 #include	"grSandbox.h"
 
 
@@ -25,10 +26,11 @@ grCore::grCore( const uInt winWidth, const uInt winHeight, const uInt frameRate,
 	, m_pSfEvent			( new sf::Event )
 	, m_pEngineClock		( new sf::Clock )
 {
+	grInput::Initialize();
 	grEntityManager::Initialize();
 	grMapManager::Initialize();
 	grNavMeshManager::Initialize();
-	grInput::Initialize();
+	grParticleManager::Initialize();
 
 #ifdef DEBUG
 	grDebugManager::Initialize();
@@ -56,10 +58,11 @@ grCore::~grCore( void )
 	grDebugManager::DeInitialize();
 #endif // DEBUG
 
-	grInput::DeInitialize();
+	grParticleManager::DeInitialize();
 	grNavMeshManager::DeInitialize();
 	grMapManager::DeInitialize();
 	grEntityManager::DeInitialize();
+	grInput::DeInitialize();
 
 	//////////////////////////////////////////////////
 
