@@ -36,13 +36,8 @@ grBBox::Intersects( const grBBox& rBBox )
 inline const bool
 grBBox::IsPointInside(const grV2f& rPoint)
 {
-	if( ( rPoint.x > ( m_MidPos.x - m_Dimensions.x ) ) && ( rPoint.x < ( m_MidPos.x + m_Dimensions.x ) ) &&
-		( rPoint.y > ( m_MidPos.y - m_Dimensions.y ) ) && ( rPoint.y < ( m_MidPos.y + m_Dimensions.y ) ) )
-	{
-		return true;
-	}
-	
-	return false;
+	return	( rPoint.x > m_MidPos.x - m_Dimensions.x ) && ( rPoint.x < m_MidPos.x + m_Dimensions.x ) &&
+			( rPoint.y > m_MidPos.y - m_Dimensions.y ) && ( rPoint.y < m_MidPos.y + m_Dimensions.y );
 }
 
 
@@ -51,14 +46,17 @@ grBBox::IsPointInside(const grV2f& rPoint)
 inline void
 grBBox::UpdateCorners( void )
 {
-	m_Corners.TopLeft.x = m_MidPos.x - ( m_Dimensions.x * 0.5f );
-	m_Corners.TopLeft.y = m_MidPos.y - ( m_Dimensions.y * 0.5f );
+	float halfDimensionX = m_Dimensions.x * 0.5f;
+	float halfDimensionY = m_Dimensions.y * 0.5f;
 
-	m_Corners.TopRight.x = m_MidPos.x + ( m_Dimensions.x * 0.5f );
+	m_Corners.TopLeft.x = m_MidPos.x - halfDimensionX;
+	m_Corners.TopLeft.y = m_MidPos.y - halfDimensionY;
+
+	m_Corners.TopRight.x = m_MidPos.x + halfDimensionX;
 	m_Corners.TopRight.y = m_Corners.TopLeft.y;
 
 	m_Corners.BotRight.x = m_Corners.TopRight.x;
-	m_Corners.BotRight.y = m_MidPos.y + ( m_Dimensions.y * 0.5f );
+	m_Corners.BotRight.y = m_MidPos.y + halfDimensionY;
 
 	m_Corners.BotLeft.x = m_Corners.TopLeft.x;
 	m_Corners.BotLeft.y = m_Corners.BotRight.y;
