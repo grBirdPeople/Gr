@@ -1,6 +1,5 @@
 #include	"grEntityManager.h"
 
-#include	"grDefine.h"
 #include	"grEntityPlayer.h"
 #include	"grIEntity.h"
 #include	"grEntityEnemy.h"
@@ -37,12 +36,12 @@ grEntityManager::~grEntityManager(void)
 // CreateEntity
 //////////////////////////////////////////////////
 grIEntity*
-grEntityManager::CreateEntity( const grIEntity::EEntityType type, const str& rUniqueName, const grV2f& rPos )
+grEntityManager::CreateEntity( const grEnums::EntityType type, const str& rUniqueName, const grV2f& rPos )
 {
 	switch (type)
 	{
-	case grIEntity::EEntityType::PLAYER: return CreatePlayer( type, rUniqueName, rPos ); break;
-	case grIEntity::EEntityType::ENEMY: return CreateEnemy( type, rUniqueName, rPos ); break;
+	case grEnums::EntityType::PLAYER: return CreatePlayer( type, rUniqueName, rPos ); break;
+	case grEnums::EntityType::ENEMY: return CreateEnemy( type, rUniqueName, rPos ); break;
 	default: std::cerr << "grEntityManager::CreateEntity(): Something broke" << std::endl;
 	}
 
@@ -59,12 +58,12 @@ grEntityManager::CreateEntity( const grIEntity::EEntityType type, const str& rUn
 void
 grEntityManager::DestroyEntity( grIEntity* pEntity )
 {
-	grIEntity::EEntityType entityType = pEntity->GetType();
+	grEnums::EntityType entityType = pEntity->GetType();
 	uInt entityId = pEntity->GetId();
 
 	switch ( entityType )
 	{
-	case grIEntity::EEntityType::ENEMY:
+	case grEnums::EntityType::ENEMY:
 	{
 		grEntityEnemy* pEnemy = (grEntityEnemy*)pEntity;
 		for ( uInt i = 0; i < m_EnemyQuantity; ++i )
@@ -99,7 +98,7 @@ grEntityManager::DestroyEntity( grIEntity* pEntity )
 	}
 	break;
 
-	case grIEntity::EEntityType::PLAYER:
+	case grEnums::EntityType::PLAYER:
 	{
 		if ( m_pPlayerEntity != nullptr )
 		{
@@ -204,7 +203,7 @@ grEntityManager::Disable( grIEntity* pEntity )
 // CreatePlayer
 //////////////////////////////////////////////////
 grIEntity*
-grEntityManager::CreatePlayer( const grIEntity::EEntityType type, const str& rUniqueName, const grV2f& rPos )
+grEntityManager::CreatePlayer( const grEnums::EntityType type, const str& rUniqueName, const grV2f& rPos )
 {
 #ifdef DEBUG
 	if( m_pPlayerEntity != nullptr )
@@ -222,7 +221,7 @@ grEntityManager::CreatePlayer( const grIEntity::EEntityType type, const str& rUn
 // CreateEnemy
 //////////////////////////////////////////////////
 grIEntity*
-grEntityManager::CreateEnemy( const grIEntity::EEntityType type, const str& rUniqueName, const grV2f& rPos )
+grEntityManager::CreateEnemy( const grEnums::EntityType type, const str& rUniqueName, const grV2f& rPos )
 {
 	if( m_EnemyQuantity == MAX_ENEMY )
 	{

@@ -1,7 +1,7 @@
 #include	"grIEntity.h"
 
-#include	"grDefine.h"
 #include	"grEntityManager.h"
+
 
 
 // cTor
@@ -9,7 +9,7 @@
 grIEntity::grIEntity( void )
 	: m_Name		( "No Name" )
 	, m_Id			( 0 )
-	, m_Type		( EEntityType::NONE )
+	, m_Type		( grEnums::EntityType::NONE )
 	, m_bIsEnabled	( false )
 	, rEMan			( grEntityManager::Instance() )
 	, m_pParent		( nullptr )

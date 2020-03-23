@@ -1,12 +1,11 @@
 #include	"grEntityEnemy.h"
 
-#include	"grBBox.h"
 #include	"grDebugManager.h"
 
 
 // cTor
 //////////////////////////////////////////////////
-grEntityEnemy::grEntityEnemy( const grIEntity::EEntityType type, const str& rName, const grV2f& rPos, const uInt id )
+grEntityEnemy::grEntityEnemy( const grEnums::EntityType type, const str& rName, const grV2f& rPos, const uInt id )
 {
 	m_PosWorld		= rPos;
 	m_PosLocal		= rPos;

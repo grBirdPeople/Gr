@@ -22,16 +22,22 @@ public:
 
 public:
 								grBBox					( const grV2f& rDimension, const grV2f& rPos );
-								grBBox					( const grV2f& rDimension, const grV2f& rPos, const float rotationInDeg );
 	
 	//////////////////////////////////////////////////
-	
-	inline	const	grV2f&		GetDimension			( void )					{ return m_Dimension; }
-	inline			void		SetDimension			( const grV2f& rDmension )	{ m_Dimension = rDmension; }
-	inline	const	grV2f&		GetPos					( void )					{ return m_MidPos; }
-	inline			void		SetPos					( const grV2f& rPos );
-	inline	const	grV2f&		GetTopLeftCorner		( void )					{ return m_TopLeftCorner; }
-	inline	const	Corners&	GetCorners				( void ) 					{ return m_Corners; }
+
+	inline	const	grV2f&		GetPosistion			( void )						{ return m_MidPos; }
+	inline			void		SetPosition				( const grV2f& rPosition )
+																						{
+																							m_MidPos = rPosition;
+																							UpdateCorners( );
+																						}
+	inline	const	grV2f&		GetDimensions			( void )						{ return m_Dimensions; }
+	inline			void		SetDimensions			( const grV2f& rDimensions )
+																						{
+																							m_Dimensions = rDimensions;
+																							UpdateCorners( );
+																						}
+	inline	const	Corners&	GetCorners				( void ) 						{ return m_Corners; }
 	
 	//////////////////////////////////////////////////
 	
@@ -42,19 +48,14 @@ public:
 	
 private:
 
-	inline			void		CheckRotationBounds		( float* rotInDeg );
-	inline			void		RotatePoint				( grV2f* pPoint, const float rotInRad );
-	inline			void		SetCorners				( const grV2f& rDimension, const grV2f& rPos );
+	inline			void		UpdateCorners			( void );
 
 	//////////////////////////////////////////////////
 	
 	Corners	m_Corners;
 
-	grV2f	m_Dimension,
-			m_MidPos,			// Origo
-			m_TopLeftCorner;
-
-	float	m_RotationInDeg;
+	grV2f	m_Dimensions,
+			m_MidPos;			// Origo
 
 };
 

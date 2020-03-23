@@ -12,7 +12,7 @@ class grEntityPlayer : public grIEntity
 {
 public:
 
-			grEntityPlayer	( const grIEntity::EEntityType type, const str& rName, const grV2f& rPos, const uInt id );
+			grEntityPlayer	( const grEnums::EntityType type, const str& rName, const grV2f& rPos, const uInt id );
 			~grEntityPlayer	( void );
 
 	//////////////////////////////////////////////////
@@ -27,7 +27,8 @@ private:
 
 	grCtrlPlayer*					m_pCtrl;
 
+	grBBox*							m_pBBox;
+
 };
 
 #endif		//_GRENTITYPLAYER_H_
-
