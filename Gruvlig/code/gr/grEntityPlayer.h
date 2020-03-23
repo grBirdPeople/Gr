@@ -27,8 +27,6 @@ private:
 
 	grCtrlPlayer*					m_pCtrl;
 
-	grBBox*							m_pBBox;
-
 };
 
 #endif		//_GRENTITYPLAYER_H_
