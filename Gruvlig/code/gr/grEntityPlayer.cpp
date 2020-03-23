@@ -2,7 +2,6 @@
 
 #include	"grBBox.h"
 #include	"grDebugManager.h"
-#include	"grDefine.h"
 #include	"grInput.h"
 #include	"grCtrlPlayer.h"
 

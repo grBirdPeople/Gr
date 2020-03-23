@@ -1,7 +1,6 @@
 #ifndef		_GRENTITYPLAYER_H_
 #define		_GRENTITYPLAYER_H_
 
-#include	"grCommon.h"
 #include	"grIEntity.h"
 
 class		grCtrlPlayer;

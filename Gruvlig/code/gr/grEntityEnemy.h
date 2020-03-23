@@ -1,7 +1,6 @@
 #ifndef		_GRENTITYENEMY_H_
 #define		_GRENTITYENEMY_H_
 
-#include	"grCommon.h"
 #include	"grIEntity.h"
 
 
