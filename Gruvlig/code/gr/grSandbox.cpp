@@ -84,7 +84,7 @@ grSandbox::grSandbox( void )
 
 	// Particles
 	m_pParticleSys = grParticleManager::Instance().CreateParticleSystem();
-	m_pParticleSys->Init( grV2f( 350.0f, 150.0f ), grV2f( 0.0f, -1.0f ), 50.0f, 2.0f, 4 );
+	m_pParticleSys->Init( grV2f( 350.0f, 150.0f ), grV2f( 1.0f, -1.0f ), 50.0f, 2.0f, 4 );
 
 }
 
