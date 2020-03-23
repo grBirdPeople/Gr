@@ -16,8 +16,11 @@ typedef		std::vector<grMap*>	vecMap;
 class grMapManager : public grSingleton<grMapManager>
 {
 public:
-			grMapManager	( void )						{ m_pVecMap.reserve( MAX_MAP );	CreateMaps(); }
-			~grMapManager	( void )						{ for ( auto& i : m_pVecMap ) { if ( i != nullptr ) { DELANDNULL( i ); } } }
+			grMapManager	( void )						{
+																m_pVecMap.reserve( MAX_MAP );
+																CreateMaps();
+															}
+			~grMapManager	( void );
 	
 	//////////////////////////////////////////////////
 	

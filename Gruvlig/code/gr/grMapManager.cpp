@@ -4,6 +4,20 @@
 #include	"grMap.h"
 
 
+// dTor
+//////////////////////////////////////////////////
+grMapManager::~grMapManager( void )
+{
+	for ( auto& i : m_pVecMap )
+	{
+		if ( i != nullptr )
+		{
+			DELANDNULL( i );
+		}
+	}
+}
+
+
 // GetMap
 //////////////////////////////////////////////////
 grMap*
