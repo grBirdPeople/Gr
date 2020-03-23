@@ -14,33 +14,6 @@ grBBox::grBBox( const grV2f& rDimension, const grV2f& rPos )
 }
 
 
-// Intersect
-//////////////////////////////////////////////////
-const bool
-grBBox::Intersects( const grBBox& rBBox )
-{
-	grBBox otherBox			= rBBox;
-	grV2f otherPos			= otherBox.GetPosistion();
-	grV2f otherDimensions	= otherBox.GetDimensions();
-	grV2f otherTopLeft		= otherBox.GetCorners().TopLeft;
-
-	return	m_Corners.TopLeft.x	< otherTopLeft.x		+ otherDimensions.x	&&
-			otherTopLeft.x		< m_Corners.TopLeft.x	+ m_Dimensions.x	&&
-			m_Corners.TopLeft.y	< otherTopLeft.y		+ otherDimensions.y	&&
-			otherTopLeft.y		< m_Corners.TopLeft.y	+ m_Dimensions.y;
-}
-
-
-// PointInside
-//////////////////////////////////////////////////
-inline const bool
-grBBox::IsPointInside(const grV2f& rPoint)
-{
-	return	( rPoint.x > m_MidPos.x - m_Dimensions.x ) && ( rPoint.x < m_MidPos.x + m_Dimensions.x ) &&
-			( rPoint.y > m_MidPos.y - m_Dimensions.y ) && ( rPoint.y < m_MidPos.y + m_Dimensions.y );
-}
-
-
 // UpdateCorners
 //////////////////////////////////////////////////
 inline void
