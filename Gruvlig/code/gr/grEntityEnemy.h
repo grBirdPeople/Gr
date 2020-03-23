@@ -10,7 +10,7 @@ class grEntityEnemy : public grIEntity
 {
 public:
 
-			grEntityEnemy	( const grIEntity::EEntityType type, const str& rName, const grV2f& rPos, const uInt id );
+			grEntityEnemy	( const grEnums::EntityType type, const str& rName, const grV2f& rPos, const uInt id );
 			~grEntityEnemy	( void );
 	
 	//////////////////////////////////////////////////

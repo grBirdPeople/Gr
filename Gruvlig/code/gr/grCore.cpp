@@ -66,12 +66,12 @@ grCore::grCore( const uInt winWidth, const uInt winHeight, const uInt frameRate,
 	// Entities
 	grEntityManager& entityMan = grEntityManager::Instance();
 
-	m_pPlayer = entityMan.CreateEntity( grIEntity::EEntityType::PLAYER, "Player", grV2f( 300.0f, 150.0f ) );
+	m_pPlayer = entityMan.CreateEntity( grEnums::EntityType::PLAYER, "Player", grV2f( 300.0f, 150.0f ) );
 
-	grIEntity* pEnemy_1 = entityMan.CreateEntity(grIEntity::EEntityType::ENEMY, "Enemy_1", grV2f( 290.0f, 140.0f ) );
-	grIEntity* pEnemy_2 = entityMan.CreateEntity( grIEntity::EEntityType::ENEMY, "Enemy_2", grV2f( 280.0f, 130.0f ) );
-	m_pEnemy = entityMan.CreateEntity( grIEntity::EEntityType::ENEMY, "Enemy_3", grV2f( 310.0f, 140.0f ) );
-	grIEntity* pEnemy_4 = entityMan.CreateEntity( grIEntity::EEntityType::ENEMY, "Enemy_4", grV2f(320.0f, 130.0f ) );
+	grIEntity* pEnemy_1 = entityMan.CreateEntity( grEnums::EntityType::ENEMY, "Enemy_1", grV2f( 290.0f, 140.0f ) );
+	grIEntity* pEnemy_2 = entityMan.CreateEntity( grEnums::EntityType::ENEMY, "Enemy_2", grV2f( 280.0f, 130.0f ) );
+	m_pEnemy = entityMan.CreateEntity( grEnums::EntityType::ENEMY, "Enemy_3", grV2f( 310.0f, 140.0f ) );
+	grIEntity* pEnemy_4 = entityMan.CreateEntity( grEnums::EntityType::ENEMY, "Enemy_4", grV2f(320.0f, 130.0f ) );
 
 	m_pPlayer->AddChild( pEnemy_1 );
 	pEnemy_1->AddChild( pEnemy_2 );
@@ -84,16 +84,17 @@ grCore::grCore( const uInt winWidth, const uInt winHeight, const uInt frameRate,
 	//entityMan.DestroyEntity( pEnemy_1 );
 
 
-	// HashMap
-	grHashMap<grIEntity*> map( 5 );
-	map.Put( 3, m_pPlayer );
-	map.Put( 3, m_pEnemy );
-	grIEntity* pTmp = map.Get( 7 );
-	pTmp = map.Get( 3 );
-	std::vector<uInt> used = map.UsedKeys();
-	map.Del( 7 );
-	map.Del( 3 );
-	map.Put( 3, m_pPlayer );
+
+	//// HashMap
+	//grHashMap<grIEntity*> map( 5 );
+	//map.Put( 3, m_pPlayer );
+	//map.Put( 3, m_pEnemy );
+	//grIEntity* pTmp = map.Get( 7 );
+	//pTmp = map.Get( 3 );
+	//std::vector<uInt> used = map.UsedKeys();
+	//map.Del( 7 );
+	//map.Del( 3 );
+	//map.Put( 3, m_pPlayer );
 
 
 

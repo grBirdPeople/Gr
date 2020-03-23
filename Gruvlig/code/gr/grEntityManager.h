@@ -5,7 +5,6 @@
 
 #include	<SFML/Graphics/RenderWindow.hpp>
 
-#include	"grCommon.h"
 #include	"grIEntity.h"
 #include	"grSingleton.h"
 
@@ -28,7 +27,7 @@ public:
 	
 	//////////////////////////////////////////////////
 	
-			grIEntity*	CreateEntity		( const grIEntity::EEntityType type, const str& rUniqueName, const grV2f& rPos );
+			grIEntity*	CreateEntity		( const grEnums::EntityType type, const str& rUniqueName, const grV2f& rPos );
 			void		DestroyEntity		( grIEntity* pEntity );
 			void		Update				( const float deltaT );
 	
@@ -37,8 +36,8 @@ public:
 private:
 			void		Enable				( grIEntity* rEntity );
 			void		Disable				( grIEntity* rEntity );
-			grIEntity*	CreatePlayer		( const grIEntity::EEntityType type, const str& rUniqueName, const grV2f& rPos );
-			grIEntity*	CreateEnemy			( const grIEntity::EEntityType type, const str& rUniqueName, const grV2f& rPos );
+			grIEntity*	CreatePlayer		( const grEnums::EntityType type, const str& rUniqueName, const grV2f& rPos );
+			grIEntity*	CreateEnemy			( const grEnums::EntityType type, const str& rUniqueName, const grV2f& rPos );
 	inline	uInt		CreateAndGetId		( void)	const																		{ uInt id = m_Id;	++m_Id;	return id; }
 
 

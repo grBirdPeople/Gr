@@ -1,6 +1,5 @@
 #include	"grEntityPlayer.h"
 
-#include	"grBBox.h"
 #include	"grDebugManager.h"
 #include	"grInput.h"
 #include	"grCtrlPlayer.h"
@@ -8,8 +7,9 @@
 
 // cTor
 //////////////////////////////////////////////////
-grEntityPlayer::grEntityPlayer( const grIEntity::EEntityType type, const str& rName, const grV2f& rPos, const uInt id )
+grEntityPlayer::grEntityPlayer( const grEnums::EntityType type, const str& rName, const grV2f& rPos, const uInt id )
 	: m_pCtrl	( new grCtrlPlayer( this ) )
+	, m_pBBox	( new grBBox( grV2f( 10.0f ,10.0f ), rPos ) )
 {
 	m_PosWorld		= rPos;
 	m_PosLocal		= rPos;
@@ -28,6 +28,11 @@ grEntityPlayer::~grEntityPlayer( void )
 	if ( m_pCtrl != nullptr )
 	{
 		DELANDNULL( m_pCtrl );
+	}
+
+	if ( m_pBBox != nullptr )
+	{
+		DELANDNULL( m_pBBox );
 	}
 }
 
@@ -51,7 +56,12 @@ grEntityPlayer::Update( const float deltaT )
 	
 #ifdef DEBUG
 	// Debug draw
-	grBBox box( grV2f( 10.0f, 10.0f ), GetPosition() );
-	grDebugManager::Instance( ).AddBBox( box, sf::Color::Green );
+
+	m_pBBox->SetDimensions( grV2f( 20.0f, 20.0f ));
+	m_pBBox->SetPosition( GetPosition() );
+	grDebugManager::Instance( ).AddBBox( *m_pBBox, sf::Color::Green );
+
+	//grBBox box( grV2f( 10.0f, 10.0f ), GetPosition() );
+	//grDebugManager::Instance( ).AddBBox( box, sf::Color::Green );
 #endif // DEBUG
 }

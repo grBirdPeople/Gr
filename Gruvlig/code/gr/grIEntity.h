@@ -2,7 +2,10 @@
 #define		_GRIENTITY_H_
 
 #include	"grCommon.h"
+#include	"grDefine.h"
 #include	"grV2.h"
+#include	"grEnums.h"
+#include	"grBBox.h"
 
 class		grEntityManager;
 class		grIEntity;
@@ -16,16 +19,6 @@ class grIEntity
 {
 public:
 
-	enum class EEntityType
-	{
-		NONE = 0,
-		PLAYER,
-		ENEMY,
-		SIZE
-	};
-
-	//////////////////////////////////////////////////
-
 						grIEntity					( void );
 						~grIEntity					( void );
 	
@@ -36,7 +29,7 @@ public:
 	const	str&		GetName					( void )	const				{ return m_Name; }
 			void		SetName					( const str& rName )			{ m_Name = rName; }
 			uInt		GetId					( void )	const				{ return m_Id; }
-			EEntityType	GetType					( void )	const				{ return m_Type; }
+			grEnums::EntityType	GetType					( void )	const				{ return m_Type; }
 			bool		GetEnable				( void )	const				{ return m_bIsEnabled; }
 			void		SetEnable				( const bool bEnable );
 			void		SetPosition				( const grV2f& rPos )			{ m_PosLocal = rPos; }
@@ -55,7 +48,7 @@ public:
 
 protected:
 
-			void		SetType						( const EEntityType type )	{ m_Type = type; }
+			void		SetType						( const grEnums::EntityType type )	{ m_Type = type; }
 
 			//////////////////////////////////////////////////
 
@@ -79,7 +72,7 @@ protected:
 
 	uInt				m_Id;
 
-	EEntityType			m_Type;
+	grEnums::EntityType			m_Type;
 	
 	bool				m_bIsEnabled;
 
