@@ -69,7 +69,9 @@ private:
 	eEvent*		m_pSfEvent;
 	gClock*		m_pEngineClock;
 
-	grSandbox*	m_pSandbox;
+#ifdef DEBUG
+	grSandbox* m_pSandbox;
+#endif // DEBUG
 
 };
 
