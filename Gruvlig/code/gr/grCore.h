@@ -16,12 +16,7 @@ typedef		sf::Clock			gClock;
 typedef		sf::Event			eEvent;
 typedef		sf::RenderWindow	rWin;
 
-// TEST
-class		grActor;
-class		grMap;
-
-class grIEntity;
-// TEST
+class		grSandbox;
 
 
 // grCore
@@ -37,6 +32,7 @@ public:
 	
 	inline	double	GetGameTimeElapsed	( void )	const				{ return m_TotalTimeElapsed; }
 	inline	float	GetDeltaT			( void )	const				{ return (float)m_Dt; }
+	inline	rWin&	GetRenderWin		( void )	const				{ return *m_pRenderWin; }
 										  
 	inline	void	SetAA				( const uInt aa )				{ m_Aa = aa;	m_pCSettings->antialiasingLevel = m_Aa; }
 										  
@@ -50,7 +46,6 @@ public:
 private:
 
 			void	InitRenderWin		( void );
-			void	HandleInput			( void );
 			void	Update				( void );
 			void	Render				( void );
 	inline	void	Terminate			( void )						{ if ( m_pRenderWin != nullptr ) { if ( m_pRenderWin->isOpen() == true ) { m_pRenderWin->close(); } } }
@@ -73,15 +68,9 @@ private:
 	cSettings*	m_pCSettings;
 	eEvent*		m_pSfEvent;
 	gClock*		m_pEngineClock;
-	
-	// TEST
-	grMap*		m_pMap;
-	grActor*	m_pActor;
 
-	grIEntity* m_pPlayer;
-	grIEntity* m_pEnemy;
-	bool hej = true;
-	// TEST
+	grSandbox*	m_pSandbox;
+
 };
 
 #endif		//_GRCORE_H_

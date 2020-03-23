@@ -3,7 +3,6 @@
 #include	<iostream>
 
 #include	"grDefine.h"
-//#include	"grNavMesh.h"
 #include	"grMap.h"
 
 

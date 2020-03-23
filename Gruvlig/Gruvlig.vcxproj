@@ -176,6 +176,7 @@
     <ClCompile Include="code\gr\grMath.cpp" />
     <ClCompile Include="code\gr\grNavMesh.cpp" />
     <ClCompile Include="code\gr\grNavMeshManager.cpp" />
+    <ClCompile Include="code\gr\grSandbox.cpp" />
     <ClCompile Include="code\gr\main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -240,6 +241,7 @@
     <ClInclude Include="code\gr\grNavMesh.h" />
     <ClInclude Include="code\gr\grNavMeshManager.h" />
     <ClInclude Include="code\gr\grNavNode.h" />
+    <ClInclude Include="code\gr\grSandbox.h" />
     <ClInclude Include="code\gr\grSingleton.h" />
     <ClInclude Include="code\gr\grV2.h" />
     <ClInclude Include="code\SFML\Audio.hpp" />

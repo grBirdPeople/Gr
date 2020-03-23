@@ -27,21 +27,23 @@ private:
 
 public:
 
-				grMap			(const str& uniqueName,
+				grMap			( const str& uniqueName,
 								const str& strMap,
 								const grV2f& tileSize,
 								const uInt numTilesX,
-								const uInt numTilesY);
+								const uInt numTilesY );
+
+				~grMap			( void );
 	
 	//////////////////////////////////////////////////
 	
-	sMapData*	GetMapData		(void)					{ return m_pMapData; }
-	grNavMesh*	GetNavMesh		(void)					{ return m_pNavMesh; }
+	sMapData*	GetMapData		( void )					{ return m_pMapData; }
+	grNavMesh*	GetNavMesh		( void )					{ return m_pNavMesh; }
 	
 	/////////////////////////////////////////////////
 	
-	void		CreateNavMesh	(void);
-	grNavNode*	FindValidPos	(const grV2f& pos);
+	void		CreateNavMesh	( void );
+	grNavNode*	FindValidPos	( const grV2f& pos );
 	
 	//////////////////////////////////////////////////
 
