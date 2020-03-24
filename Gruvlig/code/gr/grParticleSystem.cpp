@@ -124,6 +124,7 @@ grParticleSystem::ActivateParticle( const float deltaT )
 			pTmp->LifeTime = m_ParticleBlueprint.LifeTime;
 			++m_ActiveParticles;
 
+			// TEST
 			if ( m_bDirRandomDiviation == true )
 			{
 				float dirInDeg = grMath::VecToDeg( pTmp->Direction );
@@ -133,6 +134,7 @@ grParticleSystem::ActivateParticle( const float deltaT )
 
 				int hej = 0;
 			}
+			// TEST
 		}
 	}
 }
