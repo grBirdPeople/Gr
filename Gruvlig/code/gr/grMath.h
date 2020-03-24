@@ -191,6 +191,24 @@ namespace grMath
 		return vec;
 	}
 
+	// DegToVec
+	//////////////////////////////////////////////////
+	inline	grV2f	DegToVec	( const float deg, const bool counterClock = false )
+	{
+		grV2f vec;
+		float rad = deg * DegToRad;
+		if ( counterClock == true )
+		{
+			vec.x = std::sin( rad );
+			vec.y = -std::cos( rad );
+		}
+		else
+		{
+			vec.x = std::cos( rad );
+			vec.y = std::sin( rad );
+		}
+		return vec;
+	}
 }
 
 #endif	// _H_GRMATH_
