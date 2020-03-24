@@ -24,6 +24,8 @@
 // cTor
 //////////////////////////////////////////////////
 grSandbox::grSandbox( void )
+	: m_rInputMan		( grInput::Instance() )
+	, m_rParticleMan	( grParticleManager::Instance() )
 {
 	// CReate maps and navmeshes
 	grMapManager::Instance().GetMap( "m_01" )->CreateNavMesh();
@@ -83,8 +85,8 @@ grSandbox::grSandbox( void )
 	//b2Fixture* pFix = pBody->CreateFixture( &fixDef );
 
 	// Particles
-	m_pParticleSys = grParticleManager::Instance().CreateParticleSystem();
-	m_pParticleSys->Init( grV2f( 350.0f, 150.0f ), grV2f( 1.0f, -1.0f ), 50.0f, 2.0f, 4 );
+	//grParticleSystem& pPartSys = *m_rParticleMan.CreateParticleSystem();
+	//pPartSys.Init( grV2f( 350.0f, 150.0f ), grV2f( 1.0f, -1.0f ), 50.0f, 2.0f, 4 );
 
 }
 
@@ -94,15 +96,13 @@ grSandbox::grSandbox( void )
 void
 grSandbox::Update( const float deltaT )
 {
-	grCore& coreMan = grCore::Instance();
-	grParticleManager& particleMan = grParticleManager::Instance();
-	grInput& inputMan = grInput::Instance();
+	grCore& rCore = grCore::Instance();
 
 	// Particle things
-	particleMan.Update( deltaT );
+	m_rParticleMan.Update( deltaT );
 
 	// Scenegraph things
-	if ( inputMan.GetMouseDown( sf::Mouse::Left ) )
+	if ( m_rInputMan.GetMouseDown( sf::Mouse::Left ) )
 	{
 		//m_pPlayer->ReleaseChildByIdx( 0 );		
 		//grEntityManager::Instance().DestroyEntity( m_pPlayer );
@@ -118,16 +118,16 @@ grSandbox::Update( const float deltaT )
 	// Navmesh things
 	if ( m_pMap != nullptr )
 	{
-		if ( inputMan.GetMouse( sf::Mouse::Button::Left ) )
+		if ( m_rInputMan.GetMouse( sf::Mouse::Button::Left ) )
 		{
-			grV2f mousePos = grV2f( ( float )sf::Mouse::getPosition( coreMan.GetRenderWin() ).x, ( float )sf::Mouse::getPosition( coreMan.GetRenderWin() ).y );
+			grV2f mousePos = grV2f( ( float )sf::Mouse::getPosition( rCore.GetRenderWin() ).x, ( float )sf::Mouse::getPosition( rCore.GetRenderWin() ).y );
 			m_pActor->SetEnd( m_pMap, mousePos );
 			m_pActor->FindPath( m_pMap );
 		}
 
-		if ( inputMan.GetMouse( sf::Mouse::Button::Right ) )
+		if ( m_rInputMan.GetMouse( sf::Mouse::Button::Right ) )
 		{
-			grV2f mousePos = grV2f( ( float )sf::Mouse::getPosition( coreMan.GetRenderWin() ).x, ( float )sf::Mouse::getPosition( coreMan.GetRenderWin() ).y );
+			grV2f mousePos = grV2f( ( float )sf::Mouse::getPosition( rCore.GetRenderWin() ).x, ( float )sf::Mouse::getPosition( rCore.GetRenderWin() ).y );
 			m_pActor->SetStart( m_pMap, mousePos );
 			m_pActor->FindPath( m_pMap );
 		}

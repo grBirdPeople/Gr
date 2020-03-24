@@ -6,7 +6,8 @@
 class		grActor;
 class		grMap;
 class		grIEntity;
-class		grParticleSystem;
+class		grInput;
+class		grParticleManager;
 
 
 // grSandbox
@@ -26,14 +27,16 @@ public:
 
 private:
 
-	grMap* m_pMap;
-	grActor* m_pActor;
+	grInput&			m_rInputMan;
+	grParticleManager&	m_rParticleMan;
 
-	grIEntity* m_pPlayer;
-	grIEntity* m_pEnemy;
-	bool m_bFlipFlop = true;
+	grMap*				m_pMap;
+	grActor*			m_pActor;
 
-	grParticleSystem* m_pParticleSys;
+	grIEntity*			m_pPlayer;
+	grIEntity*			m_pEnemy;
+
+	bool				m_bFlipFlop = true;
 
 };
 

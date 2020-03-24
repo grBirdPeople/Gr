@@ -62,6 +62,39 @@ namespace grMath
 	// RotatePoint
 	//////////////////////////////////////////////////
 	inline	void	RotatePoint	( grV2f* pPoint, const float rotationInDeg );
+
+	// VecToRad
+	//////////////////////////////////////////////////
+	inline	float	VecToRad	( const grV2f& rVec )
+	{
+		return std::atan2f( rVec.y, rVec.x );
+	}
+
+	// VecToDeg
+	//////////////////////////////////////////////////
+	inline	float	VecToDeg	( const grV2f& rVec )
+	{
+		return std::atan2f( rVec.y, rVec.x ) * RadToDeg;
+	}
+
+	// RadToVec
+	//////////////////////////////////////////////////
+	inline	grV2f	RadToVec	( const float rad, const bool counterClock = false )
+	{
+		grV2f vec;
+		if ( counterClock == true )
+		{
+			vec.x = std::sin( rad );
+			vec.y = -std::cos( rad );
+		}
+		else
+		{
+			vec.x = std::cos( rad );
+			vec.y = std::sin( rad );
+		}
+		return vec;
+	}
+
 }
 
 #endif	// _H_GRMATH_
