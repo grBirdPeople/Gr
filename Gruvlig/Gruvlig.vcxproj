@@ -245,6 +245,7 @@
     <ClInclude Include="code\gr\grNavNode.h" />
     <ClInclude Include="code\gr\grParticleManager.h" />
     <ClInclude Include="code\gr\grParticleSystem.h" />
+    <ClInclude Include="code\gr\grRandom.h" />
     <ClInclude Include="code\gr\grSandbox.h" />
     <ClInclude Include="code\gr\grSingleton.h" />
     <ClInclude Include="code\gr\grV2.h" />

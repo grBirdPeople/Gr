@@ -5,6 +5,7 @@
 #include	"grDebugManager.h"
 
 #include	"grMath.h"
+#include	"grRandom.h"
 
 
 // cTor
@@ -17,6 +18,7 @@ grParticleSystem::grParticleSystem( void )
 	, m_ActiveParticles		( 0 )
 	, m_bDirRandomDiviation	( false )
 	, m_bGravityRandomRange	( false )
+	, m_pRandom				( new grRandom() )
 {
 	m_VecParticles.reserve( PARTICLE_QUANTITY );
 	for ( uInt i = 0; i < PARTICLE_QUANTITY; ++i )
@@ -30,9 +32,17 @@ grParticleSystem::grParticleSystem( void )
 //////////////////////////////////////////////////
 grParticleSystem::~grParticleSystem( void )
 {
+	if ( m_pRandom != nullptr )
+	{
+		DELANDNULL( m_pRandom );
+	}
+
 	for ( uInt i = 0; i < PARTICLE_QUANTITY; ++i )
 	{
-		DELANDNULL( m_VecParticles[ i ] );
+		if ( m_VecParticles[ i ] != nullptr )
+		{
+			DELANDNULL( m_VecParticles[ i ] );
+		}
 	}
 }
 
@@ -116,6 +126,8 @@ grParticleSystem::ActivateParticle( const float deltaT )
 			//{
 			//	float radDir = grMath::VecToRad( pTmp->Direction );
 			//}
+
+			//printf( "%g\n", m_pRandom->GetRandomFloat( -10.0f, 10.0f ) );
 		}
 	}
 }

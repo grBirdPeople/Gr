@@ -6,6 +6,8 @@
 #include	"grCommon.h"
 #include	"grV2.h"
 
+class		grRandom;
+
 
 // grParticleSystem
 //////////////////////////////////////////////////
@@ -87,6 +89,8 @@ private:
 
 	bool					m_bDirRandomDiviation,
 							m_bGravityRandomRange;
+
+	grRandom*				m_pRandom;
 
 };
 
