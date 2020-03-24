@@ -85,8 +85,8 @@ grSandbox::grSandbox( void )
 	//b2Fixture* pFix = pBody->CreateFixture( &fixDef );
 
 	// Particles
-	grParticleSystem& pPartSys = *m_rParticleMan.CreateParticleSystem();
-	pPartSys.Init( grV2f( 350.0f, 150.0f ), grV2f( 1.0f, -1.0f ), 50.0f, 2.0f, 4 );
+	//grParticleSystem& pPartSys = *m_rParticleMan.CreateParticleSystem();
+	//pPartSys.Init( grV2f( 350.0f, 150.0f ), grV2f( 1.0f, -1.0f ), 50.0f, 2.0f, 4 );
 
 }
 

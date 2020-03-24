@@ -171,6 +171,7 @@ namespace grMath
         return cpyValue;
     }
 
+
     // RotatePoint
     //////////////////////////////////////////////////
     inline void

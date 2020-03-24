@@ -4,14 +4,19 @@
 #include	"grDefine.h"
 #include	"grDebugManager.h"
 
+#include	"grMath.h"
+
 
 // cTor
 //////////////////////////////////////////////////
 grParticleSystem::grParticleSystem( void )
-	: m_SpawnsPerSec	( 4 )
-	, m_SpawnInMilliSec	( 1.0f / m_SpawnsPerSec )
-	, m_SpawnTimer		( m_SpawnInMilliSec )
-	, m_ActiveParticles	( 0 )
+	: m_SpawnsPerSec		( 4 )
+	, m_SpawnInMilliSec		( 1.0f / m_SpawnsPerSec )
+	, m_SpawnTimer			( m_SpawnInMilliSec )
+	, m_DirDiviationInRad	( 0.0f )
+	, m_ActiveParticles		( 0 )
+	, m_bDirRandomDiviation	( false )
+	, m_bGravityRandomRange	( false )
 {
 	m_VecParticles.reserve( PARTICLE_QUANTITY );
 	for ( uInt i = 0; i < PARTICLE_QUANTITY; ++i )
@@ -37,24 +42,20 @@ grParticleSystem::~grParticleSystem( void )
 void
 grParticleSystem::Init( const grV2f& position, const grV2f& direction, const float velocity, const float lifetime, const float spawnsPerSec )
 {
-	m_SpawnsPerSec = spawnsPerSec;
-	m_SpawnInMilliSec = 1.0f / m_SpawnsPerSec;
-	m_SpawnTimer = m_SpawnInMilliSec;
+	m_SpawnsPerSec		= spawnsPerSec;
+	m_SpawnInMilliSec	= 1.0f / m_SpawnsPerSec;
+	m_SpawnTimer		= m_SpawnInMilliSec;
 
 	m_ParticleBlueprint.Position			= position;
-	m_ParticleBlueprint.Direction			= direction;
-	//m_ParticleBlueprint.Gravity			= 
+	m_ParticleBlueprint.Direction			= direction;	// TODO: Sign it
 	m_ParticleBlueprint.Velocity			= velocity;
-	//m_ParticleBlueprint.VelocityChange	= 
 	m_ParticleBlueprint.LifeTime			= lifetime;
 
 	for ( uInt i = 0; i < PARTICLE_QUANTITY; ++i )
 	{
 		m_VecParticles[ i ]->Position		= m_ParticleBlueprint.Position;
 		m_VecParticles[ i ]->Direction		= m_ParticleBlueprint.Direction;
-		//m_VecParticles[ i ]->Gravity		= m_ParticleBlueprint.Gravity;
 		m_VecParticles[ i ]->Velocity		= m_ParticleBlueprint.Velocity;
-		//m_VecParticles[ i ]->VelocityChange	= m_ParticleBlueprint.VelocityChange;
 		m_VecParticles[ i ]->LifeTime		= m_ParticleBlueprint.LifeTime;
 	}
 }
@@ -110,6 +111,11 @@ grParticleSystem::ActivateParticle( const float deltaT )
 			pTmp->Position = m_ParticleBlueprint.Position;
 			pTmp->LifeTime = m_ParticleBlueprint.LifeTime;
 			++m_ActiveParticles;
+
+			//if ( m_bDirRandomDiviation == true )
+			//{
+			//	float radDir = grMath::VecToRad( pTmp->Direction );
+			//}
 		}
 	}
 }

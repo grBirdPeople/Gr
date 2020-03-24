@@ -20,7 +20,6 @@ public:
 			Position		= grV2f();
 			Direction		= grV2f();
 			Gravity			= grV2f();
-			Velocity		= 0.0f;
 			VelocityChange	= 0.0f;
 			LifeTime		= 0.0f;
 		}
@@ -35,21 +34,42 @@ public:
 
 	//////////////////////////////////////////////////
 
-				grParticleSystem	( void );
-				~grParticleSystem	( void );
+					grParticleSystem	( void );
+					~grParticleSystem	( void );
 
 	//////////////////////////////////////////////////
 
-	void		Init				( const grV2f& position, const grV2f& direction, const float velocity, const float lifetime, const float m_SpawnsPerSec );
-	void		Update				( const float deltaT );
+	inline	void	SetPosition			( const grV2f& rPos )
+										{
+											m_ParticleBlueprint.Position = rPos;
+										}
+	inline	void	SetDirection		( const grV2f& direction, const float deviationInDeg = 0.0f )
+										{
+											m_ParticleBlueprint.Direction = direction;								// TODO: Sign it
+											m_bDirRandomDiviation = deviationInDeg != 0.0f ? true : false;
+											if ( m_bDirRandomDiviation == true )
+											{
+												m_DirDiviationInRad = deviationInDeg * ( 3.141593f / 180.0f );		// TODO: Check min/max 360
+											}
+										}
+	inline	void	SetGravity			( const grV2f& rGravity, const float randomRange = 0.0f )
+										{
+											m_ParticleBlueprint.Gravity = rGravity;
+											m_bGravityRandomRange = randomRange != 0.0f ? true : false;
+										}
+
+	//////////////////////////////////////////////////
+
+			void	Init				( const grV2f& position, const grV2f& direction, const float velocity, const float lifetime, const float m_SpawnsPerSec );
+			void	Update				( const float deltaT );
 
 	//////////////////////////////////////////////////
 
 private:
 
-	void		DeactivateParticle	( void );
-	void		ActivateParticle	( const float deltaT );
-	void		UpdateParticle		( const float deltaT );
+	void			DeactivateParticle	( void );
+	void			ActivateParticle	( const float deltaT );
+	void			UpdateParticle		( const float deltaT );
 
 	//////////////////////////////////////////////////
 
@@ -61,7 +81,12 @@ private:
 							m_SpawnInMilliSec,
 							m_SpawnTimer;
 
+	float					m_DirDiviationInRad;
+
 	uInt					m_ActiveParticles;
+
+	bool					m_bDirRandomDiviation,
+							m_bGravityRandomRange;
 
 };
 
