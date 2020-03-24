@@ -70,12 +70,19 @@ namespace grMath
 		return std::atan2f( rVec.y, rVec.x );
 	}
 
+	// VecToDeg
+	//////////////////////////////////////////////////
+	inline	float	VecToDeg	( const grV2f& rVec )
+	{
+		return std::atan2f( rVec.y, rVec.x ) * RadToDeg;
+	}
+
 	// RadToVec
 	//////////////////////////////////////////////////
 	inline	grV2f	RadToVec	( const float rad, const bool counterClock = false )
 	{
 		grV2f vec;
-		if ( counterClock == false )
+		if ( counterClock == true )
 		{
 			vec.x = std::sin( rad );
 			vec.y = -std::cos( rad );

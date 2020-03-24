@@ -1,7 +1,7 @@
 #ifndef		_H_GRPARTICLESYSTEM_
 #define		_H_GRPARTICLESYSTEM_
 
-#define		PARTICLE_QUANTITY	100
+#define		PARTICLE_QUANTITY	500
 
 #include	"grCommon.h"
 #include	"grV2.h"
@@ -51,7 +51,7 @@ public:
 											m_bDirRandomDiviation = deviationInDeg != 0.0f ? true : false;
 											if ( m_bDirRandomDiviation == true )
 											{
-												m_DirDiviationInRad = deviationInDeg * ( 3.141593f / 180.0f );		// TODO: Check min/max 360
+												m_HalfDirDiviationInDeg = deviationInDeg * 0.5f;					// TODO: Check min/max 360
 											}
 										}
 	inline	void	SetGravity			( const grV2f& rGravity, const float randomRange = 0.0f )
@@ -83,14 +83,14 @@ private:
 							m_SpawnInMilliSec,
 							m_SpawnTimer;
 
-	float					m_DirDiviationInRad;
+	float					m_HalfDirDiviationInDeg;
 
 	uInt					m_ActiveParticles;
 
 	bool					m_bDirRandomDiviation,
 							m_bGravityRandomRange;
 
-	grRandom*				m_pRandom;
+	grRandom*				m_pRand;
 
 };
 

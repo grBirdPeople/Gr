@@ -25,8 +25,8 @@ grEntityPlayer::grEntityPlayer( const grEnums::EntityType type, const str& rName
 
 	// TEST
 	m_pPartSys = grParticleManager::Instance().CreateParticleSystem();
-	m_pPartSys->Init( GetPosition(), grV2f( 1.0f, -1.0f ), 50.0f, 2.0f, 16 );
-	m_pPartSys->SetDirection( grV2f( 0.0f, 1.0f ), 90.0f );
+	m_pPartSys->Init( GetPosition(), grV2f( 0.0f, -1.0f ), 50.0f, 4.0f, 100 );
+	m_pPartSys->SetDirection( grV2f( 1.0f, -1.0f ), 90.0f );
 	//m_pPartSys->SetGravity( grV2f( 0.0f, 9.8f ), 5.0f );
 	// TEST
 }
@@ -63,16 +63,24 @@ grEntityPlayer::Update( const float deltaT )
 	// TEST
 	if ( GetChildByIdx( 1 ) != nullptr )
 	{
+
 		grIEntity* childEntTwo = GetChildByIdx( 1 )->GetChildByIdx( 0 );
 		if ( childEntTwo != nullptr )
+		{
 			m_pPartSys->SetPosition( childEntTwo->GetPosition() );
+			m_pPartSys->SetDirection( grV2f( 1.0f, -1.0f ), 359.0f );
+		}
 
 	}
 	else if ( GetChildByIdx( 0 ) != nullptr )
 	{
+
 		grIEntity* childEntTwo = GetChildByIdx( 0 )->GetChildByIdx( 0 );
 		if ( childEntTwo != nullptr )
+		{
 			m_pPartSys->SetPosition( childEntTwo->GetPosition() );
+			m_pPartSys->SetDirection( grV2f( 1.0f, -1.0f ), 90.0f );
+		}
 	}
 	// TEST
 	

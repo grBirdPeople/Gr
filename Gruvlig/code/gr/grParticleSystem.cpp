@@ -11,14 +11,14 @@
 // cTor
 //////////////////////////////////////////////////
 grParticleSystem::grParticleSystem( void )
-	: m_SpawnsPerSec		( 4 )
-	, m_SpawnInMilliSec		( 1.0f / m_SpawnsPerSec )
-	, m_SpawnTimer			( m_SpawnInMilliSec )
-	, m_DirDiviationInRad	( 0.0f )
-	, m_ActiveParticles		( 0 )
-	, m_bDirRandomDiviation	( false )
-	, m_bGravityRandomRange	( false )
-	, m_pRandom				( new grRandom() )
+	: m_SpawnsPerSec			( 4 )
+	, m_SpawnInMilliSec			( 1.0f / m_SpawnsPerSec )
+	, m_SpawnTimer				( m_SpawnInMilliSec )
+	, m_HalfDirDiviationInDeg	( 0.0f )
+	, m_ActiveParticles			( 0 )
+	, m_bDirRandomDiviation		( false )
+	, m_bGravityRandomRange		( false )
+	, m_pRand					( new grRandom() )
 {
 	m_VecParticles.reserve( PARTICLE_QUANTITY );
 	for ( uInt i = 0; i < PARTICLE_QUANTITY; ++i )
@@ -32,9 +32,9 @@ grParticleSystem::grParticleSystem( void )
 //////////////////////////////////////////////////
 grParticleSystem::~grParticleSystem( void )
 {
-	if ( m_pRandom != nullptr )
+	if ( m_pRand != nullptr )
 	{
-		DELANDNULL( m_pRandom );
+		DELANDNULL( m_pRand );
 	}
 
 	for ( uInt i = 0; i < PARTICLE_QUANTITY; ++i )
@@ -119,15 +119,20 @@ grParticleSystem::ActivateParticle( const float deltaT )
 		{
 			Particle* pTmp = m_VecParticles[ m_ActiveParticles ];
 			pTmp->Position = m_ParticleBlueprint.Position;
+			pTmp->Direction = m_ParticleBlueprint.Direction;
+			pTmp->Velocity = m_ParticleBlueprint.Velocity;
 			pTmp->LifeTime = m_ParticleBlueprint.LifeTime;
 			++m_ActiveParticles;
 
-			//if ( m_bDirRandomDiviation == true )
-			//{
-			//	float radDir = grMath::VecToRad( pTmp->Direction );
-			//}
+			if ( m_bDirRandomDiviation == true )
+			{
+				float dirInDeg = grMath::VecToDeg( pTmp->Direction );
+				float halfDiviationRand = m_pRand->GetRandFloat( -m_HalfDirDiviationInDeg, m_HalfDirDiviationInDeg );
+				float newRadDir = halfDiviationRand * grMath::DegToRad;
+				pTmp->Direction = grMath::RadToVec( newRadDir );
 
-			printf( "%g\n", m_pRandom->GetRandFloat( -10.0f, 10.0f ) );
+				int hej = 0;
+			}
 		}
 	}
 }
@@ -146,7 +151,7 @@ grParticleSystem::UpdateParticle( const float deltaT )
 
 		// TEST
 		grBBox box( grV2f( 5.0f, 5.0f ), pTmp->Position );
-		grDebugManager::Instance().AddBBox( box, sf::Color::Yellow );
+		grDebugManager::Instance().AddBBox( box, sf::Color::White );
 		// TEST
 	}
 }
