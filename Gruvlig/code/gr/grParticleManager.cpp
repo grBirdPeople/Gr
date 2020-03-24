@@ -36,7 +36,7 @@ grParticleManager::CreateParticleSystem( void )
 	if ( m_SystemQuantity == MAX_PARTCILE_SYS )
 	{
 #ifdef DEBUG
-		std::cerr << "grParticleManager::CreateParticleSystem(): Max systems reched" << std::endl;
+		std::cerr << "grParticleManager::CreateParticleSystem(): Max systems reached" << std::endl;
 #endif // DEBUG
 		return nullptr;
 	}
