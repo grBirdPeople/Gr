@@ -127,7 +127,7 @@ grParticleSystem::ActivateParticle( const float deltaT )
 			//	float radDir = grMath::VecToRad( pTmp->Direction );
 			//}
 
-			//printf( "%g\n", m_pRandom->GetRandomFloat( -10.0f, 10.0f ) );
+			printf( "%g\n", m_pRandom->GetRandFloat( -10.0f, 10.0f ) );
 		}
 	}
 }
