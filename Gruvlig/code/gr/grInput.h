@@ -50,8 +50,8 @@ public:
 																								m_MouseButtonDown[ (uInt)button ] = false;
 																							}
 	inline			sInt	GetMouseScroll			( void )						const	{ return m_MouseScroll; }
-	inline			sInt	GetMouseScrollForwards	( void )						const	{ return ( m_MouseScroll > 0 ) ? true : false; }
-	inline			sInt	GetMouseScrollBackwards	( void )						const	{ return ( m_MouseScroll < 0 ) ? true : false; }
+	inline			bool	GetMouseScrollForwards	( void )						const	{ return ( m_MouseScroll > 0 ) ? true : false; }
+	inline			bool	GetMouseScrollBackwards	( void )						const	{ return ( m_MouseScroll < 0 ) ? true : false; }
 	inline			void	SetMouseScroll			( const sInt scrollDir )				{ m_MouseScroll = scrollDir; }
 
 	inline			bool	GetMouseMoved			( void )						const	{ return m_bMouseMoved; }
