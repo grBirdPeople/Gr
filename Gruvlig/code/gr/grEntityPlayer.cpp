@@ -25,11 +25,12 @@ grEntityPlayer::grEntityPlayer( const grEnums::EntityType type, const str& rName
 
 	// TEST
 	m_pPartSys = grParticleManager::Instance().CreateParticleSystem();
-	m_pPartSys->Init( GetPosition(), grV2f( 0.0f, -1.0f ), 100.0f, 3.0f, 100 );
-	m_pPartSys->SetDirection( grV2f( 1.0f, -1.0f ), 360.0f );
+	m_pPartSys->Init( GetPosition(), grV2f( 1.0f, 0.0f ), 100.0f, 2.0f, 100 );
+	//m_pPartSys->SetDirection( grV2f( 1.0f, 0.0f ), 360.0f );
+	m_pPartSys->SetDirectionRange( 360.0f );
 	//m_pPartSys->SetGravity( grV2f( 0.0f, 9.8f ), 5.0f );
-	m_pPartSys->SetVelocity( 100.0f, 10 );
-	m_pPartSys->SetVelocityChange( -0.35f, 0.25f );
+	m_pPartSys->SetVelocity( 100.0f );
+	//m_pPartSys->SetVelocityChange( -0.35f, 0.25f );
 	// TEST
 }
 
@@ -63,35 +64,41 @@ grEntityPlayer::Update( const float deltaT )
 	}
 
 	// TEST
-	if ( GetChildByIdx( 1 ) != nullptr )
-	{
-		grIEntity* childEntTwo = GetChildByIdx( 1 )->GetChildByIdx( 0 );
-		if ( childEntTwo != nullptr )
-		{
-			m_pPartSys->SetPosition( childEntTwo->GetPosition() );
-			m_pPartSys->SetDirection( grV2f( 1.0f, -1.0f ), 359.0f );
-		}
-
-	}
-	else if ( GetChildByIdx( 0 ) != nullptr )
-	{
-		grIEntity* childEntTwo = GetChildByIdx( 0 )->GetChildByIdx( 0 );
-		if ( childEntTwo != nullptr )
-		{
-			m_pPartSys->SetPosition( childEntTwo->GetPosition() );
-			m_pPartSys->SetDirection( grV2f( 1.0f, -1.0f ), 90.0f );
-		}
-	}
-
-	//grInput& rInputMan = grInput::Instance();
-	//if ( rInputMan.GetMouseScrollForwards() == true )
+	//if ( GetChildByIdx( 1 ) != nullptr )
 	//{
-	//	m_pPartSys->SetDiviation( m_pPartSys->GetDiviation() + 1.0f );
+	//	grIEntity* childEntTwo = GetChildByIdx( 1 )->GetChildByIdx( 0 );
+	//	if ( childEntTwo != nullptr )
+	//	{
+	//		m_pPartSys->SetPosition( childEntTwo->GetPosition() );
+	//		m_pPartSys->SetDirection( grV2f( 1.0f, -1.0f ), 360.0f );
+	//	}
+
 	//}
-	//if ( rInputMan.GetMouseScrollBackwards() == true )
+	//else if ( GetChildByIdx( 0 ) != nullptr )
 	//{
-	//	m_pPartSys->SetDiviation( m_pPartSys->GetDiviation() - 1.0f );
+	//	grIEntity* childEntTwo = GetChildByIdx( 0 )->GetChildByIdx( 0 );
+	//	if ( childEntTwo != nullptr )
+	//	{
+	//		m_pPartSys->SetPosition( childEntTwo->GetPosition() );
+	//		m_pPartSys->SetDirection( grV2f( 1.0f, -1.0f ), 90.0f );
+	//	}
 	//}
+
+	grInput& rInputMan = grInput::Instance();
+	if ( rInputMan.GetMouseScrollForwards() == true )
+	{
+		//m_pPartSys->SetDirectionRange( m_pPartSys->GetDirectionRange() + 10.0f );
+		//printf( "%s %g\n", "DirInDeg: ", m_pPartSys->GetDirectionRange() );
+		m_pPartSys->SetVelocityRange( m_pPartSys->GetVelocityRange() + 10.0f );
+		//printf( "%s %g\n", "Velocity: ", m_pPartSys->GetVelocityRange() );
+	}
+	if ( rInputMan.GetMouseScrollBackwards() == true )
+	{
+		//m_pPartSys->SetDirectionRange( m_pPartSys->GetDirectionRange() - 10.0f );
+		//printf( "%s %g\n", "DirInDeg: ", m_pPartSys->GetDirectionRange() );
+		m_pPartSys->SetVelocityRange( m_pPartSys->GetVelocityRange() - 10.0f );
+		//printf( "%s %g\n", "Velocity: ", m_pPartSys->GetVelocityRange() );
+	}
 	// TEST
 	
 #ifdef DEBUG

@@ -19,51 +19,51 @@ namespace grMath
 
 	// Min
 	//////////////////////////////////////////////////
-	inline	sInt	Min			( const sInt a, const sInt b )
+	inline sInt	Min( sInt a, sInt b )
 	{
 		return ( a < b ) ? a : ( b < a ) ? b : a;
 	}
-	inline	float	Min			( const float a, const float b )							// Untested
+	inline float Min( float a, float b )							// Untested
 	{
 		return ( a < b ) ? a : ( b < a ) ? b : a;
 	}
 
 	// Max
 	//////////////////////////////////////////////////
-	inline	sInt	Max			( const sInt a, const sInt b )
+	inline sInt	Max( sInt a, sInt b )
 	{
 		return ( a > b ) ? a : ( b > a ) ? b : a;
 	}
-	inline	float	Max			( const float a, const float b )							// Untested
+	inline float Max( float a, float b )							// Untested
 	{
 		return ( a > b ) ? a : ( b > a ) ? b : a;
 	}
 
 	// Abs
 	//////////////////////////////////////////////////
-	inline	float	Abs			( const float value )
+	inline float Abs( float value )
 	{
 		return ( value < 0.0f ) ? -value : value;
 	}
-	inline	uInt	Abs			( const sInt value )
+	inline uInt	Abs( sInt value )
 	{
 		return ( value < 0 ) ? ( uInt )-value : ( uInt )value;
 	}
 
 	// Sign
 	//////////////////////////////////////////////////
-	inline	sInt	Sign		( const sInt value )
+	inline sInt	Sign( sInt value )
 	{
 		return ( value < 0 ) ? -1 : ( value > 0 ) ? 1 : 0;
 	}
-	inline	float	Sign		( const float value )
+	inline float Sign( float value )
 	{
 		return ( value < 0.0f ) ? -1.0f : ( value > 0.0f ) ? 1.0f : 0.0f;
 	}
 
 	// Sqrt // Babylonian method stolen from overflow but changed from doubles to floats
 	//////////////////////////////////////////////////
-	inline	float	Sqrt		( const float value )
+	inline float Sqrt( const float value )
 	{
 		float x = value;
 		if ( x <= 0 )
@@ -93,11 +93,11 @@ namespace grMath
 
 	// Lerp
 	//////////////////////////////////////////////////
-	inline	float	Lerp		( const float from, const float to, const float value )
+	inline float Lerp( float from, float to, float value )
 	{
 		return ( value <= 0.0f ) ? from : ( value >= 1.0f ) ? to : ( to - from ) * value + from;
 	}
-	inline	grV2f	Lerp		( const grV2f& rVec1, const grV2f& rVec2, const float value )
+	inline grV2f Lerp( grV2f& rVec1, grV2f& rVec2, float value )
 	{
 		if ( value <= 0.0f )
 		{
@@ -116,7 +116,7 @@ namespace grMath
 
 	// MoveTo
 	//////////////////////////////////////////////////
-	inline	float	MoveTo		( const float from, const float to, const float speed )		// Untested
+	inline float MoveTo( float from, float to, float speed )		// Untested
 	{
 		float cpyFrom = from;
 		float sign = Sign( to - cpyFrom );
@@ -126,7 +126,7 @@ namespace grMath
 
 	// MoveToZero
 	//////////////////////////////////////////////////
-	inline	float	MoveToZero	( const float from, const float speed )						// Untested
+	inline float MoveToZero( float from, float speed )						// Untested
 	{
 		float cpyFrom = from;
 		float sign = Sign( from );
@@ -136,20 +136,18 @@ namespace grMath
 
 	// Clamp
 	//////////////////////////////////////////////////
-	inline	sInt	Clamp		( const sInt value, const sInt min, const sInt max )		// Untested
+	inline sInt Clamp( sInt value, sInt min, sInt max )
 	{
-		sInt cpyValue = ( value < min ) ? min ? ( value > max ) : max : value;
-		return cpyValue;
+		return ( value < min ) ? min : ( value > max ) ? max : value;
 	}
-	inline	float	Clamp		( const float value, const float min, const float max )		// Untested
+	inline float Clamp( float value, float min, float max )
 	{
-		float cpyValue = ( value < min ) ? min ? ( value > max ) : max : value;
-		return cpyValue;
+		return ( value < min ) ? min : ( value > max ) ? max : value;
 	}
 
 	// RotatePoint
 	//////////////////////////////////////////////////
-	inline	void	RotatePoint	( grV2f* pPoint, const float rotInRad )
+	inline void RotatePoint( grV2f* pPoint, const float rotInRad )
 	{
 		float sin = std::sin( rotInRad );
 		float cos = std::cos( rotInRad );
@@ -161,21 +159,21 @@ namespace grMath
 
 	// VecToRad
 	//////////////////////////////////////////////////
-	inline	float	VecToRad	( const grV2f& rVec )
+	inline float VecToRad( grV2f& rVec )
 	{
 		return std::atan2f( rVec.y, rVec.x );
 	}
 
 	// VecToDeg
 	//////////////////////////////////////////////////
-	inline	float	VecToDeg	( const grV2f& rVec )
+	inline float VecToDeg( grV2f& rVec )
 	{
 		return std::atan2f( rVec.y, rVec.x ) * RadToDeg;
 	}
 
 	// RadToVec
 	//////////////////////////////////////////////////
-	inline	grV2f	RadToVec	( const float rad, const bool counterClock = false )
+	inline grV2f RadToVec( float rad, const bool counterClock = false )
 	{
 		grV2f vec;
 		if ( counterClock == true )
@@ -193,7 +191,7 @@ namespace grMath
 
 	// DegToVec
 	//////////////////////////////////////////////////
-	inline	grV2f	DegToVec	( const float deg, const bool counterClock = false )
+	inline grV2f DegToVec( float deg, const bool counterClock = false )
 	{
 		grV2f vec;
 		float rad = deg * DegToRad;
@@ -208,22 +206,6 @@ namespace grMath
 			vec.y = std::sin( rad );
 		}
 		return vec;
-	}
-
-	// DegToVec
-//////////////////////////////////////////////////
-	inline	float	RotClamp	( const float rotation )
-	{
-		float rot = rotation;
-		if ( rot > 360.0f )
-		{
-			rot = rot - 360.0f;
-		}
-		else if ( rot < 0.0f )
-		{
-			rot = 360.0f + rot;
-		}
-		return rot;
 	}
 
 }

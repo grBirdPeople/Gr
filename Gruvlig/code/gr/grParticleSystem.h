@@ -47,49 +47,84 @@ public:
 	inline void SetPosition( const grV2f& rPos, const grV2f& randomRange = grV2f() )
 	{
 		m_ParticleBlueprint.Position = rPos;
-		if ( randomRange.x != 0.0f || randomRange.y != 0.0f )
-		{
-			m_bPosRandRange = true;
-			m_RandPosRange = randomRange;
-			m_RandPosRange *= 0.5f;
-		}
+		SetPositionRange( randomRange );
 	}
-	inline void SetDirection( const grV2f& direction, const float deviationInDeg = 0.0f )
+	inline void SetDirection( const grV2f& direction, const float randomRangeInDeg = 0.0f )
 	{
-		m_ParticleBlueprint.Direction = grV2f( grMath::Sign( direction.x ), grMath::Sign( direction.y ) );
-		m_bDirRandDiviation = deviationInDeg != 0.0f ? true : false;
-		if ( m_bDirRandDiviation == true )
-		{
-			m_RandDirDiviationInDeg =  grMath::RotClamp( deviationInDeg ) * 0.5f;
-		}
+		grV2f dir = direction;
+		m_ParticleBlueprint.Direction = grV2f( grMath::Sign( dir.x ), grMath::Sign( dir.y ) );
+		SetDirectionRange( randomRangeInDeg );
 	}
 	inline void SetGravity( const grV2f& rGravity, const float randomRange = 0.0f )
 	{
 		m_ParticleBlueprint.Gravity = rGravity;
-		m_bGravityRandRange = randomRange != 0.0f ? true : false;
-		if ( m_bGravityRandRange == true )
-		{
-			m_RandGravityRange = grMath::Abs( randomRange ) * 0.5f;
-		}
+		SetGravityRange( randomRange );
 	}
 	inline void	SetVelocity( const float velocity, const float randomRange = 0.0f )
 	{
 		m_ParticleBlueprint.Velocity = velocity;
-		m_bVelocityRandRange = ( randomRange != 0.0f ) ? true : false;
-		if ( m_bVelocityRandRange == true )
-		{
-			m_RandVelocityRange = grMath::Abs( randomRange ) * 0.5f;
-		}
+		SetVelocityRange( randomRange );
 	}
 	inline void SetVelocityChange( const float velocityChange, const float randomRange = 0.0f )
 	{
 		m_ParticleBlueprint.VelocityChange = velocityChange;
-		float range = ( randomRange < 0.0f ) ? 0.0f : randomRange;
-		m_bVelocityChangeRandRange = ( range > 0.0f ) ? true : false;
-		if ( m_bVelocityChangeRandRange == true )
+		SetVelocityChangeRange( randomRange );
+	}
+
+	//////////////////////////////////////////////////
+
+	inline void SetPositionRange( const grV2f& randomRange )
+	{
+		grV2f range = randomRange;
+		m_bRandPosition = range != grV2f() ? true : false;
+		if ( m_bRandPosition == true ) { m_RandPosRange = range * 0.5f; }
+	}
+	inline void SetDirectionRange( const float deviationInDeg )
+	{
+		float deviation = grMath::Abs( deviationInDeg );
+		m_bRandDirDiviation = deviation > 0.0f ? true : false;
+		if ( m_bRandDirDiviation == true )
 		{
-			m_RandVelocityChangeRange = grMath::Abs( range ) * 0.5f;
+			m_RandDiviationInDeg = grMath::Clamp( deviation, 0.0f, 360.0f ) * 0.5f;
 		}
+	}
+	inline void SetGravityRange( const float randomRange )
+	{
+		float range = randomRange;
+		m_bRandGravity = range != 0.0f ? true : false;
+		if ( m_bRandGravity == true ) { m_RandGravityRange = grMath::Abs( range ) * 0.5f; }
+	}
+	inline void SetVelocityRange( const float randomRange )
+	{
+		float range = grMath::Clamp( randomRange, 0.0f, grMath::Abs( randomRange ) );
+		m_bRandVelocity = ( range > 0.0f ) ? true : false;
+		if ( m_bRandVelocity == true )
+		{
+			m_RandVelocityRange = range * 0.5f;
+		}
+		else
+		{
+			m_RandVelocityRange = 0.0f;
+		}
+	}
+	inline void SetVelocityChangeRange( const float randomRange )
+	{
+		float range = grMath::Abs( randomRange );
+		m_bRandVelocityChange = ( range > 0.0f ) ? true : false;
+		if ( m_bRandVelocityChange == true ) { m_RandVelocityChangeRange = range * 0.5f; }
+	}
+
+	// TODO: Implement set lifetime
+
+	//////////////////////////////////////////////////
+
+	inline float GetDirectionRange( void )
+	{
+		return m_RandDiviationInDeg * 2.0f;
+	}
+	inline float GetVelocityRange( void )
+	{
+		return m_RandVelocityRange * 2.0f;
 	}
 
 	//////////////////////////////////////////////////
@@ -111,24 +146,24 @@ private:
 
 	Particle				m_ParticleBlueprint;
 
-	grV2f					m_RandPosRange;		// TODO: Implement this
+	grV2f					m_RandPosRange;
 
 	float					m_SpawnsPerSec,
 							m_SpawnInMilliSec,
 							m_SpawnTimer;
 
-	float					m_RandDirDiviationInDeg,
+	float					m_RandDiviationInDeg,
 							m_RandGravityRange,
 							m_RandVelocityRange,
 							m_RandVelocityChangeRange;
 
 	uInt					m_ActiveParticles;
 
-	bool					m_bPosRandRange,
-							m_bDirRandDiviation,
-							m_bGravityRandRange,
-							m_bVelocityRandRange,
-							m_bVelocityChangeRandRange;
+	bool					m_bRandPosition,
+							m_bRandDirDiviation,
+							m_bRandGravity,
+							m_bRandVelocity,
+							m_bRandVelocityChange;
 
 	grRandom* m_pRand;
 
