@@ -65,7 +65,6 @@ grEntityPlayer::Update( const float deltaT )
 	// TEST
 	if ( GetChildByIdx( 1 ) != nullptr )
 	{
-
 		grIEntity* childEntTwo = GetChildByIdx( 1 )->GetChildByIdx( 0 );
 		if ( childEntTwo != nullptr )
 		{
@@ -76,7 +75,6 @@ grEntityPlayer::Update( const float deltaT )
 	}
 	else if ( GetChildByIdx( 0 ) != nullptr )
 	{
-
 		grIEntity* childEntTwo = GetChildByIdx( 0 )->GetChildByIdx( 0 );
 		if ( childEntTwo != nullptr )
 		{
@@ -84,6 +82,16 @@ grEntityPlayer::Update( const float deltaT )
 			m_pPartSys->SetDirection( grV2f( 1.0f, -1.0f ), 90.0f );
 		}
 	}
+
+	//grInput& rInputMan = grInput::Instance();
+	//if ( rInputMan.GetMouseScrollForwards() == true )
+	//{
+	//	m_pPartSys->SetDiviation( m_pPartSys->GetDiviation() + 1.0f );
+	//}
+	//if ( rInputMan.GetMouseScrollBackwards() == true )
+	//{
+	//	m_pPartSys->SetDiviation( m_pPartSys->GetDiviation() - 1.0f );
+	//}
 	// TEST
 	
 #ifdef DEBUG

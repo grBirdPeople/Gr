@@ -99,7 +99,7 @@ grSandbox::Update( const float deltaT )
 	grCore& rCore = grCore::Instance();
 
 	// Particle things
-	m_rParticleMan.Update( deltaT );
+
 
 	// Scenegraph things
 	if ( m_rInputMan.GetMouseDown( sf::Mouse::Left ) )

@@ -3,8 +3,6 @@
 #include	"grBBox.h"
 #include	"grDefine.h"
 #include	"grDebugManager.h"
-
-#include	"grMath.h"
 #include	"grRandom.h"
 
 
@@ -59,21 +57,21 @@ grParticleSystem::~grParticleSystem( void )
 void
 grParticleSystem::Init( const grV2f& position, const grV2f& direction, const float velocity, const float lifetime, const float spawnsPerSec )
 {
-	m_SpawnsPerSec		= spawnsPerSec;
-	m_SpawnInMilliSec	= 1.0f / m_SpawnsPerSec;
-	m_SpawnTimer		= m_SpawnInMilliSec;
+	m_SpawnsPerSec = spawnsPerSec;
+	m_SpawnInMilliSec = 1.0f / m_SpawnsPerSec;
+	m_SpawnTimer = m_SpawnInMilliSec;
 
-	m_ParticleBlueprint.Position			= position;
-	m_ParticleBlueprint.Direction			= direction;	// TODO: Sign it
-	m_ParticleBlueprint.Velocity			= velocity;
-	m_ParticleBlueprint.LifeTime			= lifetime;
+	m_ParticleBlueprint.Position = position;
+	m_ParticleBlueprint.Direction = direction;	// TODO: Sign it
+	m_ParticleBlueprint.Velocity = velocity;
+	m_ParticleBlueprint.LifeTime = lifetime;
 
 	for ( uInt i = 0; i < PARTICLE_QUANTITY; ++i )
 	{
-		m_VecParticles[ i ]->Position		= m_ParticleBlueprint.Position;
-		m_VecParticles[ i ]->Direction		= m_ParticleBlueprint.Direction;
-		m_VecParticles[ i ]->Velocity		= m_ParticleBlueprint.Velocity;
-		m_VecParticles[ i ]->LifeTime		= m_ParticleBlueprint.LifeTime;
+		m_VecParticles[ i ]->Position = m_ParticleBlueprint.Position;
+		m_VecParticles[ i ]->Direction = m_ParticleBlueprint.Direction;
+		m_VecParticles[ i ]->Velocity = m_ParticleBlueprint.Velocity;
+		m_VecParticles[ i ]->LifeTime = m_ParticleBlueprint.LifeTime;
 	}
 }
 

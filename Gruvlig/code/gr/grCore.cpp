@@ -95,6 +95,7 @@ grCore::Update( void )
 
 	// Update entities
 	grEntityManager::Instance().Update( GetDeltaT() );
+	grParticleManager::Instance().Update( GetDeltaT() );
 }
 
 

@@ -209,6 +209,23 @@ namespace grMath
 		}
 		return vec;
 	}
+
+	// DegToVec
+//////////////////////////////////////////////////
+	inline	float	RotClamp	( const float rotation )
+	{
+		float rot = rotation;
+		if ( rot > 360.0f )
+		{
+			rot = rot - 360.0f;
+		}
+		else if ( rot < 0.0f )
+		{
+			rot = 360.0f + rot;
+		}
+		return rot;
+	}
+
 }
 
 #endif	// _H_GRMATH_
