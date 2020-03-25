@@ -26,11 +26,11 @@ grEntityPlayer::grEntityPlayer( const grEnums::EntityType type, const str& rName
 	// TEST
 	m_pPartSys = grParticleManager::Instance().CreateParticleSystem();
 	m_pPartSys->Init( GetPosition(), grV2f( 1.0f, 0.0f ), 100.0f, 2.0f, 100 );
-	//m_pPartSys->SetDirection( grV2f( 1.0f, 0.0f ), 360.0f );
-	m_pPartSys->SetDirectionRange( 360.0f );
-	//m_pPartSys->SetGravity( grV2f( 0.0f, 9.8f ), 5.0f );
-	m_pPartSys->SetVelocity( 100.0f );
-	//m_pPartSys->SetVelocityChange( -0.35f, 0.25f );
+	//m_pPartSys->SetDirection( grV2f( 1.0f, 0.0f ), 360.0f );		// NOT IMPLEMENTED
+	m_pPartSys->SetDirectionRange( 360.0f );						// OK!
+	//m_pPartSys->SetGravity( grV2f( 0.0f, 9.8f ), 5.0f );			// NOT IMPLEMENTED
+	//m_pPartSys->SetVelocity( 100.0f );							// OK!
+	//m_pPartSys->SetVelocityChange( -0.75f );						// OK!
 	// TEST
 }
 
@@ -87,17 +87,37 @@ grEntityPlayer::Update( const float deltaT )
 	grInput& rInputMan = grInput::Instance();
 	if ( rInputMan.GetMouseScrollForwards() == true )
 	{
-		//m_pPartSys->SetDirectionRange( m_pPartSys->GetDirectionRange() + 10.0f );
-		//printf( "%s %g\n", "DirInDeg: ", m_pPartSys->GetDirectionRange() );
-		m_pPartSys->SetVelocityRange( m_pPartSys->GetVelocityRange() + 10.0f );
-		//printf( "%s %g\n", "Velocity: ", m_pPartSys->GetVelocityRange() );
+		//m_pPartSys->SetDirection( m_pPartSys->GetDirection() + 10.0f, 45.0f );
+		//printf( "%s %g %t %g\n", "Dir: ", m_pPartSys->GetDirection().x, m_pPartSys->GetDirection().y );
+
+		m_pPartSys->SetDirectionRange( m_pPartSys->GetDirectionRange() + 10.0f );
+		printf( "%s %g\n", "DirInDegRange: ", m_pPartSys->GetDirectionRange() );
+
+		//m_pPartSys->SetVelocity( m_pPartSys->GetVelocity() + 10.0f );
+		//printf( "%s %g\n", "Velocity: ", m_pPartSys->GetVelocity() );
+
+		//m_pPartSys->SetVelocityRange( m_pPartSys->GetVelocityRange() + 10.0f );
+		//printf( "%s %g\n", "VelocityRange: ", m_pPartSys->GetVelocityRange() );
+
+		//m_pPartSys->SetVelocityChangeRange( m_pPartSys->GetVelocityChangeRange() + 1.0f );
+		//printf( "%s %g\n", "VelocityChange: ", m_pPartSys->GetVelocityChangeRange() );
 	}
 	if ( rInputMan.GetMouseScrollBackwards() == true )
 	{
-		//m_pPartSys->SetDirectionRange( m_pPartSys->GetDirectionRange() - 10.0f );
-		//printf( "%s %g\n", "DirInDeg: ", m_pPartSys->GetDirectionRange() );
-		m_pPartSys->SetVelocityRange( m_pPartSys->GetVelocityRange() - 10.0f );
-		//printf( "%s %g\n", "Velocity: ", m_pPartSys->GetVelocityRange() );
+		//m_pPartSys->SetDirection( m_pPartSys->GetDirection() - 10.0f, 45.0f );
+		//printf( "%s %g %t %g\n", "Dir: ", m_pPartSys->GetDirection().x, m_pPartSys->GetDirection().y );
+
+		m_pPartSys->SetDirectionRange( m_pPartSys->GetDirectionRange() - 10.0f );
+		printf( "%s %g\n", "DirInDegRange: ", m_pPartSys->GetDirectionRange() );
+
+		//m_pPartSys->SetVelocity( m_pPartSys->GetVelocity() - 10.0f );
+		//printf( "%s %g\n", "Velocity: ", m_pPartSys->GetVelocity() );
+
+		//m_pPartSys->SetVelocityRange( m_pPartSys->GetVelocityRange() - 10.0f );
+		//printf( "%s %g\n", "VelocityRange: ", m_pPartSys->GetVelocityRange() );
+
+		//m_pPartSys->SetVelocityChangeRange( m_pPartSys->GetVelocityChangeRange() - 1.0f );
+		//printf( "%s %g\n", "VelocityChange: ", m_pPartSys->GetVelocityChangeRange() );
 	}
 	// TEST
 	

@@ -44,6 +44,9 @@ public:
 
 	//////////////////////////////////////////////////
 
+	// TODO: Implement position things
+	// TODO: Implement lifetime things
+
 	inline void SetPosition( const grV2f& rPos, const grV2f& randomRange = grV2f() )
 	{
 		m_ParticleBlueprint.Position = rPos;
@@ -62,12 +65,14 @@ public:
 	}
 	inline void	SetVelocity( const float velocity, const float randomRange = 0.0f )
 	{
-		m_ParticleBlueprint.Velocity = velocity;
+		float vel = velocity;
+		m_ParticleBlueprint.Velocity = grMath::Clamp( vel, 0.0f, grMath::Abs( vel ) );
 		SetVelocityRange( randomRange );
 	}
 	inline void SetVelocityChange( const float velocityChange, const float randomRange = 0.0f )
 	{
-		m_ParticleBlueprint.VelocityChange = velocityChange;
+		float change = velocityChange;
+		m_ParticleBlueprint.VelocityChange = grMath::Clamp( change, 0.0f, grMath::Abs( change ) );
 		SetVelocityChangeRange( randomRange );
 	}
 
@@ -77,47 +82,70 @@ public:
 	{
 		grV2f range = randomRange;
 		m_bRandPosition = range != grV2f() ? true : false;
-		if ( m_bRandPosition == true ) { m_RandPosRange = range * 0.5f; }
+		if ( m_bRandPosition == true )
+		{
+			m_RandPosRange = range * 0.5f;
+		}
 	}
 	inline void SetDirectionRange( const float deviationInDeg )
 	{
-		float deviation = grMath::Abs( deviationInDeg );
-		m_bRandDirDiviation = deviation > 0.0f ? true : false;
-		if ( m_bRandDirDiviation == true )
+		float deviation = deviationInDeg;
+		deviation = grMath::Clamp( deviationInDeg, 0.0f, 360.0f );
+		if ( grMath::CmpFloat( 0.0f, deviation ) == true )
 		{
-			m_RandDiviationInDeg = grMath::Clamp( deviation, 0.0f, 360.0f ) * 0.5f;
+			deviation = 0.0f;
 		}
+		m_bRandDirDiviation = deviation > 0.0f ? true : false;
+		m_RandDiviationInDeg = ( m_bRandDirDiviation == true ) ? deviation * 0.5f : deviation;
 	}
 	inline void SetGravityRange( const float randomRange )
 	{
 		float range = randomRange;
+		if ( grMath::CmpFloat( 0.0f, range ) == true )
+		{
+			range = 0.0f;
+		}
 		m_bRandGravity = range != 0.0f ? true : false;
 		if ( m_bRandGravity == true ) { m_RandGravityRange = grMath::Abs( range ) * 0.5f; }
 	}
 	inline void SetVelocityRange( const float randomRange )
 	{
-		float range = grMath::Clamp( randomRange, 0.0f, grMath::Abs( randomRange ) );
+		float range = randomRange;
+		range = grMath::Clamp( range, 0.0f, grMath::Abs( range ) );
+		if ( grMath::CmpFloat( 0.0f, range ) == true )
+		{
+			range = 0.0f;
+		}
 		m_bRandVelocity = ( range > 0.0f ) ? true : false;
-		if ( m_bRandVelocity == true )
-		{
-			m_RandVelocityRange = range * 0.5f;
-		}
-		else
-		{
-			m_RandVelocityRange = 0.0f;
-		}
+		m_RandVelocityRange = ( m_bRandVelocity == true ) ? range * 0.5f : range;
 	}
-	inline void SetVelocityChangeRange( const float randomRange )
+	inline void SetVelocityChangeRange( float randomRange )
 	{
-		float range = grMath::Abs( randomRange );
+		float range = randomRange;
+		range = grMath::Clamp( range, 0.0f, grMath::Abs( range ) );
+		if ( grMath::CmpFloat( 0.0f, range ) == true )
+		{
+			range = 0.0f;
+		}
 		m_bRandVelocityChange = ( range > 0.0f ) ? true : false;
-		if ( m_bRandVelocityChange == true ) { m_RandVelocityChangeRange = range * 0.5f; }
+		m_RandVelocityChangeRange = ( m_bRandVelocityChange == true ) ? range * 0.5f : range;
 	}
-
-	// TODO: Implement set lifetime
 
 	//////////////////////////////////////////////////
 
+	inline grV2f& GetDirection( void )
+	{
+		return m_ParticleBlueprint.Direction;
+	}
+	inline float GetVelocity( void ) const
+	{
+		return m_ParticleBlueprint.Velocity;
+	}
+	inline float GetVelocityChange( void ) const
+	{
+		return m_ParticleBlueprint.VelocityChange;
+	}
+	
 	inline float GetDirectionRange( void )
 	{
 		return m_RandDiviationInDeg * 2.0f;
@@ -125,6 +153,10 @@ public:
 	inline float GetVelocityRange( void )
 	{
 		return m_RandVelocityRange * 2.0f;
+	}
+	inline float GetVelocityChangeRange( void )
+	{
+		return m_RandVelocityChangeRange * 2.0f;
 	}
 
 	//////////////////////////////////////////////////

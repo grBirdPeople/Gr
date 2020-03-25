@@ -2,6 +2,7 @@
 #define		_H_GRMATH_
 
 #include	<math.h>
+#include	<limits>
 
 #include	"grCommon.h"
 #include	"grV2.h"
@@ -16,6 +17,7 @@ namespace grMath
 	const float Pi = 3.141592f;
 	const float DegToRad = Pi / 180.0f;
 	const float RadToDeg = 180 / Pi;
+	const float Epsilon = 0.000001f;
 
 	// Min
 	//////////////////////////////////////////////////
@@ -43,7 +45,7 @@ namespace grMath
 	//////////////////////////////////////////////////
 	inline float Abs( float value )
 	{
-		return ( value < 0.0f ) ? -value : value;
+		return ( value < 0.0f ) ? -value : value;	// TODO: Fix epsilon
 	}
 	inline uInt	Abs( sInt value )
 	{
@@ -208,6 +210,12 @@ namespace grMath
 		return vec;
 	}
 
+	// ZeroCmp
+	//////////////////////////////////////////////////
+	inline bool CmpFloat( const float numOne, const float numTwo )
+	{
+		return Abs( numOne - numTwo ) < Epsilon;
+	}
 }
 
 #endif	// _H_GRMATH_
