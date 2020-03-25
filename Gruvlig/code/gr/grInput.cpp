@@ -6,6 +6,7 @@
 // cTor
 //////////////////////////////////////////////////
 grInput::grInput( void )
+	: m_MouseScroll	( 0 )
 {
 	m_KeyCount = sf::Keyboard::KeyCount;
 	m_MouseCount = sf::Mouse::ButtonCount;
@@ -42,6 +43,7 @@ grInput::grInput( void )
 grInput::~grInput(void)
 {
 	ResetKeys();
+	ResetMouse();
 }
 
 
@@ -59,7 +61,14 @@ grInput::ResetKeys( void )
 	{
 		m_KeyDown.push_back( false );
 	}
+}
 
+
+// ResetMouse
+//////////////////////////////////////////////////
+inline void
+grInput::ResetMouse( void )
+{
 	for ( uInt i = 0; i < m_MouseCount; i++ )
 	{
 		m_MouseButton.push_back( false );

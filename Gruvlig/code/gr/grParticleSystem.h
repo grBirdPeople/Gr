@@ -1,7 +1,7 @@
 #ifndef		_H_GRPARTICLESYSTEM_
 #define		_H_GRPARTICLESYSTEM_
 
-#define		PARTICLE_QUANTITY	500
+#define		PARTICLE_QUANTITY	500		// TODO: Some time in the future, make this to be individual per particle system, based on spawn per sec over lifetime, or something
 
 #include	"grCommon.h"
 #include	"grV2.h"

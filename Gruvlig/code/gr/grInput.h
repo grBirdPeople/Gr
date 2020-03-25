@@ -14,42 +14,52 @@ class grInput : public grSingleton<grInput>
 {
 public:
 
-							grInput			( void );
-							~grInput		( void );
+							grInput					( void );
+							~grInput				( void );
 
 	//////////////////////////////////////////////////
 
-	inline	const	bool	GetKey			( sf::Keyboard::Key key )		const	{ return m_Key[ key ]; }
-	inline	const	bool	GetKeyDown		( sf::Keyboard::Key key )
-																					{
-																						uInt idx = (uInt)key;
-																						if ( sf::Keyboard::isKeyPressed( key ) == true && m_KeyDown[ idx ] == false  )
+	inline	const	bool	GetKey					( sf::Keyboard::Key key )	const	{ return m_Key[ key ]; }
+	inline	const	bool	GetKeyDown				( sf::Keyboard::Key key )
 																						{
-																							m_KeyDown[ idx ] = true;
-																							return true;
+																							uInt idx = (uInt)key;
+																							if ( sf::Keyboard::isKeyPressed( key ) == true && m_KeyDown[ idx ] == false  )
+																							{
+																								m_KeyDown[ idx ] = true;
+																								return true;
+																							}
+																							return false;
 																						}
-																						return false;
-																					}
-	inline			void	SetKeyDown		( sf::Keyboard::Key key )				{ m_Key[ key ] = true; }
-	inline			void	SetKeyUp		( sf::Keyboard::Key key )				{ m_Key[ key ] = false; }
-	inline	const	bool	GetMouse		( sf::Mouse::Button button )	const	{ return m_MouseButton[ button ]; }
-	inline	const	bool	GetMouseDown	( sf::Mouse::Button button )
-																					{
-																						uInt idx = (uInt)button;
-																						if ( sf::Mouse::isButtonPressed( button ) == true && m_MouseButtonDown[ idx ] == false )
-																						{
-																							m_MouseButtonDown[ idx ] = true;
-																							return true;
-																						}
-																						return false;
-																					}
-	inline			void	SetMouseDown	( sf::Mouse::Button button )			{ m_MouseButton[ button ] = true; }
-	inline			void	SetMouseUp		( sf::Mouse::Button button )
-																					{
-																						m_MouseButton[ button ] = false;
-																						m_MouseButtonDown[ (uInt)button ] = false;
-																					}
-	inline			void	ResetKeys		( void );
+	inline			void	SetKeyDown				( sf::Keyboard::Key key )				{ m_Key[ key ] = true; }
+	inline			void	SetKeyUp				( sf::Keyboard::Key key )				{ m_Key[ key ] = false; }
+	inline	const	bool	GetMouse				( sf::Mouse::Button button )	const	{ return m_MouseButton[ button ]; }
+	inline	const	bool	GetMouseDown			( sf::Mouse::Button button )
+																							{
+																								uInt idx = (uInt)button;
+																								if ( sf::Mouse::isButtonPressed( button ) == true && m_MouseButtonDown[ idx ] == false )
+																								{
+																									m_MouseButtonDown[ idx ] = true;
+																									return true;
+																								}
+																								return false;
+																							}
+	inline			void	SetMouseDown			( sf::Mouse::Button button )			{ m_MouseButton[ button ] = true; }
+	inline			void	SetMouseUp				( sf::Mouse::Button button )
+																							{
+																								m_MouseButton[ button ] = false;
+																								m_MouseButtonDown[ (uInt)button ] = false;
+																							}
+	inline			sInt	GetMouseScroll			( void )						const	{ return m_MouseScroll; }
+	inline			sInt	GetMouseScrollForwards	( void )						const	{ return ( m_MouseScroll > 0 ) ? true : false; }
+	inline			sInt	GetMouseScrollBackwards	( void )						const	{ return ( m_MouseScroll < 0 ) ? true : false; }
+	inline			void	SetMouseScroll			( const sInt scrollDir )				{ m_MouseScroll = scrollDir; }
+
+	//////////////////////////////////////////////////
+
+	inline			void	Update					( void )								{ m_MouseScroll = 0; }
+
+	inline			void	ResetKeys				( void );
+	inline			void	ResetMouse				( void );
 
 	//////////////////////////////////////////////////
 
@@ -60,8 +70,11 @@ private:
 						m_MouseButton,
 						m_MouseButtonDown;
 
+	sInt				m_MouseScroll;
+
 	uInt				m_KeyCount,
 						m_MouseCount;
+
 };
 
 #endif		//_GRINPUT_H_

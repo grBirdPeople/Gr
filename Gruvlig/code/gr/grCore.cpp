@@ -130,11 +130,12 @@ grCore::Run( void )
 		{
 			switch( m_pSfEvent->type )
 			{
-				case eEvent::Closed:				Terminate();											break;
-				case eEvent::KeyPressed:			rInput.SetKeyDown( m_pSfEvent->key.code );				break;
-				case eEvent::KeyReleased:			rInput.SetKeyUp( m_pSfEvent->key.code );				break;
-				case eEvent::MouseButtonPressed:	rInput.SetMouseDown( m_pSfEvent->mouseButton.button );	break;
-				case eEvent::MouseButtonReleased:	rInput.SetMouseUp( m_pSfEvent->mouseButton.button );	break;
+				case eEvent::Closed:				Terminate();															break;
+				case eEvent::KeyPressed:			rInput.SetKeyDown( m_pSfEvent->key.code );								break;
+				case eEvent::KeyReleased:			rInput.SetKeyUp( m_pSfEvent->key.code );								break;
+				case eEvent::MouseButtonPressed:	rInput.SetMouseDown( m_pSfEvent->mouseButton.button );					break;
+				case eEvent::MouseButtonReleased:	rInput.SetMouseUp( m_pSfEvent->mouseButton.button );					break;
+				case eEvent::MouseWheelScrolled:	rInput.SetMouseScroll( ( uInt )m_pSfEvent->mouseWheelScroll.delta );	break;
 			};
 		}
 		
@@ -144,6 +145,7 @@ grCore::Run( void )
 		
 		Update();
 		Render();
+		rInput.Update();
 	}
 }
 
