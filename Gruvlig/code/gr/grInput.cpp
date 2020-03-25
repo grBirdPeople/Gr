@@ -7,6 +7,7 @@
 //////////////////////////////////////////////////
 grInput::grInput( void )
 	: m_MouseScroll	( 0 )
+	, m_bMouseMoved	( false )
 {
 	m_KeyCount = sf::Keyboard::KeyCount;
 	m_MouseCount = sf::Mouse::ButtonCount;
@@ -78,4 +79,7 @@ grInput::ResetMouse( void )
 	{
 		m_MouseButtonDown.push_back( false );
 	}
+
+	m_MouseScroll = 0;
+	m_bMouseMoved = false;
 }

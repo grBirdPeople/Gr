@@ -27,6 +27,7 @@ grCore::grCore( const uInt winWidth, const uInt winHeight, const uInt frameRate,
 	, m_pEngineClock		( new sf::Clock )
 {
 	grInput::Initialize();
+	m_pInputMan = grInput::InstancePtr();
 	grEntityManager::Initialize();
 	grMapManager::Initialize();
 	grNavMeshManager::Initialize();
@@ -62,6 +63,7 @@ grCore::~grCore( void )
 	grNavMeshManager::DeInitialize();
 	grMapManager::DeInitialize();
 	grEntityManager::DeInitialize();
+	m_pInputMan = nullptr;
 	grInput::DeInitialize();
 
 	//////////////////////////////////////////////////
@@ -121,7 +123,6 @@ grCore::Render( void )
 void
 grCore::Run( void )
 {
-	grInput& rInput	= grInput::Instance();
 	double timeLast	= m_pEngineClock->getElapsedTime().asSeconds();
 	
 	while ( m_pRenderWin->isOpen() )
@@ -130,12 +131,14 @@ grCore::Run( void )
 		{
 			switch( m_pSfEvent->type )
 			{
-				case eEvent::Closed:				Terminate();															break;
-				case eEvent::KeyPressed:			rInput.SetKeyDown( m_pSfEvent->key.code );								break;
-				case eEvent::KeyReleased:			rInput.SetKeyUp( m_pSfEvent->key.code );								break;
-				case eEvent::MouseButtonPressed:	rInput.SetMouseDown( m_pSfEvent->mouseButton.button );					break;
-				case eEvent::MouseButtonReleased:	rInput.SetMouseUp( m_pSfEvent->mouseButton.button );					break;
-				case eEvent::MouseWheelScrolled:	rInput.SetMouseScroll( ( uInt )m_pSfEvent->mouseWheelScroll.delta );	break;
+				case eEvent::Closed:				Terminate();																break;
+				// Input
+				case eEvent::KeyPressed:			m_pInputMan->SetKeyDown( m_pSfEvent->key.code );							break;
+				case eEvent::KeyReleased:			m_pInputMan->SetKeyUp( m_pSfEvent->key.code );								break;
+				case eEvent::MouseMoved:			m_pInputMan->SetMouseMoved();												break;
+				case eEvent::MouseButtonPressed:	m_pInputMan->SetMouseDown( m_pSfEvent->mouseButton.button );				break;
+				case eEvent::MouseButtonReleased:	m_pInputMan->SetMouseUp( m_pSfEvent->mouseButton.button );					break;
+				case eEvent::MouseWheelScrolled:	m_pInputMan->SetMouseScroll( ( uInt )m_pSfEvent->mouseWheelScroll.delta );	break;
 			};
 		}
 		
@@ -145,7 +148,7 @@ grCore::Run( void )
 		
 		Update();
 		Render();
-		rInput.Update();
+		m_pInputMan->Update();
 	}
 }
 

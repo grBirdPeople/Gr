@@ -29,7 +29,7 @@ grEntityPlayer::grEntityPlayer( const grEnums::EntityType type, const str& rName
 	m_pPartSys->SetDirection( grV2f( 1.0f, -1.0f ), 360.0f );
 	//m_pPartSys->SetGravity( grV2f( 0.0f, 9.8f ), 5.0f );
 	m_pPartSys->SetVelocity( 100.0f, 10 );
-	m_pPartSys->SetVelocityChange( -0.35, 0.25f );
+	m_pPartSys->SetVelocityChange( -0.35f, 0.25f );
 	// TEST
 }
 

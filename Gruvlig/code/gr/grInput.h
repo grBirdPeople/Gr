@@ -54,10 +54,19 @@ public:
 	inline			sInt	GetMouseScrollBackwards	( void )						const	{ return ( m_MouseScroll < 0 ) ? true : false; }
 	inline			void	SetMouseScroll			( const sInt scrollDir )				{ m_MouseScroll = scrollDir; }
 
+	inline			bool	GetMouseMoved			( void )						const	{ return m_bMouseMoved; }
+	inline			void	SetMouseMoved			( void )
+																							{
+																								m_bMouseMoved = true;
+																							}
+
 	//////////////////////////////////////////////////
 
-	inline			void	Update					( void )								{ m_MouseScroll = 0; }
-
+	inline			void	Update					( void )
+																							{
+																								if( m_MouseScroll != 0 )		{m_MouseScroll = 0; }
+																								if( m_bMouseMoved != false )	{ m_bMouseMoved = false; }
+																							}
 	inline			void	ResetKeys				( void );
 	inline			void	ResetMouse				( void );
 
@@ -74,6 +83,8 @@ private:
 
 	uInt				m_KeyCount,
 						m_MouseCount;
+
+	bool				m_bMouseMoved;
 
 };
 

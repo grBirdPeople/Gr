@@ -16,6 +16,7 @@ typedef		sf::Clock			gClock;
 typedef		sf::Event			eEvent;
 typedef		sf::RenderWindow	rWin;
 
+class		grInput;
 class		grSandbox;
 
 
@@ -68,6 +69,7 @@ private:
 	cSettings*	m_pCSettings;
 	eEvent*		m_pSfEvent;
 	gClock*		m_pEngineClock;
+	grInput*	m_pInputMan;
 
 #ifdef DEBUG
 	grSandbox* m_pSandbox;
