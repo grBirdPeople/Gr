@@ -14,13 +14,13 @@ class grParticleManager : public grSingleton<grParticleManager>
 {
 public:
 
-								grParticleManager		( void );
-								~grParticleManager		( void );
+	grParticleManager( void );
+	~grParticleManager( void );
 
 	//////////////////////////////////////////////////
 
-	grParticleSystem*	const	CreateParticleSystem	( void );
-	void						Update					( const float deltaT );
+	grParticleSystem* const CreateParticleSystem( void );
+	void Update( const float deltaT );
 
 	//////////////////////////////////////////////////
 

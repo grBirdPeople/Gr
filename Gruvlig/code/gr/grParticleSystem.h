@@ -6,6 +6,7 @@
 #include	"grCommon.h"
 #include	"grMath.h"
 #include	"grV2.h"
+#include	"grParticleManager.h"
 
 class		grRandom;
 
@@ -16,26 +17,7 @@ class grParticleSystem
 {
 public:
 
-	struct Particle
-	{
-		Particle( void )
-		{
-			Position = grV2f();
-			Direction = grV2f();
-			Gravity = grV2f();
-			Velocity = 0.0f;
-			VelocityChange = 0.0f;
-			LifeTime = 0.0f;
-		}
-
-		// TODO: Would be cleaner to add rands here instead of in class... but particles would get heavier... Unsure of what's best
-		grV2f Position;
-		grV2f Direction;
-		grV2f Gravity;
-		float Velocity;
-		float VelocityChange;
-		float LifeTime;
-	};
+	friend class grParticleManager;
 
 	//////////////////////////////////////////////////
 
@@ -45,34 +27,35 @@ public:
 	//////////////////////////////////////////////////
 
 	// TODO: Implement position things
+	// TODO: Implement direction things
 	// TODO: Implement lifetime things
 
 	inline void SetPosition( const grV2f& rPos, const grV2f& randomRange = grV2f() )
 	{
-		m_ParticleBlueprint.Position = rPos;
+		m_ParticleBlueprint->Position = rPos;
 		SetPositionRange( randomRange );
 	}
 	inline void SetDirection( const grV2f& direction, const float randomRangeInDeg = 0.0f )
 	{
 		grV2f dir = direction;
-		m_ParticleBlueprint.Direction = grV2f( grMath::Sign( dir.x ), grMath::Sign( dir.y ) );
+		m_ParticleBlueprint->Direction = grV2f( grMath::Sign( dir.x ), grMath::Sign( dir.y ) );
 		SetDirectionRange( randomRangeInDeg );
 	}
 	inline void SetGravity( const grV2f& rGravity, const float randomRange = 0.0f )
 	{
-		m_ParticleBlueprint.Gravity = rGravity;
+		m_ParticleBlueprint->Gravity = rGravity;
 		SetGravityRange( randomRange );
 	}
 	inline void	SetVelocity( const float velocity, const float randomRange = 0.0f )
 	{
 		float vel = velocity;
-		m_ParticleBlueprint.Velocity = grMath::Clamp( vel, 0.0f, grMath::Abs( vel ) );
+		m_ParticleBlueprint->Velocity = grMath::Clamp( vel, 0.0f, grMath::Abs( vel ) );
 		SetVelocityRange( randomRange );
 	}
 	inline void SetVelocityChange( const float velocityChange, const float randomRange = 0.0f )
 	{
 		float change = velocityChange;
-		m_ParticleBlueprint.VelocityChange = grMath::Clamp( change, 0.0f, grMath::Abs( change ) );
+		m_ParticleBlueprint->VelocityChange = grMath::Clamp( change, 0.0f, grMath::Abs( change ) );
 		SetVelocityChangeRange( randomRange );
 	}
 
@@ -106,7 +89,10 @@ public:
 			range = 0.0f;
 		}
 		m_bRandGravity = range != 0.0f ? true : false;
-		if ( m_bRandGravity == true ) { m_RandGravityRange = grMath::Abs( range ) * 0.5f; }
+		if ( m_bRandGravity == true )
+		{
+			m_RandGravityRange = grMath::Abs( range ) * 0.5f;
+		}
 	}
 	inline void SetVelocityRange( const float randomRange )
 	{
@@ -135,17 +121,17 @@ public:
 
 	inline grV2f& GetDirection( void )
 	{
-		return m_ParticleBlueprint.Direction;
+		return m_ParticleBlueprint->Direction;
 	}
 	inline float GetVelocity( void ) const
 	{
-		return m_ParticleBlueprint.Velocity;
+		return m_ParticleBlueprint->Velocity;
 	}
 	inline float GetVelocityChange( void ) const
 	{
-		return m_ParticleBlueprint.VelocityChange;
+		return m_ParticleBlueprint->VelocityChange;
 	}
-	
+
 	inline float GetDirectionRange( void )
 	{
 		return m_RandDiviationInDeg * 2.0f;
@@ -162,7 +148,7 @@ public:
 	//////////////////////////////////////////////////
 
 	void Init ( const grV2f& position, const grV2f& direction, const float velocity, const float lifetime, const float m_SpawnsPerSec );
-	void Update ( const float deltaT );
+	//inline void Update ( const float deltaT );
 
 	//////////////////////////////////////////////////
 
@@ -174,9 +160,33 @@ private:
 
 	//////////////////////////////////////////////////
 
-	std::vector<Particle*>	m_VecParticles;
+	struct Particle
+	{
+		Particle( void )
+		{
+			Position = grV2f();
+			Direction = grV2f();
+			Gravity = grV2f();
+			Velocity = 0.0f;
+			VelocityChange = 0.0f;
+			LifeTime = 0.0f;
+		}
 
-	Particle				m_ParticleBlueprint;
+		grV2f Position;
+		grV2f Direction;
+		grV2f Gravity;
+		float Velocity;
+		float VelocityChange;
+		float LifeTime;
+	};
+
+	//////////////////////////////////////////////////
+
+	// TODO: Add color
+
+	Particle* m_ParticleBlueprint;
+
+	std::vector<Particle*>	m_VecParticles;
 
 	grV2f					m_RandPosRange;
 
@@ -197,7 +207,7 @@ private:
 							m_bRandVelocity,
 							m_bRandVelocityChange;
 
-	grRandom* m_pRand;
+	grRandom*				m_pRandGen;
 
 };
 

@@ -25,7 +25,7 @@ grEntityPlayer::grEntityPlayer( const grEnums::EntityType type, const str& rName
 
 	// TEST
 	m_pPartSys = grParticleManager::Instance().CreateParticleSystem();
-	m_pPartSys->Init( GetPosition(), grV2f( 1.0f, 0.0f ), 100.0f, 2.0f, 100 );
+	m_pPartSys->Init( GetPosition(), grV2f( 1.0f, 0.0f ), 100.0f, 0.125f, 100 );
 	//m_pPartSys->SetDirection( grV2f( 1.0f, 0.0f ), 360.0f );		// NOT IMPLEMENTED
 	m_pPartSys->SetDirectionRange( 360.0f );						// OK!
 	//m_pPartSys->SetGravity( grV2f( 0.0f, 9.8f ), 5.0f );			// NOT IMPLEMENTED
@@ -121,7 +121,7 @@ grEntityPlayer::Update( const float deltaT )
 	
 #ifdef DEBUG
 	// Debug draw
-	grBBox box( grV2f( 10.0f, 10.0f ), GetPosition() );
-	grDebugManager::Instance( ).AddBBox( box, sf::Color::Green );
+	//grBBox box( grV2f( 10.0f, 10.0f ), GetPosition() );
+	//grDebugManager::Instance( ).AddBBox( box, sf::Color::Green );
 #endif // DEBUG
 }

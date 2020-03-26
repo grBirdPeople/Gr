@@ -55,7 +55,17 @@ grParticleManager::Update( const float deltaT )
 	{
 		for ( uInt i = 0; i < m_SystemQuantity; ++i )
 		{
-			m_arrParticleSys[ i ]->Update( deltaT );
+			m_arrParticleSys[ i ]->DeactivateParticle();
+		}
+
+		for ( uInt i = 0; i < m_SystemQuantity; ++i )
+		{
+			m_arrParticleSys[ i ]->ActivateParticle( deltaT );
+		}
+
+		for ( uInt i = 0; i < m_SystemQuantity; ++i )
+		{
+			m_arrParticleSys[ i ]->UpdateParticle( deltaT );
 		}
 	}
 }
