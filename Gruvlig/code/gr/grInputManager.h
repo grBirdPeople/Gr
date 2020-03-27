@@ -10,12 +10,12 @@
 
 // grInput
 //////////////////////////////////////////////////
-class grInput : public grSingleton<grInput>
+class grInputManager : public grSingleton<grInputManager>
 {
 public:
 
-	grInput( void );
-	~grInput( void );
+	grInputManager( void );
+	~grInputManager( void );
 
 	//////////////////////////////////////////////////
 

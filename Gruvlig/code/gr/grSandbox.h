@@ -6,7 +6,7 @@
 class		grActor;
 class		grMap;
 class		grIEntity;
-class		grInput;
+class		grInputManager;
 class		grParticleManager;
 
 
@@ -27,7 +27,7 @@ public:
 
 private:
 
-	grInput&			m_rInputMan;
+	grInputManager&			m_rInputMan;
 	grParticleManager&	m_rParticleMan;
 
 	grMap*				m_pMap;

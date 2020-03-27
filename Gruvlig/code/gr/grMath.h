@@ -43,13 +43,13 @@ namespace grMath
 
 	// Abs
 	//////////////////////////////////////////////////
-	inline float Abs( float value )
-	{
-		return ( value < 0.0f ) ? -value : value;	// TODO: Fix epsilon
-	}
 	inline uInt	Abs( sInt value )
 	{
 		return ( value < 0 ) ? ( uInt )-value : ( uInt )value;
+	}
+	inline float Abs( float value )
+	{
+		return ( value < 0.0f ) ? -value : value;
 	}
 
 	// Sign
@@ -68,29 +68,29 @@ namespace grMath
 	inline float Sqrt( const float value )
 	{
 		float x = value;
-		if ( x <= 0 )
+		if ( x <= 0.0f )
 		{
 			std::cerr << "grMath::Sqrt(): Can't sqrt negatives\n" << std::endl;
-			return 0;							// if negative number throw an exception?
+			return 0;								// if negative number throw an exception?
 		}
 
 		int exp = 0;
 		x = ( float )frexp( ( double )x, &exp );	// extract binary exponent from x
-		if ( exp & 1 )							// we want exponent to be even
+		if ( exp & 1 )								// we want exponent to be even
 		{
 			--exp;
 			x *= 2.0f;
 		}
 
-		float y = ( 1.0f + x ) / 2.0f;			// first approximation
+		float y = ( 1.0f + x ) / 2.0f;				// first approximation
 		float z = 0.0f;
-		while ( y != z )						// yes, we CAN compare doubles here!
+		while ( y != z )							// yes, we CAN compare doubles here!
 		{
 			z = y;
 			y = ( y + x / y ) / 2.0f;
 		}
 
-		return ( float )ldexp( y, exp / 2 );		// multiply answer by 2^(exp/2)
+		return ( float )ldexp( y, exp / 2 );			// multiply answer by 2^(exp/2)
 	}
 
 	// Lerp

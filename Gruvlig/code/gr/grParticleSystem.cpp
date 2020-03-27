@@ -15,14 +15,14 @@ grParticleSystem::grParticleSystem( void )
 	, m_SpawnTimer				( m_SpawnInMilliSec )
 	, m_RandDiviationInDeg		( 90.0f )
 	, m_RandGravityRange		( 0.0f )
-	, m_RandVelocityRange		( 0.0f )
-	, m_RandVelocityChangeRange	( 0.0f )
+	, m_RandSpeedRange			( 0.0f )
+	, m_RandSpeedChangeRange	( 0.0f )
 	, m_ActiveParticles			( 0 )
 	, m_bRandPosition			( false )
 	, m_bRandDirDiviation		( false )
 	, m_bRandGravity			( false )
-	, m_bRandVelocity			( false )
-	, m_bRandVelocityChange		( false )
+	, m_bRandSpeed				( false )
+	, m_bRandSpeedChange		( false )
 	, m_pRandGen				( new grRandom() )
 {
 	m_ParticleBlueprint = new Particle();
@@ -32,8 +32,6 @@ grParticleSystem::grParticleSystem( void )
 	{
 		m_VecParticles.push_back( new Particle() );
 	}
-
-
 }
 
 
@@ -64,7 +62,7 @@ grParticleSystem::~grParticleSystem( void )
 // Init
 //////////////////////////////////////////////////
 void
-grParticleSystem::Init( const grV2f& position, const grV2f& direction, const float velocity, const float lifetime, const float spawnsPerSec )
+grParticleSystem::Init( const grV2f& position, const grV2f& direction, const float speed, const float lifetime, const float spawnsPerSec )
 {
 	m_SpawnsPerSec = spawnsPerSec;
 	m_SpawnInMilliSec = 1.0f / m_SpawnsPerSec;
@@ -73,30 +71,20 @@ grParticleSystem::Init( const grV2f& position, const grV2f& direction, const flo
 	// TODO: Set some auto init deviation, like 45-90 deg
 
 	m_ParticleBlueprint->Position = position;
-	m_ParticleBlueprint->Direction = grV2f( grMath::Sign( direction.x ), grMath::Sign( direction.y ) );
-	m_ParticleBlueprint->Velocity = velocity;
+	grV2f dir = direction;
+	dir.Normalize();
+	m_ParticleBlueprint->Direction = dir;
+	m_ParticleBlueprint->Speed = speed;
 	m_ParticleBlueprint->LifeTime = grMath::Abs( lifetime );
 
 	for ( uInt i = 0; i < PARTICLE_QUANTITY; ++i )
 	{
 		m_VecParticles[ i ]->Position = m_ParticleBlueprint->Position;
 		m_VecParticles[ i ]->Direction = m_ParticleBlueprint->Direction;
-		m_VecParticles[ i ]->Velocity = m_ParticleBlueprint->Velocity;
+		m_VecParticles[ i ]->Speed = m_ParticleBlueprint->Speed;
 		m_VecParticles[ i ]->LifeTime = m_ParticleBlueprint->LifeTime;
 	}
 }
-
-
-// Update
-//////////////////////////////////////////////////
-//inline void
-//grParticleSystem::Update( const float deltaT )
-//{
-//	// TODO: Call this functions from the manager one by one (for each particle sys deactivate) for more DOD
-//	DeactivateParticle();
-//	ActivateParticle( deltaT );
-//	UpdateParticle( deltaT );
-//}
 
 
 // DeactivateParticle
@@ -137,22 +125,22 @@ grParticleSystem::ActivateParticle( const float deltaT )
 			Particle* pTmp = m_VecParticles[ m_ActiveParticles ];
 			pTmp->Position = m_ParticleBlueprint->Position;
 			//pTmp->Direction = m_ParticleBlueprint->Direction;
-			//pTmp->Velocity = m_ParticleBlueprint->Velocity;
-			//pTmp->VelocityChange = m_ParticleBlueprint->VelocityChange;
+			//pTmp->Speed = m_ParticleBlueprint->Speed;
+			//pTmp->VelocitySpeed = m_ParticleBlueprint->SpeedChange;
 			pTmp->LifeTime = m_ParticleBlueprint->LifeTime;
 			++m_ActiveParticles;
 
 			// TEST
 			// TODO: Make this into private functions
 
-			// Rand diviation // TESTED OK!
+			// Rand diviation // TESTED
 			{
 				if ( m_bRandDirDiviation == true )
 				{
 					float dirInDeg = grMath::VecToDeg( pTmp->Direction );
-					float halfDiviationRand = m_pRandGen->GetRandFloat( -m_RandDiviationInDeg, m_RandDiviationInDeg );	// TODO: Fix grMath::Radians, works so so
+					float halfDiviationRand = m_pRandGen->GetRandFloat( -m_RandDiviationInDeg, m_RandDiviationInDeg );
 					float newRadDir = halfDiviationRand * grMath::DegToRad;
-					pTmp->Direction = grMath::RadToVec( newRadDir );
+					pTmp->Direction = grMath::RadToVec( newRadDir );	// TODO: Fix grMath::Radians, works so so
 				}
 				else
 				{
@@ -160,29 +148,29 @@ grParticleSystem::ActivateParticle( const float deltaT )
 				}
 			}
 
-			// Rand velocity // TESTED OK!
+			// Rand speed // TESTED
 			{
-				if ( m_bRandVelocity == true )
+				if ( m_bRandSpeed == true )
 				{
-					float randVel = m_pRandGen->GetRandFloat( -m_RandVelocityRange, m_RandVelocityRange );
-					pTmp->Velocity = m_ParticleBlueprint->Velocity + randVel;
+					float randVel = m_pRandGen->GetRandFloat( -m_RandSpeedRange, m_RandSpeedRange );
+					pTmp->Speed = m_ParticleBlueprint->Speed + randVel;
 				}
 				else
 				{
-					pTmp->Velocity = m_ParticleBlueprint->Velocity;
+					pTmp->Speed = m_ParticleBlueprint->Speed;
 				}
 			}
 
-			// Rand velocity change // TESTED OK!
+			// Rand speed change // TESTED
 			{
-				if ( m_bRandVelocityChange == true )
+				if ( m_bRandSpeedChange == true )
 				{
-					float randChange = m_pRandGen->GetRandFloat( -m_RandVelocityChangeRange, m_RandVelocityChangeRange );
-					pTmp->VelocityChange = m_ParticleBlueprint->VelocityChange + randChange;
+					float randChange = m_pRandGen->GetRandFloat( -m_RandSpeedChangeRange, m_RandSpeedChangeRange );
+					pTmp->SpeedChange = m_ParticleBlueprint->SpeedChange + randChange;
 				}
 				else
 				{
-					pTmp->VelocityChange = m_ParticleBlueprint->VelocityChange;
+					pTmp->SpeedChange = m_ParticleBlueprint->SpeedChange;
 				}
 			}
 
@@ -200,8 +188,9 @@ grParticleSystem::UpdateParticle( const float deltaT )
 	for ( uInt i = 0; i < m_ActiveParticles; ++i )
 	{
 		Particle* pTmp = m_VecParticles[ i ];
-		pTmp->Velocity += pTmp->VelocityChange;
-		pTmp->Position += pTmp->Direction * pTmp->Velocity * deltaT;
+		pTmp->Speed += pTmp->SpeedChange;
+
+		pTmp->Position += pTmp->Direction * pTmp->Speed * deltaT;
 		pTmp->LifeTime -= deltaT;
 
 		// TEST

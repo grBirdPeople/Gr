@@ -1,7 +1,7 @@
 #include	"grEntityPlayer.h"
 
 #include	"grDebugManager.h"
-#include	"grInput.h"
+#include	"grInputManager.h"
 #include	"grCtrlPlayer.h"
 
 // TEST
@@ -25,7 +25,7 @@ grEntityPlayer::grEntityPlayer( const grEnums::EntityType type, const str& rName
 
 	// TEST
 	m_pPartSys = grParticleManager::Instance().CreateParticleSystem();
-	m_pPartSys->Init( GetPosition(), grV2f( 1.0f, 0.0f ), 100.0f, 0.125f, 100 );
+	m_pPartSys->Init( GetPosition(), grV2f( 1.0f, 0.0f ), 100.0f, 3.125f, 100 );
 	//m_pPartSys->SetDirection( grV2f( 1.0f, 0.0f ), 360.0f );		// NOT IMPLEMENTED
 	m_pPartSys->SetDirectionRange( 360.0f );						// OK!
 	//m_pPartSys->SetGravity( grV2f( 0.0f, 9.8f ), 5.0f );			// NOT IMPLEMENTED
@@ -82,7 +82,7 @@ grEntityPlayer::Update( const float deltaT )
 		}
 	}
 
-	grInput& rInputMan = grInput::Instance();
+	grInputManager& rInputMan = grInputManager::Instance();
 	if ( rInputMan.GetMouseScrollForwards() == true )
 	{
 		//m_pPartSys->SetDirection( m_pPartSys->GetDirection() + 10.0f, 45.0f );
@@ -94,8 +94,8 @@ grEntityPlayer::Update( const float deltaT )
 		//m_pPartSys->SetVelocity( m_pPartSys->GetVelocity() + 10.0f );
 		//printf( "%s %g\n", "Velocity: ", m_pPartSys->GetVelocity() );
 
-		m_pPartSys->SetVelocityRange( m_pPartSys->GetVelocityRange() + 10.0f );
-		printf( "%s %g\n", "VelocityRange: ", m_pPartSys->GetVelocityRange() );
+		m_pPartSys->SetSpeedRange( m_pPartSys->GetSpeedRange() + 10.0f );
+		printf( "%s %g\n", "VelocityRange: ", m_pPartSys->GetSpeedRange() );
 
 		//m_pPartSys->SetVelocityChangeRange( m_pPartSys->GetVelocityChangeRange() + 1.0f );
 		//printf( "%s %g\n", "VelocityChange: ", m_pPartSys->GetVelocityChangeRange() );
@@ -111,8 +111,8 @@ grEntityPlayer::Update( const float deltaT )
 		//m_pPartSys->SetVelocity( m_pPartSys->GetVelocity() - 10.0f );
 		//printf( "%s %g\n", "Velocity: ", m_pPartSys->GetVelocity() );
 
-		m_pPartSys->SetVelocityRange( m_pPartSys->GetVelocityRange() - 10.0f );
-		printf( "%s %g\n", "VelocityRange: ", m_pPartSys->GetVelocityRange() );
+		m_pPartSys->SetSpeedRange( m_pPartSys->GetSpeedRange() - 10.0f );
+		printf( "%s %g\n", "VelocityRange: ", m_pPartSys->GetSpeedRange() );
 
 		//m_pPartSys->SetVelocityChangeRange( m_pPartSys->GetVelocityChangeRange() - 1.0f );
 		//printf( "%s %g\n", "VelocityChange: ", m_pPartSys->GetVelocityChangeRange() );
