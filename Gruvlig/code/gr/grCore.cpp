@@ -3,7 +3,7 @@
 #include	"grDebugManager.h"
 #include	"grDefine.h"
 #include	"grEntityManager.h"
-#include	"grInput.h"
+#include	"grInputManager.h"
 #include	"grMapManager.h"
 #include	"grNavMeshManager.h"
 #include	"grParticleManager.h"
@@ -26,8 +26,7 @@ grCore::grCore( const uInt winWidth, const uInt winHeight, const uInt frameRate,
 	, m_pSfEvent			( new sf::Event )
 	, m_pEngineClock		( new sf::Clock )
 {
-	grInput::Initialize();
-	m_pInputMan = grInput::InstancePtr();
+	grInputManager::Initialize();
 	grEntityManager::Initialize();
 	grMapManager::Initialize();
 	grNavMeshManager::Initialize();
@@ -35,7 +34,6 @@ grCore::grCore( const uInt winWidth, const uInt winHeight, const uInt frameRate,
 
 #ifdef DEBUG
 	grDebugManager::Initialize();
-
 	m_pSandbox = new grSandbox();
 #endif // DEBUG
 
@@ -63,8 +61,7 @@ grCore::~grCore( void )
 	grNavMeshManager::DeInitialize();
 	grMapManager::DeInitialize();
 	grEntityManager::DeInitialize();
-	m_pInputMan = nullptr;
-	grInput::DeInitialize();
+	grInputManager::DeInitialize();
 
 	//////////////////////////////////////////////////
 
@@ -125,6 +122,7 @@ void
 grCore::Run( void )
 {
 	double timeLast	= m_pEngineClock->getElapsedTime().asSeconds();
+	grInputManager& rInputMan = grInputManager::Instance();
 	
 	while ( m_pRenderWin->isOpen() )
 	{
@@ -132,14 +130,14 @@ grCore::Run( void )
 		{
 			switch( m_pSfEvent->type )
 			{
-				case eEvent::Closed:				Terminate();																break;
+				case eEvent::Closed:				Terminate();															break;
 				// Input
-				case eEvent::KeyPressed:			m_pInputMan->SetKeyDown( m_pSfEvent->key.code );							break;
-				case eEvent::KeyReleased:			m_pInputMan->SetKeyUp( m_pSfEvent->key.code );								break;
-				case eEvent::MouseMoved:			m_pInputMan->SetMouseMoved();												break;
-				case eEvent::MouseButtonPressed:	m_pInputMan->SetMouseDown( m_pSfEvent->mouseButton.button );				break;
-				case eEvent::MouseButtonReleased:	m_pInputMan->SetMouseUp( m_pSfEvent->mouseButton.button );					break;
-				case eEvent::MouseWheelScrolled:	m_pInputMan->SetMouseScroll( ( uInt )m_pSfEvent->mouseWheelScroll.delta );	break;
+				case eEvent::KeyPressed:			rInputMan.SetKeyDown( m_pSfEvent->key.code );							break;
+				case eEvent::KeyReleased:			rInputMan.SetKeyUp( m_pSfEvent->key.code );								break;
+				case eEvent::MouseMoved:			rInputMan.SetMouseMoved();												break;
+				case eEvent::MouseButtonPressed:	rInputMan.SetMouseDown( m_pSfEvent->mouseButton.button );				break;
+				case eEvent::MouseButtonReleased:	rInputMan.SetMouseUp( m_pSfEvent->mouseButton.button );					break;
+				case eEvent::MouseWheelScrolled:	rInputMan.SetMouseScroll( ( uInt )m_pSfEvent->mouseWheelScroll.delta );	break;
 			};
 		}
 		
@@ -149,7 +147,7 @@ grCore::Run( void )
 		
 		Update();
 		Render();
-		m_pInputMan->Update();
+		rInputMan.Update();
 	}
 }
 

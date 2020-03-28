@@ -24,6 +24,7 @@ struct grV2
 	inline	void		Set				( const grV2<T>& rV2 )				{ x = rV2.x; y = rV2.y; }
 	inline	T			Magnitude		( void )							{ return  std::sqrt( MagnitudeSqr() ); }
 	inline	float		MagnitudeSqr	( void )							{ return ( x * x ) + ( y * y ); }
+	inline	void		Normalize		( void )							{ *this = *this / this->Magnitude(); }
 	inline	grV2<T>		Normalized		( void )							{ return *this / this->Magnitude(); }
 	inline	float		Dot				( const grV2<T>& rV2 )				{ return ( x * rV2.x ) + ( y * rV2.y ); }
 	inline  grV2<T>		Cross			( void )							{ return grV2f( y, -x ); }

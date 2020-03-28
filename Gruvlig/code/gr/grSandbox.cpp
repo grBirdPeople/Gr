@@ -6,7 +6,7 @@
 #include	"grCore.h"
 #include	"grBox2D.h"
 #include	"grDebugManager.h"
-#include	"grInput.h"
+#include	"grInputManager.h"
 #include	"grActor.h"
 #include	"grMap.h"
 #include	"grNavMesh.h"
@@ -24,7 +24,7 @@
 // cTor
 //////////////////////////////////////////////////
 grSandbox::grSandbox( void )
-	: m_rInputMan		( grInput::Instance() )
+	: m_rInputMan		( grInputManager::Instance() )
 	, m_rParticleMan	( grParticleManager::Instance() )
 {
 	// CReate maps and navmeshes

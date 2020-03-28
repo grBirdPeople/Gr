@@ -1,11 +1,11 @@
-#include	"grInput.h"
+#include	"grInputManager.h"
 
 #include	"grDefine.h"
 
 
 // cTor
 //////////////////////////////////////////////////
-grInput::grInput( void )
+grInputManager::grInputManager( void )
 	: m_MouseScroll	( 0 )
 	, m_bMouseMoved	( false )
 {
@@ -41,7 +41,7 @@ grInput::grInput( void )
 
 // dTor
 //////////////////////////////////////////////////
-grInput::~grInput(void)
+grInputManager::~grInputManager(void)
 {
 	ResetKeys();
 	ResetMouse();
@@ -51,7 +51,7 @@ grInput::~grInput(void)
 // ResetKeys
 //////////////////////////////////////////////////
 inline void
-grInput::ResetKeys( void )
+grInputManager::ResetKeys( void )
 {
 	for ( uInt i = 0; i < m_KeyCount; i++ )
 	{
@@ -68,7 +68,7 @@ grInput::ResetKeys( void )
 // ResetMouse
 //////////////////////////////////////////////////
 inline void
-grInput::ResetMouse( void )
+grInputManager::ResetMouse( void )
 {
 	for ( uInt i = 0; i < m_MouseCount; i++ )
 	{

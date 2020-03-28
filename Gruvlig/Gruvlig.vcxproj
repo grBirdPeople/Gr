@@ -170,7 +170,7 @@
     <ClCompile Include="code\gr\grEntityManager.cpp" />
     <ClCompile Include="code\gr\grEntityPlayer.cpp" />
     <ClCompile Include="code\gr\grIEntity.cpp" />
-    <ClCompile Include="code\gr\grInput.cpp" />
+    <ClCompile Include="code\gr\grInputManager.cpp" />
     <ClCompile Include="code\gr\grMap.cpp" />
     <ClCompile Include="code\gr\grMapManager.cpp" />
     <ClCompile Include="code\gr\grNavMesh.cpp" />
@@ -235,7 +235,7 @@
     <ClInclude Include="code\gr\grHashMap.h" />
     <ClInclude Include="code\gr\grICtrlObj.h" />
     <ClInclude Include="code\gr\grIEntity.h" />
-    <ClInclude Include="code\gr\grInput.h" />
+    <ClInclude Include="code\gr\grInputManager.h" />
     <ClInclude Include="code\gr\grMap.h" />
     <ClInclude Include="code\gr\grMapManager.h" />
     <ClInclude Include="code\gr\grMath.h" />

@@ -30,7 +30,7 @@ grEntityEnemy::Update( const float deltaT )
 	grIEntity::Update();
 
 #ifdef DEBUG
-	grBBox box( grV2f( 10.0f, 10.0f ), GetPosition() );
-	grDebugManager::Instance().AddBBox( box, sf::Color::Magenta );
+	//grBBox box( grV2f( 10.0f, 10.0f ), GetPosition() );
+	//grDebugManager::Instance().AddBBox( box, sf::Color::Magenta );
 #endif // DEBUG
 }
