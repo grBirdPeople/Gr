@@ -13,13 +13,13 @@ grParticleSystem::grParticleSystem( void )
 	, m_SpawnsPerSec			( 4 )
 	, m_SpawnInMilliSec			( 1.0f / m_SpawnsPerSec )
 	, m_SpawnTimer				( m_SpawnInMilliSec )
-	, m_RandDiviationInDeg		( 90.0f )
+	, m_RandDiviationInDeg		( 90.0f * 0.5f )
 	, m_RandGravityRange		( 0.0f )
 	, m_RandSpeedRange			( 0.0f )
 	, m_RandSpeedChangeRange	( 0.0f )
 	, m_ActiveParticles			( 0 )
 	, m_bRandPosition			( false )
-	, m_bRandDirDiviation		( false )
+	, m_bRandDirDiviation		( true )
 	, m_bRandGravity			( false )
 	, m_bRandSpeed				( false )
 	, m_bRandSpeedChange		( false )
@@ -137,10 +137,10 @@ grParticleSystem::ActivateParticle( const float deltaT )
 			{
 				if ( m_bRandDirDiviation == true )
 				{
-					float dirInDeg = grMath::VecToDeg( pTmp->Direction );
-					float halfDiviationRand = m_pRandGen->GetRandFloat( -m_RandDiviationInDeg, m_RandDiviationInDeg );
-					float newRadDir = halfDiviationRand * grMath::DegToRad;
-					pTmp->Direction = grMath::RadToVec( newRadDir );	// TODO: Fix grMath::Radians, works so so
+					float rand = m_pRandGen->GetRandFloat( -m_RandDiviationInDeg, m_RandDiviationInDeg ) * grMath::DegToRad;
+					grV2f dir = m_ParticleBlueprint->Direction;
+					grMath::RotatePoint( &dir, rand );
+					pTmp->Direction = dir;
 				}
 				else
 				{
@@ -188,10 +188,20 @@ grParticleSystem::UpdateParticle( const float deltaT )
 	for ( uInt i = 0; i < m_ActiveParticles; ++i )
 	{
 		Particle* pTmp = m_VecParticles[ i ];
-		pTmp->Speed += pTmp->SpeedChange;
 
+		pTmp->Speed += pTmp->SpeedChange;
 		pTmp->Position += pTmp->Direction * pTmp->Speed * deltaT;
+
 		pTmp->LifeTime -= deltaT;
+
+
+
+		//Particle* pTmp = m_VecParticles[ i ];
+
+		//pTmp->Speed += pTmp->SpeedChange;
+		//pTmp->Position += pTmp->Direction * pTmp->Speed * deltaT;
+
+		//pTmp->LifeTime -= deltaT;
 
 		// TEST
 		grBBox box( grV2f( 1.0f, 1.0f ), pTmp->Position );

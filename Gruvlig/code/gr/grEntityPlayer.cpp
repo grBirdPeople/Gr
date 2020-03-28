@@ -25,9 +25,9 @@ grEntityPlayer::grEntityPlayer( const grEnums::EntityType type, const str& rName
 
 	// TEST
 	m_pPartSys = grParticleManager::Instance().CreateParticleSystem();
-	m_pPartSys->Init( GetPosition(), grV2f( 1.0f, 0.0f ), 100.0f, 3.125f, 100 );
+	m_pPartSys->Init( GetPosition(), grV2f( 0.0f, -1.0f ), 100.0f, 3.125f, 100 );
 	//m_pPartSys->SetDirection( grV2f( 1.0f, 0.0f ), 360.0f );		// NOT IMPLEMENTED
-	m_pPartSys->SetDirectionRange( 360.0f );						// OK!
+	//m_pPartSys->SetDirectionRange( 360.0f );						// OK!
 	//m_pPartSys->SetGravity( grV2f( 0.0f, 9.8f ), 5.0f );			// NOT IMPLEMENTED
 	//m_pPartSys->SetVelocity( 100.0f );							// OK!
 	//m_pPartSys->SetVelocityChange( -0.75f );						// OK!
@@ -85,34 +85,40 @@ grEntityPlayer::Update( const float deltaT )
 	grInputManager& rInputMan = grInputManager::Instance();
 	if ( rInputMan.GetMouseScrollForwards() == true )
 	{
-		//m_pPartSys->SetDirection( m_pPartSys->GetDirection() + 10.0f, 45.0f );
-		//printf( "%s %g %t %g\n", "Dir: ", m_pPartSys->GetDirection().x, m_pPartSys->GetDirection().y );
+		//grV2f dir = m_pPartSys->GetDirection();
+		//float rad = 10.0f * grMath::DegToRad;
+		//grMath::RotatePoint( &dir, rad );
+		//m_pPartSys->SetDirection( dir );
+		//printf( "%s %g\n", "Deg: ", grMath::VecToDeg( m_pPartSys->GetDirection() ) );
 
-		//m_pPartSys->SetDirectionRange( m_pPartSys->GetDirectionRange() + 10.0f );
-		//printf( "%s %g\n", "DirInDegRange: ", m_pPartSys->GetDirectionRange() );
+		m_pPartSys->SetDirectionRange( m_pPartSys->GetDirectionRange() + 10.0f );
+		printf( "%s %g\n", "DirInDegRange: ", m_pPartSys->GetDirectionRange() );
 
 		//m_pPartSys->SetVelocity( m_pPartSys->GetVelocity() + 10.0f );
 		//printf( "%s %g\n", "Velocity: ", m_pPartSys->GetVelocity() );
 
-		m_pPartSys->SetSpeedRange( m_pPartSys->GetSpeedRange() + 10.0f );
-		printf( "%s %g\n", "VelocityRange: ", m_pPartSys->GetSpeedRange() );
+		//m_pPartSys->SetSpeedRange( m_pPartSys->GetSpeedRange() + 10.0f );
+		//printf( "%s %g\n", "VelocityRange: ", m_pPartSys->GetSpeedRange() );
 
 		//m_pPartSys->SetVelocityChangeRange( m_pPartSys->GetVelocityChangeRange() + 1.0f );
 		//printf( "%s %g\n", "VelocityChange: ", m_pPartSys->GetVelocityChangeRange() );
 	}
 	if ( rInputMan.GetMouseScrollBackwards() == true )
 	{
-		//m_pPartSys->SetDirection( m_pPartSys->GetDirection() - 10.0f, 45.0f );
-		//printf( "%s %g %t %g\n", "Dir: ", m_pPartSys->GetDirection().x, m_pPartSys->GetDirection().y );
+		//grV2f dir = m_pPartSys->GetDirection();
+		//float rad = -10.0f * grMath::DegToRad;
+		//grMath::RotatePoint( &dir, rad );
+		//m_pPartSys->SetDirection( dir );
+		//printf( "%s %g\n", "Deg: ", grMath::VecToDeg( m_pPartSys->GetDirection() ) );
 
-		//m_pPartSys->SetDirectionRange( m_pPartSys->GetDirectionRange() - 10.0f );
-		//printf( "%s %g\n", "DirInDegRange: ", m_pPartSys->GetDirectionRange() );
+		m_pPartSys->SetDirectionRange( m_pPartSys->GetDirectionRange() - 10.0f );
+		printf( "%s %g\n", "DirInDegRange: ", m_pPartSys->GetDirectionRange() );
 
 		//m_pPartSys->SetVelocity( m_pPartSys->GetVelocity() - 10.0f );
 		//printf( "%s %g\n", "Velocity: ", m_pPartSys->GetVelocity() );
 
-		m_pPartSys->SetSpeedRange( m_pPartSys->GetSpeedRange() - 10.0f );
-		printf( "%s %g\n", "VelocityRange: ", m_pPartSys->GetSpeedRange() );
+		//m_pPartSys->SetSpeedRange( m_pPartSys->GetSpeedRange() - 10.0f );
+		//printf( "%s %g\n", "VelocityRange: ", m_pPartSys->GetSpeedRange() );
 
 		//m_pPartSys->SetVelocityChangeRange( m_pPartSys->GetVelocityChangeRange() - 1.0f );
 		//printf( "%s %g\n", "VelocityChange: ", m_pPartSys->GetVelocityChangeRange() );

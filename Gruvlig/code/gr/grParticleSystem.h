@@ -38,9 +38,13 @@ public:
 	inline void SetDirection( const grV2f& direction, const float randomRangeInDeg = 0.0f )
 	{
 		grV2f dir = direction;
-		dir.Normalize();
-		m_ParticleBlueprint->Direction = grV2f( dir.x, dir.y );
-		SetDirectionRange( randomRangeInDeg );
+		if ( ( direction.x < -1.0f || direction.x > 1.0f ) ||
+			( direction.y < -1.0f || direction.y > 1.0f ) )
+		{
+			dir.Normalize();
+		}
+		m_ParticleBlueprint->Direction = dir;
+		//SetDirectionRange( randomRangeInDeg );
 	}
 	inline void SetGravity( const grV2f& rGravity, const float randomRange = 0.0f )
 	{
@@ -79,7 +83,7 @@ public:
 		{
 			deviation = 0.0f;
 		}
-		m_bRandDirDiviation = deviation > 0.0f ? true : false;
+		m_bRandDirDiviation = ( deviation > 0.0f ) ? true : false;
 		m_RandDiviationInDeg = ( m_bRandDirDiviation == true ) ? deviation * 0.5f : deviation;
 	}
 	inline void SetGravityRange( const float randomRange )
