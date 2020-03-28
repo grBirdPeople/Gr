@@ -13,13 +13,14 @@ grParticleSystem::grParticleSystem( void )
 	, m_SpawnsPerSec			( 4 )
 	, m_SpawnInMilliSec			( 1.0f / m_SpawnsPerSec )
 	, m_SpawnTimer				( m_SpawnInMilliSec )
-	, m_RandDiviationInDeg		( 90.0f * 0.5f )
+	, m_RandSpreadRange			( 90.0f * 0.5f )
 	, m_RandGravityRange		( 0.0f )
 	, m_RandSpeedRange			( 0.0f )
 	, m_RandSpeedChangeRange	( 0.0f )
+	, m_SysRotation				( 0.0f )
 	, m_ActiveParticles			( 0 )
 	, m_bRandPosition			( false )
-	, m_bRandDirDiviation		( true )
+	, m_bRandSpread				( true )
 	, m_bRandGravity			( false )
 	, m_bRandSpeed				( false )
 	, m_bRandSpeedChange		( false )
@@ -133,12 +134,12 @@ grParticleSystem::ActivateParticle( const float deltaT )
 			// TEST
 			// TODO: Make this into private functions
 
-			// Rand diviation // TESTED
+			// Rand spread // TESTED
 			{
-				if ( m_bRandDirDiviation == true )
+				if ( m_bRandSpread == true )
 				{
-					float rand = m_pRandGen->GetRandFloat( -m_RandDiviationInDeg, m_RandDiviationInDeg ) * grMath::DegToRad;
 					grV2f dir = m_ParticleBlueprint->Direction;
+					float rand = m_pRandGen->GetRandFloat( -m_RandSpreadRange, m_RandSpreadRange ) * grMath::DegToRad;
 					grMath::RotatePoint( &dir, rand );
 					pTmp->Direction = dir;
 				}

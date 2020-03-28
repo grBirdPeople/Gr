@@ -44,22 +44,30 @@ public:
 			dir.Normalize();
 		}
 		m_ParticleBlueprint->Direction = dir;
-		//SetDirectionRange( randomRangeInDeg );
+		SetSpreadRange( randomRangeInDeg );
+	}
+	inline void SetRotation( const float degrees )
+	{
+		grV2f dir = grV2f( 0.0f, -1.0f );
+		float deg = ( degrees > 360.0f ) ? degrees - 360.0f : degrees;
+		float rad = deg * grMath::DegToRad;
+		grMath::RotatePoint( &dir, rad );
+		SetDirection( dir, GetSpreadRange() );
 	}
 	inline void SetGravity( const grV2f& rGravity, const float randomRange = 0.0f )
 	{
 		m_ParticleBlueprint->Gravity = rGravity;
 		SetGravityRange( randomRange );
 	}
-	inline void	SetSpeed( const float velocity, const float randomRange = 0.0f )
+	inline void	SetSpeed( const float speed, const float randomRange = 0.0f )
 	{
-		float vel = velocity;
+		float vel = speed;
 		m_ParticleBlueprint->Speed = grMath::Clamp( vel, 0.0f, grMath::Abs( vel ) );
 		SetSpeedRange( randomRange );
 	}
-	inline void SetSpeedChange( const float velocityChange, const float randomRange = 0.0f )
+	inline void SetSpeedChange( const float speedChange, const float randomRange = 0.0f )
 	{
-		float change = velocityChange;
+		float change = speedChange;
 		m_ParticleBlueprint->SpeedChange = grMath::Clamp( change, 0.0f, grMath::Abs( change ) );
 		SetSpeedChangeRange( randomRange );
 	}
@@ -75,51 +83,51 @@ public:
 			m_RandPosRange = range * 0.5f;
 		}
 	}
-	inline void SetDirectionRange( const float deviationInDeg )
+	inline void SetSpreadRange( const float rangeInDeg )
 	{
-		float deviation = deviationInDeg;
-		deviation = grMath::Clamp( deviationInDeg, 0.0f, 360.0f );
-		if ( grMath::CmpFloat( 0.0f, deviation ) == true )
+		float d = rangeInDeg;
+		d = grMath::Clamp( rangeInDeg, 0.0f, 360.0f );
+		if ( grMath::CmpFloat( 0.0f, d ) == true )
 		{
-			deviation = 0.0f;
+			d = 0.0f;
 		}
-		m_bRandDirDiviation = ( deviation > 0.0f ) ? true : false;
-		m_RandDiviationInDeg = ( m_bRandDirDiviation == true ) ? deviation * 0.5f : deviation;
+		m_bRandSpread = ( d > 0.0f ) ? true : false;
+		m_RandSpreadRange = ( m_bRandSpread == true ) ? d * 0.5f : d;
 	}
-	inline void SetGravityRange( const float randomRange )
+	inline void SetGravityRange( const float range )
 	{
-		float range = randomRange;
-		if ( grMath::CmpFloat( 0.0f, range ) == true )
+		float r = range;
+		if ( grMath::CmpFloat( 0.0f, r ) == true )
 		{
-			range = 0.0f;
+			r = 0.0f;
 		}
-		m_bRandGravity = range != 0.0f ? true : false;
+		m_bRandGravity = r != 0.0f ? true : false;
 		if ( m_bRandGravity == true )
 		{
-			m_RandGravityRange = grMath::Abs( range ) * 0.5f;
+			m_RandGravityRange = grMath::Abs( r ) * 0.5f;
 		}
 	}
-	inline void SetSpeedRange( const float randomRange )
+	inline void SetSpeedRange( const float range )
 	{
-		float range = randomRange;
-		range = grMath::Clamp( range, 0.0f, grMath::Abs( range ) );
-		if ( grMath::CmpFloat( 0.0f, range ) == true )
+		float r = range;
+		r = grMath::Clamp( r, 0.0f, grMath::Abs( r ) );
+		if ( grMath::CmpFloat( 0.0f, r ) == true )
 		{
-			range = 0.0f;
+			r = 0.0f;
 		}
-		m_bRandSpeed = ( range > 0.0f ) ? true : false;
-		m_RandSpeedRange = ( m_bRandSpeed == true ) ? range * 0.5f : range;
+		m_bRandSpeed = ( r > 0.0f ) ? true : false;
+		m_RandSpeedRange = ( m_bRandSpeed == true ) ? r * 0.5f : r;
 	}
-	inline void SetSpeedChangeRange( float randomRange )
+	inline void SetSpeedChangeRange( float range )
 	{
-		float range = randomRange;
-		range = grMath::Clamp( range, 0.0f, grMath::Abs( range ) );
-		if ( grMath::CmpFloat( 0.0f, range ) == true )
+		float r = range;
+		r = grMath::Clamp( r, 0.0f, grMath::Abs( r ) );
+		if ( grMath::CmpFloat( 0.0f, r ) == true )
 		{
-			range = 0.0f;
+			r = 0.0f;
 		}
-		m_bRandSpeedChange = ( range > 0.0f ) ? true : false;
-		m_RandSpeedChangeRange = ( m_bRandSpeedChange == true ) ? range * 0.5f : range;
+		m_bRandSpeedChange = ( r > 0.0f ) ? true : false;
+		m_RandSpeedChangeRange = ( m_bRandSpeedChange == true ) ? r * 0.5f : r;
 	}
 
 	//////////////////////////////////////////////////
@@ -127,6 +135,22 @@ public:
 	inline grV2f& GetDirection( void )
 	{
 		return m_ParticleBlueprint->Direction;
+	}
+	inline float GetRotationInDeg( void )
+	{
+		float deg = grMath::VecToDeg( m_ParticleBlueprint->Direction );
+		if ( deg < 0.0f )
+		{
+			float diff = 180.0f - grMath::Abs( deg );
+			deg = 180.0f + diff;
+		}
+		deg -= 270.0f;
+		if ( deg < 0.0f )
+		{
+			deg = 360 - grMath::Abs( deg );
+		}
+
+		return deg;
 	}
 	inline float GetSpeed( void ) const
 	{
@@ -137,9 +161,9 @@ public:
 		return m_ParticleBlueprint->SpeedChange;
 	}
 
-	inline float GetDirectionRange( void )
+	inline float GetSpreadRange( void )
 	{
-		return m_RandDiviationInDeg * 2.0f;
+		return m_RandSpreadRange * 2.0f;
 	}
 	inline float GetSpeedRange( void )
 	{
@@ -188,7 +212,7 @@ private:
 
 	// TODO: Add color
 
-	Particle* m_ParticleBlueprint;
+	Particle*				m_ParticleBlueprint;
 
 	std::vector<Particle*>	m_VecParticles;
 
@@ -198,15 +222,17 @@ private:
 							m_SpawnInMilliSec,
 							m_SpawnTimer;
 
-	float					m_RandDiviationInDeg,
+	float					m_RandSpreadRange,
 							m_RandGravityRange,
 							m_RandSpeedRange,
 							m_RandSpeedChangeRange;
 
+	float					m_SysRotation;	// TODO: Implement this
+
 	uInt					m_ActiveParticles;
 
 	bool					m_bRandPosition,
-							m_bRandDirDiviation,
+							m_bRandSpread,
 							m_bRandGravity,
 							m_bRandSpeed,
 							m_bRandSpeedChange;
