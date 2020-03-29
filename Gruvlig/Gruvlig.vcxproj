@@ -178,6 +178,7 @@
     <ClCompile Include="code\gr\grParticleManager.cpp" />
     <ClCompile Include="code\gr\grParticleSystem.cpp" />
     <ClCompile Include="code\gr\grSandbox.cpp" />
+    <ClCompile Include="code\gr\grTransform.cpp" />
     <ClCompile Include="code\gr\main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -247,6 +248,7 @@
     <ClInclude Include="code\gr\grRandom.h" />
     <ClInclude Include="code\gr\grSandbox.h" />
     <ClInclude Include="code\gr\grSingleton.h" />
+    <ClInclude Include="code\gr\grTransform.h" />
     <ClInclude Include="code\gr\grV2.h" />
     <ClInclude Include="code\SFML\Audio.hpp" />
     <ClInclude Include="code\SFML\Audio\AlResource.hpp" />

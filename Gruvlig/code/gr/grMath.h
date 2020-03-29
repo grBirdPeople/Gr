@@ -17,7 +17,7 @@ namespace grMath
 	const float Pi = 3.141592f;
 	const float DegToRad = Pi / 180.0f;
 	const float RadToDeg = 180 / Pi;
-	const float Epsilon = 0.000001f;
+	const float Epsilon = 0.00001f;
 
 	// Min
 	//////////////////////////////////////////////////

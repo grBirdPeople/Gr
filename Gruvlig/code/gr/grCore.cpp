@@ -123,7 +123,7 @@ grCore::Run( void )
 {
 	double timeLast	= m_pEngineClock->getElapsedTime().asSeconds();
 	grInputManager& rInputMan = grInputManager::Instance();
-	
+
 	while ( m_pRenderWin->isOpen() )
 	{
 		while ( m_pRenderWin->pollEvent( *m_pSfEvent ) )
@@ -134,7 +134,8 @@ grCore::Run( void )
 				// Input
 				case eEvent::KeyPressed:			rInputMan.SetKeyDown( m_pSfEvent->key.code );							break;
 				case eEvent::KeyReleased:			rInputMan.SetKeyUp( m_pSfEvent->key.code );								break;
-				case eEvent::MouseMoved:			rInputMan.SetMouseMoved();												break;
+				case eEvent::MouseMoved:
+					rInputMan.SetMouseMoved( grV2f( ( float )m_pSfEvent->mouseMove.x, ( float )m_pSfEvent->mouseMove.y ) );		break;																	break;
 				case eEvent::MouseButtonPressed:	rInputMan.SetMouseDown( m_pSfEvent->mouseButton.button );				break;
 				case eEvent::MouseButtonReleased:	rInputMan.SetMouseUp( m_pSfEvent->mouseButton.button );					break;
 				case eEvent::MouseWheelScrolled:	rInputMan.SetMouseScroll( ( uInt )m_pSfEvent->mouseWheelScroll.delta );	break;

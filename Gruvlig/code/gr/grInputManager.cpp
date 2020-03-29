@@ -6,7 +6,8 @@
 // cTor
 //////////////////////////////////////////////////
 grInputManager::grInputManager( void )
-	: m_MouseScroll	( 0 )
+	: m_MousePos		( grV2f() )
+	, m_MouseScroll	( 0 )
 	, m_bMouseMoved	( false )
 {
 	m_KeyCount = sf::Keyboard::KeyCount;
