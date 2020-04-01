@@ -69,8 +69,8 @@ grEntityPlayer::Update( const float deltaT )
 
 	if ( rInputMan.GetMouseMoved() == true )
 	{
-		//grV2f dir = ( rInputMan.GetMousePos() - m_pPartSys->GetPosition() ).Normalized();
-		//m_pPartSys->SetDirection( dir, m_pPartSys->GetSpread() );
+		grV2f dir = ( rInputMan.GetMousePos() - m_pPartSys->GetPosition() ).Normalized();
+		m_pPartSys->SetDirection( dir, m_pPartSys->GetDirectionRange() );
 	}
 
 	if ( rInputMan.GetMouseScrollForwards() == true )

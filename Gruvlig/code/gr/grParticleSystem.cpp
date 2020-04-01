@@ -133,46 +133,39 @@ grParticleSystem::ActivateParticle( const float deltaT )
 
 			// TEST
 
-			// Rand pos // TESTED ok
+			// Rand pos
+			if ( m_bRandPosition == true )
 			{
-				if ( m_bRandPosition == true )
-				{
-					pTmp->Position.x += m_pRandGen->GetRandFloat( -m_RandPosRange.x, m_RandPosRange.x );
-					pTmp->Position.y += m_pRandGen->GetRandFloat( -m_RandPosRange.y, m_RandPosRange.y );
-				}
+				pTmp->Position.x += m_pRandGen->GetRandFloat( -m_RandPosRange.x, m_RandPosRange.x );
+				pTmp->Position.y += m_pRandGen->GetRandFloat( -m_RandPosRange.y, m_RandPosRange.y );
 			}
 
-			// Rand dir // TESTED ok
+			// Rand dir
+			if ( m_bRandDirection == true )
 			{
-				if ( m_bRandDirection == true )
-				{
-					float rand = m_pRandGen->GetRandFloat( -m_RandDirectionRange, m_RandDirectionRange ) * grMath::DegToRad;
-					grMath::RotatePoint( &pTmp->Direction, rand );
-				}
+				//float randRad = m_pRandGen->GetRandFloat( -m_RandDirectionRange, m_RandDirectionRange );
+				//grMath::RotatePoint( &pTmp->Direction, randRad );
+
+				float randRad = m_pRandGen->GetRandFloat( -m_RandDirectionRange, m_RandDirectionRange ) * grMath::DegToRad;
+				grMath::RotatePoint( &pTmp->Direction, randRad );
 			}
 
-			// Rand speed // TESTED ok
+			// Rand speed
+			if ( m_bRandSpeed == true )
 			{
-				if ( m_bRandSpeed == true )
-				{
-					pTmp->Speed -= m_pRandGen->GetRandFloat( 0.0f, m_RandSpeedRange );
-				}
+				pTmp->Speed -= m_pRandGen->GetRandFloat( 0.0f, m_RandSpeedRange );
 			}
 
-			// Rand speed change // TESTED ok
+			// Rand speed change
+			if ( m_bRandSpeedChange == true )
 			{
-				if ( m_bRandSpeedChange == true )
-				{
-					pTmp->SpeedChange = m_pRandGen->GetRandFloat( -m_RandSpeedChangeRange, m_RandSpeedChangeRange );
-				}
+				pTmp->SpeedChange = m_pRandGen->GetRandFloat( -m_RandSpeedChangeRange, m_RandSpeedChangeRange );
 			}
 
-			// Rand lifetime // TESTED ok
+			// Rand lifetime
+			if ( m_bRandLife == true )
 			{
-				if ( m_bRandLife == true )
-				{
-					pTmp->LifeTime -= m_pRandGen->GetRandFloat( 0.0f, m_RandLifeRange );
-				}
+				pTmp->LifeTime -= m_pRandGen->GetRandFloat( 0.0f, m_RandLifeRange );
 			}
 
 			// TEST
