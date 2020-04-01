@@ -25,13 +25,13 @@ grEntityPlayer::grEntityPlayer( const grEnums::EntityType type, const str& rName
 
 	// TEST
 	m_pPartSys = grParticleManager::Instance().CreateParticleSystem();
-	m_pPartSys->Init( GetPosition(), grV2f( 0.0f, -1.0f ), 100.0f, 3.125f, 100 );
+	m_pPartSys->Init( GetPosition(), grV2f( 0.0f, -1.0f ), 100.0f, 2.0f, 100 );
 	//m_pPartSys->SetDirection( grV2f( 1.0f, 0.0f ), 360.0f );		// OK
 	//m_pPartSys->SetDirectionRange( 360.0f );						// OK
 	//m_pPartSys->SetRotation( 180.0f );							// OK
 	//m_pPartSys->SetGravity( grV2f( 0.0f, 9.8f ), 5.0f );			// NOT IMPLEMENTED
-	m_pPartSys->SetSpeed( 0.0f );							// OK
-	//m_pPartSys->SetSpeedChange( -0.75f );						// OK
+	//m_pPartSys->SetSpeed( 0.0f );									// OK
+	//m_pPartSys->SetSpeedChange( -0.75f );							// OK
 	// TEST
 }
 
@@ -75,12 +75,12 @@ grEntityPlayer::Update( const float deltaT )
 
 	if ( rInputMan.GetMouseScrollForwards() == true )
 	{
-		grV2f range;
-		range.x = m_pPartSys->GetPositionRange().x;
-		range.y = m_pPartSys->GetPositionRange().y;
-		range += 5.0f;
-		m_pPartSys->SetPositionRange( range );
-		printf( "%s %g \t %g \n", "Pos: ", m_pPartSys->GetPositionRange().x, m_pPartSys->GetPositionRange().y );
+		//grV2f range;
+		//range.x = m_pPartSys->GetPositionRange().x;
+		//range.y = m_pPartSys->GetPositionRange().y;
+		//range += 5.0f;
+		//m_pPartSys->SetPositionRange( range );
+		//printf( "%s %g \t %g \n", "Pos: ", m_pPartSys->GetPositionRange().x, m_pPartSys->GetPositionRange().y );
 
 		//grV2f dir = m_pPartSys->GetDirection();
 		//float rad = 10.0f * grMath::DegToRad;
@@ -91,8 +91,14 @@ grEntityPlayer::Update( const float deltaT )
 		//m_pPartSys->SetRotation( m_pPartSys->GetRotationInDeg() + 15.0f );
 		//printf( "%s %g\n", "Deg: ", m_pPartSys->GetRotationInDeg() );
 
-		//m_pPartSys->SetSpread( m_pPartSys->GetSpread() + 10.0f );
-		//printf( "%s %g\n", "SpreadInDeg: ", m_pPartSys->GetSpread() );
+		//m_pPartSys->SetLifetime( m_pPartSys->GetLifetime() + 0.5f );
+		//printf( "%s %g\n", "Lifetime: ", m_pPartSys->GetLifetime() );
+
+		//m_pPartSys->SetLifetimeRange( m_pPartSys->GetLifetimeRange() + 0.25f );
+		//printf( "%s %g\n", "LifetimeRange: ", m_pPartSys->GetLifetimeRange() );
+
+		//m_pPartSys->SetDirectionRange( m_pPartSys->GetDirectionRange() + 10.0f );
+		//printf( "%s %g\n", "SpreadInDeg: ", m_pPartSys->GetDirectionRange() );
 
 		//m_pPartSys->SetSpeed( m_pPartSys->GetSpeed() + 10.0f );
 		//printf( "%s %g\n", "Speed: ", m_pPartSys->GetSpeed() );
@@ -100,17 +106,17 @@ grEntityPlayer::Update( const float deltaT )
 		//m_pPartSys->SetSpeedRange( m_pPartSys->GetSpeedRange() + 10.0f );
 		//printf( "%s %g\n", "VelocityRange: ", m_pPartSys->GetSpeedRange() );
 
-		//m_pPartSys->SetVelocityChangeRange( m_pPartSys->GetVelocityChangeRange() + 1.0f );
-		//printf( "%s %g\n", "VelocityChange: ", m_pPartSys->GetVelocityChangeRange() );
+		//m_pPartSys->SetSpeedChangeRange( m_pPartSys->GetSpeedChangeRange() + 0.25f );
+		//printf( "%s %g\n", "SpeedChange: ", m_pPartSys->GetSpeedChangeRange() );
 	}
 	if ( rInputMan.GetMouseScrollBackwards() == true )
 	{
-		grV2f range;
-		range.x = m_pPartSys->GetPositionRange().x;
-		range.y = m_pPartSys->GetPositionRange().y;
-		range -= 5.0f;
-		m_pPartSys->SetPositionRange( range );
-		printf( "%s %g \t %g \n", "Pos: ", m_pPartSys->GetPositionRange().x, m_pPartSys->GetPositionRange().y );
+		//grV2f range;
+		//range.x = m_pPartSys->GetPositionRange().x;
+		//range.y = m_pPartSys->GetPositionRange().y;
+		//range -= 5.0f;
+		//m_pPartSys->SetPositionRange( range );
+		//printf( "%s %g \t %g \n", "Pos: ", m_pPartSys->GetPositionRange().x, m_pPartSys->GetPositionRange().y );
 
 		//grV2f dir = m_pPartSys->GetDirection();
 		//float rad = -10.0f * grMath::DegToRad;
@@ -121,8 +127,14 @@ grEntityPlayer::Update( const float deltaT )
 		//m_pPartSys->SetRotation( m_pPartSys->GetRotationInDeg() - 15.0f );
 		//printf( "%s %g\n", "Deg: ", m_pPartSys->GetRotationInDeg() );
 
-		//m_pPartSys->SetSpread( m_pPartSys->GetSpread() - 10.0f );
-		//printf( "%s %g\n", "SpreadInDeg: ", m_pPartSys->GetSpread() );
+		//m_pPartSys->SetLifetime( m_pPartSys->GetLifetime() - 0.5f );
+		//printf( "%s %g\n", "Lifetime: ", m_pPartSys->GetLifetime() );
+
+		//m_pPartSys->SetLifetimeRange( m_pPartSys->GetLifetimeRange() - 0.25f );
+		//printf( "%s %g\n", "LifetimeRange: ", m_pPartSys->GetLifetimeRange() );
+
+		//m_pPartSys->SetDirectionRange( m_pPartSys->GetDirectionRange() - 10.0f );
+		//printf( "%s %g\n", "SpreadInDeg: ", m_pPartSys->GetDirectionRange() );
 
 		//m_pPartSys->SetSpeed( m_pPartSys->GetSpeed() - 10.0f );
 		//printf( "%s %g\n", "Speed: ", m_pPartSys->GetSpeed() );
@@ -130,8 +142,8 @@ grEntityPlayer::Update( const float deltaT )
 		//m_pPartSys->SetSpeedRange( m_pPartSys->GetSpeedRange() - 10.0f );
 		//printf( "%s %g\n", "VelocityRange: ", m_pPartSys->GetSpeedRange() );
 
-		//m_pPartSys->SetVelocityChangeRange( m_pPartSys->GetVelocityChangeRange() - 1.0f );
-		//printf( "%s %g\n", "VelocityChange: ", m_pPartSys->GetVelocityChangeRange() );
+		//m_pPartSys->SetSpeedChangeRange( m_pPartSys->GetSpeedChangeRange() - 0.25f );
+		//printf( "%s %g\n", "SpeedChange: ", m_pPartSys->GetSpeedChangeRange() );
 	}
 
 	if ( GetChildByIdx( 1 ) != nullptr )
