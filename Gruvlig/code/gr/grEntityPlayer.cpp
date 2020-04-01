@@ -30,8 +30,8 @@ grEntityPlayer::grEntityPlayer( const grEnums::EntityType type, const str& rName
 	//m_pPartSys->SetDirectionRange( 360.0f );						// OK
 	//m_pPartSys->SetRotation( 180.0f );							// OK
 	//m_pPartSys->SetGravity( grV2f( 0.0f, 9.8f ), 5.0f );			// NOT IMPLEMENTED
-	//m_pPartSys->SetVelocity( 100.0f );							// OK
-	//m_pPartSys->SetVelocityChange( -0.75f );						// OK
+	m_pPartSys->SetSpeed( 0.0f );							// OK
+	//m_pPartSys->SetSpeedChange( -0.75f );						// OK
 	// TEST
 }
 
@@ -69,12 +69,19 @@ grEntityPlayer::Update( const float deltaT )
 
 	if ( rInputMan.GetMouseMoved() == true )
 	{
-		grV2f dir = ( rInputMan.GetMousePos() - m_pPartSys->GetPosition() ).Normalized();
-		m_pPartSys->SetDirection( dir, m_pPartSys->GetSpread() );
+		//grV2f dir = ( rInputMan.GetMousePos() - m_pPartSys->GetPosition() ).Normalized();
+		//m_pPartSys->SetDirection( dir, m_pPartSys->GetSpread() );
 	}
 
 	if ( rInputMan.GetMouseScrollForwards() == true )
 	{
+		grV2f range;
+		range.x = m_pPartSys->GetPositionRange().x;
+		range.y = m_pPartSys->GetPositionRange().y;
+		range += 5.0f;
+		m_pPartSys->SetPositionRange( range );
+		printf( "%s %g \t %g \n", "Pos: ", m_pPartSys->GetPositionRange().x, m_pPartSys->GetPositionRange().y );
+
 		//grV2f dir = m_pPartSys->GetDirection();
 		//float rad = 10.0f * grMath::DegToRad;
 		//grMath::RotatePoint( &dir, rad );
@@ -84,12 +91,12 @@ grEntityPlayer::Update( const float deltaT )
 		//m_pPartSys->SetRotation( m_pPartSys->GetRotationInDeg() + 15.0f );
 		//printf( "%s %g\n", "Deg: ", m_pPartSys->GetRotationInDeg() );
 
-		m_pPartSys->SetSpread( m_pPartSys->GetSpread() + 10.0f );
-		printf( "%s %g\n", "SpreadInDeg: ", m_pPartSys->GetSpread() );
+		//m_pPartSys->SetSpread( m_pPartSys->GetSpread() + 10.0f );
+		//printf( "%s %g\n", "SpreadInDeg: ", m_pPartSys->GetSpread() );
 
-		//m_pPartSys->SetVelocity( m_pPartSys->GetVelocity() + 10.0f );
-		//printf( "%s %g\n", "Velocity: ", m_pPartSys->GetVelocity() );
-
+		//m_pPartSys->SetSpeed( m_pPartSys->GetSpeed() + 10.0f );
+		//printf( "%s %g\n", "Speed: ", m_pPartSys->GetSpeed() );
+		
 		//m_pPartSys->SetSpeedRange( m_pPartSys->GetSpeedRange() + 10.0f );
 		//printf( "%s %g\n", "VelocityRange: ", m_pPartSys->GetSpeedRange() );
 
@@ -98,6 +105,13 @@ grEntityPlayer::Update( const float deltaT )
 	}
 	if ( rInputMan.GetMouseScrollBackwards() == true )
 	{
+		grV2f range;
+		range.x = m_pPartSys->GetPositionRange().x;
+		range.y = m_pPartSys->GetPositionRange().y;
+		range -= 5.0f;
+		m_pPartSys->SetPositionRange( range );
+		printf( "%s %g \t %g \n", "Pos: ", m_pPartSys->GetPositionRange().x, m_pPartSys->GetPositionRange().y );
+
 		//grV2f dir = m_pPartSys->GetDirection();
 		//float rad = -10.0f * grMath::DegToRad;
 		//grMath::RotatePoint( &dir, rad );
@@ -107,11 +121,11 @@ grEntityPlayer::Update( const float deltaT )
 		//m_pPartSys->SetRotation( m_pPartSys->GetRotationInDeg() - 15.0f );
 		//printf( "%s %g\n", "Deg: ", m_pPartSys->GetRotationInDeg() );
 
-		m_pPartSys->SetSpread( m_pPartSys->GetSpread() - 10.0f );
-		printf( "%s %g\n", "SpreadInDeg: ", m_pPartSys->GetSpread() );
+		//m_pPartSys->SetSpread( m_pPartSys->GetSpread() - 10.0f );
+		//printf( "%s %g\n", "SpreadInDeg: ", m_pPartSys->GetSpread() );
 
-		//m_pPartSys->SetVelocity( m_pPartSys->GetVelocity() - 10.0f );
-		//printf( "%s %g\n", "Velocity: ", m_pPartSys->GetVelocity() );
+		//m_pPartSys->SetSpeed( m_pPartSys->GetSpeed() - 10.0f );
+		//printf( "%s %g\n", "Speed: ", m_pPartSys->GetSpeed() );
 
 		//m_pPartSys->SetSpeedRange( m_pPartSys->GetSpeedRange() - 10.0f );
 		//printf( "%s %g\n", "VelocityRange: ", m_pPartSys->GetSpeedRange() );
@@ -125,7 +139,7 @@ grEntityPlayer::Update( const float deltaT )
 		grIEntity* childEntTwo = GetChildByIdx( 1 )->GetChildByIdx( 0 );
 		if ( childEntTwo != nullptr )
 		{
-			m_pPartSys->SetPosition( childEntTwo->GetPosition() );
+			//m_pPartSys->SetPosition( childEntTwo->GetPosition(), m_pPartSys->GetPositionRange() );
 		}
 
 	}
@@ -134,7 +148,7 @@ grEntityPlayer::Update( const float deltaT )
 		grIEntity* childEntTwo = GetChildByIdx( 0 )->GetChildByIdx( 0 );
 		if ( childEntTwo != nullptr )
 		{
-			m_pPartSys->SetPosition( childEntTwo->GetPosition() );
+			//m_pPartSys->SetPosition( childEntTwo->GetPosition(), m_pPartSys->GetPositionRange() );
 		}
 	}
 	// TEST

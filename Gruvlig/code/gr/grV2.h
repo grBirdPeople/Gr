@@ -40,6 +40,8 @@ struct grV2
 	inline	grV2<T>		operator/	( const T& num )						{ return grV2<T>( x / num, y / num ); }
 	inline	grV2<T>		operator/	( const grV2<T>& rV2 )					{ return grV2<T>( x / rV2.x, y / rV2.y ); }
 			  
+	//////////////////////////////////////////////////
+
 	inline	grV2<T>&	operator=	( const T& num )						{ x = num; y = num; return *this; }
 	inline	grV2<T>&	operator=	( const grV2<T>& rV2 )
 			{
@@ -59,6 +61,22 @@ struct grV2
 
 	inline	bool		operator==	( const grV2<T>& rV2 )					{ return ( x == rV2.x ) && ( y == rV2.y ) ? true : false; }
 	inline	bool		operator!=	( const grV2<T>& rV2 )					{ return ( x != rV2.x ) || ( y != rV2.y ) ? true : false; }
+
+	//////////////////////////////////////////////////
+
+	inline T& operator[]( const uInt idx )
+	{
+		if ( idx < 0 || idx > 1 )
+		{
+#ifdef DEBUG
+			std::cerr << "grV2::operator[]: Index was out of range" << std::endl;
+#endif // DEBUG
+			T t;
+			return t;
+		}
+
+		return ( idx == 0 ) ? x : y;
+	}
 
 	//////////////////////////////////////////////////
 

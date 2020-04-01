@@ -26,7 +26,6 @@ public:
 
 	//////////////////////////////////////////////////
 
-	// TODO: Implement position things
 	// TODO: Implement direction things
 	// TODO: Implement lifetime things
 
@@ -48,6 +47,7 @@ public:
 	}
 	inline void SetRotation( const float degrees )
 	{
+		// TODO: Makes this better
 		float deg = ( degrees > 360.0f ) ? degrees - 360.0f : ( degrees < 0.0f ) ? 360.0f - degrees : degrees;
 		m_SysRotInDeg = ( grMath::CmpFloat( deg, grMath::Epsilon ) == true ) ? 0.0f : deg;
 		float rad = m_SysRotInDeg * grMath::DegToRad;
@@ -92,11 +92,17 @@ public:
 
 	inline void SetPositionRange( const grV2f& randomRange )
 	{
-		grV2f range = randomRange;
-		m_bRandPosition = range != grV2f() ? true : false;
-		if ( m_bRandPosition == true )
+		m_RandPosRange.x = grMath::Clamp( randomRange.x, 0.0f, grMath::Abs( randomRange.x ) );
+		m_RandPosRange.y = grMath::Clamp( randomRange.y, 0.0f, grMath::Abs( randomRange.y ) );
+		if ( grMath::CmpFloat( 0.0f, m_RandPosRange.x ) == true &&
+			grMath::CmpFloat( 0.0f, m_RandPosRange.y ) == true )
 		{
-			m_RandPosRange = range * 0.5f;
+			m_bRandPosition = false;
+		}
+		else
+		{
+			m_RandPosRange *= 0.5f;
+			m_bRandPosition = true;
 		}
 	}
 	inline void SetGravityRange( const float range )
@@ -114,58 +120,71 @@ public:
 	}
 	inline void SetSpeedRange( const float range )
 	{
-		float r = range;
-		r = grMath::Clamp( r, 0.0f, grMath::Abs( r ) );
-		if ( grMath::CmpFloat( 0.0f, r ) == true )
+		m_RandSpeedRange = range;
+		m_RandSpeedRange = grMath::Clamp( m_RandSpeedRange, 0.0f, grMath::Abs( m_RandSpeedRange ) );
+		if ( grMath::CmpFloat( 0.0f, m_RandSpeedRange ) == true )
 		{
-			r = 0.0f;
+			m_bRandSpeed = false;
 		}
-		m_bRandSpeed = ( r > 0.0f ) ? true : false;
-		m_RandSpeedRange = ( m_bRandSpeed == true ) ? r * 0.5f : r;
+		else
+		{
+			m_RandSpeedRange *= 0.5f;
+			m_bRandSpeed = true;
+		}
 	}
 	inline void SetSpeedChangeRange( float range )
 	{
-		float r = range;
-		r = grMath::Clamp( r, 0.0f, grMath::Abs( r ) );
-		if ( grMath::CmpFloat( 0.0f, r ) == true )
+		m_RandSpeedChangeRange = range;
+		m_RandSpeedChangeRange = grMath::Clamp( m_RandSpeedChangeRange, 0.0f, grMath::Abs( m_RandSpeedChangeRange ) );
+		if ( grMath::CmpFloat( 0.0f, m_RandSpeedChangeRange ) == true )
 		{
-			r = 0.0f;
+			m_bRandSpeedChange = false;
 		}
-		m_bRandSpeedChange = ( r > 0.0f ) ? true : false;
-		m_RandSpeedChangeRange = ( m_bRandSpeedChange == true ) ? r * 0.5f : r;
+		else
+		{
+			m_RandSpeedChangeRange *= 0.5f;
+			m_bRandSpeedChange = true;
+		}
 	}
 
 	//////////////////////////////////////////////////
 
-	inline grV2f& GetPosition( void )
+	inline const grV2f& GetPosition( void )
 	{
 		return m_ParticleBlueprint->Position;
 	}
-	inline grV2f& GetDirection( void )
+	inline const grV2f& GetDirection( void )
 	{
 		return m_ParticleBlueprint->Direction;
 	}
-	inline float GetRotationInDeg( void )
+	inline const float GetRotationInDeg( void )
 	{
 		return m_SysRotInDeg;
 	}
-	inline float GetSpread( void )
+	inline const float GetSpread( void )
 	{
 		return m_RandSpreadRange * 2.0f;
 	}
-	inline float GetSpeed( void ) const
+	inline const float GetSpeed( void ) const
 	{
 		return m_ParticleBlueprint->Speed;
 	}
-	inline float GetSpeedChange( void ) const
+	inline const grV2f& GetPositionRange( void )
+	{
+		grV2f vec = m_RandPosRange;
+		vec.x *= 2.0f;
+		vec.y *= 2.0f;
+		return m_RandPosRange * 2.0f;
+	}
+	inline const float GetSpeedChange( void ) const
 	{
 		return m_ParticleBlueprint->SpeedChange;
 	}
-	inline float GetSpeedRange( void )
+	inline const float GetSpeedRange( void )
 	{
 		return m_RandSpeedRange * 2.0f;
 	}
-	inline float GetSpeedChangeRange( void )
+	inline const float GetSpeedChangeRange( void )
 	{
 		return m_RandSpeedChangeRange * 2.0f;
 	}

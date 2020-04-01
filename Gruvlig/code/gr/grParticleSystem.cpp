@@ -124,7 +124,7 @@ grParticleSystem::ActivateParticle( const float deltaT )
 		if ( m_ActiveParticles < PARTICLE_QUANTITY )
 		{
 			Particle* pTmp = m_VecParticles[ m_ActiveParticles ];
-			pTmp->Position = m_ParticleBlueprint->Position;
+			//pTmp->Position = m_ParticleBlueprint->Position;
 			//pTmp->Direction = m_ParticleBlueprint->Direction;
 			//pTmp->Speed = m_ParticleBlueprint->Speed;
 			//pTmp->VelocitySpeed = m_ParticleBlueprint->SpeedChange;
@@ -134,44 +134,43 @@ grParticleSystem::ActivateParticle( const float deltaT )
 			// TEST
 			// TODO: Make this into private functions
 
-			// Rand spread // TESTED
+			// Rand pos // TESTED ok
 			{
+				pTmp->Position = m_ParticleBlueprint->Position;
+				if ( m_bRandPosition == true )
+				{
+					pTmp->Position.x += m_pRandGen->GetRandFloat( -m_RandPosRange.x, m_RandPosRange.x );
+					pTmp->Position.y += m_pRandGen->GetRandFloat( -m_RandPosRange.y, m_RandPosRange.y );
+				}
+			}
+
+			// Rand spread // TESTED ok
+			{
+				pTmp->Direction = m_ParticleBlueprint->Direction;
 				if ( m_bRandSpread == true )
 				{
-					grV2f dir = m_ParticleBlueprint->Direction;
 					float rand = m_pRandGen->GetRandFloat( -m_RandSpreadRange, m_RandSpreadRange ) * grMath::DegToRad;
-					grMath::RotatePoint( &dir, rand );
-					pTmp->Direction = dir;
-				}
-				else
-				{
-					pTmp->Direction = m_ParticleBlueprint->Direction;
+					grMath::RotatePoint( &pTmp->Direction, rand );
 				}
 			}
 
-			// Rand speed // TESTED
+			// Rand speed // TESTED ok
 			{
+				pTmp->Speed = m_ParticleBlueprint->Speed;
 				if ( m_bRandSpeed == true )
 				{
-					float randVel = m_pRandGen->GetRandFloat( -m_RandSpeedRange, m_RandSpeedRange );
-					pTmp->Speed = m_ParticleBlueprint->Speed + randVel;
-				}
-				else
-				{
-					pTmp->Speed = m_ParticleBlueprint->Speed;
+					float randVel = m_pRandGen->GetRandFloat( -grMath::Abs( m_RandSpeedRange ), grMath::Abs( m_RandSpeedRange ) );
+					pTmp->Speed += randVel;
 				}
 			}
 
-			// Rand speed change // TESTED
+			// Rand speed change // TESTED ok
 			{
+				pTmp->SpeedChange = m_ParticleBlueprint->SpeedChange;
 				if ( m_bRandSpeedChange == true )
 				{
-					float randChange = m_pRandGen->GetRandFloat( -m_RandSpeedChangeRange, m_RandSpeedChangeRange );
-					pTmp->SpeedChange = m_ParticleBlueprint->SpeedChange + randChange;
-				}
-				else
-				{
-					pTmp->SpeedChange = m_ParticleBlueprint->SpeedChange;
+					float randChange = m_pRandGen->GetRandFloat( -grMath::Abs( m_RandSpeedChangeRange ), grMath::Abs( m_RandSpeedChangeRange ) );
+					pTmp->SpeedChange += randChange;
 				}
 			}
 
