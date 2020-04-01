@@ -13,17 +13,19 @@ grParticleSystem::grParticleSystem( void )
 	, m_SpawnsPerSec			( 4 )
 	, m_SpawnInMilliSec			( 1.0f / m_SpawnsPerSec )
 	, m_SpawnTimer				( m_SpawnInMilliSec )
-	, m_RandSpreadRange			( 90.0f * 0.5f )
+	, m_RandDirectionRange			( 90.0f * 0.5f )
 	, m_RandGravityRange		( 0.0f )
 	, m_RandSpeedRange			( 0.0f )
 	, m_RandSpeedChangeRange	( 0.0f )
-	, m_SysRotation				( 0.0f )
+	, m_RandLifeRange			( 0.0f)
+	, m_SysRotInDeg				( 0.0f )
 	, m_ActiveParticles			( 0 )
 	, m_bRandPosition			( false )
-	, m_bRandSpread				( true )
+	, m_bRandDirection				( true )
 	, m_bRandGravity			( false )
 	, m_bRandSpeed				( false )
 	, m_bRandSpeedChange		( false )
+	, m_bRandLife				( false )
 	, m_pRandGen				( new grRandom() )
 {
 	m_ParticleBlueprint = new Particle();
@@ -125,57 +127,57 @@ grParticleSystem::ActivateParticle( const float deltaT )
 		{
 			Particle* pTmp = m_VecParticles[ m_ActiveParticles ];
 			pTmp->Position = m_ParticleBlueprint->Position;
-			//pTmp->Direction = m_ParticleBlueprint->Direction;
-			//pTmp->Speed = m_ParticleBlueprint->Speed;
-			//pTmp->VelocitySpeed = m_ParticleBlueprint->SpeedChange;
+			pTmp->Direction = m_ParticleBlueprint->Direction;
+			pTmp->Speed = m_ParticleBlueprint->Speed;
 			pTmp->LifeTime = m_ParticleBlueprint->LifeTime;
-			++m_ActiveParticles;
 
 			// TEST
-			// TODO: Make this into private functions
 
-			// Rand spread // TESTED
+			// Rand pos // TESTED ok
 			{
-				if ( m_bRandSpread == true )
+				if ( m_bRandPosition == true )
 				{
-					grV2f dir = m_ParticleBlueprint->Direction;
-					float rand = m_pRandGen->GetRandFloat( -m_RandSpreadRange, m_RandSpreadRange ) * grMath::DegToRad;
-					grMath::RotatePoint( &dir, rand );
-					pTmp->Direction = dir;
-				}
-				else
-				{
-					pTmp->Direction = m_ParticleBlueprint->Direction;
+					pTmp->Position.x += m_pRandGen->GetRandFloat( -m_RandPosRange.x, m_RandPosRange.x );
+					pTmp->Position.y += m_pRandGen->GetRandFloat( -m_RandPosRange.y, m_RandPosRange.y );
 				}
 			}
 
-			// Rand speed // TESTED
+			// Rand dir // TESTED ok
+			{
+				if ( m_bRandDirection == true )
+				{
+					float rand = m_pRandGen->GetRandFloat( -m_RandDirectionRange, m_RandDirectionRange ) * grMath::DegToRad;
+					grMath::RotatePoint( &pTmp->Direction, rand );
+				}
+			}
+
+			// Rand speed // TESTED ok
 			{
 				if ( m_bRandSpeed == true )
 				{
-					float randVel = m_pRandGen->GetRandFloat( -m_RandSpeedRange, m_RandSpeedRange );
-					pTmp->Speed = m_ParticleBlueprint->Speed + randVel;
-				}
-				else
-				{
-					pTmp->Speed = m_ParticleBlueprint->Speed;
+					pTmp->Speed -= m_pRandGen->GetRandFloat( 0.0f, m_RandSpeedRange );
 				}
 			}
 
-			// Rand speed change // TESTED
+			// Rand speed change // TESTED ok
 			{
 				if ( m_bRandSpeedChange == true )
 				{
-					float randChange = m_pRandGen->GetRandFloat( -m_RandSpeedChangeRange, m_RandSpeedChangeRange );
-					pTmp->SpeedChange = m_ParticleBlueprint->SpeedChange + randChange;
+					pTmp->SpeedChange = m_pRandGen->GetRandFloat( -m_RandSpeedChangeRange, m_RandSpeedChangeRange );
 				}
-				else
+			}
+
+			// Rand lifetime // TESTED ok
+			{
+				if ( m_bRandLife == true )
 				{
-					pTmp->SpeedChange = m_ParticleBlueprint->SpeedChange;
+					pTmp->LifeTime -= m_pRandGen->GetRandFloat( 0.0f, m_RandLifeRange );
 				}
 			}
 
 			// TEST
+
+			++m_ActiveParticles;
 		}
 	}
 }

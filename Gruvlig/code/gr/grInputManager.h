@@ -6,6 +6,7 @@
 
 #include	"grCommon.h"
 #include	"grSingleton.h"
+#include	"grV2.h"
 
 
 // grInput
@@ -54,9 +55,11 @@ public:
 	inline bool GetMouseScrollBackwards( void ) const { return ( m_MouseScroll < 0 ) ? true : false; }
 	inline void SetMouseScroll( const sInt scrollDir ) { m_MouseScroll = scrollDir; }
 
-	inline bool GetMouseMoved ( void ) const { return m_bMouseMoved; }
-	inline void SetMouseMoved ( void )
+	inline bool GetMouseMoved( void ) const { return m_bMouseMoved; }
+	inline grV2f& GetMousePos( void ) { return m_MousePos; }
+	inline void SetMouseMoved( const grV2f& rPos )
 	{
+		m_MousePos = rPos;
 		m_bMouseMoved = true;
 	}
 
@@ -78,6 +81,8 @@ private:
 						m_KeyDown,
 						m_MouseButton,
 						m_MouseButtonDown;
+
+	grV2f				m_MousePos;
 
 	sInt				m_MouseScroll;
 
