@@ -25,11 +25,11 @@ grEntityPlayer::grEntityPlayer( const grEnums::EntityType type, const str& rName
 
 	// TEST
 	m_pPartSys = grParticleManager::Instance().CreateParticleSystem();
-	m_pPartSys->Init( GetPosition(), grV2f( 0.0f, -1.0f ), 100.0f, 2.0f, 100 );
+	m_pPartSys->Init( GetPosition(), grV2f( 0.0f, -1.0f ), 100.0f, 6.0f, 100 );
 	//m_pPartSys->SetDirection( grV2f( 1.0f, 0.0f ), 360.0f );		// OK
 	//m_pPartSys->SetDirectionRange( 360.0f );						// OK
 	//m_pPartSys->SetRotation( 180.0f );							// OK
-	//m_pPartSys->SetGravity( grV2f( 0.0f, 9.8f ), 5.0f );			// NOT IMPLEMENTED
+	m_pPartSys->SetGravity( grV2f( 0.0f, 1.0f ), 5.0f );			// NOT IMPLEMENTED
 	//m_pPartSys->SetSpeed( 0.0f );									// OK
 	//m_pPartSys->SetSpeedChange( -0.75f );							// OK
 	// TEST
@@ -100,6 +100,9 @@ grEntityPlayer::Update( const float deltaT )
 		//m_pPartSys->SetDirectionRange( m_pPartSys->GetDirectionRange() + 10.0f );
 		//printf( "%s %g\n", "SpreadInDeg: ", m_pPartSys->GetDirectionRange() );
 
+		m_pPartSys->SetGravityRange( m_pPartSys->GetGravityRange() + 5.0f );
+		printf( "%s %g\n", "Gravity X: ", m_pPartSys->GetGravityRange() );
+
 		//m_pPartSys->SetSpeed( m_pPartSys->GetSpeed() + 10.0f );
 		//printf( "%s %g\n", "Speed: ", m_pPartSys->GetSpeed() );
 		
@@ -135,6 +138,9 @@ grEntityPlayer::Update( const float deltaT )
 
 		//m_pPartSys->SetDirectionRange( m_pPartSys->GetDirectionRange() - 10.0f );
 		//printf( "%s %g\n", "SpreadInDeg: ", m_pPartSys->GetDirectionRange() );
+
+		m_pPartSys->SetGravityRange( m_pPartSys->GetGravityRange() - 5.0f );
+		printf( "%s %g\n", "Gravity X: ", m_pPartSys->GetGravityRange() );
 
 		//m_pPartSys->SetSpeed( m_pPartSys->GetSpeed() - 10.0f );
 		//printf( "%s %g\n", "Speed: ", m_pPartSys->GetSpeed() );

@@ -26,7 +26,7 @@ public:
 
 	//////////////////////////////////////////////////
 
-	// TODO: Implement lifetime things
+	// TODO: Add gravity
 
 	inline void SetPosition( const grV2f& rPos, const grV2f& randomRange = grV2f() )
 	{
@@ -46,7 +46,7 @@ public:
 	}
 	inline void SetRotation( const float degrees )
 	{
-		// TODO: Makes this better
+		// TODO: Makes all this better
 		float deg = grMath::Clamp( degrees, -360.0f, 360.0f );
 		if ( deg < 0.0f )
 		{
@@ -57,6 +57,11 @@ public:
 		grV2f dir = grV2f( 0.0f, -1.0f );
 		grMath::RotatePoint( &dir, rad );
 		SetDirection( dir, GetDirectionRange() );
+	}
+	inline void	SetGravity( const grV2f& gravityDir, const float randomRange )
+	{
+		m_ParticleBlueprint->Gravity = gravityDir;
+		SetGravityRange( randomRange );
 	}
 	inline void	SetSpeed( const float speed, const float randomRange = 0.0f )
 	{
@@ -76,24 +81,17 @@ public:
 
 	//////////////////////////////////////////////////
 
-	inline void SetPositionRange( const grV2f& randomRange )
+	// TODO: Probably make theese here private
+
+	inline void SetPositionRange( const grV2f& range )
 	{
-		m_RandPosRange.x = grMath::Clamp( randomRange.x, 0.0f, grMath::Abs( randomRange.x ) );
-		m_RandPosRange.y = grMath::Clamp( randomRange.y, 0.0f, grMath::Abs( randomRange.y ) );
+		m_RandPosRange.x = grMath::Clamp( range.x, 0.0f, grMath::Abs( range.x ) );
+		m_RandPosRange.y = grMath::Clamp( range.y, 0.0f, grMath::Abs( range.y ) );
 		m_bRandPosition = ( grMath::CmpFloat( 0.0f, m_RandPosRange.x ) == true &&
 							grMath::CmpFloat( 0.0f, m_RandPosRange.y ) == true ) ? false : true;
 	}
 	inline void SetDirectionRange( const float degrees )
 	{
-		//float num = grMath::Clamp( degrees, -360.0f, 360.0f );
-		//if ( degrees < 0.0f )
-		//{
-		//	num = 360.0f + num;
-		//}
-		//m_SysRotInDeg = ( grMath::CmpFloat( num, grMath::Epsilon ) == true ) ? 0.0f : num;
-		//m_bRandDirection = ( m_SysRotInDeg > 0.0f ) ? true : false;
-		//m_RandDirectionRange = ( m_bRandDirection == true ) ? num * grMath::DegToRad : 0.0f;
-
 		float deg = grMath::Clamp( degrees, -360.0f, 360.0f );
 		if ( degrees < 0.0f )
 		{
@@ -102,6 +100,11 @@ public:
 		m_SysRotInDeg = ( grMath::CmpFloat( deg, grMath::Epsilon ) == true ) ? 0.0f : deg;
 		m_bRandDirection = ( m_SysRotInDeg > 0.0f ) ? true : false;
 		m_RandDirectionRange = ( m_bRandDirection == true ) ? deg * 0.5f : deg;
+	}
+	inline void SetGravityRange( const float range )
+	{
+		m_bRandGravity = ( range != 0.0f ) ? true : false;
+		m_RandGravityRange = range;
 	}
 	inline void SetSpeedRange( const float range )
 	{
@@ -116,7 +119,7 @@ public:
 	inline void SetLifetimeRange( float range )
 	{
 		m_RandLifeRange = grMath::Clamp( range, 0.0f, m_ParticleBlueprint->LifeTime );
-		m_bRandLife = ( grMath::CmpFloat( 0.0f, m_RandLifeRange ) == true ) ? false : true;
+		m_bRandLife = ( grMath::CmpFloat( 0.0f, m_ParticleBlueprint->LifeTime ) == true ) ? false : true;
 	}
 
 	//////////////////////////////////////////////////
@@ -133,6 +136,10 @@ public:
 	{
 		return m_SysRotInDeg;
 	}
+	inline const grV2f& GetGravity( void )
+	{
+		return m_ParticleBlueprint->Gravity;
+	}
 	inline const float GetSpeed( void ) const
 	{
 		return m_ParticleBlueprint->Speed;
@@ -146,14 +153,19 @@ public:
 		return m_ParticleBlueprint->LifeTime;
 	}
 
+	// TODO: Probably make theese here private too
+
 	inline const grV2f& GetPositionRange( void )
 	{
 		return m_RandPosRange;
 	}
 	inline const float GetDirectionRange( void )
 	{
-		//return m_RandDirectionRange * grMath::RadToDeg;
 		return m_RandDirectionRange * 2.0f;
+	}
+	inline const float GetGravityRange( void )
+	{
+		return m_RandGravityRange;
 	}
 	inline const float GetSpeedRange( void )
 	{
@@ -187,11 +199,11 @@ private:
 		Particle( void )
 		{
 			Position = grV2f();
-			Direction = grV2f();
+			Direction = grV2f( 0.0f, -1.0f );
 			Gravity = grV2f();
-			Speed = 0.0f;
+			Speed = 50.0f;
 			SpeedChange = 0.0f;
-			LifeTime = 0.0f;
+			LifeTime = 3.0f;
 		}
 
 		grV2f Position;
@@ -217,7 +229,7 @@ private:
 							m_SpawnTimer;
 
 	float					m_RandDirectionRange,	// Degrees
-							m_RandGravityRange,
+							m_RandGravityRange,		// Degrees
 							m_RandSpeedRange,
 							m_RandSpeedChangeRange,
 							m_RandLifeRange;		// Seconds
