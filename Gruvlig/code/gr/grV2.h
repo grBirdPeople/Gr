@@ -7,7 +7,7 @@
 #include	"grCommon.h"
 
 
-// V2
+// grV2
 //////////////////////////////////////////////////
 template <typename T>
 struct grV2
@@ -89,7 +89,7 @@ struct grV2
 
 };
 
-// std::cout definition
+// std::cout
 //////////////////////////////////////////////////
 template <typename T>
 std::ostream& operator<< ( std::ostream& out, const grV2<T>& rV2 )
@@ -97,7 +97,7 @@ std::ostream& operator<< ( std::ostream& out, const grV2<T>& rV2 )
 	return out << "(" << rV2.x << ", " << rV2.y << ")";
 }
 
-// Typedef common
+// Typedefs
 //////////////////////////////////////////////////
 typedef	grV2<double>	grV2d;
 typedef	grV2<float>		grV2f;

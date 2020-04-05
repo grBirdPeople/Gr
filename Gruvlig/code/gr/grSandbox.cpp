@@ -27,10 +27,13 @@ grSandbox::grSandbox( void )
 	: m_rInputMan		( grInputManager::Instance() )
 	, m_rParticleMan	( grParticleManager::Instance() )
 {
-	// CReate maps and navmeshes
-	grMapManager::Instance().GetMap( "m_01" )->CreateNavMesh();
-	grMapManager::Instance().GetMap( "m_02" )->CreateNavMesh();
-	m_pMap = grMapManager::Instance().GetMap( "m_02" );
+	// Create maps and navmeshes
+	grMapManager::Instance().GetMap( "map_00" )->CreateNavMesh();	// TODO: Don't like this. Other way around ( navmeshmanager create navmesh ( map ))
+	grMapManager::Instance().GetMap( "map_01" )->CreateNavMesh();
+
+	m_pMap = grMapManager::Instance().GetMap( "map_00" );
+	grNavMeshManager::Instance().SetNavMeshToDebug( -1 );	// TODO: Don't know if I want to keep the map stuff,
+															// but maybe better if this is called auto in grMap and also updated from there instead of in core
 
 	// Create an actor and add it to a map
 	m_pActor = new grActor( m_pMap );
@@ -96,7 +99,6 @@ grSandbox::grSandbox( void )
 void
 grSandbox::Update( const float deltaT )
 {
-	grCore& rCore = grCore::Instance();
 
 	// Particle things
 
@@ -118,6 +120,7 @@ grSandbox::Update( const float deltaT )
 	// Navmesh things
 	if ( m_pMap != nullptr )
 	{
+		grCore& rCore = grCore::Instance();
 		if ( m_rInputMan.GetMouse( sf::Mouse::Button::Left ) )
 		{
 			grV2f mousePos = grV2f( ( float )sf::Mouse::getPosition( rCore.GetRenderWin() ).x, ( float )sf::Mouse::getPosition( rCore.GetRenderWin() ).y );
@@ -140,7 +143,5 @@ grSandbox::Update( const float deltaT )
 void
 grSandbox::Render( sf::RenderWindow& rRenderWin )
 {
-#ifdef	DEBUG
-	grNavMeshManager::Instance( ).GetNavMesh( m_pMap->GetMapData()->Name )->DebugRender();
-#endif	//DEBUG_MODE
+
 }

@@ -20,6 +20,8 @@ public:
 
 	//////////////////////////////////////////////////
 
+	// TODO: To avoid confusion, make some functions only accessible from friend classes (grCore), or similar
+
 	inline const bool GetKey( sf::Keyboard::Key key ) const { return m_Key[ key ]; }
 	inline const bool GetKeyDown( sf::Keyboard::Key key )
 	{
@@ -67,11 +69,18 @@ public:
 
 	inline void Update( void )
 	{
-		if( m_MouseScroll != 0 )		{m_MouseScroll = 0; }
-		if( m_bMouseMoved != false )	{ m_bMouseMoved = false; }
+		if( m_MouseScroll != 0 )
+		{
+			m_MouseScroll = 0;
+		}
+
+		if( m_bMouseMoved != false )
+		{
+			m_bMouseMoved = false;
+		}
 	}
-	inline			void	ResetKeys				( void );
-	inline			void	ResetMouse				( void );
+	inline void ResetKeys( void );
+	inline void ResetMouse( void );
 
 	//////////////////////////////////////////////////
 

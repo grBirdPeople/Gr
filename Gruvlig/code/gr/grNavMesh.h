@@ -35,7 +35,7 @@ public:
 	
 	void			CreateNavMesh		( void );
 	vecNavNode*		FindPath			( const uInt startPos, const uInt endPos );
-	void			DebugRender			( void );
+	void			Debug				( void );
 	
 	//////////////////////////////////////////////////
 	

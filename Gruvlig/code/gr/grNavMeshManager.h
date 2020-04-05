@@ -18,28 +18,36 @@ class grNavMeshManager : public grSingleton<grNavMeshManager>
 {
 public:
 
-						grNavMeshManager	( void )				{ m_VecNavMesh.reserve( MAX_NAVMESH ); }
-						~grNavMeshManager	( void )				{
-																		for ( uInt i = 0; i < m_VecNavMesh.size(); ++ i )
-																		{
-																			DELANDNULL( m_VecNavMesh[ i ] );
-																		}
-																	}
+	grNavMeshManager( void )
+		: m_NavMeshRenderIdx	( -1 )
+	{ m_VecNavMesh.reserve( MAX_NAVMESH ); }
+
+	~grNavMeshManager( void )
+	{
+		for ( uInt i = 0; i < m_VecNavMesh.size(); ++ i )
+		{ DELANDNULL( m_VecNavMesh[ i ] ); }
+	}
+
+	//////////////////////////////////////////////////
+
+	void SetNavMeshToDebug( const sInt idx );
 	
 	//////////////////////////////////////////////////
 	
-			grNavMesh*	GetNavMesh			( const str& name );
+	grNavMesh* GetNavMesh( const str& name );
 	
 	//////////////////////////////////////////////////
 	
-			grNavMesh* CreateNavMesh		( grMap* pMap );
+	grNavMesh* CreateNavMesh( grMap* pMap );
+	void Debug( void );
 
 	//////////////////////////////////////////////////
 
 private:
-	
+
 	vecNavMesh	m_VecNavMesh;
 
+	sInt m_NavMeshRenderIdx;
 };
 
 #endif		//_GRNAVMESHMANAGER_H_
