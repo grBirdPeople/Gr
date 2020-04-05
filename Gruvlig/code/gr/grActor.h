@@ -18,9 +18,9 @@ public:
 		, m_pEnd	( pMap->GetNavMesh()->GetNavNodes()[ 0 ] )
 	{}
 	
-	inline	void	SetStart ( grMap* pMap, const grV2f& rPos ) { if ( pMap->FindValidPos( rPos ) != nullptr ) { m_pStart = pMap->FindValidPos( rPos ); } }
-	inline	void	SetEnd ( grMap* pMap, const grV2f& rPos ) { if ( pMap->FindValidPos( rPos ) != nullptr ) { m_pEnd = pMap->FindValidPos( rPos ); } }
-	inline	void	FindPath ( grMap* pMap ) { pMap->GetNavMesh()->FindPath( m_pStart->m_Id, m_pEnd->m_Id ); }
+	inline void SetStart( grMap* pMap, const grV2f& rPos ) { if ( pMap->FindValidPos( rPos ) != nullptr ) { m_pStart = pMap->FindValidPos( rPos ); } }
+	inline void SetEnd( grMap* pMap, const grV2f& rPos ) { if ( pMap->FindValidPos( rPos ) != nullptr ) { m_pEnd = pMap->FindValidPos( rPos ); } }
+	inline void FindPath( grMap* pMap ) { pMap->GetNavMesh()->FindPath( m_pStart->m_Id, m_pEnd->m_Id ); }
 
 private:
 

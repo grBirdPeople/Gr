@@ -25,7 +25,7 @@ grInputManager::grInputManager( void )
 
 	for (uInt i = 0; i < m_KeyCount; i++)
 	{
-		m_KeyDown.push_back(false);
+		m_KeyDown.push_back( false );
 	}
 
 	for ( uInt i = 0; i < m_MouseCount; i++ )
@@ -35,14 +35,14 @@ grInputManager::grInputManager( void )
 
 	for (uInt i = 0; i < m_MouseCount; i++)
 	{
-		m_MouseButtonDown.push_back(false);
+		m_MouseButtonDown.push_back( false );
 	}
 }
 
 
 // dTor
 //////////////////////////////////////////////////
-grInputManager::~grInputManager(void)
+grInputManager::~grInputManager( void )
 {
 	ResetKeys();
 	ResetMouse();

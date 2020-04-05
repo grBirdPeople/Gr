@@ -27,7 +27,7 @@ public:
 
 private:
 
-	grInputManager&			m_rInputMan;
+	grInputManager&		m_rInputMan;
 	grParticleManager&	m_rParticleMan;
 
 	grMap*				m_pMap;

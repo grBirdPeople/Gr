@@ -39,11 +39,11 @@ grMap::~grMap( void )
 void
 grMap::CreateNavMesh( void )
 {
-	if( m_pNavMesh == nullptr )
-	{
-		m_pNavMesh = grNavMeshManager::Instance().CreateNavMesh( this );
-		m_pNavMesh->FindPath( 0, 0 );	// Init pos
-	}
+	if( m_pNavMesh != nullptr )
+	{ return; }
+
+	m_pNavMesh = grNavMeshManager::Instance().CreateNavMesh( this );
+	m_pNavMesh->FindPath( 0, 0 );	// Init pos
 }
 
 

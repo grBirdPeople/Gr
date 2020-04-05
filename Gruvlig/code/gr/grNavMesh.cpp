@@ -114,7 +114,7 @@ grNavMesh::FindPath( const uInt startPos, const uInt endPos )
 // DebugRender
 //////////////////////////////////////////////////
 void
-grNavMesh::DebugRender( void )
+grNavMesh::Debug( void )
 {
 	if( m_VecNode.size() > 0 )
 	{
@@ -242,7 +242,7 @@ grNavMesh::InsertSortByCost( vecNavNode& rVec )
 				{ beforeCost = rVec[ idxBefore ]->m_CostF; }
 			}
 
-			rVec[ idxBefore + 1 ] = currentNode;
+			rVec[ ++idxBefore ] = currentNode;
 		}
 	}
 }

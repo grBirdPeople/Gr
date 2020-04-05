@@ -40,7 +40,6 @@ grCore::grCore( const uInt winWidth, const uInt winHeight, const uInt frameRate,
 	//////////////////////////////////////////////////
 
 	InitRenderWin();
-
 }
 
 
@@ -93,6 +92,10 @@ grCore::Update( void )
 	// Update entities
 	grEntityManager::Instance().Update( GetDeltaT() );
 	grParticleManager::Instance().Update( GetDeltaT() );
+
+#ifdef DEBUG
+	grNavMeshManager::Instance().Debug();
+#endif // DEBUG
 }
 
 
@@ -130,15 +133,14 @@ grCore::Run( void )
 		{
 			switch( m_pSfEvent->type )
 			{
-				case eEvent::Closed:				Terminate();															break;
+				case eEvent::Closed: Terminate(); break;
 				// Input
-				case eEvent::KeyPressed:			rInputMan.SetKeyDown( m_pSfEvent->key.code );							break;
-				case eEvent::KeyReleased:			rInputMan.SetKeyUp( m_pSfEvent->key.code );								break;
-				case eEvent::MouseMoved:
-					rInputMan.SetMouseMoved( grV2f( ( float )m_pSfEvent->mouseMove.x, ( float )m_pSfEvent->mouseMove.y ) );		break;																	break;
-				case eEvent::MouseButtonPressed:	rInputMan.SetMouseDown( m_pSfEvent->mouseButton.button );				break;
-				case eEvent::MouseButtonReleased:	rInputMan.SetMouseUp( m_pSfEvent->mouseButton.button );					break;
-				case eEvent::MouseWheelScrolled:	rInputMan.SetMouseScroll( ( uInt )m_pSfEvent->mouseWheelScroll.delta );	break;
+				case eEvent::KeyPressed: rInputMan.SetKeyDown( m_pSfEvent->key.code ); break;
+				case eEvent::KeyReleased: rInputMan.SetKeyUp( m_pSfEvent->key.code ); break;
+				case eEvent::MouseMoved: rInputMan.SetMouseMoved( grV2f( ( float )m_pSfEvent->mouseMove.x, ( float )m_pSfEvent->mouseMove.y ) ); break;																	break;
+				case eEvent::MouseButtonPressed: rInputMan.SetMouseDown( m_pSfEvent->mouseButton.button ); break;
+				case eEvent::MouseButtonReleased: rInputMan.SetMouseUp( m_pSfEvent->mouseButton.button ); break;
+				case eEvent::MouseWheelScrolled: rInputMan.SetMouseScroll( ( uInt )m_pSfEvent->mouseWheelScroll.delta ); break;
 			};
 		}
 		
