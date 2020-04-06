@@ -58,7 +58,8 @@ public:
 		m_VSync = vSync;
 		m_pRenderWin->setVerticalSyncEnabled( m_VSync );
 	}
-										  
+					
+	void Init( void );
 	void Run( void );
 	
 	//////////////////////////////////////////////////

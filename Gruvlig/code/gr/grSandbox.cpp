@@ -19,6 +19,7 @@
 #include	"grHashMap.h"
 #include	"grParticleManager.h"
 #include	"grParticleSystem.h"
+#include	"grParticleManagerPB.h"
 
 
 // cTor
@@ -91,6 +92,9 @@ grSandbox::grSandbox( void )
 	//grParticleSystem& pPartSys = *m_rParticleMan.CreateParticleSystem();
 	//pPartSys.Init( grV2f( 350.0f, 150.0f ), grV2f( 1.0f, -1.0f ), 50.0f, 2.0f, 4 );
 
+	// Particles Physics Based
+	grParticleSystemPB* sys1 = grParticleManagerPB::Instance().CreateSystem();
+	grParticleSystemPB* sys2 = grParticleManagerPB::Instance().CreateSystem();
 }
 
 

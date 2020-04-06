@@ -176,7 +176,9 @@
     <ClCompile Include="code\gr\grNavMesh.cpp" />
     <ClCompile Include="code\gr\grNavMeshManager.cpp" />
     <ClCompile Include="code\gr\grParticleManager.cpp" />
+    <ClCompile Include="code\gr\grParticleManagerPB.cpp" />
     <ClCompile Include="code\gr\grParticleSystem.cpp" />
+    <ClCompile Include="code\gr\grParticleSystemPB.cpp" />
     <ClCompile Include="code\gr\grSandbox.cpp" />
     <ClCompile Include="code\gr\main.cpp" />
   </ItemGroup>
@@ -243,7 +245,10 @@
     <ClInclude Include="code\gr\grNavMeshManager.h" />
     <ClInclude Include="code\gr\grNavNode.h" />
     <ClInclude Include="code\gr\grParticleManager.h" />
+    <ClInclude Include="code\gr\grParticleManagerPB.h" />
+    <ClInclude Include="code\gr\grParticlePB.h" />
     <ClInclude Include="code\gr\grParticleSystem.h" />
+    <ClInclude Include="code\gr\grParticleSystemPB.h" />
     <ClInclude Include="code\gr\grRandom.h" />
     <ClInclude Include="code\gr\grSandbox.h" />
     <ClInclude Include="code\gr\grSingleton.h" />

@@ -7,6 +7,7 @@
 #include	"grMapManager.h"
 #include	"grNavMeshManager.h"
 #include	"grParticleManager.h"
+#include	"grParticleManagerPB.h"
 #include	"grSandbox.h"
 
 
@@ -26,20 +27,20 @@ grCore::grCore( const uInt winWidth, const uInt winHeight, const uInt frameRate,
 	, m_pSfEvent			( new sf::Event )
 	, m_pEngineClock		( new sf::Clock )
 {
+	InitRenderWin();
+
+	//////////////////////////////////////////////////
+
 	grInputManager::Initialize();
 	grEntityManager::Initialize();
 	grMapManager::Initialize();
 	grNavMeshManager::Initialize();
 	grParticleManager::Initialize();
+	grParticleManagerPB::Initialize();
 
 #ifdef DEBUG
 	grDebugManager::Initialize();
-	m_pSandbox = new grSandbox();
 #endif // DEBUG
-
-	//////////////////////////////////////////////////
-
-	InitRenderWin();
 }
 
 
@@ -56,6 +57,7 @@ grCore::~grCore( void )
 	grDebugManager::DeInitialize();
 #endif // DEBUG
 
+	grParticleManagerPB::DeInitialize();
 	grParticleManager::DeInitialize();
 	grNavMeshManager::DeInitialize();
 	grMapManager::DeInitialize();
@@ -92,6 +94,7 @@ grCore::Update( void )
 	// Update entities
 	grEntityManager::Instance().Update( GetDeltaT() );
 	grParticleManager::Instance().Update( GetDeltaT() );
+	grParticleManagerPB::Instance().Update( GetDeltaT() );
 
 #ifdef DEBUG
 	grNavMeshManager::Instance().Debug();
@@ -116,6 +119,16 @@ grCore::Render( void )
 	//////////////////////////////////////////////////
 	
 	m_pRenderWin->display();
+}
+
+
+// Init
+//////////////////////////////////////////////////
+void grCore::Init( void )
+{
+#ifdef	DEBUG
+	m_pSandbox = new grSandbox();
+#endif	//DEBUG_MODE
 }
 
 
