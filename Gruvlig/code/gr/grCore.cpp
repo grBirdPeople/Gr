@@ -35,7 +35,7 @@ grCore::grCore( const uInt winWidth, const uInt winHeight, const uInt frameRate,
 	grEntityManager::Initialize();
 	grMapManager::Initialize();
 	grNavMeshManager::Initialize();
-	grParticleManager::Initialize();
+	//grParticleManager::Initialize();
 	grParticleManagerPB::Initialize();
 
 #ifdef DEBUG
@@ -58,7 +58,7 @@ grCore::~grCore( void )
 #endif // DEBUG
 
 	grParticleManagerPB::DeInitialize();
-	grParticleManager::DeInitialize();
+	//grParticleManager::DeInitialize();
 	grNavMeshManager::DeInitialize();
 	grMapManager::DeInitialize();
 	grEntityManager::DeInitialize();
@@ -93,7 +93,7 @@ grCore::Update( void )
 
 	// Update entities
 	grEntityManager::Instance().Update( GetDeltaT() );
-	grParticleManager::Instance().Update( GetDeltaT() );
+	//grParticleManager::Instance().Update( GetDeltaT() );
 	grParticleManagerPB::Instance().Update( GetDeltaT() );
 
 #ifdef DEBUG
@@ -124,9 +124,11 @@ grCore::Render( void )
 
 // Init
 //////////////////////////////////////////////////
-void grCore::Init( void )
+void
+grCore::Init( void )
 {
 #ifdef	DEBUG
+	grParticleManagerPB::Instance().Init();
 	m_pSandbox = new grSandbox();
 #endif	//DEBUG_MODE
 }

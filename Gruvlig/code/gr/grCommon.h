@@ -7,10 +7,14 @@
 #include	<iostream>
 #include	<map>
 #include    <math.h>
+#include    <memory>
 #include	<string>
 #include	<vector>
 
 //////////////////////////////////////////////////
+
+template<typename U> using uPtr = std::unique_ptr<U>;
+template<typename S> using sPtr = std::shared_ptr<S>;
 
 typedef	signed int		sInt;
 typedef	unsigned int	uInt;

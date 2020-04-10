@@ -1,10 +1,10 @@
-#include	<random>
-
-#include	"grAlgo.h"
-#include	"grCommon.h"
+//#include	<random>
+//
+//#include	"grAlgo.h"
+//#include	"grCommon.h"
 #include	"grCore.h"
-#include	"grNavNode.h"
-#include	"grV2.h"
+//#include	"grNavNode.h"
+//#include	"grV2.h"
 
 
 int main()

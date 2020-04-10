@@ -21,12 +21,14 @@
 #include	"grParticleSystem.h"
 #include	"grParticleManagerPB.h"
 
+#include <bitset>
+
 
 // cTor
 //////////////////////////////////////////////////
 grSandbox::grSandbox( void )
 	: m_rInputMan		( grInputManager::Instance() )
-	, m_rParticleMan	( grParticleManager::Instance() )
+	, m_rParticleManPB	( grParticleManagerPB::Instance() )
 {
 	// Create maps and navmeshes
 	grMapManager::Instance().GetMap( "map_00" )->CreateNavMesh();	// TODO: Don't like this. Other way around ( navmeshmanager create navmesh ( map ))
@@ -93,9 +95,11 @@ grSandbox::grSandbox( void )
 	//pPartSys.Init( grV2f( 350.0f, 150.0f ), grV2f( 1.0f, -1.0f ), 50.0f, 2.0f, 4 );
 
 	// Particles Physics Based
-	grParticleSystemPB* sys1 = grParticleManagerPB::Instance().CreateSystem();
-	grParticleSystemPB* sys2 = grParticleManagerPB::Instance().CreateSystem();
+	grParticleSetupPB* pSys1 = grParticleManagerPB::Instance().Create();
+	int j = 7;
 }
+
+
 
 
 // Update

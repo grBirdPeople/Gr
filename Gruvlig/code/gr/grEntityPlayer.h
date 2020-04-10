@@ -32,7 +32,7 @@ private:
 	grCtrlPlayer*		m_pCtrl;
 
 	// TEST
-	grParticleSystem*	m_pPartSys;
+	//grParticleSystem*	m_pPartSys;
 	// TEST
 
 };
