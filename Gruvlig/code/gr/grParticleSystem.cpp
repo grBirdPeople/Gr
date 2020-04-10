@@ -87,7 +87,7 @@ grParticleSystem::Init( const grV2f& position, const grV2f& direction, const flo
 void
 grParticleSystem::DeactivateParticle( void )
 {
-	for ( sInt i = 0; i < m_ActiveParticles; ++i )
+	for ( sInt i = 0; i < ( sInt )m_ActiveParticles; ++i )
 	{
 		if ( m_VecParticles[ i ]->LifeTime < 0.0f )
 		{

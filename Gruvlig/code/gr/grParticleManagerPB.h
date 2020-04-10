@@ -63,18 +63,18 @@ private:
 struct grParticleSetupPB
 {
 	grParticleSetupPB( void )
-		: SpawnInMilliSec	( 1.0f / 500.0f )
+		: SpawnInMilliSec	( 1.0f / 100.0f )
 		, Id				( 0 )
 		, ParticlesActive	( 0 )
 		
 	{
 		SpawnCounter = SpawnInMilliSec;
-		VecParticle.reserve( PARTICLE_PER_SYS );
 		pParticleAttribute = nullptr;
+		VecParticle.reserve( PARTICLE_PER_SYS );
 	}
 
-	vecParticle					VecParticle;
 	uPtr<grParticleAttributePB>	pParticleAttribute;
+	vecParticle					VecParticle;
 	float						SpawnInMilliSec,
 								SpawnCounter;
 	uInt						Id,

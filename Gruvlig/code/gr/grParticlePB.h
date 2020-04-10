@@ -16,7 +16,7 @@ struct grParticleAttributePB
 		, Gravity		( grV2f( 0.0f, 100.0f ) )
 		, Acceleration	( grV2f( 5000.0f, -20000.0f ) )
 		, Mass			( 1.0f )
-		, LifeTime		( 3.5f )
+		, LifeTime		( 3.33f )
 	{
 		grCore& rCore = grCore::Instance();
 		Position = grV2f( rCore.GetRenderWin().getSize().x * 0.5f, rCore.GetRenderWin().getSize().y * 0.5f );
@@ -35,6 +35,11 @@ struct grParticleAttributePB
 //////////////////////////////////////////////////
 struct grParticlePB
 {
+	grParticlePB( void )
+		: Mass		( 0.0f )
+		, LifeTime	( 0.0f )
+	{}
+
 	grV2f	Position;
 	grV2f	Velocity;
 	grV2f	Acceleration;

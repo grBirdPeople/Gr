@@ -4,7 +4,6 @@
 
 #include	"grBBox.h"
 #include	"grDefine.h"
-#include	"grNavMeshManager.h"
 
 
 // AddBox
@@ -34,4 +33,3 @@ grDebugManager::AddBBox( grBBox& rBBox, const sf::Color color )
 		
 	m_VecBBoxDebug.push_back( vertexBox );
 }
-
