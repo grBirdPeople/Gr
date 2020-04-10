@@ -19,10 +19,10 @@ protected:
 
 public:
 
-	static inline T& Initialize (void) { assert(m_pInstance == nullptr && "grSingleton::Initialize(): Singleton already initialized"); m_pInstance = new T; return *m_pInstance; }
-	static inline void DeInitialize	(void) { assert(m_pInstance != nullptr && "grSingleton::Deinitialize(): No singleton initialized"); DELANDNULL(m_pInstance); }
-	static inline T& Instance (void) { assert(m_pInstance != nullptr && "grSingleton::Instance(): No singleton initialized"); return *m_pInstance; }
-	static inline T* InstancePtr (void) { return m_pInstance; }
+	static inline T& Initialize( void ) { assert(m_pInstance == nullptr && "grSingleton::Initialize(): Singleton already initialized"); m_pInstance = new T; return *m_pInstance; }
+	static inline void DeInitialize( void ) { assert(m_pInstance != nullptr && "grSingleton::Deinitialize(): No singleton initialized"); DELANDNULL(m_pInstance); }
+	static inline T& Instance( void ) { assert(m_pInstance != nullptr && "grSingleton::Instance(): No singleton initialized"); return *m_pInstance; }
+	static inline T* InstancePtr( void ) { return m_pInstance; }
 
 	//////////////////////////////////////////////////
 

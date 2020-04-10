@@ -19,7 +19,7 @@ struct HashNode
 };
 
 
-// grHashMap // Open adress where only unsigned int's that are unique are allowed
+// grHashMap // Uses buckets / open-adress where only unique unsigned int's are allowed
 //////////////////////////////////////////////////
 template<typename T>
 class grHashMap

@@ -23,29 +23,29 @@ public:
 	
 	//////////////////////////////////////////////////
 
-					grNavMesh			( grMap* pOwnerMap ) : m_pOwnerMap( *pOwnerMap )	{ CreateNavMesh(); }
-					~grNavMesh			( void );
+	grNavMesh( grMap* pOwnerMap ) : m_pOwnerMap( *pOwnerMap )	{ CreateNavMesh(); }
+	~grNavMesh( void );
 
 	//////////////////////////////////////////////////
 
-	grMap*			GetOwnerMap			( void )											{ return &m_pOwnerMap; }
-	vecNavNode&		GetNavNodes			( void )											{ return m_VecNode; }
+	grMap* GetOwnerMap( void ) { return &m_pOwnerMap; }
+	vecNavNode& GetNavNodes( void ) { return m_VecNode; }
 
 	//////////////////////////////////////////////////
 	
-	void			CreateNavMesh		( void );
-	vecNavNode*		FindPath			( const uInt startPos, const uInt endPos );
-	void			Debug				( void );
+	void CreateNavMesh( void );
+	vecNavNode* FindPath( const uInt startPos, const uInt endPos );
+	void Debug( void );
 	
 	//////////////////////////////////////////////////
 	
 private:
 
-	bool			AStar				( grNavNode* pStartNode, grNavNode* pEndNode );
-	float			Heuristic			( grNavNode* pNode, grNavNode* pEndNode );
-	void			InsertSortByCost	( vecNavNode& rVec );
-	void			BuildNodePath		( grNavNode* pEndNode );
-	bool			FindInOpenOrClose	( const uInt nodeId, const vecNavNode& vec );
+	bool AStar( grNavNode* pStartNode, grNavNode* pEndNode );
+	float Heuristic( grNavNode* pNode, grNavNode* pEndNode );
+	void InsertSortByCost( vecNavNode& rVec );
+	void BuildNodePath( grNavNode* pEndNode );
+	bool FindInOpenOrClose( const uInt nodeId, const vecNavNode& vec );
 	
 	////////////////////////////////////////////////
 

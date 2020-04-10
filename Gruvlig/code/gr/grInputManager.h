@@ -86,6 +86,7 @@ public:
 
 private:
 
+	// TODO: Change vectors to bitset
 	std::vector<bool>	m_Key,
 						m_KeyDown,
 						m_MouseButton,

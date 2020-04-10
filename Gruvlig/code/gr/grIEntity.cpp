@@ -36,7 +36,7 @@ grIEntity::~grIEntity( void )
 
 // GetChildById
 //////////////////////////////////////////////////
-grIEntity*
+inline grIEntity*
 grIEntity::GetChildById( const uInt id )
 {
 	for ( uInt i = 0; i < m_vecChildren.size(); ++i )
@@ -67,13 +67,11 @@ grIEntity::GetChildByIdx( const uInt idx )
 
 // SetIsActive
 //////////////////////////////////////////////////
-void
+inline void
 grIEntity::SetEnable( const bool bEnable )
 {
 	if ( bEnable == m_bIsEnabled )
-	{
-		return;
-	}
+	{ return; }
 
 	m_bIsEnabled = bEnable;
 	( bEnable == true ) ? rEMan.Enable( this ) : rEMan.Disable( this );
@@ -132,7 +130,7 @@ grIEntity::ReleaseChildByIdx( const uInt idx )
 {
 #ifdef DEBUG
 	sInt size = ( sInt )m_vecChildren.size() - 1;
-	if ( idx > size )
+	if ( ( sInt )idx > size )
 	{
 		std::cerr << "grIEntity::ReleaseChildByIdx(): Out of range. Idx was: " << idx << std::endl;
 		return;
@@ -240,7 +238,7 @@ grIEntity::DestroyRecursively( grIEntity& rEntity )
 
 // ResetPosOnRelease
 //////////////////////////////////////////////////
-void
+inline void
 grIEntity::ResetPosOnRelease( void )
 {
 	m_PosLocal = m_pParent->m_PosWorld + m_PosLocal;

@@ -188,6 +188,8 @@ public:
 
 private:
 
+	
+	// Below functions causes pointer chasing
 	void DeactivateParticle( void );
 	void ActivateParticle( const float deltaT );
 	void UpdateParticle( const float deltaT );
