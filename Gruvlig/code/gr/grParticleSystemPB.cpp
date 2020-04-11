@@ -1,37 +1,25 @@
 #include	"grParticleSystemPB.h"
 
-#include	"grParticleManagerPB.h"
-#include	"grV2.h"
 #include	"grBBox.h"
 #include	"grDebugManager.h"
+#include	"grParticleManagerPB.h"
+#include    "grRandom.h"
+#include	"grV2.h"
 
 
-// Deactivate
+// cTor
 //////////////////////////////////////////////////
-void
-grParticleSystemPB::Deactivate( grParticleSetupPB& rParticleSetup )
+grParticleSystemPB::grParticleSystemPB( void )
+    :   pRandom ( new grRandom() )
+{}
+
+
+// dTor
+//////////////////////////////////////////////////
+grParticleSystemPB::~grParticleSystemPB( void )
 {
-    vecParticle& rVec = rParticleSetup.VecParticle;
-    sInt active = ( sInt )rParticleSetup.ParticlesActive;
-    for ( sInt idx = 0; idx < active; ++idx )
-    {
-        if ( rVec[ idx ]->LifeTime < 0.0f )
-        {
-            grParticlePB& rFrom = *rVec[ --active ].get();
-            grParticlePB& rToo = *rVec[ idx ].get();
-            rToo = rFrom;
-
-            // TODO: This reset block should not be needed but without it things blow up. Investigate more.
-            // Hint: If idx equals active it writes to itself
-            rFrom.Position = grV2f();
-            rFrom.Velocity = grV2f();
-            rFrom.Mass = 0.0f;
-            rFrom.LifeTime = 0.0f;
-
-            --idx;
-        }
-    }
-    rParticleSetup.ParticlesActive = active;
+    if( pRandom  != nullptr)
+        DELANDNULL( pRandom );
 }
 
 
@@ -40,20 +28,33 @@ grParticleSystemPB::Deactivate( grParticleSetupPB& rParticleSetup )
 void
 grParticleSystemPB::Activate( grParticleSetupPB& rParticleSetup, const float fixedT )
 {
-    rParticleSetup.SpawnCounter -= fixedT;
-    if ( rParticleSetup.SpawnCounter < 0.0f )
+    grParticleAttributePB& rAttribute = *rParticleSetup.pAttribute;
+    rAttribute.SpawnCounter -= fixedT;
+    if ( rAttribute.SpawnCounter < 0.0f )
     {
-        rParticleSetup.SpawnCounter += rParticleSetup.SpawnInMilliSec;
-        if ( rParticleSetup.ParticlesActive >= PARTICLE_PER_SYS )
+        rAttribute.SpawnCounter += rAttribute.SpawnInMilliSec;
+        if ( rParticleSetup.ParticlesActive >= PARTICLE_PER_SETUP )
             return;
 
-        grParticlePB& rPart = *rParticleSetup.VecParticle[ rParticleSetup.ParticlesActive ].get();
-        grParticleAttributePB& attribute = *rParticleSetup.pParticleAttribute;
+        grParticlePB& rPart = *rParticleSetup.vecParticle[ rParticleSetup.ParticlesActive ].get();
 
-        rPart.Position = attribute.Position;
-        rPart.Acceleration = attribute.Acceleration;
-        rPart.Mass = attribute.Mass;
-        rPart.LifeTime = attribute.LifeTime;
+        rPart.Position = rAttribute.Position;
+        rPart.Acceleration = rAttribute.Acceleration;
+        rPart.Mass = rAttribute.Mass;
+
+        // Speed
+        {
+
+        }
+
+        // Lifetime
+        {
+            rPart.LifeTime = ( rAttribute.bLifetimeRange == true )
+                ? pRandom->GetRandFloat( rAttribute.LifetimeRange.x, rAttribute.LifetimeRange.y )
+                : rAttribute.LifetimeRange.y;
+        }
+
+
 
         ++rParticleSetup.ParticlesActive;
     }
@@ -65,11 +66,11 @@ grParticleSystemPB::Activate( grParticleSetupPB& rParticleSetup, const float fix
 void
 grParticleSystemPB::Update( grParticleSetupPB& rParticleSetup, const float fixedT )
 {
-    vecParticle& rVec = rParticleSetup.VecParticle;
-    grParticleAttributePB& rAttribute = *rParticleSetup.pParticleAttribute;
+    vecParticle& rVec = rParticleSetup.vecParticle;
+    grParticleAttributePB& rAttribute = *rParticleSetup.pAttribute.get();
     for ( uInt idx = 0; idx < rParticleSetup.ParticlesActive; ++idx )
     {
-        grParticlePB& rPart = *rParticleSetup.VecParticle[ idx ].get();
+        grParticlePB& rPart = *rParticleSetup.vecParticle[ idx ].get();
 
         rPart.Acceleration += rAttribute.Gravity / rPart.Mass;
 
@@ -85,4 +86,37 @@ grParticleSystemPB::Update( grParticleSetupPB& rParticleSetup, const float fixed
         grDebugManager::Instance().AddBBox( box, sf::Color::White );
         // TEST
     }
+}
+
+
+// Deactivate
+//////////////////////////////////////////////////
+void
+grParticleSystemPB::Deactivate( grParticleSetupPB& rParticleSetup )
+{
+    vecParticle& rVec = rParticleSetup.vecParticle;
+    sInt active = ( sInt )rParticleSetup.ParticlesActive;
+    for ( sInt idx = 0; idx < active; ++idx )
+    {
+        if ( rVec[ idx ]->LifeTime < 0.0f )
+        {
+            grParticlePB& rFrom = *rVec[ --active ].get();
+            grParticlePB& rToo = *rVec[ idx ].get();
+
+            rToo.Position = rFrom.Position;
+            rToo.Velocity = rFrom.Velocity;
+            rToo.Mass = rFrom.Mass;
+            rToo.LifeTime = rFrom.LifeTime;
+
+            // TODO: This reset block should not be needed but without it things blow up. Investigate more.
+            // Hint: If idx equals active it writes to itself
+            rFrom.Position = grV2f();
+            rFrom.Velocity = grV2f();
+            rFrom.Mass = 0.0f;
+            rFrom.LifeTime = 0.0f;
+
+            --idx;
+        }
+    }
+    rParticleSetup.ParticlesActive = active;
 }
