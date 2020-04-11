@@ -7,7 +7,6 @@
 
 struct		grParticlePB;
 
-//using		vecParticle = std::vector<uPtr<grParticlePB>>;
 using		arrParticle = uPtr<grParticlePB>[ PARTICLE_PER_SETUP ];
 
 
@@ -25,15 +24,19 @@ public:
 	//////////////////////////////////////////////////
 
 	grParticleAttributePB( void )
-		: Acceleration		( grV2f( 5000.0f, -22500.0f ) )
-		, Gravity			( grV2f( 0.0f, 500.0f ) )
+		: Velocity			( grV2f() )
+		, Acceleration		( grV2f() )
+		, Gravity			( grV2f( 0.0f, 0.0f ) )
 
-		, LifetimeRange		( grV2f( 2.0f, 2.0f ) )
+		, SpeedRange		( grV2f() )
+		, DirectionRange	( grV2f() )
+		, LifetimeRange		( grV2f() )
 
 		, Mass				( 1.0f )
-		, SpawnInMilliSec	( 1.0f / 45.0f )
+		, SpawnInMilliSec	( 1.0f / 100.0f )
 		, SpawnCounter		( 0.0f )
 
+		, bSpeedRange		( false )
 		, bDirectionRange	( false )
 		, bLifetimeRange	( false )
 
@@ -41,48 +44,69 @@ public:
 	{
 		grCore& rCore = grCore::Instance();
 		Position = grV2f( rCore.GetRenderWin().getSize().x * 0.5f, rCore.GetRenderWin().getSize().y * 0.5f );
+
+		// TEST
+		//Acceleration += grV2f( 5000.0f, -22500.0f );
+		// TEST
 	}
 
 	//////////////////////////////////////////////////
-
-	void SetLifetime( const float min, const float max )
+	void SetSpeed( const float min, const float max )
 	{
-		grV2f life = grV2f( std::abs( min ), std::abs( max ) );
-
-		if ( life.x > life.y )
-			life.x = life.y;
-		else if ( life.y < life.x )
-			life.y = life.x;
-
-		LifetimeRange = life;
-		bLifetimeRange = ( life.x == life.y ) ? false : true;
+		grV2f spd = MinMaxFixer( grMath::Abs( min ), grMath::Abs( max ) );
+		SpeedRange = spd;
+		bSpeedRange = ( grMath::CmpFloat( spd.x, spd.y ) ) ? false : true;
 	}
-	void SetDirection( const float min, const float max, const float osc )
+	void SetDirection( const float minDeg, const float maxDeg )
 	{
+		grV2f dir = MinMaxFixer( minDeg, maxDeg );
+		dir = grV2f( grMath::Clamp( minDeg, -359.9, 359.9f ), grMath::Clamp( maxDeg, -359.9, 359.9f ) );
+		//if ( dir.x < 0.0f )
+		//	dir.x = 360.0f + dir.x;
+		//if ( dir.y < 0.0f )
+		//	dir.y = 360.0f + dir.y;
 
+		DirectionRange = dir;
+		bDirectionRange = ( grMath::CmpFloat( dir.x, dir.y ) ) ? false : true;
+	}
+	void SetLifetime( const float minT, const float maxT )
+	{
+		grV2f life = MinMaxFixer( grMath::Abs( minT ), grMath::Abs( maxT ) );
+		LifetimeRange = life;
+		bLifetimeRange = ( grMath::CmpFloat( life.x, life.y ) ) ? false : true;
 	}
 
 	//////////////////////////////////////////////////
 
 private:
 
+	grV2f MinMaxFixer( const float min, const float max )
+	{
+		return grV2f( grMath::Min( min , max ), grMath::Max( min, max ) );
+	}
+
+	//////////////////////////////////////////////////
+
 	grV2f	Position;
 	grV2f	Velocity;
 	grV2f	Acceleration;
 	grV2f	Gravity;
-
-	// Range
-	grV2f	LifetimeRange;
 
 	float	Mass;
 
 	float	SpawnInMilliSec,
 			SpawnCounter;
 
-	// Range
-	bool	bDirectionRange,
+	// Range values
+	grV2f	SpeedRange;
+	grV2f	DirectionRange;
+	grV2f	LifetimeRange;
+
+	// Range flags
+	bool	bSpeedRange,
+			bDirectionRange,
 			bLifetimeRange;
-	// Oscillation
+	// Oscillation flags
 	bool	bDirectionOsc;
 };
 
@@ -135,11 +159,16 @@ struct grParticleSetupPB
 		pAttribute->Velocity = rAttribute.Velocity;
 		pAttribute->Acceleration = rAttribute.Acceleration;
 		pAttribute->Gravity = rAttribute.Gravity;
+
+		pAttribute->SpeedRange = rAttribute.SpeedRange;
+		pAttribute->DirectionRange = rAttribute.DirectionRange;
 		pAttribute->LifetimeRange = rAttribute.LifetimeRange;
+
 		pAttribute->Mass = rAttribute.Mass;
 		pAttribute->SpawnCounter = rAttribute.SpawnCounter;
 		pAttribute->SpawnInMilliSec = rAttribute.SpawnInMilliSec;
 
+		pAttribute->bSpeedRange = rAttribute.bSpeedRange;
 		pAttribute->bDirectionRange = rAttribute.bDirectionRange;
 		pAttribute->bLifetimeRange = rAttribute.bLifetimeRange;
 	}

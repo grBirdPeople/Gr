@@ -42,16 +42,42 @@ grParticleSystemPB::Activate( grParticleSetupPB& rParticleSetup, const float fix
         rPart.Acceleration = rAttribute.Acceleration;
         rPart.Mass = rAttribute.Mass;
 
-        // Direction
-        {
 
+        // Speed
+        float speed = ( rAttribute.bSpeedRange == true )
+            ? pRand->Float( rAttribute.SpeedRange.x, rAttribute.SpeedRange.y )
+            : rAttribute.SpeedRange.x;
+
+        // Direction
+        grV2f dir = grV2f( 0.0f, -1.0f );
+        {
+            grV2f ran;
+            ran.x = ( rAttribute.DirectionRange.x < 0.0f )
+                ? pRand->Float( 360.0f + rAttribute.DirectionRange.x, 359.9f )
+                : pRand->Float( 0.0f, rAttribute.DirectionRange.x );
+            ran.y = ( rAttribute.DirectionRange.y < 0.0f )
+                ? pRand->Float( 360.0f + rAttribute.DirectionRange.y, 359.9f )
+                : pRand->Float( 0.0f, rAttribute.DirectionRange.y );
+
+            ( pRand->IntU( 1 ) == 0 ) ? grMath::RotatePoint( &dir, ran.x * grMath::DegToRad ) : grMath::RotatePoint( &dir, ran.y * grMath::DegToRad );
+
+            int j = 0;
         }
+
+        //float deg = ( rAttribute.bDirectionRange == true )
+        //    ? pRand->Float( rAttribute.DirectionRange.x, rAttribute.DirectionRange.y )
+        //    : rAttribute.DirectionRange.x;
+        //grMath::RotatePoint( &dir, deg * grMath::DegToRad );
+
+        // TEST
+        rPart.Acceleration += ( dir * speed ) / rPart.Mass;
+        // TEST
 
         // Lifetime
         {
             rPart.Lifetime = ( rAttribute.bLifetimeRange == true )
                 ? pRand->Float( rAttribute.LifetimeRange.x, rAttribute.LifetimeRange.y )
-                : rAttribute.LifetimeRange.y;
+                : rAttribute.LifetimeRange.x;
         }
 
 

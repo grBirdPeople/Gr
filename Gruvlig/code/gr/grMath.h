@@ -214,6 +214,7 @@ namespace grMath
 	//////////////////////////////////////////////////
 	inline bool CmpFloat( const float numOne, const float numTwo )
 	{
+		float num = Abs( numOne - numTwo );
 		return Abs( numOne - numTwo ) < Epsilon;
 	}
 }

@@ -97,6 +97,8 @@ grSandbox::grSandbox( void )
 	// Particles Physics Based
 	grParticleSetupPB& rPartSetup = *grParticleManagerPB::Instance().CreateSetup();
 	grParticleAttributePB partAtt;
+	partAtt.SetSpeed( 10000.0f, 10000.0f );
+	partAtt.SetDirection( 5.0f, 90.0f );
 	partAtt.SetLifetime( 0.1f, 1.5f );
 	rPartSetup.SetParticleAttribute( partAtt );
 }
