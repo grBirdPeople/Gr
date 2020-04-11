@@ -8,9 +8,9 @@ struct		grParticleSetupPB;
 //////////////////////////////////////////////////
 struct grParticleSystemPB
 {
-	void Update( grParticleSetupPB& rParticleSetup, const float fixedT );
 	void Deactivate( grParticleSetupPB& rParticleSetup );
 	void Activate( grParticleSetupPB& rParticleSetup, const float fixedT );
+	void Update( grParticleSetupPB& rParticleSetup, const float fixedT );
 };
 
 #endif	// 

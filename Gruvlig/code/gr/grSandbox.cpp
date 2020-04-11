@@ -95,7 +95,7 @@ grSandbox::grSandbox( void )
 	//pPartSys.Init( grV2f( 350.0f, 150.0f ), grV2f( 1.0f, -1.0f ), 50.0f, 2.0f, 4 );
 
 	// Particles Physics Based
-	grParticleManagerPB::Instance().Create();
+	grParticleManagerPB::Instance().CreateSystem();
 }
 
 

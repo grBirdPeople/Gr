@@ -38,7 +38,9 @@ public:
 	//////////////////////////////////////////////////
 
 	void Init( void );
-	grParticleSetupPB* const Create( void );	// TODO: This should return some minimal API
+
+	// grParticleAttributePB* CreateParticleAttribute( void );	// TODO: Implement.
+	grParticleSetupPB* const CreateSystem( void );	// TODO: This should take a particle attribute as parameter and return some API
 	void Update( const float deltaT );
 
 	//////////////////////////////////////////////////
@@ -52,7 +54,6 @@ private:
 
 	// TEST
 	float						m_TimeStepCounter;
-
 	// TEST
 
 };
@@ -63,13 +64,13 @@ private:
 struct grParticleSetupPB
 {
 	grParticleSetupPB( void )
-		: SpawnInMilliSec	( 1.0f / 100.0f )
-		, Id				( 0 )
-		, ParticlesActive	( 0 )
+		: pParticleAttribute	( nullptr )
+		, SpawnInMilliSec		( 1.0f / 3.0f )
+		, SpawnCounter			( SpawnInMilliSec )
+		, Id					( 0 )
+		, ParticlesActive		( 0 )
 		
 	{
-		SpawnCounter = SpawnInMilliSec;
-		pParticleAttribute = nullptr;
 		VecParticle.reserve( PARTICLE_PER_SYS );
 	}
 

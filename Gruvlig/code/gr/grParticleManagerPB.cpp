@@ -17,14 +17,14 @@ grParticleManagerPB::grParticleManagerPB( void )
 //////////////////////////////////////////////////
 grParticleManagerPB::~grParticleManagerPB( void )
 {
-    m_pParticleSystem.reset();
-
     for ( auto& i : m_VecParticleSetup )
     {
         i->pParticleAttribute.reset();
         for ( auto& p : i->VecParticle )
             p.reset();
     }
+
+    m_pParticleSystem.reset();
 }
 
 
@@ -34,7 +34,6 @@ void
 grParticleManagerPB::Init( void )
 {
     sInt id = -1;
-    m_VecParticleSetup.reserve( PARTICLE_SYS );
     for ( uInt i = 0; i < PARTICLE_SYS; ++i )
     {
         std::unique_ptr<grParticleSetupPB> pSetup = std::make_unique<grParticleSetupPB>();
@@ -50,7 +49,7 @@ grParticleManagerPB::Init( void )
 // CreateSystem
 //////////////////////////////////////////////////
 grParticleSetupPB* const
-grParticleManagerPB::Create( void )
+grParticleManagerPB::CreateSystem( void )
 {
     if ( m_SetupQuantity >= PARTICLE_SYS )
     {
@@ -62,10 +61,7 @@ grParticleManagerPB::Create( void )
 
     grParticleSetupPB* pSetup = m_VecParticleSetup[ m_SetupQuantity ].get();
     for ( uInt i = 0; i < PARTICLE_PER_SYS; ++i )
-    {
-        std::unique_ptr<grParticlePB> pPart = std::make_unique<grParticlePB>();
-        pSetup->VecParticle.push_back( std::move( pPart ) );
-    }
+        pSetup->VecParticle.push_back( std::move( std::make_unique<grParticlePB>() ) );
 
     ++m_SetupQuantity;
     return pSetup;
@@ -83,15 +79,6 @@ grParticleManagerPB::Update( const float deltaT )
         // Reset time step
         m_TimeStepCounter += PARTICLE_TIMESTEP;
 
-        // Update
-        for ( uInt idx = 0; idx < m_SetupQuantity; ++idx )
-        {
-            if ( m_VecParticleSetup[ idx ]->ParticlesActive == 0 )
-                continue;
-
-            m_pParticleSystem->Update( *m_VecParticleSetup[ idx ], PARTICLE_TIMESTEP );
-        }
-
         // Deactivate
         for ( uInt idx = 0; idx < m_SetupQuantity; ++idx )
         {
@@ -105,6 +92,15 @@ grParticleManagerPB::Update( const float deltaT )
         for ( uInt idx = 0; idx < m_SetupQuantity; ++idx )
         {
             m_pParticleSystem->Activate( *m_VecParticleSetup[ idx ], PARTICLE_TIMESTEP );
+        }
+
+        // Update
+        for ( uInt idx = 0; idx < m_SetupQuantity; ++idx )
+        {
+            if ( m_VecParticleSetup[ idx ]->ParticlesActive == 0 )
+                continue;
+
+            m_pParticleSystem->Update( *m_VecParticleSetup[ idx ], PARTICLE_TIMESTEP );
         }
     }
 }
