@@ -7,7 +7,8 @@
 
 struct		grParticlePB;
 
-using		vecParticle = std::vector<uPtr<grParticlePB>>;
+//using		vecParticle = std::vector<uPtr<grParticlePB>>;
+using		arrParticle = uPtr<grParticlePB>[ PARTICLE_PER_SETUP ];
 
 
 // TODO: When there is an API for particles hook it up to grParticleAttributePB
@@ -33,8 +34,10 @@ public:
 		, SpawnInMilliSec	( 1.0f / 45.0f )
 		, SpawnCounter		( 0.0f )
 
-		, bAccelerationRange	( false )
-		, bLifetimeRange		( false )
+		, bDirectionRange	( false )
+		, bLifetimeRange	( false )
+
+		, bDirectionOsc		( false )
 	{
 		grCore& rCore = grCore::Instance();
 		Position = grV2f( rCore.GetRenderWin().getSize().x * 0.5f, rCore.GetRenderWin().getSize().y * 0.5f );
@@ -54,10 +57,9 @@ public:
 		LifetimeRange = life;
 		bLifetimeRange = ( life.x == life.y ) ? false : true;
 	}
-	void SetSpeed( const float min, const float max, const float mod )
+	void SetDirection( const float min, const float max, const float osc )
 	{
-		// min/max equals degrees
-		// mod is speed change over time
+
 	}
 
 	//////////////////////////////////////////////////
@@ -69,6 +71,7 @@ private:
 	grV2f	Acceleration;
 	grV2f	Gravity;
 
+	// Range
 	grV2f	LifetimeRange;
 
 	float	Mass;
@@ -76,8 +79,11 @@ private:
 	float	SpawnInMilliSec,
 			SpawnCounter;
 
-	bool	bAccelerationRange,
+	// Range
+	bool	bDirectionRange,
 			bLifetimeRange;
+	// Oscillation
+	bool	bDirectionOsc;
 };
 
 
@@ -87,14 +93,14 @@ struct grParticlePB
 {
 	grParticlePB( void )
 		: Mass		( 0.0f )
-		, LifeTime	( 0.0f )
+		, Lifetime	( 0.0f )
 	{}
 
 	grV2f	Position;
 	grV2f	Velocity;
 	grV2f	Acceleration;
 	float	Mass,
-			LifeTime;
+			Lifetime;
 };
 
 
@@ -107,16 +113,18 @@ struct grParticleSetupPB
 		, ParticlesActive	( 0 )
 
 	{
+		for( sizeT i = 0; i < PARTICLE_PER_SETUP; ++i )
+			arrParticle[ i ] = nullptr;
+
 		pAttribute = std::make_unique<grParticleAttributePB>();
-		vecParticle.reserve( PARTICLE_PER_SETUP );
 	}
 
 	~grParticleSetupPB( void )
 	{
 		pAttribute.reset();
 
-		for ( auto& p : vecParticle )
-			p.reset();
+		for( sInt i = 0; i < PARTICLE_PER_SETUP; ++i )
+			arrParticle[ i ].reset();
 	}
 
 	//////////////////////////////////////////////////
@@ -132,14 +140,15 @@ struct grParticleSetupPB
 		pAttribute->SpawnCounter = rAttribute.SpawnCounter;
 		pAttribute->SpawnInMilliSec = rAttribute.SpawnInMilliSec;
 
-		pAttribute->bAccelerationRange = rAttribute.bAccelerationRange;
+		pAttribute->bDirectionRange = rAttribute.bDirectionRange;
 		pAttribute->bLifetimeRange = rAttribute.bLifetimeRange;
 	}
 
 	//////////////////////////////////////////////////
 
+	arrParticle					arrParticle;
 	uPtr<grParticleAttributePB>	pAttribute;
-	vecParticle					vecParticle;
+
 	uInt						Id,
 								ParticlesActive;
 };

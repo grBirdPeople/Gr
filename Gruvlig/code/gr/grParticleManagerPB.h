@@ -13,8 +13,8 @@
 struct		grParticlePB;
 struct		grParticleSetupPB;
 
-using		vecParticleSetup = std::vector<uPtr<grParticleSetupPB>>;
-using		vecSystems = std::vector<uPtr<grParticleSystemPB>>;	// If I wan't to thread there can exists one system for each thread
+using		arrParticleSetup = uPtr<grParticleSetupPB>[ PARTICLE_SETUPS ];
+using		arrSystems = uPtr<grParticleSystemPB>[ PARTICLE_SYTEMS ];
 
 
 // TODO: Setup is one particle attribute followed by all the particles per particle system instance.
@@ -44,14 +44,14 @@ public:
 
 private:
 
-	vecSystems			m_vecSystems;
-	vecParticleSetup	m_vecParticleSetup;
-
-	uInt				m_SetupQuantity;
+	arrParticleSetup	m_arrParticleSetup;
+	arrSystems			m_arrSystems;
 
 	// TEST
 	float				m_TimeStepCounter;
 	// TEST
+
+	uInt				m_SetupQuantity;
 
 };
 

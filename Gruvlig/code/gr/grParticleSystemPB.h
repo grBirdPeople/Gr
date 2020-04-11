@@ -1,6 +1,8 @@
 #ifndef		_H_GRPARTICLESYSTEMPB_
 #define		_H_GRPARTICLESYSTEMPB_
 
+#include	"grCommon.h"
+
 struct		grParticleSetupPB;
 class		grRandom;
 
@@ -20,7 +22,7 @@ struct grParticleSystemPB
 
 	//////////////////////////////////////////////////
 
-	grRandom*	pRandom;
+	uPtr<grRandom> pRand;
 };
 
 #endif	// 

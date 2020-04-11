@@ -129,40 +129,40 @@ grParticleSystem::ActivateParticle( const float deltaT )
 			// Rand pos
 			if ( m_bRandPosition == true )
 			{
-				pTmp->Position.x += m_pRandGen->GetRandFloat( -m_RandPosRange.x, m_RandPosRange.x );
-				pTmp->Position.y += m_pRandGen->GetRandFloat( -m_RandPosRange.y, m_RandPosRange.y );
+				pTmp->Position.x += m_pRandGen->Float( -m_RandPosRange.x, m_RandPosRange.x );
+				pTmp->Position.y += m_pRandGen->Float( -m_RandPosRange.y, m_RandPosRange.y );
 			}
 
 			// Rand dir
 			if ( m_bRandDirection == true )
 			{
-				float randRad = m_pRandGen->GetRandFloat( -m_RandDirectionRange, m_RandDirectionRange ) * grMath::DegToRad;
+				float randRad = m_pRandGen->Float( -m_RandDirectionRange, m_RandDirectionRange ) * grMath::DegToRad;
 				grMath::RotatePoint( &pTmp->Direction, randRad );
 			}
 
 			// Rand gravity
 			if ( m_bRandGravity == true )
 			{
-				float randX = m_pRandGen->GetRandFloat( 1.0f, grMath::Abs( m_RandGravityRange ) );
+				float randX = m_pRandGen->Float( 1.0f, grMath::Abs( m_RandGravityRange ) );
 				pTmp->Gravity = m_ParticleBlueprint->Gravity * randX;
 			}
 
 			// Rand speed
 			if ( m_bRandSpeed == true )
 			{
-				pTmp->Speed -= m_pRandGen->GetRandFloat( 0.0f, m_RandSpeedRange );
+				pTmp->Speed -= m_pRandGen->Float( 0.0f, m_RandSpeedRange );
 			}
 
 			// Rand speed change
 			if ( m_bRandSpeedChange == true )
 			{
-				pTmp->SpeedChange = m_pRandGen->GetRandFloat( -m_RandSpeedChangeRange, m_RandSpeedChangeRange );
+				pTmp->SpeedChange = m_pRandGen->Float( -m_RandSpeedChangeRange, m_RandSpeedChangeRange );
 			}
 
 			// Rand lifetime
 			if ( m_bRandLife == true )
 			{
-				pTmp->LifeTime -= m_pRandGen->GetRandFloat( 0.0f, m_RandLifeRange );
+				pTmp->LifeTime -= m_pRandGen->Float( 0.0f, m_RandLifeRange );
 			}
 
 			// TEST
