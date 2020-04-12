@@ -16,12 +16,15 @@ class grSandbox
 {
 public:
 
-			grSandbox	( void );
+	grSandbox	( void );
+
+	grSandbox( grSandbox const& ) = delete;
+	grSandbox& operator=( grSandbox const& ) = delete;
 
 	//////////////////////////////////////////////////
 
-	void	Update		( const float deltaT );
-	void	Render		( sf::RenderWindow& rRenderWin );
+	void Update( const float deltaT );
+	void Render( sf::RenderWindow& rRenderWin );
 
 	//////////////////////////////////////////////////
 

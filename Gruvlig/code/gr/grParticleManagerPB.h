@@ -1,10 +1,10 @@
 #ifndef		_H_GRPARTICLEMANAGERPB_
 #define		_H_GRPARTICLEMANAGERPB_
 
+#define		PARTICLE_SYTEMS		1				// Simulate threads
 #define		PARTICLE_SETUPS		100
 #define		PARTICLE_PER_SETUP	500
 #define		PARTICLE_TIMESTEP	1.0f / 60.0f
-#define		PARTICLE_SYTEMS		1				// Simulate threads
 
 #include	"grParticlePB.h"
 #include	"grSingleton.h"

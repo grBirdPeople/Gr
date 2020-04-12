@@ -17,10 +17,16 @@ grParticleManagerPB::grParticleManagerPB( void )
 grParticleManagerPB::~grParticleManagerPB( void )
 {
     for ( sizeT i = 0; i < PARTICLE_SETUPS; ++i )
-        m_arrParticleSetup[ i ].release();
+    {
+        if( m_arrParticleSetup[ i ] != nullptr )
+            m_arrParticleSetup[ i ].release();
+    }
 
     for ( sizeT i = 0; i < PARTICLE_SYTEMS; ++i )
-        m_arrSystems[ i ].release();    
+    {
+        if ( m_arrSystems[ i ] != nullptr )
+            m_arrSystems[ i ].release();    
+    }
 }
 
 
@@ -31,15 +37,10 @@ grParticleManagerPB::Init( void )
 {
     sInt id = -1;
     for ( sizeT i = 0; i < PARTICLE_SETUPS; ++i )
-    {
-        std::unique_ptr<grParticleSetupPB> pSetup = std::make_unique<grParticleSetupPB>( ( uInt )++id );
-        m_arrParticleSetup[ i ] = std::move( pSetup );
-    }
+        m_arrParticleSetup[ i ] = std::move( std::make_unique<grParticleSetupPB>( ( uInt )++id ) );
 
     for ( sizeT i = 0; i < PARTICLE_SYTEMS; ++i )
-    {
         m_arrSystems[ i ] = std::make_unique<grParticleSystemPB>();
-    }
 }
 
 
@@ -88,9 +89,7 @@ grParticleManagerPB::Update( const float deltaT )
         // TEST
         // Activate
         for ( sizeT idx = 0; idx < m_SetupQuantity; ++idx )
-        {
             m_arrSystems[ 0 ]->Activate( *m_arrParticleSetup[ idx ], PARTICLE_TIMESTEP );
-        }
 
         // Update
         for ( sizeT idx = 0; idx < m_SetupQuantity; ++idx )

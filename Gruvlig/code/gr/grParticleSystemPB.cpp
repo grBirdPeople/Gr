@@ -39,47 +39,59 @@ grParticleSystemPB::Activate( grParticleSetupPB& rParticleSetup, const float fix
         grParticlePB& rPart = *rParticleSetup.arrParticle[ rParticleSetup.ParticlesActive ].get();
 
         rPart.Position = rAttribute.Position;
-        rPart.Acceleration = rAttribute.Acceleration;
         rPart.Mass = rAttribute.Mass;
 
 
         // Speed
-        float speed = ( rAttribute.bSpeedRange == true )
-            ? pRand->Float( rAttribute.SpeedRange.x, rAttribute.SpeedRange.y )
-            : rAttribute.SpeedRange.x;
+        float speed = 0.0f;
+        if ( rAttribute.bSpeedRange == true )
+        {
+            speed = pRand->Float( rAttribute.SpeedRange.x, rAttribute.SpeedRange.y );
+        }
+        else
+        {
+            speed = rAttribute.SpeedRange.x;
+        }
 
         // Direction
         grV2f dir = grV2f( 0.0f, -1.0f );
+        if ( rAttribute.bDirectionRange == true )
         {
-            grV2f ran;
-            ran.x = ( rAttribute.DirectionRange.x < 0.0f )
-                ? pRand->Float( 360.0f + rAttribute.DirectionRange.x, 359.9f )
-                : pRand->Float( 0.0f, rAttribute.DirectionRange.x );
-            ran.y = ( rAttribute.DirectionRange.y < 0.0f )
-                ? pRand->Float( 360.0f + rAttribute.DirectionRange.y, 359.9f )
-                : pRand->Float( 0.0f, rAttribute.DirectionRange.y );
+            grV2f range = rAttribute.DirectionRange;
+            float randDeg = 0.0f;
+            if ( range.x > range.y )
+            {
+                range.x = grMath::Abs( range.x - 360.0f );
+                randDeg = range.x + range.y;
+                randDeg = pRand->Float( 0.0f, randDeg );
+                randDeg -= range.x;
+            }
+            else
+            {
+                randDeg = range.y - range.x;
+                randDeg = pRand->Float( 0.0f, randDeg );
+                randDeg += range.x;
+            }
 
-            ( pRand->IntU( 1 ) == 0 ) ? grMath::RotatePoint( &dir, ran.x * grMath::DegToRad ) : grMath::RotatePoint( &dir, ran.y * grMath::DegToRad );
-
-            int j = 0;
+            grMath::RotatePoint( &dir, randDeg * grMath::DegToRad );
         }
-
-        //float deg = ( rAttribute.bDirectionRange == true )
-        //    ? pRand->Float( rAttribute.DirectionRange.x, rAttribute.DirectionRange.y )
-        //    : rAttribute.DirectionRange.x;
-        //grMath::RotatePoint( &dir, deg * grMath::DegToRad );
-
-        // TEST
-        rPart.Acceleration += ( dir * speed ) / rPart.Mass;
-        // TEST
+        else
+        {
+            grMath::RotatePoint( &dir, rAttribute.DirectionRange.x * grMath::DegToRad );
+        }
 
         // Lifetime
+        if ( rAttribute.bLifetimeRange == true )
         {
-            rPart.Lifetime = ( rAttribute.bLifetimeRange == true )
-                ? pRand->Float( rAttribute.LifetimeRange.x, rAttribute.LifetimeRange.y )
-                : rAttribute.LifetimeRange.x;
+            rPart.Lifetime = pRand->Float( rAttribute.LifetimeRange.x, rAttribute.LifetimeRange.y );
+        }
+        else
+        {
+            rPart.Lifetime = rAttribute.LifetimeRange.x;
         }
 
+        // Accelerations
+        rPart.Acceleration += ( dir * speed ) / rPart.Mass;
 
 
         ++rParticleSetup.ParticlesActive;
