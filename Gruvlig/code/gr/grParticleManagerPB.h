@@ -1,26 +1,82 @@
 #ifndef		_H_GRPARTICLEMANAGERPB_
 #define		_H_GRPARTICLEMANAGERPB_
 
-#define		PARTICLE_SYTEMS		1				// Simulate threads
-#define		PARTICLE_SETUPS		100
-#define		PARTICLE_PER_SETUP	500
-#define		PARTICLE_TIMESTEP	1.0f / 60.0f
+#define		PARTICLE_SYTEMS			1				// If threads would happen
+#define		PARTICLE_ATTRIBUTES		5
+#define		PARTICLE_PER_ATTRIBUTE	10
+#define		PARTICLE_TIMESTEP		1.0f / 60.0f	// If physics update for particles
 
-#include	"grParticlePB.h"
 #include	"grSingleton.h"
+
 #include	"grParticleSystemPB.h"
+#include	"grParticlePB.h"
 
-struct		grParticlePB;
-struct		grParticleSetupPB;
-
-using		arrParticleSetup = uPtr<grParticleSetupPB>[ PARTICLE_SETUPS ];
-using		arrSystems = uPtr<grParticleSystemPB>[ PARTICLE_SYTEMS ];
+using		arrParticle = grParticlePB*[ PARTICLE_ATTRIBUTES * PARTICLE_PER_ATTRIBUTE ];
 
 
-// TODO: Setup is one particle attribute followed by all the particles per particle system instance.
-// Struct holds one attribute and a vector of max particles. Structs in vector.
-// Possible to have one system for each thread. System iterates over struct vector. Test if: one or three loops of particle setups Activate/Deactivate/Update.
-// Avoid pointer chasing is done on Activate/Deactivate/Update.
+// Dynamically aligned loop que, which is broken
+template<typename T>
+class grDALQue
+{
+public:
+
+	grDALQue( const uInt size )
+		: Size		( size )
+		, FirstIdx	( 0 )
+		, Quantity	( 0 )
+	{
+		arrT = new T[ Size ];
+		memset( arrT, 0, Size );
+	}
+
+	~grDALQue( void )
+	{
+		delete[] arrT;
+	}
+
+	grDALQue( grDALQue const& ) = delete;
+	grDALQue& operator=( grDALQue const& ) = delete;
+
+	const uInt GetQuantity( void ) const
+	{
+		return Quantity;
+	}
+
+	void Push( const T& rT )
+	{
+		if ( Quantity == Size )
+		{
+#ifdef DEBUG
+			std::puts( "DALQue::Push(): Size maxed out. No element was added.\n" );
+#endif // DEBUG
+			return;
+		}
+
+		arrT[ FirstIdx + Quantity ] = rT;
+		++Quantity;
+	}
+
+	T Pull( void )
+	{
+		assert( ( Quantity > 0 ) && "DALQue::Pull(): Que is empty" );
+
+		--Quantity;
+		T firstIdx = arrT[ FirstIdx ];
+
+		if ( ++firstIdx == Size )
+			firstIdx = 0;
+
+		return firstIdx;
+	}
+
+private:
+
+	T* arrT;
+
+	sizeT	Size,
+		FirstIdx,
+		Quantity;
+};
 
 
 // grParticleManagerPB
@@ -34,24 +90,65 @@ public:
 
 	//////////////////////////////////////////////////
 
-	void Init( void );
-
-	inline grParticleAttributePB CreateParticleAttribute( void );
-	grParticleSetupPB* const CreateSetup( void );	// TODO: This should take a particle attribute as parameter and return some API
+	//inline grParticleAttributePB CreateParticleAttribute( void );
+	grParticleAttributePB* const CreateParticleSystem( void );
 	void Update( const float deltaT );
 
 	//////////////////////////////////////////////////
 
 private:
+	
+	struct AttPartCombo
+	{
+		AttPartCombo( const uInt id, const sizeT size )
+			: uPtrArrParticles	( new grParticlePB*[ size ]() )
+			, uPtrAttribute		( new grParticleAttributePB() )
+			, Id				( id )
+			, ActiveParicles	( 0 )
+			, Size				( size )
+		{
+			for ( sizeT i = 0; i < Size; ++i )
+				uPtrArrParticles[ i ] = new grParticlePB();
 
-	arrParticleSetup	m_arrParticleSetup;
-	arrSystems			m_arrSystems;
+			uPtrAttribute = std::make_unique<grParticleAttributePB>();
+			uPtrAttribute->Id = Id;
+		}
+		~AttPartCombo( void )
+		{
+			for ( sizeT i = 0; i < Size; ++i )
+			{
+				if ( uPtrArrParticles[ i ] != nullptr )
+					DELANDNULL( uPtrArrParticles[ i ] );
+			}
+			uPtrArrParticles.release();
 
-	// TEST
-	float				m_TimeStepCounter;
-	// TEST
+			if ( uPtrAttribute != nullptr )
+				uPtrAttribute.release();
+		}
+		AttPartCombo( AttPartCombo const& ) = delete;
+		AttPartCombo& operator=( AttPartCombo  const& ) = delete;
 
-	uInt				m_SetupQuantity;
+		//////////////////////////////////////////////////
+
+		uPtr<grParticlePB*[]>		uPtrArrParticles;
+		uPtr<grParticleAttributePB>	uPtrAttribute;
+
+		uInt	Id,
+				ActiveParicles;
+
+		sizeT	Size;
+	};
+
+	//////////////////////////////////////////////////
+
+	uPtr<uPtr<AttPartCombo>[]>			m_uPtrArrAttPartCombo;
+	uPtr<uPtr<grParticleSystemPB>[]>	m_uPtrSystems;
+
+	uInt				m_CreatedSystems,
+						m_CreatedArrCombo,
+						m_TotalParticles;
+
+	grDALQue<uInt>*		m_Que;
 
 };
 

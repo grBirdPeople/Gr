@@ -3,18 +3,16 @@
 
 #include	"grCommon.h"
 
-struct		grParticleSetupPB;
+struct		grParticleAttributePB;
+struct		grParticlePB;
 class		grRandom;
 
-// All alive particles are aligned so no iteration over dead/deactivated particles are done.
-// When a particle dies it's data get's overwritten from the last alive particle in the list and the list count get's set to one less.
-// See deactivate function.
 
 // grParticleSystemPB
 //////////////////////////////////////////////////
 struct grParticleSystemPB
 {
-	grParticleSystemPB( void );
+	grParticleSystemPB( const uInt id );
 	~grParticleSystemPB( void );
 
 	grParticleSystemPB( grParticleSystemPB const& ) = delete;
@@ -22,13 +20,28 @@ struct grParticleSystemPB
 
 	//////////////////////////////////////////////////
 
-	void Activate( grParticleSetupPB& rParticleSetup, const float fixedT );
-	void Update( grParticleSetupPB& rParticleSetup, const float fixedT );
-	void Deactivate( grParticleSetupPB& rParticleSetup );
+	const uInt GetId( void ) const { return Id; }
 
 	//////////////////////////////////////////////////
 
-	uPtr<grRandom> pRand;
+	void Activate( uPtr<grParticlePB*[]>& rArrPart,
+				   const uPtr<grParticleAttributePB>& rArrAtt,
+				   const float deltaT );
+
+	void Update( uPtr<grParticlePB*[]>& rArrPart,
+				 const uPtr<grParticleAttributePB>& rArrAtt,
+				 const float deltaT );
+
+	void Deactivate( uPtr<grParticlePB*[]>& rArrPart,
+					 const uPtr<grParticleAttributePB>& rArrAtt );
+
+	//////////////////////////////////////////////////
+
+private:
+
+	uPtr<grRandom>	pRand;
+
+	uInt			Id;
 };
 
 #endif	// 

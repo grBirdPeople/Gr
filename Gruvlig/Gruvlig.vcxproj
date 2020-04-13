@@ -247,6 +247,7 @@
     <ClInclude Include="code\gr\grParticleManager.h" />
     <ClInclude Include="code\gr\grParticleManagerPB.h" />
     <ClInclude Include="code\gr\grParticlePB.h" />
+    <ClInclude Include="code\gr\grParticleSetupPB.h" />
     <ClInclude Include="code\gr\grParticleSystem.h" />
     <ClInclude Include="code\gr\grParticleSystemPB.h" />
     <ClInclude Include="code\gr\grRandom.h" />

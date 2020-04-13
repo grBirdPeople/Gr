@@ -128,7 +128,6 @@ void
 grCore::Init( void )
 {
 #ifdef	DEBUG
-	grParticleManagerPB::Instance().Init();
 	m_pSandbox = new grSandbox();
 #endif	//DEBUG_MODE
 }
