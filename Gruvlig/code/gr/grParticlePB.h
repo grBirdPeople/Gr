@@ -21,14 +21,19 @@ public:
 	grParticlAttributePB( void )
 		: Id		( 0 )
 		, Position	( grV2f() )
+		, Velocity	( grV2f() )
+		, Lifetime	( 0.0f )
 	{
-
+		grCore& rCore = grCore::Instance();
+		Position = grV2f( rCore.GetRenderWin().getSize().x * 0.5f, rCore.GetRenderWin().getSize().y * 0.5f );
 	}
 
 	const uInt GetId( void ) const { return Id; }
 
 	grV2f	Position;
 	grV2f	Velocity;
+
+	float	Lifetime;
 
 private:
 

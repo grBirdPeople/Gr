@@ -110,23 +110,17 @@ private:
 struct SParticleBlock
 {
 	SParticleBlock( const uInt id, const sizeT size )
-		: uPArrParticle		( new grParticlePB*[ size ]() )
-		, m_DeactivateIdQue	( new grDALQue<uInt>( size ) )
-		, uPAttribute		( new grParticlAttributePB() )
-		, SpawnCounter		( 0.0f )
-		, SpawnInMilliSec	( 1.0f / 10.0f )	// Set to zero when particle API exists
-		, Id				( id )
-		, ActiveParticles	( 0 )
-		, PartSize			( size )
+		: uPArrParticle			( new grParticlePB*[ size ]() )
+		, m_DeactivatePartQue	( new grDALQue<uInt>( size ) )
+		, uPAttribute			( new grParticlAttributePB() )
+		, SpawnCounter			( 0.0f )
+		, SpawnInMilliSec		( 1.0f / 25.0f )	// Set to zero when particle API exists
+		, Id					( id )
+		, PartActive		( 0 )
+		, PartSize				( size )
 	{
 		for ( sizeT i = 0; i < PartSize; ++i )
-		{
 			uPArrParticle[ i ] = new grParticlePB();
-
-			// TEST
-			uPArrParticle[ i ]->Lifetime = ( float )i;
-			// TEST
-		}
 
 		uPAttribute->Id = Id;
 	}
@@ -139,8 +133,8 @@ struct SParticleBlock
 		}
 		delete[] uPArrParticle.release();
 
-		if( m_DeactivateIdQue != nullptr )
-			delete m_DeactivateIdQue.release();
+		if( m_DeactivatePartQue != nullptr )
+			delete m_DeactivatePartQue.release();
 
 		if ( uPAttribute != nullptr )
 			delete uPAttribute.release();
@@ -151,14 +145,14 @@ struct SParticleBlock
 	//////////////////////////////////////////////////
 
 	uPtr<grParticlePB*[]>		uPArrParticle;
-	uPtr<grDALQue<uInt>>		m_DeactivateIdQue;
+	uPtr<grDALQue<uInt>>		m_DeactivatePartQue;
 	uPtr<grParticlAttributePB>	uPAttribute;
 
 	float	SpawnCounter,
 			SpawnInMilliSec;
 
 	uInt	Id,
-			ActiveParticles;
+			PartActive;
 
 	sizeT	PartSize;
 };

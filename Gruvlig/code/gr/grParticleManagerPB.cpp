@@ -3,6 +3,11 @@
 #include    "grCore.h"
 #include	"grDefine.h"
 
+// TEST DRAW
+#include	"grBBox.h"
+#include	"grDebugManager.h"
+// TEST DRAW
+
 
 // cTor
 //////////////////////////////////////////////////
@@ -38,8 +43,6 @@ grParticleManagerPB::~grParticleManagerPB( void )
     {
         if ( m_uPArrPartBlock[ i ] != nullptr )
             delete m_uPArrPartBlock[ i ].release();
-
-        
     }
     if ( m_uPArrPartBlock != nullptr )
         delete m_uPArrPartBlock.release();
@@ -99,4 +102,19 @@ grParticleManagerPB::Update( const float deltaT )
 
     for ( sizeT i = 0; i < m_CreatedBlocks; ++i )
         m_uPSystems[ 0 ]->Deactivate( m_uPArrPartBlock[ i ] );
+
+
+    // TEST DRAW
+    for ( sizeT i = 0; i < m_CreatedBlocks; ++i )
+    {
+        uInt size = m_uPArrPartBlock[ i ]->PartActive;
+        for ( sizeT j = 0; j < size; ++j )
+        {
+            // TEST
+            grBBox box( grV2f( 20.0f, 20.0f ), m_uPArrPartBlock[ i ]->uPArrParticle[ j ]->Position );
+            grDebugManager::Instance().AddBBox( box, sf::Color::White );
+            // TEST
+        }
+    }
+    // TEST DRAW
 }

@@ -1,10 +1,9 @@
 #include	"grParticleSystemPB.h"
 
-#include	"grBBox.h"
-#include	"grDebugManager.h"
 #include    "grRandom.h"
 #include	"grV2.h"
 #include    "grParticleManagerPB.h"
+#include    "grAlgo.h"
 
 
 // cTor
@@ -29,25 +28,24 @@ grParticleSystemPB::~grParticleSystemPB( void )
 void
 grParticleSystemPB::Activate( uPtr<SParticleBlock>& rPartBlock, const float deltaT )
 {
+    rPartBlock->SpawnCounter -= deltaT;
+    if ( rPartBlock->SpawnCounter <= 0.0f )
+    {
+        rPartBlock->SpawnCounter += rPartBlock->SpawnInMilliSec;
+        if ( rPartBlock->PartActive >= rPartBlock->PartSize )
+            return;
 
+        // Think writing data should maybe be done elsewhere
+        {
+            grParticlePB& rPart = *rPartBlock->uPArrParticle[ rPartBlock->PartActive ];
+            grParticlAttributePB& rAtt = *rPartBlock->uPAttribute.get();
+            rPart.Position = rAtt.Position;
+            rPart.Velocity = grV2f( -1.0f, -1.0f ).Normalized() * 50.0f;  //rAtt.Velocity;
+            rPart.Lifetime = 2.0f; //rAtt.Lifetime;
+        }
 
-        //rBlock->SpawnCounter -= deltaT;
-        //if ( rBlock->SpawnCounter <= 0.0f )
-        //{
-        //    rBlock->SpawnCounter += rBlock->SpawnInMilliSec;
-        //    if ( rBlock->ActiveParticles >= rBlock->Size )
-        //        return;
-
-        //    ++rBlock->ActiveParticles;
-
-        //    // Think writing data should be done seperate
-        //    {
-        //        grParticlePB& rPart = *rBlock->uPArrParticles[ rBlock->ActiveParticles - 1 ];
-        //        grParticlAttributePB& rAtt = *rBlock->uPAttribute.get();
-        //        rPart.Position = rAtt.Position;
-        //        rPart.Velocity = rAtt.Velocity;
-        //    }
-        //}
+        ++rPartBlock->PartActive;
+    }
 
 
 
@@ -127,24 +125,20 @@ grParticleSystemPB::Activate( uPtr<SParticleBlock>& rPartBlock, const float delt
 void
 grParticleSystemPB::Update( uPtr<SParticleBlock>& rPartBlock, const float deltaT )
 {
-    //grParticlAttributePB& rAtt = *rBlock->uPAttribute.get();
-    //for ( sizeT idx = 0; idx < rBlock->ActiveParticles; ++idx )
-    //{
-    //    rBlock->uPArrParticles[ idx ]->Lifetime -= deltaT;
-    //    if ( rBlock->uPArrParticles[ idx ]->Lifetime < grMath::Epsilon )
-    //    {
-    //        rBlock->bitSet << idx;
-    //        continue;
-    //    }
+    grParticlAttributePB& rAtt = *rPartBlock->uPAttribute.get();
+    for ( sizeT idx = 0; idx < rPartBlock->PartActive; ++idx )
+    {
+        rPartBlock->uPArrParticle[ idx ]->Lifetime -= deltaT;
+        if ( rPartBlock->uPArrParticle[ idx ]->Lifetime <= grMath::Epsilon )
+        {
+            rPartBlock->m_DeactivatePartQue->Push( idx );
+            continue;
+        }
 
-    //    rBlock->uPArrParticles[ idx ]->Position += rBlock->uPArrParticles[ idx ]->Velocity * deltaT;
-    //}
+        rPartBlock->uPArrParticle[ idx ]->Position += rPartBlock->uPArrParticle[ idx ]->Velocity * deltaT;
+    }
 
-        //// TEST
-        ////printf( "%s %d \n", "Particles Active: ", rParticleSetup.ParticlesActive );
-        //grBBox box( grV2f( 20.0f, 20.0f ), rPart.Position );
-        //grDebugManager::Instance().AddBBox( box, sf::Color::White );
-        //// TEST
+
 
 
 
@@ -188,6 +182,32 @@ grParticleSystemPB::Update( uPtr<SParticleBlock>& rPartBlock, const float deltaT
 void
 grParticleSystemPB::Deactivate( uPtr<SParticleBlock>& rPartBlock )
 {
+    if ( rPartBlock->m_DeactivatePartQue->GetQuantity() > 0 )
+    {
+        std::vector<uInt> ids;
+        sizeT quantity = rPartBlock->m_DeactivatePartQue->GetQuantity();
+        ids.reserve( quantity );
+        for ( uInt i = 0; i < quantity; ++i )
+            ids.push_back( rPartBlock->m_DeactivatePartQue->Pull() );
+
+        grAlgo::InsrtSort( ids );
+
+        for ( uInt idx = 0; idx < ids.size(); ++idx )
+        {
+            grParticlePB& rTooPart = *rPartBlock->uPArrParticle[ ids[ idx ] ];
+            grParticlePB& rFromPart = *rPartBlock->uPArrParticle[ rPartBlock->PartActive - 1 ];
+
+            rTooPart = rFromPart;
+
+            rFromPart.Position = 0.0f;
+            rFromPart.Velocity = 0.0f;
+            rFromPart.Lifetime = 0.0f;
+
+            --rPartBlock->PartActive;
+        }
+    }
+
+
     //sInt active = ( sInt )rParticleSetup.ParticlesActive;
     //for ( sInt idx = 0; idx < active; ++idx )
     //{
