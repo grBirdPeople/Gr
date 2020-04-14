@@ -12,19 +12,23 @@
 
 // TODO: When there is an API for particles hook it up to grParticleAttributePB
 
-class grParticleAttributePB
+class grParticlAttributePB
 {
 public:
 
-	friend class grParticleManagerPB;
+	friend struct SParticleBlock;
 
-	grParticleAttributePB( void )
-		: Id				( 0 )
+	grParticlAttributePB( void )
+		: Id		( 0 )
+		, Position	( grV2f() )
 	{
 
 	}
 
 	const uInt GetId( void ) const { return Id; }
+
+	grV2f	Position;
+	grV2f	Velocity;
 
 private:
 

@@ -36,13 +36,13 @@ public:
 
 	inline sInt IntS( const sInt min, const sInt max )
 	{
-		m_RandIntS.param( std::uniform_int_distribution<signed int>::param_type( min, max ) );
+		m_RandIntS.param( std::uniform_int_distribution<signed int>::param_type( ( signed int )min, ( signed int )max ) );
 		return ( sInt )m_RandIntS( m_Mt );
 	}
 
 	inline uInt IntU( const uInt max )
 	{
-		m_RandIntU.param( std::uniform_int_distribution<unsigned int>::param_type( 0, max ) );
+		m_RandIntU.param( std::uniform_int_distribution<unsigned int>::param_type( 0, ( unsigned int )max ) );
 		return ( uInt )m_RandIntU( m_Mt );
 	}
 

@@ -100,7 +100,7 @@ grSandbox::grSandbox( void )
 	//partAtt.SetLifetime( 1.0f, 1.25f );
 	//m_rParticleSetup.SetParticleAttribute( partAtt );
 
-	grParticleAttributePB& rAtt1 = *grParticleManagerPB::Instance().CreateParticleSystem();
+	grParticlAttributePB& rAtt1 = *grParticleManagerPB::Instance().CreateParticleSystem();
 	//grParticleAttributePB& rAtt2 = *grParticleManagerPB::Instance().CreateSetup();
 }
 

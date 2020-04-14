@@ -1,37 +1,33 @@
 #ifndef		_H_GRPARTICLEMANAGERPB_
 #define		_H_GRPARTICLEMANAGERPB_
 
-#define		PARTICLE_SYTEMS			1				// If threads would happen
-#define		PARTICLE_ATTRIBUTES		5
-#define		PARTICLE_PER_ATTRIBUTE	10
-#define		PARTICLE_TIMESTEP		1.0f / 60.0f	// If physics update for particles
+#define		PARTICLE_SYTEMS			1				// If threads would happen each thread can have it's own
+#define		PARTICLE_ATTRIBUTES		5				// weird naming but is actually max num of continuasly running particle systems
+#define		PARTICLE_PER_ATTRIBUTE	128
+//#define		PARTICLE_TIMESTEP		1.0f / 60.0f	// If physics update for particles
 
 #include	"grSingleton.h"
 
 #include	"grParticleSystemPB.h"
 #include	"grParticlePB.h"
 
-using		arrParticle = grParticlePB*[ PARTICLE_ATTRIBUTES * PARTICLE_PER_ATTRIBUTE ];
 
-
-// Dynamically aligned loop que, which is broken
+// Dynamically aligned loop que was the abs sickest name I could come up with
 template<typename T>
 class grDALQue
 {
 public:
 
 	grDALQue( const uInt size )
-		: Size		( size )
-		, FirstIdx	( 0 )
+		: arrT		( new T[ size ] )
+		, Size		( size )
+		, StrtIdx	( 0 )
 		, Quantity	( 0 )
-	{
-		arrT = new T[ Size ];
-		memset( arrT, 0, Size );
-	}
-
+	{}
 	~grDALQue( void )
 	{
-		delete[] arrT;
+		if ( arrT != nullptr )
+			delete[] arrT;
 	}
 
 	grDALQue( grDALQue const& ) = delete;
@@ -41,7 +37,6 @@ public:
 	{
 		return Quantity;
 	}
-
 	void Push( const T& rT )
 	{
 		if ( Quantity == Size )
@@ -52,30 +47,36 @@ public:
 			return;
 		}
 
-		arrT[ FirstIdx + Quantity ] = rT;
+		uInt insrtIdx = StrtIdx + Quantity;
+		if ( insrtIdx > Size - 1 )
+			insrtIdx = insrtIdx - Size;
+
+		arrT[ insrtIdx ] = rT;
 		++Quantity;
 	}
-
 	T Pull( void )
 	{
 		assert( ( Quantity > 0 ) && "DALQue::Pull(): Que is empty" );
 
+		T elem = arrT[ StrtIdx ];
+
+		++StrtIdx;
+		if( StrtIdx > Size - 1 )
+			StrtIdx = StrtIdx - Size;
+
 		--Quantity;
-		T firstIdx = arrT[ FirstIdx ];
+		return elem;
 
-		if ( ++firstIdx == Size )
-			firstIdx = 0;
-
-		return firstIdx;
+		return 0;
 	}
 
 private:
 
-	T* arrT;
+	T*		arrT;
 
 	sizeT	Size,
-		FirstIdx,
-		Quantity;
+			StrtIdx,
+			Quantity;
 };
 
 
@@ -90,66 +91,76 @@ public:
 
 	//////////////////////////////////////////////////
 
-	//inline grParticleAttributePB CreateParticleAttribute( void );
-	grParticleAttributePB* const CreateParticleSystem( void );
+	grParticlAttributePB* const CreateParticleSystem( void );
 	void Update( const float deltaT );
 
 	//////////////////////////////////////////////////
 
 private:
-	
-	struct AttPartCombo
+
+	uPtr<uPtr<SParticleBlock>[]>		m_uPArrPartBlock;
+	uPtr<uPtr<grParticleSystemPB>[]>	m_uPSystems;
+
+	uInt	m_CreatedSystems,
+			m_CreatedBlocks,
+			m_TotalParticles;
+};
+
+
+struct SParticleBlock
+{
+	SParticleBlock( const uInt id, const sizeT size )
+		: uPArrParticle		( new grParticlePB*[ size ]() )
+		, m_DeactivateIdQue	( new grDALQue<uInt>( size ) )
+		, uPAttribute		( new grParticlAttributePB() )
+		, SpawnCounter		( 0.0f )
+		, SpawnInMilliSec	( 1.0f / 10.0f )	// Set to zero when particle API exists
+		, Id				( id )
+		, ActiveParticles	( 0 )
+		, PartSize			( size )
 	{
-		AttPartCombo( const uInt id, const sizeT size )
-			: uPtrArrParticles	( new grParticlePB*[ size ]() )
-			, uPtrAttribute		( new grParticleAttributePB() )
-			, Id				( id )
-			, ActiveParicles	( 0 )
-			, Size				( size )
+		for ( sizeT i = 0; i < PartSize; ++i )
 		{
-			for ( sizeT i = 0; i < Size; ++i )
-				uPtrArrParticles[ i ] = new grParticlePB();
+			uPArrParticle[ i ] = new grParticlePB();
 
-			uPtrAttribute = std::make_unique<grParticleAttributePB>();
-			uPtrAttribute->Id = Id;
+			// TEST
+			uPArrParticle[ i ]->Lifetime = ( float )i;
+			// TEST
 		}
-		~AttPartCombo( void )
+
+		uPAttribute->Id = Id;
+	}
+	~SParticleBlock( void )
+	{
+		for ( sizeT i = 0; i < PartSize; ++i )
 		{
-			for ( sizeT i = 0; i < Size; ++i )
-			{
-				if ( uPtrArrParticles[ i ] != nullptr )
-					DELANDNULL( uPtrArrParticles[ i ] );
-			}
-			uPtrArrParticles.release();
-
-			if ( uPtrAttribute != nullptr )
-				uPtrAttribute.release();
+			if ( uPArrParticle[ i ] != nullptr )
+				DELANDNULL( uPArrParticle[ i ] );
 		}
-		AttPartCombo( AttPartCombo const& ) = delete;
-		AttPartCombo& operator=( AttPartCombo  const& ) = delete;
+		delete[] uPArrParticle.release();
 
-		//////////////////////////////////////////////////
+		if( m_DeactivateIdQue != nullptr )
+			delete m_DeactivateIdQue.release();
 
-		uPtr<grParticlePB*[]>		uPtrArrParticles;
-		uPtr<grParticleAttributePB>	uPtrAttribute;
-
-		uInt	Id,
-				ActiveParicles;
-
-		sizeT	Size;
-	};
+		if ( uPAttribute != nullptr )
+			delete uPAttribute.release();
+	}
+	SParticleBlock( SParticleBlock const& ) = delete;
+	SParticleBlock& operator=( SParticleBlock  const& ) = delete;
 
 	//////////////////////////////////////////////////
 
-	uPtr<uPtr<AttPartCombo>[]>			m_uPtrArrAttPartCombo;
-	uPtr<uPtr<grParticleSystemPB>[]>	m_uPtrSystems;
+	uPtr<grParticlePB*[]>		uPArrParticle;
+	uPtr<grDALQue<uInt>>		m_DeactivateIdQue;
+	uPtr<grParticlAttributePB>	uPAttribute;
 
-	uInt				m_CreatedSystems,
-						m_CreatedArrCombo,
-						m_TotalParticles;
+	float	SpawnCounter,
+			SpawnInMilliSec;
 
-	grDALQue<uInt>*		m_Que;
+	uInt	Id,
+			ActiveParticles;
 
+	sizeT	PartSize;
 };
 
 #endif	// _H_GRPARTICLEMANAGERPB_

@@ -1,7 +1,7 @@
 #ifndef		_H_GRPARTICLE_SETUPPB_
 #define		_H_GRPARTICLE_SETUPPB_
 
-class		grParticleAttributePB;
+class		grParticlAttributePB;
 
 
 // grParticleSetupPB
@@ -43,7 +43,7 @@ struct grParticleSetupPB
 	//{
 	//	//rParticleManPB.Deactivate( Id );
 	//}
-	void SetParticleAttribute( const grParticleAttributePB& rAttribute )
+	void SetParticleAttribute( const grParticlAttributePB& rAttribute )
 	{
 		//pAttribute->Position = rAttribute.Position;
 		//pAttribute->Velocity = rAttribute.Velocity;

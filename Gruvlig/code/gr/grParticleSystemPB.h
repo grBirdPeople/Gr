@@ -3,9 +3,11 @@
 
 #include	"grCommon.h"
 
-struct		grParticleAttributePB;
+struct		grParticlAttributePB;
 struct		grParticlePB;
 class		grRandom;
+
+struct		SParticleBlock;
 
 
 // grParticleSystemPB
@@ -20,20 +22,9 @@ struct grParticleSystemPB
 
 	//////////////////////////////////////////////////
 
-	const uInt GetId( void ) const { return Id; }
-
-	//////////////////////////////////////////////////
-
-	void Activate( uPtr<grParticlePB*[]>& rArrPart,
-				   const uPtr<grParticleAttributePB>& rArrAtt,
-				   const float deltaT );
-
-	void Update( uPtr<grParticlePB*[]>& rArrPart,
-				 const uPtr<grParticleAttributePB>& rArrAtt,
-				 const float deltaT );
-
-	void Deactivate( uPtr<grParticlePB*[]>& rArrPart,
-					 const uPtr<grParticleAttributePB>& rArrAtt );
+	void Activate( uPtr<SParticleBlock>& rPartBlock, const float deltaT );
+	void Update( uPtr<SParticleBlock>& rPartBlock, const float deltaT );
+	void Deactivate( uPtr<SParticleBlock>& rPartBlock );
 
 	//////////////////////////////////////////////////
 

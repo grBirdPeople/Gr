@@ -10,7 +10,7 @@
 // cTor
 //////////////////////////////////////////////////
 grParticleSystemPB::grParticleSystemPB( const uInt id )
-    : pRand ( std::make_unique<grRandom>() )
+    : pRand ( new grRandom )
     , Id    ( id )
 {}
 
@@ -27,18 +27,27 @@ grParticleSystemPB::~grParticleSystemPB( void )
 // Activate
 //////////////////////////////////////////////////
 void
-grParticleSystemPB::Activate( uPtr<grParticlePB*[]>& rArrPart,
-                              const uPtr<grParticleAttributePB>& rArrAtt,
-                              const float deltaT )
+grParticleSystemPB::Activate( uPtr<SParticleBlock>& rPartBlock, const float deltaT )
 {
-    int j = 0;
 
-    for ( uInt i = 0; i < PARTICLE_PER_ATTRIBUTE; ++i )
-    {
-        int life = rArrPart[ i ]->Lifetime;
 
-        int j = 0;
-    }
+        //rBlock->SpawnCounter -= deltaT;
+        //if ( rBlock->SpawnCounter <= 0.0f )
+        //{
+        //    rBlock->SpawnCounter += rBlock->SpawnInMilliSec;
+        //    if ( rBlock->ActiveParticles >= rBlock->Size )
+        //        return;
+
+        //    ++rBlock->ActiveParticles;
+
+        //    // Think writing data should be done seperate
+        //    {
+        //        grParticlePB& rPart = *rBlock->uPArrParticles[ rBlock->ActiveParticles - 1 ];
+        //        grParticlAttributePB& rAtt = *rBlock->uPAttribute.get();
+        //        rPart.Position = rAtt.Position;
+        //        rPart.Velocity = rAtt.Velocity;
+        //    }
+        //}
 
 
 
@@ -116,10 +125,30 @@ grParticleSystemPB::Activate( uPtr<grParticlePB*[]>& rArrPart,
 // Update
 //////////////////////////////////////////////////
 void
-grParticleSystemPB::Update( uPtr<grParticlePB * []>& rArrPart,
-                            const uPtr<grParticleAttributePB>& rArrAtt,
-                            const float deltaT )
+grParticleSystemPB::Update( uPtr<SParticleBlock>& rPartBlock, const float deltaT )
 {
+    //grParticlAttributePB& rAtt = *rBlock->uPAttribute.get();
+    //for ( sizeT idx = 0; idx < rBlock->ActiveParticles; ++idx )
+    //{
+    //    rBlock->uPArrParticles[ idx ]->Lifetime -= deltaT;
+    //    if ( rBlock->uPArrParticles[ idx ]->Lifetime < grMath::Epsilon )
+    //    {
+    //        rBlock->bitSet << idx;
+    //        continue;
+    //    }
+
+    //    rBlock->uPArrParticles[ idx ]->Position += rBlock->uPArrParticles[ idx ]->Velocity * deltaT;
+    //}
+
+        //// TEST
+        ////printf( "%s %d \n", "Particles Active: ", rParticleSetup.ParticlesActive );
+        //grBBox box( grV2f( 20.0f, 20.0f ), rPart.Position );
+        //grDebugManager::Instance().AddBBox( box, sf::Color::White );
+        //// TEST
+
+
+
+
     //grParticleAttributePB& rAttribute = *rParticleSetup.pAttribute.get();
     //for ( sizeT idx = 0; idx < rParticleSetup.ParticlesActive; ++idx )
     //{
@@ -157,8 +186,7 @@ grParticleSystemPB::Update( uPtr<grParticlePB * []>& rArrPart,
 // Deactivate
 //////////////////////////////////////////////////
 void
-grParticleSystemPB::Deactivate( uPtr<grParticlePB * []>& rArrPart,
-                                const uPtr<grParticleAttributePB>& rArrAtt )
+grParticleSystemPB::Deactivate( uPtr<SParticleBlock>& rPartBlock )
 {
     //sInt active = ( sInt )rParticleSetup.ParticlesActive;
     //for ( sInt idx = 0; idx < active; ++idx )

@@ -7,7 +7,7 @@ class		grActor;
 class		grMap;
 class		grIEntity;
 class		grInputManager;
-struct		grParticleAttributePB;
+struct		grParticlAttributePB;
 
 
 // grSandbox
@@ -31,7 +31,7 @@ public:
 private:
 
 	grInputManager&			m_rInputMan;
-	grParticleAttributePB&	m_rParticleAttribute;
+	grParticlAttributePB&	m_rParticleAttribute;
 
 	grMap*					m_pMap;
 	grActor*				m_pActor;

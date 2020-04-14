@@ -46,12 +46,12 @@ public:
 	inline void SetAA ( const uInt aa )
 	{
 		m_Aa = aa;
-		m_pCSettings->antialiasingLevel = m_Aa;
+		m_pCSettings->antialiasingLevel = ( unsigned int )m_Aa;
 	}		 							  
 	inline void SetFramerateLimit( const uInt frameRateLimit )
 	{
 		m_FramesPerSec = frameRateLimit;
-		m_pRenderWin->setFramerateLimit( m_FramesPerSec );
+		m_pRenderWin->setFramerateLimit( ( unsigned int )m_FramesPerSec );
 	}
 	inline void SetVSync( const bool vSync )
 	{

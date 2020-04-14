@@ -19,8 +19,8 @@ template<typename S> using sPtr = std::shared_ptr<S>;
 using str = std::string;
 
 using sizeT = std::size_t;
-using sInt = signed int;
-using uInt = unsigned int;
+using sInt = int64_t;
+using uInt = uint64_t;
 
 //////////////////////////////////////////////////
 
