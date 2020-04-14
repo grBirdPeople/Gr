@@ -3,11 +3,13 @@
 
 #include	<SFML/Graphics/RenderWindow.hpp>
 
+#include	"grCommon.h"
+
 class		grActor;
 class		grMap;
 class		grIEntity;
 class		grInputManager;
-struct		grParticlAttributePB;
+class		grParticleManagerPB;
 
 
 // grSandbox
@@ -31,7 +33,7 @@ public:
 private:
 
 	grInputManager&			m_rInputMan;
-	grParticlAttributePB&	m_rParticleAttribute;
+	grParticleManagerPB&	m_rPartMan;
 
 	grMap*					m_pMap;
 	grActor*				m_pActor;
@@ -40,6 +42,12 @@ private:
 	grIEntity*				m_pEnemy;
 
 	bool					m_bFlipFlop = true;
+
+	float					m_LastMouseX,
+							m_LastMouseY;
+
+	sInt					m_PartSysIdOne,
+							m_PartSysIdTwo;
 
 };
 

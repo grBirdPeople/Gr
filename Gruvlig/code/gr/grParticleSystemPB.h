@@ -30,9 +30,11 @@ struct grParticleSystemPB
 
 private:
 
-	uPtr<grRandom>	pRand;
+	uPtr<uInt[]>	uPArrDeactivateId;
 
-	uInt			Id;
+	uPtr<grRandom>	uPRand;
+
+	uInt	Id;
 };
 
 #endif	// 

@@ -19,14 +19,14 @@
 #include	"grHashMap.h"
 #include	"grParticleManagerPB.h"
 
-#include <bitset>
-
 
 // cTor
 //////////////////////////////////////////////////
 grSandbox::grSandbox( void )
-	: m_rInputMan			( grInputManager::Instance() )
-	, m_rParticleAttribute	( *grParticleManagerPB::Instance().CreateParticleSystem() )
+	: m_rInputMan		( grInputManager::Instance() )
+	, m_rPartMan		( grParticleManagerPB::Instance() )
+	, m_PartSysIdOne	( -1 )
+	, m_PartSysIdTwo	( -1 )
 {
 	// Create maps and navmeshes
 	grMapManager::Instance().GetMap( "map_00" )->CreateNavMesh();	// TODO: Don't like this. Other way around ( navmeshmanager create navmesh ( map ))
@@ -100,7 +100,22 @@ grSandbox::grSandbox( void )
 	//partAtt.SetLifetime( 1.0f, 1.25f );
 	//m_rParticleSetup.SetParticleAttribute( partAtt );
 
+	m_PartSysIdOne = m_rPartMan.Create();
+	m_PartSysIdTwo = m_rPartMan.Create();
 
+	grParticlAttributePB attOne;
+	grParticlAttributePB attTwo;
+
+	attOne.Color = grParticleColor( 250, 175, 0, 125 );
+	attOne.Lifetime = 2.5f;
+
+	attTwo.Color = grParticleColor( 0, 175, 250, 60 );
+	attTwo.Position = grV2f( 150.0f, 175.0f );
+	attTwo.Velocity = grV2f( -1.0f, 0.0f ) * 100.0f;
+	attTwo.Lifetime = 0.5f;
+
+	m_rPartMan.Set( m_PartSysIdOne, attOne );
+	m_rPartMan.Set( m_PartSysIdTwo, attTwo );
 }
 
 
@@ -111,10 +126,25 @@ grSandbox::grSandbox( void )
 void
 grSandbox::Update( const float deltaT )
 {
-
 	// Particle things
-	//if( m_rInputMan.GetMouseMoved() == true )
-	//	m_rParticleSetup.pAttribute->SetPosition( m_rInputMan.GetMousePos() );
+	if ( m_rInputMan.GetMouseMoved() == true )
+	{
+		grParticlAttributePB att;
+		att.Position = m_rInputMan.GetMousePos();
+		grV2f lastMousePos = grV2f( m_LastMouseX , m_LastMouseY );
+		att.Velocity = grV2f( lastMousePos - m_rInputMan.GetMousePos() ).Normalized() * 50.0f;
+		att.Lifetime = 3.0f;
+		m_rPartMan.Set( m_PartSysIdOne, att );
+	}
+	m_LastMouseX = m_rInputMan.GetMousePos().x;
+	m_LastMouseY = m_rInputMan.GetMousePos().y;
+
+	grParticlAttributePB part = m_rPartMan.Get( m_PartSysIdTwo );
+	float deg = grMath::VecToDeg( part.Velocity );
+	deg += 1.0f * deltaT;
+	grMath::RotatePoint( &part.Velocity, deg * grMath::DegToRad );
+	m_rPartMan.Set( m_PartSysIdTwo, part );
+
 
 	// Scenegraph things
 	if ( m_rInputMan.GetMouseDown( sf::Mouse::Left ) )

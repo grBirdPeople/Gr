@@ -2,7 +2,7 @@
 #define		_H_GRPARTICLEMANAGERPB_
 
 #define		PARTICLE_SYTEMS			1				// If threads would happen each thread can have it's own
-#define		PARTICLE_ATTRIBUTES		5				// weird naming but is actually max num of continuasly running particle systems
+#define		PARTICLE_EMITTERS		8				// Not really an emitter but I don't know what to call it so
 #define		PARTICLE_PER_ATTRIBUTE	128
 //#define		PARTICLE_TIMESTEP		1.0f / 60.0f	// If physics update for particles
 
@@ -12,26 +12,26 @@
 #include	"grParticlePB.h"
 
 
-// Dynamically aligned loop que was the abs sickest name I could come up with
+// Dynamically aligned loop que, or something like that
 template<typename T>
-class grDALQue
+class grLoopQue
 {
 public:
 
-	grDALQue( const uInt size )
+	grLoopQue( const uInt size )
 		: arrT		( new T[ size ] )
 		, Size		( size )
 		, StrtIdx	( 0 )
 		, Quantity	( 0 )
 	{}
-	~grDALQue( void )
+	~grLoopQue( void )
 	{
 		if ( arrT != nullptr )
 			delete[] arrT;
 	}
 
-	grDALQue( grDALQue const& ) = delete;
-	grDALQue& operator=( grDALQue const& ) = delete;
+	grLoopQue( grLoopQue const& ) = delete;
+	grLoopQue& operator=( grLoopQue const& ) = delete;
 
 	const uInt GetQuantity( void ) const
 	{
@@ -86,20 +86,28 @@ class grParticleManagerPB : public grSingleton<grParticleManagerPB>
 {
 public:
 
+	friend class grCore;
+
 	grParticleManagerPB( void );
 	~grParticleManagerPB( void );
 
 	//////////////////////////////////////////////////
 
-	grParticlAttributePB* const CreateParticleSystem( void );
-	void Update( const float deltaT );
+	const sInt Create( void );
+	grParticlAttributePB Get( const uInt id );
+	void Set( const sInt id, const grParticlAttributePB& rAtt );
 
 	//////////////////////////////////////////////////
 
 private:
 
-	uPtr<uPtr<SParticleBlock>[]>		m_uPArrPartBlock;
-	uPtr<uPtr<grParticleSystemPB>[]>	m_uPSystems;
+	void Update( const float deltaT );
+
+	//////////////////////////////////////////////////
+
+	uPtr<uPtr<SParticleBlock>[]>			m_uPArrPartBlocks;
+	uPtr<uPtr<grParticleSystemPB>[]>		m_uPSystems;
+	uPtr<grLoopQue<grParticlAttributePB>>	m_AttributeQue;	// If this is should work it needs to be an array, one que for each emitter created
 
 	uInt	m_CreatedSystems,
 			m_CreatedBlocks,
@@ -111,18 +119,16 @@ struct SParticleBlock
 {
 	SParticleBlock( const uInt id, const sizeT size )
 		: uPArrParticle			( new grParticlePB*[ size ]() )
-		, m_DeactivatePartQue	( new grDALQue<uInt>( size ) )
+		, m_DeactivatePartQue	( new grLoopQue<uInt>( size ) )
 		, uPAttribute			( new grParticlAttributePB() )
 		, SpawnCounter			( 0.0f )
-		, SpawnInMilliSec		( 1.0f / 25.0f )	// Set to zero when particle API exists
+		, SpawnInMilliSec		( 1.0f / 25.0f )	// Set to zero when particle API or their likes exists
 		, Id					( id )
-		, PartActive		( 0 )
+		, PartActive			( 0 )
 		, PartSize				( size )
 	{
 		for ( sizeT i = 0; i < PartSize; ++i )
 			uPArrParticle[ i ] = new grParticlePB();
-
-		uPAttribute->Id = Id;
 	}
 	~SParticleBlock( void )
 	{
@@ -145,7 +151,7 @@ struct SParticleBlock
 	//////////////////////////////////////////////////
 
 	uPtr<grParticlePB*[]>		uPArrParticle;
-	uPtr<grDALQue<uInt>>		m_DeactivatePartQue;
+	uPtr<grLoopQue<uInt>>		m_DeactivatePartQue;
 	uPtr<grParticlAttributePB>	uPAttribute;
 
 	float	SpawnCounter,

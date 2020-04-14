@@ -12,6 +12,27 @@
 
 // TODO: When there is an API for particles hook it up to grParticleAttributePB
 
+struct grParticleColor
+{
+	grParticleColor( void )
+	{
+		R = 255;
+		G = 255;
+		B = 255;
+		A = 255;
+	}
+	grParticleColor( const uInt r, const uInt g, const uInt b, const uInt a )
+	{
+		R = r;
+		G = g;
+		B = b;
+		A = a;
+	}
+
+	uInt R, G, B, A;
+};
+
+
 class grParticlAttributePB
 {
 public:
@@ -19,25 +40,18 @@ public:
 	friend struct SParticleBlock;
 
 	grParticlAttributePB( void )
-		: Id		( 0 )
+		: Color		( grParticleColor() )
 		, Position	( grV2f() )
 		, Velocity	( grV2f() )
 		, Lifetime	( 0.0f )
-	{
-		grCore& rCore = grCore::Instance();
-		Position = grV2f( rCore.GetRenderWin().getSize().x * 0.5f, rCore.GetRenderWin().getSize().y * 0.5f );
-	}
+	{}
 
-	const uInt GetId( void ) const { return Id; }
+	grParticleColor	Color;
 
 	grV2f	Position;
 	grV2f	Velocity;
 
 	float	Lifetime;
-
-private:
-
-	uInt	Id;
 };
 
 //// grParticleAttributePB // One copy per particle setup
@@ -158,33 +172,19 @@ private:
 //////////////////////////////////////////////////
 struct grParticlePB
 {
-	//// Vector based
-	//grParticlePB( void )
-	//	: Position		( grV2f() )
-	//	, Velocity		( grV2f( 0.0f, 0.0f ) )
-	//	, Mass			( 0.0f )
-	//	, Lifetime		( 0.0f )
-	//{}
-
-	//grV2f	Position;
-	//grV2f	Velocity;
-	//float	Mass,
-	//		Lifetime;
-
 	//Phys based
 	grParticlePB( void )
-		: Position		( grV2f() )
-		, Velocity		( grV2f( 0.0f, 0.0f ) )
-		, Acceleration	( grV2f() )
-		, Mass			( 0.0f )
-		, Lifetime		( 0.0f )
+		: Color		( grParticleColor() )
+		, Position	( grV2f() )
+		, Velocity	( grV2f( 0.0f, 0.0f ) )
+		, Lifetime	( 0.0f )
 	{}
 
-	grV2f			Position;
-	grV2f			Velocity;
-	grV2f			Acceleration;
-	float			Mass,
-					Lifetime;
+	grParticleColor	Color;
+
+	grV2f	Position;
+	grV2f	Velocity;
+	float	Lifetime;
 };
 
 #endif	// _H_GRPARTICLEPB_

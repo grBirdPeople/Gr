@@ -12,8 +12,9 @@
 // cTor
 //////////////////////////////////////////////////
 grParticleManagerPB::grParticleManagerPB( void )
-    : m_uPArrPartBlock  ( new uPtr<SParticleBlock>[ PARTICLE_ATTRIBUTES ]() )
-    , m_uPSystems       ( new uPtr<grParticleSystemPB>[ PARTICLE_SYTEMS ] )
+    : m_uPArrPartBlocks ( new uPtr<SParticleBlock>[ PARTICLE_EMITTERS ]() )
+    , m_uPSystems       ( new uPtr<grParticleSystemPB>[ PARTICLE_SYTEMS ]() )
+    , m_AttributeQue    ( new grLoopQue<grParticlAttributePB>( PARTICLE_EMITTERS * PARTICLE_PER_ATTRIBUTE ) )
     , m_CreatedSystems  ( 0 )
     , m_CreatedBlocks   ( 0 )
     , m_TotalParticles  ( 0 )
@@ -41,11 +42,11 @@ grParticleManagerPB::~grParticleManagerPB( void )
 {
     for ( sizeT i = 0; i < m_CreatedBlocks; ++i )
     {
-        if ( m_uPArrPartBlock[ i ] != nullptr )
-            delete m_uPArrPartBlock[ i ].release();
+        if ( m_uPArrPartBlocks[ i ] != nullptr )
+            delete m_uPArrPartBlocks[ i ].release();
     }
-    if ( m_uPArrPartBlock != nullptr )
-        delete m_uPArrPartBlock.release();
+    if ( m_uPArrPartBlocks != nullptr )
+        delete m_uPArrPartBlocks.release();
 
     for ( sizeT i = 0; i < m_CreatedSystems; ++i )
     {
@@ -59,22 +60,41 @@ grParticleManagerPB::~grParticleManagerPB( void )
 
 // CreateParticleSystem
 //////////////////////////////////////////////////
-grParticlAttributePB* const
-grParticleManagerPB::CreateParticleSystem( void )
+const sInt
+grParticleManagerPB::Create( void )
 {
-    if ( m_CreatedBlocks >= PARTICLE_ATTRIBUTES )
+    if ( m_CreatedBlocks >= PARTICLE_EMITTERS )
     {
 #ifdef DEBUG
-        std::puts( "grParticleManagerPB::Create(): Max particle setups already created\n" );
+        std::puts( "grParticleManagerPB::CreateParticleSystem(): Max attributes already created\n" );
 #endif // DEBUG
-        return nullptr;
+        return -1;
     }
 
     uInt id = m_CreatedBlocks;
     ++m_CreatedBlocks;
     m_TotalParticles += PARTICLE_PER_ATTRIBUTE;
-    m_uPArrPartBlock[ id ] = std::make_unique<SParticleBlock>( id, PARTICLE_PER_ATTRIBUTE );
-    return m_uPArrPartBlock[ id ]->uPAttribute.get();
+    m_uPArrPartBlocks[ id ] = std::make_unique<SParticleBlock>( id, PARTICLE_PER_ATTRIBUTE );
+    return id;
+}
+
+
+// Get
+//////////////////////////////////////////////////
+grParticlAttributePB
+grParticleManagerPB::Get( const uInt id )
+{
+    grParticlAttributePB part = *m_uPArrPartBlocks[ id ]->uPAttribute.get();
+    return part;
+}
+
+
+// Set
+//////////////////////////////////////////////////
+void
+grParticleManagerPB::Set( const sInt id, const grParticlAttributePB& rAtt )
+{
+    *m_uPArrPartBlocks[ id ]->uPAttribute.get() = rAtt;  // TODO: Que attributes and batch update all
 }
 
 
@@ -95,24 +115,26 @@ grParticleManagerPB::Update( const float deltaT )
     //}
 
     for ( sizeT i = 0; i < m_CreatedBlocks; ++i )
-        m_uPSystems[ 0 ]->Activate( m_uPArrPartBlock[ i ], deltaT );
+        m_uPSystems[ 0 ]->Activate( m_uPArrPartBlocks[ i ], deltaT );
 
     for ( sizeT i = 0; i < m_CreatedBlocks; ++i )
-        m_uPSystems[ 0 ]->Update( m_uPArrPartBlock[ i ], deltaT );
+        m_uPSystems[ 0 ]->Update( m_uPArrPartBlocks[ i ], deltaT );
 
     for ( sizeT i = 0; i < m_CreatedBlocks; ++i )
-        m_uPSystems[ 0 ]->Deactivate( m_uPArrPartBlock[ i ] );
+        m_uPSystems[ 0 ]->Deactivate( m_uPArrPartBlocks[ i ] );
 
 
     // TEST DRAW
     for ( sizeT i = 0; i < m_CreatedBlocks; ++i )
     {
-        uInt size = m_uPArrPartBlock[ i ]->PartActive;
+        uInt size = m_uPArrPartBlocks[ i ]->PartActive;
         for ( sizeT j = 0; j < size; ++j )
         {
             // TEST
-            grBBox box( grV2f( 20.0f, 20.0f ), m_uPArrPartBlock[ i ]->uPArrParticle[ j ]->Position );
-            grDebugManager::Instance().AddBBox( box, sf::Color::White );
+            grBBox box( grV2f( 20.0f, 20.0f ), m_uPArrPartBlocks[ i ]->uPArrParticle[ j ]->Position );
+            grParticleColor color = m_uPArrPartBlocks[ i ]->uPArrParticle[ j ]->Color;
+            sf::Color sfColor( color.R, color.G, color.B, color.A );
+            grDebugManager::Instance().AddBBox( box, sfColor );
             // TEST
         }
     }

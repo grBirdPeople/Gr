@@ -138,11 +138,15 @@ namespace grMath
 
 	// Clamp
 	//////////////////////////////////////////////////
+	inline float Clamp( float value, float min, float max )
+	{
+		return ( value < min ) ? min : ( value > max ) ? max : value;
+	}
 	inline sInt Clamp( sInt value, sInt min, sInt max )
 	{
 		return ( value < min ) ? min : ( value > max ) ? max : value;
 	}
-	inline float Clamp( float value, float min, float max )
+	inline sInt Clamp( uInt value, uInt min, uInt max )
 	{
 		return ( value < min ) ? min : ( value > max ) ? max : value;
 	}
