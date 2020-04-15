@@ -234,7 +234,6 @@
     <ClInclude Include="code\gr\grEntityManager.h" />
     <ClInclude Include="code\gr\grEntityPlayer.h" />
     <ClInclude Include="code\gr\grEnums.h" />
-    <ClInclude Include="code\gr\grHashMap.h" />
     <ClInclude Include="code\gr\grICtrlObj.h" />
     <ClInclude Include="code\gr\grIEntity.h" />
     <ClInclude Include="code\gr\grInputManager.h" />
@@ -253,6 +252,7 @@
     <ClInclude Include="code\gr\grRandom.h" />
     <ClInclude Include="code\gr\grSandbox.h" />
     <ClInclude Include="code\gr\grSingleton.h" />
+    <ClInclude Include="code\gr\grStruct.h" />
     <ClInclude Include="code\gr\grV2.h" />
     <ClInclude Include="code\SFML\Audio.hpp" />
     <ClInclude Include="code\SFML\Audio\AlResource.hpp" />

@@ -7,14 +7,14 @@ struct		grParticlAttributePB;
 struct		grParticlePB;
 class		grRandom;
 
-struct		SParticleBlock;
+struct		SParticleEmitter;
 
 
 // grParticleSystemPB
 //////////////////////////////////////////////////
 struct grParticleSystemPB
 {
-	grParticleSystemPB( const uInt id );
+	grParticleSystemPB( const uInt id, const uInt partQuantity );
 	~grParticleSystemPB( void );
 
 	grParticleSystemPB( grParticleSystemPB const& ) = delete;
@@ -22,17 +22,17 @@ struct grParticleSystemPB
 
 	//////////////////////////////////////////////////
 
-	void Activate( uPtr<SParticleBlock>& rPartBlock, const float deltaT );
-	void Update( uPtr<SParticleBlock>& rPartBlock, const float deltaT );
-	void Deactivate( uPtr<SParticleBlock>& rPartBlock );
+	void Activate( SParticleEmitter& rPartBlock, const float deltaT );
+	void Update( SParticleEmitter& rPartBlock, const float deltaT );
+	void Deactivate( SParticleEmitter& rPartBlock );
 
 	//////////////////////////////////////////////////
 
 private:
 
-	uPtr<uInt[]>	uPArrDeactivateId;
+	uP<uInt[]>	uPArrDeactivateId;
 
-	uPtr<grRandom>	uPRand;
+	uP<grRandom>	uPRand;
 
 	uInt	Id;
 };

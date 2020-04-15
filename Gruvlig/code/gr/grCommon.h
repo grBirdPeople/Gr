@@ -13,8 +13,8 @@
 
 //////////////////////////////////////////////////
 
-template<typename U> using uPtr = std::unique_ptr<U>;
-template<typename S> using sPtr = std::shared_ptr<S>;
+template<typename Q> using uP = std::unique_ptr<Q>;
+template<typename W> using sP = std::shared_ptr<W>;
 
 using str = std::string;
 

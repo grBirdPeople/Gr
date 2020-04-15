@@ -2,14 +2,15 @@
 
 #include    "grRandom.h"
 #include	"grV2.h"
-#include    "grParticleManagerPB.h"
+//#include    "grParticleManagerPB.h"
+#include    "grParticlePB.h"
 #include    "grAlgo.h"
 
 
 // cTor
 //////////////////////////////////////////////////
-grParticleSystemPB::grParticleSystemPB( const uInt id )
-    : uPArrDeactivateId ( new uInt[ PARTICLE_PER_ATTRIBUTE ] )
+grParticleSystemPB::grParticleSystemPB( const uInt id, const uInt partQuantity )
+    : uPArrDeactivateId ( new uInt[ partQuantity ] )
     , uPRand            ( new grRandom )
     , Id                ( id )
 {}
@@ -30,26 +31,26 @@ grParticleSystemPB::~grParticleSystemPB( void )
 // Activate
 //////////////////////////////////////////////////
 void
-grParticleSystemPB::Activate( uPtr<SParticleBlock>& rPartBlock, const float deltaT )
+grParticleSystemPB::Activate( SParticleEmitter& rPartBlock, const float deltaT )
 {
-    rPartBlock->SpawnCounter -= deltaT;
-    if ( rPartBlock->SpawnCounter <= 0.0f )
+    rPartBlock.SpawnCounter -= deltaT;
+    if ( rPartBlock.SpawnCounter <= 0.0f )
     {
-        rPartBlock->SpawnCounter += rPartBlock->SpawnInMilliSec;
-        if ( rPartBlock->PartActive >= rPartBlock->PartSize )
+        rPartBlock.SpawnCounter += rPartBlock.SpawnInMilliSec;
+        if ( rPartBlock.PartActive >= rPartBlock.PartSize )
             return;
 
         // Think writing data should maybe be done elsewhere
         {
-            grParticlePB& rPart = *rPartBlock->uPArrParticle[ rPartBlock->PartActive ];
-            grParticlAttributePB& rAtt = *rPartBlock->uPAttribute.get();
+            grParticlePB& rPart = *rPartBlock.uPArrParticle[ rPartBlock.PartActive ];
+            grParticlAttributePB& rAtt = *rPartBlock.uPAttribute.get();
             rPart.Color = rAtt.Color;
             rPart.Position = rAtt.Position;
             rPart.Velocity = rAtt.Velocity;
             rPart.Lifetime = rAtt.Lifetime;
         }
 
-        ++rPartBlock->PartActive;
+        ++rPartBlock.PartActive;
     }
 
 
@@ -129,19 +130,19 @@ grParticleSystemPB::Activate( uPtr<SParticleBlock>& rPartBlock, const float delt
 // Update
 //////////////////////////////////////////////////
 void
-grParticleSystemPB::Update( uPtr<SParticleBlock>& rPartBlock, const float deltaT )
+grParticleSystemPB::Update( SParticleEmitter& rPartBlock, const float deltaT )
 {
-    grParticlAttributePB& rAtt = *rPartBlock->uPAttribute.get();
-    for ( sizeT idx = 0; idx < rPartBlock->PartActive; ++idx )
+    grParticlAttributePB& rAtt = *rPartBlock.uPAttribute.get();
+    for ( sizeT idx = 0; idx < rPartBlock.PartActive; ++idx )
     {
-        rPartBlock->uPArrParticle[ idx ]->Lifetime -= deltaT;
-        if ( rPartBlock->uPArrParticle[ idx ]->Lifetime <= grMath::Epsilon )
+        rPartBlock.uPArrParticle[ idx ]->Lifetime -= deltaT;
+        if ( rPartBlock.uPArrParticle[ idx ]->Lifetime <= grMath::Epsilon )
         {
-            rPartBlock->m_DeactivatePartQue->Push( idx );
+            rPartBlock.uPPartDeactivateQue->Push( idx );
             continue;
         }
 
-        rPartBlock->uPArrParticle[ idx ]->Position += rPartBlock->uPArrParticle[ idx ]->Velocity * deltaT;
+        rPartBlock.uPArrParticle[ idx ]->Position += rPartBlock.uPArrParticle[ idx ]->Velocity * deltaT;
     }
 
 
@@ -187,20 +188,20 @@ grParticleSystemPB::Update( uPtr<SParticleBlock>& rPartBlock, const float deltaT
 // Deactivate
 //////////////////////////////////////////////////
 void
-grParticleSystemPB::Deactivate( uPtr<SParticleBlock>& rPartBlock )
+grParticleSystemPB::Deactivate( SParticleEmitter& rPartBlock )
 {
-    if ( rPartBlock->m_DeactivatePartQue->GetQuantity() > 0 )
+    if ( rPartBlock.uPPartDeactivateQue->GetQuantity() > 0 )
     {
-        uInt size = rPartBlock->m_DeactivatePartQue->GetQuantity();
+        uInt size = rPartBlock.uPPartDeactivateQue->GetQuantity();
         for ( uInt i = 0; i < size; ++i )
-            uPArrDeactivateId[ i ] = rPartBlock->m_DeactivatePartQue->Pull();
+            uPArrDeactivateId[ i ] = rPartBlock.uPPartDeactivateQue->Pull();
 
         grAlgo::InsrtSort<uInt>( uPArrDeactivateId.get(), size );
 
         for ( uInt idx = 0; idx < size; ++idx )
         {
-            grParticlePB& rTooPart = *rPartBlock->uPArrParticle[ uPArrDeactivateId[ idx ] ];
-            grParticlePB& rFromPart = *rPartBlock->uPArrParticle[ rPartBlock->PartActive - 1 ];
+            grParticlePB& rTooPart = *rPartBlock.uPArrParticle[ uPArrDeactivateId[ idx ] ];
+            grParticlePB& rFromPart = *rPartBlock.uPArrParticle[ rPartBlock.PartActive - 1 ];
 
             rTooPart = rFromPart;
 
@@ -209,7 +210,7 @@ grParticleSystemPB::Deactivate( uPtr<SParticleBlock>& rPartBlock )
             //rFromPart.Velocity = 0.0f;
             //rFromPart.Lifetime = 0.0f;
 
-            --rPartBlock->PartActive;
+            --rPartBlock.PartActive;
         }
     }
 

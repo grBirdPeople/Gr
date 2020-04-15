@@ -16,7 +16,6 @@
 #include	"grEntityPlayer.h"
 #include	"grEntityManager.h"
 #include	"grMapManager.h"
-#include	"grHashMap.h"
 #include	"grParticleManagerPB.h"
 
 
@@ -106,11 +105,13 @@ grSandbox::grSandbox( void )
 	grParticlAttributePB attOne;
 	grParticlAttributePB attTwo;
 
-	attOne.Color = grParticleColor( 250, 175, 0, 125 );
+	attOne.Color = grSColor( 0, 175, 250, 75 );
+	attOne.Position = grV2f( grCore::Instance().GetRenderWin().getSize().x * 0.5f, grCore::Instance().GetRenderWin().getSize().y * 0.5f );
+	attOne.Velocity = grV2f( 0.0f, -1.0f ) * 100.0f;
 	attOne.Lifetime = 2.5f;
 
-	attTwo.Color = grParticleColor( 0, 175, 250, 60 );
-	attTwo.Position = grV2f( 150.0f, 175.0f );
+	attTwo.Color = grSColor( 250, 175, 0, 150 );
+	attTwo.Position = grV2f( grCore::Instance().GetRenderWin().getSize().x * 0.25f, grCore::Instance().GetRenderWin().getSize().y * 0.5f );
 	attTwo.Velocity = grV2f( -1.0f, 0.0f ) * 100.0f;
 	attTwo.Lifetime = 0.5f;
 
@@ -129,8 +130,8 @@ grSandbox::Update( const float deltaT )
 	// Particle things
 	if ( m_rInputMan.GetMouseMoved() == true )
 	{
-		grParticlAttributePB att;
-		att.Position = m_rInputMan.GetMousePos();
+		grParticlAttributePB att = m_rPartMan.Get( m_PartSysIdOne );
+		att.Position = grMath::Lerp( att.Position, m_rInputMan.GetMousePos(), 0.5f );
 		grV2f lastMousePos = grV2f( m_LastMouseX , m_LastMouseY );
 		att.Velocity = grV2f( lastMousePos - m_rInputMan.GetMousePos() ).Normalized() * 50.0f;
 		att.Lifetime = 3.0f;
@@ -139,11 +140,11 @@ grSandbox::Update( const float deltaT )
 	m_LastMouseX = m_rInputMan.GetMousePos().x;
 	m_LastMouseY = m_rInputMan.GetMousePos().y;
 
-	grParticlAttributePB part = m_rPartMan.Get( m_PartSysIdTwo );
-	float deg = grMath::VecToDeg( part.Velocity );
+	grParticlAttributePB att = m_rPartMan.Get( m_PartSysIdTwo );
+	float deg = grMath::VecToDeg( att.Velocity );
 	deg += 1.0f * deltaT;
-	grMath::RotatePoint( &part.Velocity, deg * grMath::DegToRad );
-	m_rPartMan.Set( m_PartSysIdTwo, part );
+	grMath::RotatePoint( &att.Velocity, deg * grMath::DegToRad );
+	m_rPartMan.Set( m_PartSysIdTwo, att );
 
 
 	// Scenegraph things
