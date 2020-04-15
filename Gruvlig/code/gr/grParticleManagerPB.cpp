@@ -43,7 +43,7 @@ grParticleManagerPB::~grParticleManagerPB( void )
     for ( sizeT i = 0; i < m_CreatedEmitters; ++i )
     {
         if ( m_uPArrEmitters[ i ] != nullptr )
-            delete m_uPArrEmitters[ i ].release();
+            delete[] m_uPArrEmitters[ i ].release();
     }
     if ( m_uPArrEmitters != nullptr )
         delete m_uPArrEmitters.release();
@@ -51,7 +51,7 @@ grParticleManagerPB::~grParticleManagerPB( void )
     for ( sizeT i = 0; i < m_CreatedSystems; ++i )
     {
         if ( m_uPSystems[ i ] != nullptr )
-            delete m_uPSystems[ i ].release();
+            delete[] m_uPSystems[ i ].release();
     }
     if ( m_uPSystems != nullptr )
         delete m_uPSystems.release();
