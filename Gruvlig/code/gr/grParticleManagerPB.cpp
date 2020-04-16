@@ -49,7 +49,7 @@ grCParticleManagerPB::~grCParticleManagerPB( void )
 }
 
 
-grSParticleEmitter* const
+grCParticleEmitter* const
 grCParticleManagerPB::CreateEmitter( void )
 {
     assert( m_CreatedEmitters <= PARTICLE_EMITTERS && "grCParticleManagerPB::Create(): Max emitters already created" );
@@ -58,7 +58,7 @@ grCParticleManagerPB::CreateEmitter( void )
     ++m_CreatedEmitters;
     m_TotalParticles += PARTICLE_PER_EMITTER;
 
-    m_VecUpEmitter.push_back( std::move( std::make_unique<grSParticleEmitter>( id, PARTICLE_PER_EMITTER ) ) );
+    m_VecUpEmitter.push_back( std::move( std::make_unique<grCParticleEmitter>( id, PARTICLE_PER_EMITTER ) ) );
 
     return m_VecUpEmitter[ m_CreatedEmitters - 1 ].get();
 }
@@ -66,7 +66,7 @@ grCParticleManagerPB::CreateEmitter( void )
 
 // GetEmitter
 //////////////////////////////////////////////////
-grSParticleEmitter* const
+grCParticleEmitter* const
 grCParticleManagerPB::GetEmitter( const uInt id )
 {
     assert( m_CreatedEmitters <= PARTICLE_EMITTERS && "grCParticleManagerPB::GetEmitter(): Emittor id out of range" );
@@ -88,19 +88,19 @@ grCParticleManagerPB::Update( const float deltaT )
     // Additionally there is a light weight system that modifies the data contained in the emitter, which is allocated directly after all the emitters.
     // Don't remeber the size of the system so look it up...
 
-    //for ( sizeT i = 0; i < m_CreatedBlocks; ++i )
-    //{
-    //    m_uPSystems[ 0 ]->Activate( m_uPArrPartBlock[ i ], deltaT );
-    //    m_uPSystems[ 0 ]->Update( m_uPArrPartBlock[ i ], deltaT );
-    //    m_uPSystems[ 0 ]->Deactivate( m_uPArrPartBlock[ i ] );
-    //}
-
     for ( sizeT i = 0; i < m_CreatedEmitters; ++i )
+    {
         m_VecUpSystem[ 0 ]->Activate( *m_VecUpEmitter[ i ].get(), deltaT );
-
-    for ( sizeT i = 0; i < m_CreatedEmitters; ++i )
         m_VecUpSystem[ 0 ]->Update( *m_VecUpEmitter[ i ].get(), deltaT );
-
-    for ( sizeT i = 0; i < m_CreatedEmitters; ++i )
         m_VecUpSystem[ 0 ]->Deactivate( *m_VecUpEmitter[ i ].get() );
+    }
+
+    //for ( sizeT i = 0; i < m_CreatedEmitters; ++i )
+    //    m_VecUpSystem[ 0 ]->Activate( *m_VecUpEmitter[ i ].get(), deltaT );
+
+    //for ( sizeT i = 0; i < m_CreatedEmitters; ++i )
+    //    m_VecUpSystem[ 0 ]->Update( *m_VecUpEmitter[ i ].get(), deltaT );
+
+    //for ( sizeT i = 0; i < m_CreatedEmitters; ++i )
+    //    m_VecUpSystem[ 0 ]->Deactivate( *m_VecUpEmitter[ i ].get() );
 }

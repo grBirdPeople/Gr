@@ -3,7 +3,7 @@
 
 #include	"grCommon.h"
 
-struct		grSParticleEmitter;
+class		grCParticleEmitter;
 class		grRandom;
 
 
@@ -20,9 +20,9 @@ struct grSParticleSystemPB
 
 	//////////////////////////////////////////////////
 
-	void Activate( grSParticleEmitter& rEmitter, const float deltaT );
-	void Update( grSParticleEmitter& rEmitter, const float deltaT );
-	void Deactivate( grSParticleEmitter& rEmitter );
+	void Activate( grCParticleEmitter& rEmitter, const float deltaT );
+	void Update( grCParticleEmitter& rEmitter, const float deltaT );
+	void Deactivate( grCParticleEmitter& rEmitter );
 
 	//////////////////////////////////////////////////
 
@@ -31,7 +31,6 @@ private:
 	// As particles lifetimes can end in an non linear manner relative their memory adress, their idx get's stored here then sorted  at a later time and deactivated linearly
 	// Unsure if this saves time, perhaps if the particle quantity is large enough
 	// Might be handy anyway, unless it worsens performance, where it's easy to cut out
-	uP<uInt[]>		uPArrDeactivateIdSortd;
 	uP<grRandom>	uPRand;
 	uInt			Id;
 };

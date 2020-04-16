@@ -55,7 +55,7 @@ class grCParticleAttributePB
 {
 public:
 
-	friend struct grSParticleEmitter;
+	friend class grCParticleEmitter;
 
 	//////////////////////////////////////////////////
 

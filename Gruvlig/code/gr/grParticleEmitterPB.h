@@ -7,23 +7,24 @@
 
 // grSParticleEmitter // Never allowed to directly copy the complete object
 //////////////////////////////////////////////////
-class grSParticleEmitter
+class grCParticleEmitter
 {
 public:
 
-	friend class grSParticleSystemPB;
+	friend struct grSParticleSystemPB;
 
 	using vecUpPart = std::vector<uP<grSParticlePB>>;
 
 	//////////////////////////////////////////////////
 
-	grSParticleEmitter( const uInt id, const sizeT size )
-		: uPPartDeactivateQue	( new grStruct::grLoopQue<uInt>( size ) )
-		, SpawnCounter			( 0.0f )
-		, SpawnInMilliSec		( 1.0f / 25.0f )	// Set to zero when particle API or their likes exists
-		, Id					( id )
-		, PartActive			( 0 )
-		, PartSize				( size )
+	grCParticleEmitter( const uInt id, const sizeT size )
+		: uPPartDeactivateQue		( new grStruct::grLoopQue<uInt>( size ) )		
+		, uPArrPartDeactivateSortd	( new uInt[ size ] )
+		, SpawnCounter				( 0.0f )
+		, SpawnInMilliSec			( 1.0f / 25.0f )	// Set to zero when particle API or their likes exists
+		, Id						( id )
+		, PartActive				( 0 )
+		, PartSize					( size )
 	{
 		vecUpParticles.reserve( PartSize );
 		for ( sizeT i = 0; i < PartSize; ++i )
@@ -31,7 +32,7 @@ public:
 
 		uPPartAttribute = std::make_unique<grCParticleAttributePB>();
 	}
-	~grSParticleEmitter( void )
+	~grCParticleEmitter( void )
 	{
 		for ( sizeT i = 0; i < PartSize; ++i )
 		{
@@ -43,11 +44,14 @@ public:
 		if ( uPPartDeactivateQue != nullptr )
 			delete uPPartDeactivateQue.release();
 
+		if ( uPArrPartDeactivateSortd != nullptr )
+			delete[] uPArrPartDeactivateSortd.release();
+
 		if( uPPartAttribute != nullptr )
 			delete uPPartAttribute.release();
 	}
-	grSParticleEmitter( grSParticleEmitter const& ) = delete;
-	grSParticleEmitter& operator=( grSParticleEmitter const& ) = delete;
+	grCParticleEmitter( grCParticleEmitter const& ) = delete;
+	grCParticleEmitter& operator=( grCParticleEmitter const& ) = delete;
 
 	//////////////////////////////////////////////////
 
@@ -76,7 +80,10 @@ private:
 
 	uP<grStruct::grLoopQue<uInt>>	uPPartDeactivateQue;
 
+	uP<uInt[]>	uPArrPartDeactivateSortd;
+
 	uP<grCParticleAttributePB>	uPPartAttribute;
+
 
 	float	SpawnCounter,
 			SpawnInMilliSec;

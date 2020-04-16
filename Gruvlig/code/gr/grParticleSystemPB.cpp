@@ -13,8 +13,7 @@
 // cTor
 //////////////////////////////////////////////////
 grSParticleSystemPB::grSParticleSystemPB( const uInt id, const uInt partQuantity )
-    : uPArrDeactivateIdSortd    ( new uInt[ partQuantity ] )
-    , uPRand                    ( new grRandom )
+    : uPRand                    ( new grRandom )
     , Id                        ( id )
 {}
 
@@ -23,9 +22,6 @@ grSParticleSystemPB::grSParticleSystemPB( const uInt id, const uInt partQuantity
 //////////////////////////////////////////////////
 grSParticleSystemPB::~grSParticleSystemPB( void )
 {
-    if ( uPArrDeactivateIdSortd != nullptr )
-        delete[] uPArrDeactivateIdSortd.release();
-
     if( uPRand  != nullptr)
         delete uPRand.release();
 }
@@ -34,7 +30,7 @@ grSParticleSystemPB::~grSParticleSystemPB( void )
 // Activate
 //////////////////////////////////////////////////
 void
-grSParticleSystemPB::Activate( grSParticleEmitter& rEmitter, const float deltaT )
+grSParticleSystemPB::Activate( grCParticleEmitter& rEmitter, const float deltaT )
 {
     rEmitter.SpawnCounter -= deltaT;
     if ( rEmitter.SpawnCounter <= 0.0f )
@@ -134,7 +130,7 @@ grSParticleSystemPB::Activate( grSParticleEmitter& rEmitter, const float deltaT 
 // Update
 //////////////////////////////////////////////////
 void
-grSParticleSystemPB::Update( grSParticleEmitter& rEmitter, const float deltaT )
+grSParticleSystemPB::Update( grCParticleEmitter& rEmitter, const float deltaT )
 {
     if ( rEmitter.PartActive > 0 )
     {
@@ -201,19 +197,20 @@ grSParticleSystemPB::Update( grSParticleEmitter& rEmitter, const float deltaT )
 // Deactivate
 //////////////////////////////////////////////////
 void
-grSParticleSystemPB::Deactivate( grSParticleEmitter& rEmitter )
+grSParticleSystemPB::Deactivate( grCParticleEmitter& rEmitter )
 {
     if ( rEmitter.uPPartDeactivateQue->Quantity() > 0 )
     {
         uInt size = rEmitter.uPPartDeactivateQue->Quantity();
         for ( uInt i = 0; i < size; ++i )
-            uPArrDeactivateIdSortd[ i ] = rEmitter.uPPartDeactivateQue->Pull();
+            rEmitter.uPArrPartDeactivateSortd[ i ] = rEmitter.uPPartDeactivateQue->Pull();
+            //uPArrDeactivateIdSortd[ i ] = rEmitter.uPPartDeactivateQue->Pull();
 
-        grAlgo::InsrtSort<uInt>( uPArrDeactivateIdSortd.get(), size );
+        grAlgo::InsrtSort<uInt>( rEmitter.uPArrPartDeactivateSortd.get(), size );
 
         for ( uInt idx = 0; idx < size; ++idx )
         {
-            grSParticlePB& rTooPart = *rEmitter.vecUpParticles[ uPArrDeactivateIdSortd[ idx ] ];
+            grSParticlePB& rTooPart = *rEmitter.vecUpParticles[ rEmitter.uPArrPartDeactivateSortd[ idx ] ];
             grSParticlePB& rFromPart = *rEmitter.vecUpParticles[ rEmitter.PartActive - 1 ];
 
             rTooPart = rFromPart;   // TODO: Make sure this actually copies the values

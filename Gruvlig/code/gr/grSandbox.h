@@ -10,7 +10,7 @@ class		grMap;
 class		grIEntity;
 class		grInputManager;
 class		grCParticleManagerPB;
-struct		grSParticleEmitter;
+class		grCParticleEmitter;
 
 
 // grSandbox
@@ -42,8 +42,8 @@ private:
 	grIEntity*				m_pPlayer;
 	grIEntity*				m_pEnemy;
 
-	grSParticleEmitter*		m_pPartEmitter_1;
-	grSParticleEmitter*		m_pPartEmitter_2;
+	grCParticleEmitter*		m_pPartEmitter_1;
+	grCParticleEmitter*		m_pPartEmitter_2;
 
 	bool					m_bFlipFlop = true;
 
