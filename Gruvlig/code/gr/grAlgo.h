@@ -15,7 +15,7 @@ namespace grAlgo
 	InsrtSort( T* pArr, const uInt size, const bool minMax = true )
 	{
 		T nowNum;
-		uInt idxBefore;
+		sizeT idxBefore;
 		
 		auto minToMax = [ & ]()
 		{

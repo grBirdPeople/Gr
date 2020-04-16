@@ -6,7 +6,6 @@
 #include	"grInputManager.h"
 #include	"grMapManager.h"
 #include	"grNavMeshManager.h"
-#include	"grParticleManager.h"
 #include	"grParticleManagerPB.h"
 #include	"grSandbox.h"
 
@@ -36,7 +35,7 @@ grCore::grCore( const uInt winWidth, const uInt winHeight, const uInt frameRate,
 	grMapManager::Initialize();
 	grNavMeshManager::Initialize();
 	//grParticleManager::Initialize();
-	grParticleManagerPB::Initialize();
+	grCParticleManagerPB::Initialize();
 
 #ifdef DEBUG
 	grDebugManager::Initialize();
@@ -57,7 +56,7 @@ grCore::~grCore( void )
 	grDebugManager::DeInitialize();
 #endif // DEBUG
 
-	grParticleManagerPB::DeInitialize();
+	grCParticleManagerPB::DeInitialize();
 	//grParticleManager::DeInitialize();
 	grNavMeshManager::DeInitialize();
 	grMapManager::DeInitialize();
@@ -94,7 +93,7 @@ grCore::Update( void )
 	// Update entities
 	grEntityManager::Instance().Update( GetDeltaT() );
 	//grParticleManager::Instance().Update( GetDeltaT() );
-	grParticleManagerPB::Instance().Update( GetDeltaT() );
+	grCParticleManagerPB::Instance().Update( GetDeltaT() );
 
 #ifdef DEBUG
 	grNavMeshManager::Instance().Debug();

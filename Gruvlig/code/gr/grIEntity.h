@@ -10,7 +10,7 @@
 class		grEntityManager;
 class		grIEntity;
 
-typedef		std::vector<grIEntity*> vecIEntity;
+using 		vecIEntity = std::vector<grIEntity*>;
 
 
 // grIEntity

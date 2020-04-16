@@ -3,38 +3,37 @@
 
 #include	"grCommon.h"
 
-struct		grParticlAttributePB;
-struct		grParticlePB;
+struct		grSParticleEmitter;
 class		grRandom;
 
-struct		SParticleEmitter;
 
 
-// grParticleSystemPB
+// grSParticleSystemPB
 //////////////////////////////////////////////////
-struct grParticleSystemPB
+struct grSParticleSystemPB
 {
-	grParticleSystemPB( const uInt id, const uInt partQuantity );
-	~grParticleSystemPB( void );
+	grSParticleSystemPB( const uInt id, const uInt partQuantity );
+	~grSParticleSystemPB( void );
 
-	grParticleSystemPB( grParticleSystemPB const& ) = delete;
-	grParticleSystemPB& operator=( grParticleSystemPB  const& ) = delete;
+	grSParticleSystemPB( grSParticleSystemPB const& ) = delete;
+	grSParticleSystemPB& operator=( grSParticleSystemPB  const& ) = delete;
 
 	//////////////////////////////////////////////////
 
-	void Activate( SParticleEmitter& rPartBlock, const float deltaT );
-	void Update( SParticleEmitter& rPartBlock, const float deltaT );
-	void Deactivate( SParticleEmitter& rPartBlock );
+	void Activate( grSParticleEmitter& rEmitter, const float deltaT );
+	void Update( grSParticleEmitter& rEmitter, const float deltaT );
+	void Deactivate( grSParticleEmitter& rEmitter );
 
 	//////////////////////////////////////////////////
 
 private:
 
-	uP<uInt[]>	uPArrDeactivateId;
-
+	// As particles lifetimes can end in an non linear manner relative their memory adress, their idx get's stored here then sorted  at a later time and deactivated linearly
+	// Unsure if this saves time, perhaps if the particle quantity is large enough
+	// Might be handy anyway, unless it worsens performance, where it's easy to cut out
+	uP<uInt[]>		uPArrDeactivateIdSortd;
 	uP<grRandom>	uPRand;
-
-	uInt	Id;
+	uInt			Id;
 };
 
 #endif	// 

@@ -17,13 +17,14 @@
 #include	"grEntityManager.h"
 #include	"grMapManager.h"
 #include	"grParticleManagerPB.h"
+#include	"grMath.h"
 
 
 // cTor
 //////////////////////////////////////////////////
 grSandbox::grSandbox( void )
 	: m_rInputMan		( grInputManager::Instance() )
-	, m_rPartMan		( grParticleManagerPB::Instance() )
+	, m_rPartMan		( grCParticleManagerPB::Instance() )
 	, m_PartSysIdOne	( -1 )
 	, m_PartSysIdTwo	( -1 )
 {
@@ -99,11 +100,11 @@ grSandbox::grSandbox( void )
 	//partAtt.SetLifetime( 1.0f, 1.25f );
 	//m_rParticleSetup.SetParticleAttribute( partAtt );
 
-	m_PartSysIdOne = m_rPartMan.Create();
-	m_PartSysIdTwo = m_rPartMan.Create();
+	m_pPartEmitter_1 = m_rPartMan.CreateEmitter();
+	m_pPartEmitter_2 = m_rPartMan.CreateEmitter();
 
-	grParticlAttributePB attOne;
-	grParticlAttributePB attTwo;
+	grCParticleAttributePB attOne;
+	grCParticleAttributePB attTwo;
 
 	attOne.Color = grSColor( 0, 175, 250, 75 );
 	attOne.Position = grV2f( grCore::Instance().GetRenderWin().getSize().x * 0.5f, grCore::Instance().GetRenderWin().getSize().y * 0.5f );
@@ -115,8 +116,8 @@ grSandbox::grSandbox( void )
 	attTwo.Velocity = grV2f( -1.0f, 0.0f ) * 100.0f;
 	attTwo.Lifetime = 0.5f;
 
-	m_rPartMan.Set( m_PartSysIdOne, attOne );
-	m_rPartMan.Set( m_PartSysIdTwo, attTwo );
+	m_pPartEmitter_1->SetParticleAttribute( attOne );
+	m_pPartEmitter_2->SetParticleAttribute( attTwo );
 }
 
 
@@ -130,21 +131,22 @@ grSandbox::Update( const float deltaT )
 	// Particle things
 	if ( m_rInputMan.GetMouseMoved() == true )
 	{
-		grParticlAttributePB att = m_rPartMan.Get( m_PartSysIdOne );
-		att.Position = grMath::Lerp( att.Position, m_rInputMan.GetMousePos(), 0.5f );
-		grV2f lastMousePos = grV2f( m_LastMouseX , m_LastMouseY );
-		att.Velocity = grV2f( lastMousePos - m_rInputMan.GetMousePos() ).Normalized() * 50.0f;
+		grCParticleAttributePB att = m_pPartEmitter_1->GetParticleAttribute();
+		att.Position = grMath::Lerp( att.Position, m_rInputMan.GetMousePos(), 0.75f );
+		att.Velocity = grV2f( att.Position - m_rInputMan.GetMousePos() ).Normalized() * 50.0f;
 		att.Lifetime = 3.0f;
-		m_rPartMan.Set( m_PartSysIdOne, att );
+		m_pPartEmitter_1->SetParticleAttribute( att );
 	}
 	m_LastMouseX = m_rInputMan.GetMousePos().x;
 	m_LastMouseY = m_rInputMan.GetMousePos().y;
 
-	grParticlAttributePB att = m_rPartMan.Get( m_PartSysIdTwo );
+	grCParticleAttributePB att = m_pPartEmitter_2->GetParticleAttribute();
 	float deg = grMath::VecToDeg( att.Velocity );
 	deg += 1.0f * deltaT;
 	grMath::RotatePoint( &att.Velocity, deg * grMath::DegToRad );
-	m_rPartMan.Set( m_PartSysIdTwo, att );
+	m_pPartEmitter_2->SetParticleAttribute( att );
+
+
 
 
 	// Scenegraph things
@@ -164,20 +166,20 @@ grSandbox::Update( const float deltaT )
 	// Navmesh things
 	if ( m_pMap != nullptr )
 	{
-		grCore& rCore = grCore::Instance();
-		if ( m_rInputMan.GetMouse( sf::Mouse::Button::Left ) )
-		{
-			grV2f mousePos = grV2f( ( float )sf::Mouse::getPosition( rCore.GetRenderWin() ).x, ( float )sf::Mouse::getPosition( rCore.GetRenderWin() ).y );
-			m_pActor->SetEnd( m_pMap, mousePos );
-			m_pActor->FindPath( m_pMap );
-		}
+		//grCore& rCore = grCore::Instance();
+		//if ( m_rInputMan.GetMouse( sf::Mouse::Button::Left ) )
+		//{
+		//	grV2f mousePos = grV2f( ( float )sf::Mouse::getPosition( rCore.GetRenderWin() ).x, ( float )sf::Mouse::getPosition( rCore.GetRenderWin() ).y );
+		//	m_pActor->SetEnd( m_pMap, mousePos );
+		//	m_pActor->FindPath( m_pMap );
+		//}
 
-		if ( m_rInputMan.GetMouse( sf::Mouse::Button::Right ) )
-		{
-			grV2f mousePos = grV2f( ( float )sf::Mouse::getPosition( rCore.GetRenderWin() ).x, ( float )sf::Mouse::getPosition( rCore.GetRenderWin() ).y );
-			m_pActor->SetStart( m_pMap, mousePos );
-			m_pActor->FindPath( m_pMap );
-		}
+		//if ( m_rInputMan.GetMouse( sf::Mouse::Button::Right ) )
+		//{
+		//	grV2f mousePos = grV2f( ( float )sf::Mouse::getPosition( rCore.GetRenderWin() ).x, ( float )sf::Mouse::getPosition( rCore.GetRenderWin() ).y );
+		//	m_pActor->SetStart( m_pMap, mousePos );
+		//	m_pActor->FindPath( m_pMap );
+		//}
 	}
 }
 

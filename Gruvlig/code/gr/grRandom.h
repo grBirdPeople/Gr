@@ -5,9 +5,9 @@
 
 #include	"grCommon.h"
 
-typedef	std::uniform_real_distribution<float>		uniform_float;
-typedef	std::uniform_int_distribution<signed int>	uniform_intS;
-typedef	std::uniform_int_distribution<unsigned int>	uniform_intU;
+using uniform_float = std::uniform_real_distribution<float>;
+using uniform_sInt = std::uniform_int_distribution<signed int>;
+using uniform_uInt = std::uniform_int_distribution<unsigned int>;
 
 
 // grRandom
@@ -53,8 +53,8 @@ private:
 	std::mt19937	m_Mt;
 
 	uniform_float	m_RandFloat;
-	uniform_intS	m_RandIntS;
-	uniform_intU	m_RandIntU;
+	uniform_sInt	m_RandIntS;
+	uniform_uInt	m_RandIntU;
 };
 
 #endif	// _H_GRRANDOM_

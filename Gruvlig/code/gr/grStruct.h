@@ -17,7 +17,7 @@ namespace grStruct
 			: arrT		( new T[ size ] )
 			, Size		( size )
 			, StrtIdx	( 0 )
-			, Quantity	( 0 )
+			, Active	( 0 )
 		{}
 		~grLoopQue( void )
 		{
@@ -28,13 +28,13 @@ namespace grStruct
 		grLoopQue( grLoopQue const& ) = delete;
 		grLoopQue& operator=( grLoopQue const& ) = delete;
 
-		const uInt GetQuantity( void ) const
+		inline const uInt Quantity( void ) const
 		{
-			return Quantity;
+			return Active;
 		}
-		void Push( const T& rT )
+		inline void Push( const T& rT )
 		{
-			if ( Quantity == Size )
+			if ( Active == Size )
 			{
 #ifdef DEBUG
 				std::puts( "grLoopQue::Push(): Size maxed out. No element was added.\n" );
@@ -42,24 +42,40 @@ namespace grStruct
 				return;
 			}
 
-			uInt insrtIdx = StrtIdx + Quantity;
+			uInt insrtIdx = StrtIdx + Active;
 			if ( Size - 1 < insrtIdx )
 				insrtIdx = insrtIdx - Size;
 
 			arrT[ insrtIdx ] = rT;
-			++Quantity;
+			++Active;
 		}
-		T Pull( void )
+		inline T Pull( void )
 		{
-			assert( ( Quantity > 0 ) && "grLoopQue::Pull(): Que is empty" );
+			assert( ( Active > 0 ) && "grLoopQue::Pull(): Que is empty" );
 
 			sizeT idx = StrtIdx;
 			++StrtIdx;
 			if ( Size - 1 < StrtIdx )
 				StrtIdx = StrtIdx - Size;
 
-			--Quantity;
+			--Active;
 			return arrT[ idx ];
+		}
+		inline T Pop( void )
+		{
+			assert( ( Active > 0 ) && "grLoopQue::Pop(): Que is empty" );
+
+			sizeT idx = StrtIdx + ( Size - 1 );
+			if ( idx > ( Size - 1 ) )
+				idx =idx - Size;
+
+			--Active;
+			return arrT[ idx ];
+		}
+		inline void Reset( void )
+		{
+			StrtIdx = 0;
+			Active = 0;
 		}
 
 	private:
@@ -68,7 +84,7 @@ namespace grStruct
 
 		sizeT	Size,
 				StrtIdx,
-				Quantity;
+				Active;
 	};
 
 
@@ -95,50 +111,29 @@ namespace grStruct
 	{
 	public:	// TODO: Linera probing is used for search (if non unique keys where allowed). Perhaps add alts. dependent of map size like Plus 3 Rehash, Qaudratic Probing (failed)^2 or Double Hashing
 
-		// cTor
-		//////////////////////////////////////////////////
-		grHashMap	( const uInt maxSize )
+		grHashMap( const uInt maxSize )
 			: m_MaxSize	( maxSize )
 			, m_NowSize	( 0 )
 		{
 			m_vecNode.reserve( m_MaxSize );
 			for ( uInt i = 0; i < m_MaxSize; ++i )
-			{
 				m_vecNode.push_back( new grHashNode<T>() );
-			}
 
 			m_vecUsedKeys.reserve( m_MaxSize );
 			for ( uInt i = 0; i < m_MaxSize; ++i )
-			{
 				m_vecUsedKeys.push_back( -1 );
-			}
 		}
+		~grHashMap( void ) {}
 
-
-		// dTor
-		//////////////////////////////////////////////////
-		~grHashMap	( void )
-		{}
-
-
-		// Get / Set
-		//////////////////////////////////////////////////
-		inline	uInt
-			Size		( void )
+		inline uInt Size( void )
 		{
 			return m_NowSize;
 		}
-
-
-		inline	bool
-			Exists		( const uInt key )
+		inline bool Exists( const uInt key )
 		{
 			return ( HashKey( key ) == true ) ? true : false;
 		}
-
-
-		inline	std::vector<uInt>
-			UsedKeys	( void )
+		inline std::vector<uInt> UsedKeys( void )
 		{
 			std::vector<uInt> keys;
 			for ( uInt i = 0; i < m_vecUsedKeys.size(); ++i )
@@ -151,12 +146,7 @@ namespace grStruct
 
 			return keys;
 		}
-
-
-		// Put
-		//////////////////////////////////////////////////
-		inline	void
-			Put			( const uInt key, const T value )
+		inline void Put( const uInt key, const T value )
 		{
 			if ( m_NowSize == m_MaxSize )
 			{
@@ -188,31 +178,13 @@ namespace grStruct
 			m_vecUsedKeys[ hashIdx ] = key;
 			++m_NowSize;
 		}
-
-
-		// Get
-		//////////////////////////////////////////////////
-		inline	T
-			Get			( const uInt key )
+		inline T Get( const uInt key )
 		{
 			grHashNode<T>* pNode = Find( key );
-			if ( pNode == nullptr )
-			{
-#ifdef DEBUG
-				std::cerr << "grHashMap::Get(): Key does not exist" << std::endl;
-#endif // DEBUG
-				return nullptr;
-			}
-
+			assert( pNode != nullptr && "grHashMap::Get(): Key does not exist" );
 			return pNode->m_Value;
 		}
-
-
-		// Get
-		//////////////////////////////////////////////////
-
-		inline	void
-			Del			( const uInt key )
+		inline void Del( const uInt key )
 		{
 			grHashNode<T>* pNode = Find( key );
 			if ( pNode == nullptr )
@@ -233,18 +205,11 @@ namespace grStruct
 
 	private:
 
-		// HashKey
-		//////////////////////////////////////////////////
-		inline	sInt
-			HashKey		( const uInt key )
+		inline sInt HashKey( const uInt key )
 		{
 			return key % m_MaxSize;
 		}
-
-		// Find
-		//////////////////////////////////////////////////
-		inline	grHashNode<T>*
-			Find		( const uInt key )
+		inline grHashNode<T>* Find( const uInt key )
 		{
 			uInt count = 0;
 			uInt hashIdx = HashKey( key );

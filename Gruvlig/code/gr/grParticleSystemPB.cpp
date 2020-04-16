@@ -1,27 +1,30 @@
 #include	"grParticleSystemPB.h"
 
 #include    "grRandom.h"
-#include	"grV2.h"
-//#include    "grParticleManagerPB.h"
-#include    "grParticlePB.h"
+#include    "grParticleEmitterPB.h"
 #include    "grAlgo.h"
+
+// TEST DRAW
+#include	"grBBox.h"
+#include	"grDebugManager.h"
+// TEST DRAW
 
 
 // cTor
 //////////////////////////////////////////////////
-grParticleSystemPB::grParticleSystemPB( const uInt id, const uInt partQuantity )
-    : uPArrDeactivateId ( new uInt[ partQuantity ] )
-    , uPRand            ( new grRandom )
-    , Id                ( id )
+grSParticleSystemPB::grSParticleSystemPB( const uInt id, const uInt partQuantity )
+    : uPArrDeactivateIdSortd    ( new uInt[ partQuantity ] )
+    , uPRand                    ( new grRandom )
+    , Id                        ( id )
 {}
 
 
 // dTor
 //////////////////////////////////////////////////
-grParticleSystemPB::~grParticleSystemPB( void )
+grSParticleSystemPB::~grSParticleSystemPB( void )
 {
-    if ( uPArrDeactivateId != nullptr )
-        delete[] uPArrDeactivateId.release();
+    if ( uPArrDeactivateIdSortd != nullptr )
+        delete[] uPArrDeactivateIdSortd.release();
 
     if( uPRand  != nullptr)
         delete uPRand.release();
@@ -31,26 +34,27 @@ grParticleSystemPB::~grParticleSystemPB( void )
 // Activate
 //////////////////////////////////////////////////
 void
-grParticleSystemPB::Activate( SParticleEmitter& rPartBlock, const float deltaT )
+grSParticleSystemPB::Activate( grSParticleEmitter& rEmitter, const float deltaT )
 {
-    rPartBlock.SpawnCounter -= deltaT;
-    if ( rPartBlock.SpawnCounter <= 0.0f )
+    rEmitter.SpawnCounter -= deltaT;
+    if ( rEmitter.SpawnCounter <= 0.0f )
     {
-        rPartBlock.SpawnCounter += rPartBlock.SpawnInMilliSec;
-        if ( rPartBlock.PartActive >= rPartBlock.PartSize )
+        rEmitter.SpawnCounter += rEmitter.SpawnInMilliSec;
+        if ( rEmitter.PartActive >= rEmitter.PartSize )
             return;
 
         // Think writing data should maybe be done elsewhere
         {
-            grParticlePB& rPart = *rPartBlock.uPArrParticle[ rPartBlock.PartActive ];
-            grParticlAttributePB& rAtt = *rPartBlock.uPAttribute.get();
+            grSParticlePB& rPart = *rEmitter.vecUpParticles[ rEmitter.PartActive ].get();
+            grCParticleAttributePB& rAtt = rEmitter.GetParticleAttribute();
+
             rPart.Color = rAtt.Color;
             rPart.Position = rAtt.Position;
             rPart.Velocity = rAtt.Velocity;
             rPart.Lifetime = rAtt.Lifetime;
         }
 
-        ++rPartBlock.PartActive;
+        ++rEmitter.PartActive;
     }
 
 
@@ -130,20 +134,29 @@ grParticleSystemPB::Activate( SParticleEmitter& rPartBlock, const float deltaT )
 // Update
 //////////////////////////////////////////////////
 void
-grParticleSystemPB::Update( SParticleEmitter& rPartBlock, const float deltaT )
+grSParticleSystemPB::Update( grSParticleEmitter& rEmitter, const float deltaT )
 {
-    grParticlAttributePB& rAtt = *rPartBlock.uPAttribute.get();
-    for ( sizeT idx = 0; idx < rPartBlock.PartActive; ++idx )
+    if ( rEmitter.PartActive > 0 )
     {
-        rPartBlock.uPArrParticle[ idx ]->Lifetime -= deltaT;
-        if ( rPartBlock.uPArrParticle[ idx ]->Lifetime <= grMath::Epsilon )
+        for ( sizeT idx = 0; idx < rEmitter.PartActive; ++idx )
         {
-            rPartBlock.uPPartDeactivateQue->Push( idx );
-            continue;
-        }
+            rEmitter.vecUpParticles[ idx ]->Lifetime -= deltaT;
+            if ( rEmitter.vecUpParticles[ idx ]->Lifetime <= grMath::Epsilon )
+            {
+                rEmitter.uPPartDeactivateQue->Push( idx );
+                continue;
+            }
 
-        rPartBlock.uPArrParticle[ idx ]->Position += rPartBlock.uPArrParticle[ idx ]->Velocity * deltaT;
+            rEmitter.vecUpParticles[ idx ]->Position += rEmitter.vecUpParticles[ idx ]->Velocity * deltaT;
+
+            // TEST DRAW
+            grBBox box( grV2f( 20.0f, 20.0f ), rEmitter.vecUpParticles[ idx ]->Position );
+            grSColor color = rEmitter.vecUpParticles[ idx ]->Color;
+            grDebugManager::Instance().AddBBox( box, sf::Color( color.R, color.G, color.B, color.A ) );
+            // TEST DRAW
+        }
     }
+
 
 
 
@@ -188,29 +201,29 @@ grParticleSystemPB::Update( SParticleEmitter& rPartBlock, const float deltaT )
 // Deactivate
 //////////////////////////////////////////////////
 void
-grParticleSystemPB::Deactivate( SParticleEmitter& rPartBlock )
+grSParticleSystemPB::Deactivate( grSParticleEmitter& rEmitter )
 {
-    if ( rPartBlock.uPPartDeactivateQue->GetQuantity() > 0 )
+    if ( rEmitter.uPPartDeactivateQue->Quantity() > 0 )
     {
-        uInt size = rPartBlock.uPPartDeactivateQue->GetQuantity();
+        uInt size = rEmitter.uPPartDeactivateQue->Quantity();
         for ( uInt i = 0; i < size; ++i )
-            uPArrDeactivateId[ i ] = rPartBlock.uPPartDeactivateQue->Pull();
+            uPArrDeactivateIdSortd[ i ] = rEmitter.uPPartDeactivateQue->Pull();
 
-        grAlgo::InsrtSort<uInt>( uPArrDeactivateId.get(), size );
+        grAlgo::InsrtSort<uInt>( uPArrDeactivateIdSortd.get(), size );
 
         for ( uInt idx = 0; idx < size; ++idx )
         {
-            grParticlePB& rTooPart = *rPartBlock.uPArrParticle[ uPArrDeactivateId[ idx ] ];
-            grParticlePB& rFromPart = *rPartBlock.uPArrParticle[ rPartBlock.PartActive - 1 ];
+            grSParticlePB& rTooPart = *rEmitter.vecUpParticles[ uPArrDeactivateIdSortd[ idx ] ];
+            grSParticlePB& rFromPart = *rEmitter.vecUpParticles[ rEmitter.PartActive - 1 ];
 
-            rTooPart = rFromPart;
+            rTooPart = rFromPart;   // TODO: Make sure this actually copies the values
 
             // Should not need this
             //rFromPart.Position = 0.0f;
             //rFromPart.Velocity = 0.0f;
             //rFromPart.Lifetime = 0.0f;
 
-            --rPartBlock.PartActive;
+            --rEmitter.PartActive;
         }
     }
 

@@ -1,23 +1,14 @@
 #include    "grParticleManagerPB.h"
 
 #include    "grCore.h"
-#include	"grDefine.h"
-
-// TEST DRAW
-#include	"grBBox.h"
-#include	"grDebugManager.h"
-// TEST DRAW
 
 
 // cTor
 //////////////////////////////////////////////////
-grParticleManagerPB::grParticleManagerPB( void )
-    : m_uPArrEmitters   ( new uP<SParticleEmitter>[ PARTICLE_EMITTERS ]() )
-    , m_uPSystems       ( new uP<grParticleSystemPB>[ PARTICLE_SYTEMS ]() )
-    , m_AttributeQue    ( new grStruct::grLoopQue<grParticlAttributePB>( PARTICLE_EMITTERS * PARTICLE_x_EMITTER ) )
-    , m_CreatedSystems  ( 0 )
-    , m_CreatedEmitters ( 0 )
-    , m_TotalParticles  ( 0 )
+grCParticleManagerPB::grCParticleManagerPB( void )
+    : m_CreatedSystems      ( 0 )
+    , m_CreatedEmitters     ( 0 )
+    , m_TotalParticles      ( 0 )
 {
     // I forget syntax dynamic-array-uPtr so example
     {
@@ -28,9 +19,11 @@ grParticleManagerPB::grParticleManagerPB( void )
         // m_upupArrParticle     ( new uPtr<grParticlePB>[ PARTICLE_PER_ATTRIBUTE ]() )
     }
 
+    m_VecUpEmitter.reserve( PARTICLE_EMITTERS );
+
     for ( sizeT i = 0; i < PARTICLE_SYTEMS; ++i )
     {
-        m_uPSystems[ i ] = std::make_unique<grParticleSystemPB>( ( uInt )i, PARTICLE_x_EMITTER );
+        m_VecUpSystem.push_back( std::make_unique<grSParticleSystemPB>( ( uInt )i, PARTICLE_PER_EMITTER ) );
         ++m_CreatedSystems;
     }
 }
@@ -38,74 +31,62 @@ grParticleManagerPB::grParticleManagerPB( void )
 
 // dTor
 //////////////////////////////////////////////////
-grParticleManagerPB::~grParticleManagerPB( void )
+grCParticleManagerPB::~grCParticleManagerPB( void )
 {
     for ( sizeT i = 0; i < m_CreatedEmitters; ++i )
     {
-        if ( m_uPArrEmitters[ i ] != nullptr )
-            delete[] m_uPArrEmitters[ i ].release();
+        if ( m_VecUpEmitter[ i ] != nullptr )
+            delete m_VecUpEmitter[ i ].release();
     }
-    if ( m_uPArrEmitters != nullptr )
-        delete m_uPArrEmitters.release();
+    m_VecUpEmitter.clear();
 
     for ( sizeT i = 0; i < m_CreatedSystems; ++i )
     {
-        if ( m_uPSystems[ i ] != nullptr )
-            delete[] m_uPSystems[ i ].release();
+        if ( m_VecUpSystem[ i ] != nullptr )
+            delete m_VecUpSystem[ i ].release();
     }
-    if ( m_uPSystems != nullptr )
-        delete m_uPSystems.release();
+    m_VecUpSystem.clear();
 }
 
 
-// CreateParticleSystem
-//////////////////////////////////////////////////
-const sInt
-grParticleManagerPB::Create( void )
+grSParticleEmitter* const
+grCParticleManagerPB::CreateEmitter( void )
 {
-    if ( m_CreatedEmitters >= PARTICLE_EMITTERS )
-    {
-#ifdef DEBUG
-        std::puts( "grParticleManagerPB::CreateParticleSystem(): Max attributes already created\n" );
-#endif // DEBUG
-        return -1;
-    }
+    assert( m_CreatedEmitters <= PARTICLE_EMITTERS && "grCParticleManagerPB::Create(): Max emitters already created" );
 
     uInt id = m_CreatedEmitters;
     ++m_CreatedEmitters;
-    m_TotalParticles += PARTICLE_x_EMITTER;
-    m_uPArrEmitters[ id ] = std::make_unique<SParticleEmitter>( id, PARTICLE_x_EMITTER );
-    return id;
+    m_TotalParticles += PARTICLE_PER_EMITTER;
+
+    m_VecUpEmitter.push_back( std::move( std::make_unique<grSParticleEmitter>( id, PARTICLE_PER_EMITTER ) ) );
+
+    return m_VecUpEmitter[ m_CreatedEmitters - 1 ].get();
 }
 
 
-// Get
+// GetEmitter
 //////////////////////////////////////////////////
-grParticlAttributePB
-grParticleManagerPB::Get( const uInt id )
+grSParticleEmitter* const
+grCParticleManagerPB::GetEmitter( const uInt id )
 {
-    grParticlAttributePB part = *m_uPArrEmitters[ id ]->uPAttribute.get();
-    return part;
-}
-
-
-// Set
-//////////////////////////////////////////////////
-void
-grParticleManagerPB::Set( const sInt id, const grParticlAttributePB& rAtt )
-{
-    *m_uPArrEmitters[ id ]->uPAttribute.get() = rAtt;  // TODO: Que attributes and batch update all
+    assert( m_CreatedEmitters <= PARTICLE_EMITTERS && "grCParticleManagerPB::GetEmitter(): Emittor id out of range" );
+    return m_VecUpEmitter[ id ].get();
 }
 
 
 // Update
 //////////////////////////////////////////////////
 void
-grParticleManagerPB::Update( const float deltaT )
+grCParticleManagerPB::Update( const float deltaT )
 {
     // TEST
 
-    // TODO: Test which loop-set is fastest
+    // TODO: Test which loop-set is the fastest.
+    // Partially possible that it comes down to SIMD vs. Cache cycles, or I know nothing is also a posibility.
+    // Cpu on used machine (Ryzen 5 2600x) has 576kb L1. One instance of an emitter (holds the emitter particles and some other minor things) is semi-roughly 8kb (double check).
+    // All emitters are allocated linearly and it's contents the same, where all member data declerations are done RowUpDown/SizeMaxMin
+    // Additionally there is a light weight system that modifies the data contained in the emitter, which is allocated directly after all the emitters.
+    // Don't remeber the size of the system so look it up...
 
     //for ( sizeT i = 0; i < m_CreatedBlocks; ++i )
     //{
@@ -115,27 +96,11 @@ grParticleManagerPB::Update( const float deltaT )
     //}
 
     for ( sizeT i = 0; i < m_CreatedEmitters; ++i )
-        m_uPSystems[ 0 ]->Activate( *m_uPArrEmitters[ i ].get(), deltaT );
+        m_VecUpSystem[ 0 ]->Activate( *m_VecUpEmitter[ i ].get(), deltaT );
 
     for ( sizeT i = 0; i < m_CreatedEmitters; ++i )
-        m_uPSystems[ 0 ]->Update( *m_uPArrEmitters[ i ].get(), deltaT );
+        m_VecUpSystem[ 0 ]->Update( *m_VecUpEmitter[ i ].get(), deltaT );
 
     for ( sizeT i = 0; i < m_CreatedEmitters; ++i )
-        m_uPSystems[ 0 ]->Deactivate( *m_uPArrEmitters[ i ].get() );
-
-    // TEST DRAW
-    for ( sizeT i = 0; i < m_CreatedEmitters; ++i )
-    {
-        uInt size = m_uPArrEmitters[ i ]->PartActive;
-        for ( sizeT j = 0; j < size; ++j )
-        {
-            // TEST
-            grBBox box( grV2f( 20.0f, 20.0f ), m_uPArrEmitters[ i ]->uPArrParticle[ j ]->Position );
-            grSColor color = m_uPArrEmitters[ i ]->uPArrParticle[ j ]->Color;
-            sf::Color sfColor( color.R, color.G, color.B, color.A );
-            grDebugManager::Instance().AddBBox( box, sfColor );
-            // TEST
-        }
-    }
-    // TEST DRAW
+        m_VecUpSystem[ 0 ]->Deactivate( *m_VecUpEmitter[ i ].get() );
 }

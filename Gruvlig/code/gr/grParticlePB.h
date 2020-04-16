@@ -2,12 +2,9 @@
 #define		_H_GRPARTICLEPB_
 
 #include	"grDefine.h"
-#include	"grMath.h"
-#include	"grStruct.h"
 #include	"grV2.h"
+#include	"grMath.h"
 
-
-// TODO: When there is an API for particles hook it up to grParticleAttributePB
 
 struct grSColor
 {
@@ -30,18 +27,46 @@ struct grSColor
 };
 
 
-class grParticlAttributePB
+// grSParticlePB // Multiple instances // // Always allowed to directly copy the whole object
+//////////////////////////////////////////////////
+struct grSParticlePB
+{
+	//Phys based
+	grSParticlePB( void )
+		: Color		( grSColor() )
+		, Position	( grV2f() )
+		, Velocity	( grV2f( 0.0f, 0.0f ) )
+		, Lifetime	( 0.0f )
+	{}
+
+	//////////////////////////////////////////////////
+
+	grSColor	Color;
+
+	grV2f	Position;
+	grV2f	Velocity;
+	float	Lifetime;
+};
+
+
+// grCParticleAttributePB // One instance per emitter // Always allowed to directly copy the whole object
+//////////////////////////////////////////////////
+class grCParticleAttributePB
 {
 public:
 
-	friend struct SParticleEmitter;
+	friend struct grSParticleEmitter;
 
-	grParticlAttributePB( void )
+	//////////////////////////////////////////////////
+
+	grCParticleAttributePB( void )
 		: Color		( grSColor() )
 		, Position	( grV2f() )
 		, Velocity	( grV2f() )
 		, Lifetime	( 0.0f )
 	{}
+
+	//////////////////////////////////////////////////
 
 	grSColor	Color;
 
@@ -164,74 +189,5 @@ public:
 //	// Oscillation flags
 //	bool	bSpeedOsc;
 //};
-
-
-// grParticlePB // Multiple instances
-//////////////////////////////////////////////////
-struct grParticlePB
-{
-	//Phys based
-	grParticlePB( void )
-		: Color		( grSColor() )
-		, Position	( grV2f() )
-		, Velocity	( grV2f( 0.0f, 0.0f ) )
-		, Lifetime	( 0.0f )
-	{}
-
-	grSColor	Color;
-
-	grV2f	Position;
-	grV2f	Velocity;
-	float	Lifetime;
-};
-
-
-struct SParticleEmitter
-{
-	SParticleEmitter( const uInt id, const sizeT size )
-		: uPArrParticle			( new grParticlePB* [ size ]() )
-		, uPPartDeactivateQue	( new grStruct::grLoopQue<uInt>( size ) )
-		, uPAttribute			( new grParticlAttributePB() )
-		, SpawnCounter			( 0.0f )
-		, SpawnInMilliSec		( 1.0f / 25.0f )	// Set to zero when particle API or their likes exists
-		, Id					( id )
-		, PartActive			( 0 )
-		, PartSize				( size )
-	{
-		for ( sizeT i = 0; i < PartSize; ++i )
-			uPArrParticle[ i ] = new grParticlePB();
-	}
-	~SParticleEmitter( void )
-	{
-		for ( sizeT i = 0; i < PartSize; ++i )
-		{
-			if ( uPArrParticle[ i ] != nullptr )
-				DELANDNULL( uPArrParticle[ i ] );
-		}
-		delete[] uPArrParticle.release();
-
-		if ( uPPartDeactivateQue != nullptr )
-			delete uPPartDeactivateQue.release();
-
-		if ( uPAttribute != nullptr )
-			delete uPAttribute.release();
-	}
-	SParticleEmitter( SParticleEmitter const& ) = delete;
-	SParticleEmitter& operator=( SParticleEmitter  const& ) = delete;
-
-	//////////////////////////////////////////////////
-
-	uP<grParticlePB * []>			uPArrParticle;
-	uP<grStruct::grLoopQue<uInt>>			uPPartDeactivateQue;
-	uP<grParticlAttributePB>	uPAttribute;
-
-	float	SpawnCounter,
-		SpawnInMilliSec;
-
-	uInt	Id,
-		PartActive;
-
-	sizeT	PartSize;
-};
 
 #endif	// _H_GRPARTICLEPB_
