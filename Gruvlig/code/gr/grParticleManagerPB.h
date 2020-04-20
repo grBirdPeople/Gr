@@ -25,8 +25,8 @@ public:
 
 	//////////////////////////////////////////////////
 
-	grCParticleEmitter* const CreateEmitter( void );
-	grCParticleEmitter* const GetEmitter( const uInt id );
+	grCParticleEmitterPB* const CreateEmitter( void );
+	grCParticleEmitterPB* const GetEmitter( const uInt id );
 
 	//////////////////////////////////////////////////
 
@@ -36,7 +36,7 @@ private:
 
 	//////////////////////////////////////////////////
 
-	using vecUpEmitter = std::vector<uP<grCParticleEmitter>>;
+	using vecUpEmitter = std::vector<uP<grCParticleEmitterPB>>;
 	using vecUpSystem = std::vector<std::unique_ptr<grSParticleSystemPB>>;
 
 	vecUpEmitter	m_VecUpEmitter;

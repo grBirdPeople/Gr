@@ -7,7 +7,7 @@
 
 // grSParticleEmitter // Never allowed to directly copy the complete object
 //////////////////////////////////////////////////
-class grCParticleEmitter
+class grCParticleEmitterPB
 {
 public:
 
@@ -17,7 +17,7 @@ public:
 
 	//////////////////////////////////////////////////
 
-	grCParticleEmitter( const uInt id, const sizeT size )
+	grCParticleEmitterPB( const uInt id, const sizeT size )
 		: uPPartDeactivateQue		( new grStruct::grLoopQue<uInt>( size ) )		
 		, uPArrPartDeactivateSortd	( new uInt[ size ] )
 		, SpawnCounter				( 0.0f )
@@ -32,7 +32,7 @@ public:
 
 		uPPartAttribute = std::make_unique<grCParticleAttributePB>();
 	}
-	~grCParticleEmitter( void )
+	~grCParticleEmitterPB( void )
 	{
 		for ( sizeT i = 0; i < PartSize; ++i )
 		{
@@ -50,8 +50,8 @@ public:
 		if( uPPartAttribute != nullptr )
 			delete uPPartAttribute.release();
 	}
-	grCParticleEmitter( grCParticleEmitter const& ) = delete;
-	grCParticleEmitter& operator=( grCParticleEmitter const& ) = delete;
+	grCParticleEmitterPB( grCParticleEmitterPB const& ) = delete;
+	grCParticleEmitterPB& operator=( grCParticleEmitterPB const& ) = delete;
 
 	//////////////////////////////////////////////////
 

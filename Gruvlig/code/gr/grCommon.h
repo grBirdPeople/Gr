@@ -3,6 +3,7 @@
 
 //////////////////////////////////////////////////
 
+#include	<array>
 #include	<assert.h>
 #include	<iostream>
 #include	<map>
@@ -15,6 +16,8 @@
 
 template<typename Q> using uP = std::unique_ptr<Q>;
 template<typename W> using sP = std::shared_ptr<W>;
+
+template<typename E> using vE = std::vector<E>;
 
 using str = std::string;
 

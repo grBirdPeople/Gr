@@ -55,7 +55,7 @@ class grCParticleAttributePB
 {
 public:
 
-	friend class grCParticleEmitter;
+	friend class grCParticleEmitterPB;
 
 	//////////////////////////////////////////////////
 
@@ -125,7 +125,7 @@ public:
 //	}
 //	void SetSpeed( const float min, const float max, const float osc = 0.0f )
 //	{
-//		SpeedRange = MinMaxFixer( grMath::Abs( min ), grMath::Abs( max ) );;
+//		SpeedRange = MinMaxFixer( grMath::Abs( min ), grMath::Abs( max ) );
 //		bSpeedRange = ( grMath::CmpFloat( SpeedRange.x, SpeedRange.y ) ) ? false : true;
 //		bSpeedOsc = ( osc != 0.0f ) ? true : false;
 //		SpeedOsc = osc;

@@ -3,7 +3,7 @@
 
 #include	"grCommon.h"
 
-class		grCParticleEmitter;
+class		grCParticleEmitterPB;
 class		grRandom;
 
 
@@ -20,9 +20,9 @@ struct grSParticleSystemPB
 
 	//////////////////////////////////////////////////
 
-	void Activate( grCParticleEmitter& rEmitter, const float deltaT );
-	void Update( grCParticleEmitter& rEmitter, const float deltaT );
-	void Deactivate( grCParticleEmitter& rEmitter );
+	void Activate( grCParticleEmitterPB& rEmitter, const float deltaT );
+	void Update( grCParticleEmitterPB& rEmitter, const float deltaT );
+	void Deactivate( grCParticleEmitterPB& rEmitter );
 
 	//////////////////////////////////////////////////
 

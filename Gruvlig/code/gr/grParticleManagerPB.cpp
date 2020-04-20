@@ -10,7 +10,7 @@ grCParticleManagerPB::grCParticleManagerPB( void )
     , m_CreatedEmitters     ( 0 )
     , m_TotalParticles      ( 0 )
 {
-    // I forget syntax dynamic-array-uPtr so example
+    // I forget syntax for dynamic array of uPtr's so example
     {
         // uPtr<grParticlePB*[]>	m_upArrParticle;
         // uPtr<uPtr<grParticlePB>[]>	m_upupArrParticle;
@@ -49,7 +49,7 @@ grCParticleManagerPB::~grCParticleManagerPB( void )
 }
 
 
-grCParticleEmitter* const
+grCParticleEmitterPB* const
 grCParticleManagerPB::CreateEmitter( void )
 {
     assert( m_CreatedEmitters <= PARTICLE_EMITTERS && "grCParticleManagerPB::Create(): Max emitters already created" );
@@ -58,7 +58,7 @@ grCParticleManagerPB::CreateEmitter( void )
     ++m_CreatedEmitters;
     m_TotalParticles += PARTICLE_PER_EMITTER;
 
-    m_VecUpEmitter.push_back( std::move( std::make_unique<grCParticleEmitter>( id, PARTICLE_PER_EMITTER ) ) );
+    m_VecUpEmitter.push_back( std::move( std::make_unique<grCParticleEmitterPB>( id, PARTICLE_PER_EMITTER ) ) );
 
     return m_VecUpEmitter[ m_CreatedEmitters - 1 ].get();
 }
@@ -66,7 +66,7 @@ grCParticleManagerPB::CreateEmitter( void )
 
 // GetEmitter
 //////////////////////////////////////////////////
-grCParticleEmitter* const
+grCParticleEmitterPB* const
 grCParticleManagerPB::GetEmitter( const uInt id )
 {
     assert( m_CreatedEmitters <= PARTICLE_EMITTERS && "grCParticleManagerPB::GetEmitter(): Emittor id out of range" );

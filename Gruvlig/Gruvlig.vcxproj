@@ -164,6 +164,7 @@
   <ItemGroup>
     <ClCompile Include="code\gr\grBBox.cpp" />
     <ClCompile Include="code\gr\grCore.cpp" />
+    <ClCompile Include="code\gr\grCParticleManager.cpp" />
     <ClCompile Include="code\gr\grCtrlPlayer.cpp" />
     <ClCompile Include="code\gr\grDebugManager.cpp" />
     <ClCompile Include="code\gr\grEntityEnemy.cpp" />
@@ -175,7 +176,9 @@
     <ClCompile Include="code\gr\grMapManager.cpp" />
     <ClCompile Include="code\gr\grNavMesh.cpp" />
     <ClCompile Include="code\gr\grNavMeshManager.cpp" />
+    <ClCompile Include="code\gr\grParticleEmitter.cpp" />
     <ClCompile Include="code\gr\grParticleManagerPB.cpp" />
+    <ClCompile Include="code\gr\grParticleSystem.cpp" />
     <ClCompile Include="code\gr\grParticleSystemPB.cpp" />
     <ClCompile Include="code\gr\grSandbox.cpp" />
     <ClCompile Include="code\gr\main.cpp" />
@@ -225,6 +228,7 @@
     <ClInclude Include="code\gr\grBox2D.h" />
     <ClInclude Include="code\gr\grCommon.h" />
     <ClInclude Include="code\gr\grCore.h" />
+    <ClInclude Include="code\gr\grCParticleManager.h" />
     <ClInclude Include="code\gr\grCtrlPlayer.h" />
     <ClInclude Include="code\gr\grDebugManager.h" />
     <ClInclude Include="code\gr\grDefine.h" />
@@ -241,6 +245,10 @@
     <ClInclude Include="code\gr\grNavMesh.h" />
     <ClInclude Include="code\gr\grNavMeshManager.h" />
     <ClInclude Include="code\gr\grNavNode.h" />
+    <ClInclude Include="code\gr\grParticle.h" />
+    <ClInclude Include="code\gr\grParticleSystem.h" />
+    <ClInclude Include="code\gr\grSPartAttribute.h" />
+    <ClInclude Include="code\gr\grParticleEmitter.h" />
     <ClInclude Include="code\gr\grParticleEmitterPB.h" />
     <ClInclude Include="code\gr\grParticleManagerPB.h" />
     <ClInclude Include="code\gr\grParticlePB.h" />

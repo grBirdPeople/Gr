@@ -88,6 +88,93 @@ namespace grStruct
 	};
 
 
+	// grLinearActivity
+	//////////////////////////////////////////////////
+	template<typename T>
+	class grLinearActivity
+	{
+	public:
+
+		grLinearActivity( const uInt capacity )
+			: Arr			( new T[ capacity ]() )
+			, m_Capacity	( capacity )
+			, m_Size		( 0 )
+			, m_Active		( 0 )
+		{}
+		~grLinearActivity( void )
+		{
+			delete[] Arr.release();
+		}
+		grLinearActivity( const grLinearActivity & ) = delete;
+		grLinearActivity& operator=( const grLinearActivity& ) = delete;
+		T& operator[]( const sizeT idx )
+		{
+#ifdef	DEBUG
+			assert( idx >= 0 && "grStruct::grReuseArray::[]: Idx was less then zero" );
+			assert( idx < m_Capacity && "grStruct::grReuseArray::[]: Idx was out of range" );
+#endif	// DEBUG
+
+			return Arr[ idx ];
+		}
+
+		const sizeT Size( void ) const
+		{
+			return m_Size;
+		}
+		const sizeT Active( void ) const
+		{
+			return m_Active;
+		}
+		void Push( T value )
+		{
+#ifdef	DEBUG
+			if ( m_Size >= m_Capacity )
+			{
+				std::puts( "grStruct::grActivateArray::Push(): Max elements reached" );
+				return;
+			}
+#endif	// DEBUG
+
+			Arr[ m_Size ] = value;
+			++m_Size;
+		}
+		T& Activate( void )
+		{
+#ifdef	DEBUG
+			if ( m_Active == m_Size )
+			{
+				std::puts( "grStruct::grActivateArray::Activate(): All elements already active. Ref to the last element in array returned" );
+				return Arr[ m_Active - 1 ];
+			}
+#endif	// DEBUG
+
+			++m_Active;
+			return Arr[ m_Active - 1 ];
+		}
+		void Deactivate( const uInt idx )
+		{
+#ifdef	DEBUG
+			if ( idx < 0 || idx >= m_Active )
+			{
+				std::puts( "grStruct::grActivateArray::Activate(): Idx was out of range" );
+				return;
+			}
+#endif	// DEBUG
+
+			Arr[ idx ] = Arr[ m_Active - 1 ];
+			--m_Active;
+		}
+
+	private:
+
+		uP<T[]> Arr;
+
+		sizeT	m_Capacity,
+				m_Size,
+				m_Active;
+	};
+
+
 	// HashNode
 	//////////////////////////////////////////////////
 	template<typename T>
@@ -103,8 +190,7 @@ namespace grStruct
 	};
 
 
-	// TODO: This should be updated to use ptr arrays instead of vectors
-	// grHashMap // Uses buckets / Open-adress where only unique unsigned int's are allowed as keys // Never tested for reals for reals
+	// grHashMap // More like a hash set but eh // Uses buckets // Open-adress where only unique unsigned int's are allowed as keys // Never tested for reals for reals
 	//////////////////////////////////////////////////
 	template<typename T>
 	class grHashMap

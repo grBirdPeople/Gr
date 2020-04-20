@@ -16,7 +16,7 @@
 #include	"grEntityPlayer.h"
 #include	"grEntityManager.h"
 #include	"grMapManager.h"
-#include	"grParticleManagerPB.h"
+#include	"grCParticleManager.h"
 #include	"grMath.h"
 
 
@@ -24,7 +24,7 @@
 //////////////////////////////////////////////////
 grSandbox::grSandbox( void )
 	: m_rInputMan		( grInputManager::Instance() )
-	, m_rPartMan		( grCParticleManagerPB::Instance() )
+	, m_rPartMan		( grCParticleManager::Instance() )
 	, m_PartSysIdOne	( -1 )
 	, m_PartSysIdTwo	( -1 )
 {
@@ -100,24 +100,50 @@ grSandbox::grSandbox( void )
 	//partAtt.SetLifetime( 1.0f, 1.25f );
 	//m_rParticleSetup.SetParticleAttribute( partAtt );
 
-	m_pPartEmitter_1 = m_rPartMan.CreateEmitter();
-	m_pPartEmitter_2 = m_rPartMan.CreateEmitter();
+	// Particles another one
+	//m_pPartEmitter_1 = m_rPartMan.CreateEmitter();
+	//m_pPartEmitter_2 = m_rPartMan.CreateEmitter();
 
-	grCParticleAttributePB attOne;
-	grCParticleAttributePB attTwo;
+	//grCParticleAttributePB attOne;
+	//grCParticleAttributePB attTwo;
 
-	attOne.Color = grSColor( 0, 175, 250, 75 );
-	attOne.Position = grV2f( grCore::Instance().GetRenderWin().getSize().x * 0.5f, grCore::Instance().GetRenderWin().getSize().y * 0.5f );
-	attOne.Velocity = grV2f( 0.0f, -1.0f ) * 100.0f;
-	attOne.Lifetime = 2.5f;
+	//attOne.Color = grSColor( 0, 175, 250, 75 );
+	//attOne.Position = grV2f( grCore::Instance().GetRenderWin().getSize().x * 0.5f, grCore::Instance().GetRenderWin().getSize().y * 0.5f );
+	//attOne.Velocity = grV2f( 0.0f, -1.0f ) * 100.0f;
+	//attOne.Lifetime = 2.5f;
 
-	attTwo.Color = grSColor( 250, 175, 0, 150 );
-	attTwo.Position = grV2f( grCore::Instance().GetRenderWin().getSize().x * 0.25f, grCore::Instance().GetRenderWin().getSize().y * 0.5f );
-	attTwo.Velocity = grV2f( -1.0f, 0.0f ) * 100.0f;
-	attTwo.Lifetime = 0.5f;
+	//attTwo.Color = grSColor( 250, 175, 0, 150 );
+	//attTwo.Position = grV2f( grCore::Instance().GetRenderWin().getSize().x * 0.25f, grCore::Instance().GetRenderWin().getSize().y * 0.5f );
+	//attTwo.Velocity = grV2f( -1.0f, 0.0f ) * 100.0f;
+	//attTwo.Lifetime = 0.5f;
 
-	m_pPartEmitter_1->SetParticleAttribute( attOne );
-	m_pPartEmitter_2->SetParticleAttribute( attTwo );
+	//m_pPartEmitter_1->SetParticleAttribute( attOne );
+	//m_pPartEmitter_2->SetParticleAttribute( attTwo );
+
+
+
+
+	//grStruct::grLinearActivity<grSParticle> arr( 5 );
+	//for ( sizeT i = 0; i < 5; ++i )
+	//{
+	//	arr.Push( grSParticle() );
+	//	arr[ i ].Lifetime = i;
+	//}
+
+	//for ( sizeT i = 0; i < 5; ++i )
+	//{
+	//	arr.Activate();
+	//}
+
+	//for ( sizeT i = 0; i < 5; ++i )
+	//{
+	//	arr.Deactivate( i );
+	//	int life = arr[ i ].Lifetime;
+	//	int j = 7;
+	//}
+
+	grCParticleEmitter& emitr_1 = grCParticleManager::Instance().Create();
+	int j = 7;
 }
 
 
@@ -129,22 +155,26 @@ void
 grSandbox::Update( const float deltaT )
 {
 	// Particle things
-	if ( m_rInputMan.GetMouseMoved() == true )
-	{
-		grCParticleAttributePB att = m_pPartEmitter_1->GetParticleAttribute();
-		att.Position = grMath::Lerp( att.Position, m_rInputMan.GetMousePos(), 0.75f );
-		att.Velocity = grV2f( att.Position - m_rInputMan.GetMousePos() ).Normalized() * 50.0f;
-		att.Lifetime = 3.0f;
-		m_pPartEmitter_1->SetParticleAttribute( att );
-	}
-	m_LastMouseX = m_rInputMan.GetMousePos().x;
-	m_LastMouseY = m_rInputMan.GetMousePos().y;
 
-	grCParticleAttributePB att = m_pPartEmitter_2->GetParticleAttribute();
-	float deg = grMath::VecToDeg( att.Velocity );
-	deg += 1.0f * deltaT;
-	grMath::RotatePoint( &att.Velocity, deg * grMath::DegToRad );
-	m_pPartEmitter_2->SetParticleAttribute( att );
+
+
+
+	//if ( m_rInputMan.GetMouseMoved() == true )
+	//{
+	//	grCParticleAttributePB att = m_pPartEmitter_1->GetParticleAttribute();
+	//	att.Position = grMath::Lerp( att.Position, m_rInputMan.GetMousePos(), 0.75f );
+	//	att.Velocity = grV2f( att.Position - m_rInputMan.GetMousePos() ).Normalized() * 50.0f;
+	//	att.Lifetime = 3.0f;
+	//	m_pPartEmitter_1->SetParticleAttribute( att );
+	//}
+	//m_LastMouseX = m_rInputMan.GetMousePos().x;
+	//m_LastMouseY = m_rInputMan.GetMousePos().y;
+
+	//grCParticleAttributePB att = m_pPartEmitter_2->GetParticleAttribute();
+	//float deg = grMath::VecToDeg( att.Velocity );
+	//deg += 1.0f * deltaT;
+	//grMath::RotatePoint( &att.Velocity, deg * grMath::DegToRad );
+	//m_pPartEmitter_2->SetParticleAttribute( att );
 
 
 

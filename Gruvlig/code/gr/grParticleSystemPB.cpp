@@ -30,7 +30,7 @@ grSParticleSystemPB::~grSParticleSystemPB( void )
 // Activate
 //////////////////////////////////////////////////
 void
-grSParticleSystemPB::Activate( grCParticleEmitter& rEmitter, const float deltaT )
+grSParticleSystemPB::Activate( grCParticleEmitterPB& rEmitter, const float deltaT )
 {
     rEmitter.SpawnCounter -= deltaT;
     if ( rEmitter.SpawnCounter <= 0.0f )
@@ -130,7 +130,7 @@ grSParticleSystemPB::Activate( grCParticleEmitter& rEmitter, const float deltaT 
 // Update
 //////////////////////////////////////////////////
 void
-grSParticleSystemPB::Update( grCParticleEmitter& rEmitter, const float deltaT )
+grSParticleSystemPB::Update( grCParticleEmitterPB& rEmitter, const float deltaT )
 {
     if ( rEmitter.PartActive > 0 )
     {
@@ -197,7 +197,7 @@ grSParticleSystemPB::Update( grCParticleEmitter& rEmitter, const float deltaT )
 // Deactivate
 //////////////////////////////////////////////////
 void
-grSParticleSystemPB::Deactivate( grCParticleEmitter& rEmitter )
+grSParticleSystemPB::Deactivate( grCParticleEmitterPB& rEmitter )
 {
     if ( rEmitter.uPPartDeactivateQue->Quantity() > 0 )
     {
