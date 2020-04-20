@@ -25,6 +25,7 @@
 grSandbox::grSandbox( void )
 	: m_rInputMan		( grInputManager::Instance() )
 	, m_rPartMan		( grCParticleManager::Instance() )
+	, m_Emitr1			( grCParticleManager::Instance().Create() )
 	, m_PartSysIdOne	( -1 )
 	, m_PartSysIdTwo	( -1 )
 {
@@ -142,8 +143,7 @@ grSandbox::grSandbox( void )
 	//	int j = 7;
 	//}
 
-	grCParticleEmitter& emitr_1 = grCParticleManager::Instance().Create();
-	int j = 7;
+	m_Emitr1.SetPosition( grV2f( 320.0f, 180.0f ) );
 }
 
 
@@ -156,8 +156,10 @@ grSandbox::Update( const float deltaT )
 {
 	// Particle things
 
-
-
+	if ( m_rInputMan.GetMouseMoved() == true )
+	{
+		m_Emitr1.SetPosition( m_rInputMan.GetMousePos() );
+	}
 
 	//if ( m_rInputMan.GetMouseMoved() == true )
 	//{

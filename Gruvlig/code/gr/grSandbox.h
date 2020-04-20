@@ -11,6 +11,7 @@ class		grIEntity;
 class		grInputManager;
 class		grCParticleManager;
 class		grCParticleEmitterPB;
+class		grCParticleEmitter;
 
 
 // grSandbox
@@ -35,6 +36,8 @@ private:
 
 	grInputManager&			m_rInputMan;
 	grCParticleManager&		m_rPartMan;
+
+	grCParticleEmitter&		m_Emitr1;
 
 	grMap*					m_pMap;
 	grActor*				m_pActor;

@@ -7,9 +7,9 @@
 struct grSParticleAttribute
 {
 	grSParticleAttribute( void )
-		: Position	( grV2f( 320.0f, 180.0f ) )
+		: Position	( grV2f() )
 		, Velocity	( grV2f( 0.0f, -1.0f ) )
-		, Lifetime	( 3.0f )		
+		, Lifetime	( 2.0f )		
 	{}
 
 	grV2f	Position;

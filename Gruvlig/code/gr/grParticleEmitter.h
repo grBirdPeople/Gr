@@ -4,7 +4,7 @@
 #include	"grCommon.h"
 #include	"grV2.h"
 
-struct	grSParticleAttribute;
+#include	"grSPartAttribute.h"
 
 
 class grCParticleEmitter
@@ -20,9 +20,15 @@ public:
 	grCParticleEmitter( const grCParticleEmitter& ) = delete;
 	grCParticleEmitter& operator=( const grCParticleEmitter& ) = delete;
 
-	const uInt GetId( void )
+	inline const uInt GetId( void ) const
 	{
 		return m_Id;
+	}
+	inline void SetPosition( const grV2f& rPos )
+	{
+		m_uPAtt->Position = rPos;
+		m_Position = rPos;
+		m_DataModified = true;
 	}
 
 private:
@@ -34,8 +40,10 @@ private:
 	float	m_SpawnRate,
 			m_SpawnTimer;
 
-	uInt	m_Id,			// Is set when user calls create on the manager
+	uInt	m_Id,
 			m_PartActive;
+
+	bool	m_DataModified;
 };
 
 #endif	// _H_GRPARTICLE_EMITTER_

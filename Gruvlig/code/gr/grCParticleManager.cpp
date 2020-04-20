@@ -5,8 +5,6 @@
 #include	"grParticle.h"
 #include	"grAlgo.h"
 
-#include	"grRandom.h"
-
 // TEST DRAW
 #include	"grBBox.h"
 #include	"grDebugManager.h"
@@ -78,20 +76,12 @@ grCParticleManager::Create( void )
 void
 grCParticleManager::Update( const float deltaT )
 {
-	// Run all emitter spawn clocks
+	CollectEmitrDataMods();
+
 	m_uPSys->UpdateSpawnClocks( m_aREmitr, m_vEActiveEmitr, m_vEActivateQue, deltaT );
-
-	// Call attribute data update whatever
-	//m_uPSys->CpyEmitrAttData( m_vEUsrQue, m_aREmitr, m_aRAtt );
-
-	// Activate
+	m_uPSys->CpyEmitrAttData( m_vEUsrQue, m_aREmitr, m_aRAtt );
 	m_uPSys->Activate( m_vEActivateQue, m_aREmitr, m_aRAtt, m_aR2DPart );
-
-	// Update
 	m_uPSys->Update( m_vEDeactivateQue, m_vEActiveEmitr, m_aREmitr, m_aRAtt, m_aR2DPart, deltaT );
-
-
-	// Deactivate
 	m_uPSys->Deactivate( m_vEDeactivateQue, m_aREmitr, m_aR2DPart );
 
 	// TEST DRAW
@@ -109,7 +99,14 @@ grCParticleManager::Update( const float deltaT )
 
 
 void
-grCParticleManager::AddParticleSpawn( const uInt id )
+grCParticleManager::CollectEmitrDataMods( void )
 {
-	m_vEActivateQue.push_back( id );
+	if ( m_vEActiveEmitr.size() > 0 )
+	{
+		for ( sizeT i = 0; i < m_vEActiveEmitr.size(); ++i )
+		{
+			if ( m_aREmitr[ i ]->m_DataModified == true )
+				m_vEUsrQue.push_back( m_aREmitr[ i ]->m_Id );
+		}	
+	}
 }

@@ -3,7 +3,7 @@
 
 #define		PART_SYS_MAX	2
 #define		PART_EMITR_MAX	5
-#define		PART_PART_MAX	100
+#define		PART_PART_MAX	1000
 
 #include	"grSingleton.h"
 #include	"grParticleEmitter.h"
@@ -27,8 +27,7 @@ public:
 private:
 
 	void Update( const float deltaT );
-
-	void AddParticleSpawn( const uInt id );
+	void CollectEmitrDataMods( void );
 
 	// The system should probably own some of the arrays because of practicality
 	uP<uP<grCParticleEmitter>[]>	m_aREmitr;

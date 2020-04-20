@@ -30,8 +30,6 @@ grCParticleSystem::UpdateSpawnClocks( uP<uP<grCParticleEmitter>[]>& rArEmitr,
 					rVeActivateQue.push_back( rEmitr.m_Id );
 			}
 		}
-
-		std::sort( rVeActivateQue.begin(), rVeActivateQue.end() );
 	}
 }
 
@@ -45,12 +43,12 @@ grCParticleSystem::CpyEmitrAttData( vE<uInt>& rVeUsrQue,
 	{
 		for ( sizeT i = 0; i < rVeUsrQue.size(); ++i )
 		{
-			grCParticleEmitter& rEmitr = *rArEmitr[ rVeUsrQue[ i ] ].get();
-			grSParticleAttribute& rAtt = *rArAtt[ rVeUsrQue[ i ] ].get();
-
-			// TODO: Not used atm because it needs to be built
-
 			// Would be nice to have exactly which data has changed, saved in a bitset either in the emitr or the att, or something
+
+			grCParticleEmitter& rEmitr = *rArEmitr[ rVeUsrQue[ i ] ].get();
+			rEmitr.m_DataModified = false;
+			grSParticleAttribute& rAtt = *rArAtt[ rVeUsrQue[ i ] ].get();
+			rAtt = *rEmitr.m_uPAtt.get();
 		}
 
 		rVeUsrQue.clear();
@@ -62,7 +60,7 @@ void
 grCParticleSystem::Activate( vE<uInt>& rVeActivateQue,
 							 uP<uP<grCParticleEmitter>[]>& rArEmitr,
 							 uP<uP<grSParticleAttribute>[]>& rArAtt,
-							 grSParticle** pArPart )
+							 grSParticle** pAr2DPart )
 {
 	if ( rVeActivateQue.size() > 0 )
 	{
@@ -70,7 +68,7 @@ grCParticleSystem::Activate( vE<uInt>& rVeActivateQue,
 		{
 			grCParticleEmitter& rEmitr = *rArEmitr[ rVeActivateQue[ i ] ].get();
 			grSParticleAttribute& rAtt = *rArAtt[ rEmitr.m_Id ].get();
-			grSParticle& rPart = pArPart[ rEmitr.m_Id ][ rEmitr.m_PartActive ];
+			grSParticle& rPart = pAr2DPart[ rEmitr.m_Id ][ rEmitr.m_PartActive ];
 
 			rPart.Position = rAtt.Position;
 			rPart.Velocity = rAtt.Velocity;
@@ -112,7 +110,9 @@ grCParticleSystem::Update( vE<std::pair<uInt, uInt>>& rVeDeactivateQue,
 }
 
 
-void grCParticleSystem::Deactivate( vE<std::pair<uInt, uInt>>& rVeDeactivateQue, uP<uP<grCParticleEmitter>[]>& rArEmitr, grSParticle** pAr2DPart )
+void grCParticleSystem::Deactivate( vE<std::pair<uInt, uInt>>& rVeDeactivateQue,
+									uP<uP<grCParticleEmitter>[]>& rArEmitr,
+									grSParticle** pAr2DPart )
 {
 	if ( rVeDeactivateQue.size() > 0 )
 	{
@@ -125,13 +125,7 @@ void grCParticleSystem::Deactivate( vE<std::pair<uInt, uInt>>& rVeDeactivateQue,
 			grSParticle& rTooPart = pAr2DPart[ id ][ partIdx ];
 			grSParticle& rFromPart = pAr2DPart[ id ][ active - 1 ];
 
-			rTooPart = rFromPart;   // TODO: Make sure this actually copies the values
-
-			// Should not need this but in case
-			//rFromPart.Position = 0.0f;
-			//rFromPart.Velocity = 0.0f;
-			//rFromPart.Lifetime = 0.0f;
-
+			rTooPart = rFromPart;
 			--rArEmitr[ id ]->m_PartActive;
 		}
 
