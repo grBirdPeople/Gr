@@ -24,7 +24,6 @@ grCParticleManager::grCParticleManager( void )
 	m_vEActiveEmitr.reserve( PART_EMITR_MAX );
 	m_vEActivateQue.reserve( PART_EMITR_MAX );
 	m_vEDeactivateQue.reserve( PART_EMITR_MAX );
-	m_vEUsrQue.reserve( PART_EMITR_MAX );
 }
 
 
@@ -64,9 +63,6 @@ grCParticleManager::Create( void )
 	m_aRAtt[ m_CreateCount ] = std::make_unique<grSParticleAttribute>();
 	m_aR2DPart[ m_CreateCount ] = new grSParticle[ m_cPartPerEmitr ];
 
-	for ( sizeT i = 0; i < PART_EMITR_MAX; ++i )
-		m_aR2DPart[ m_CreateCount ][ i ].Lifetime = i;
-
 	++m_CreateCount;
 
 	return *m_aREmitr[ m_CreateCount - 1 ].get();
@@ -76,10 +72,8 @@ grCParticleManager::Create( void )
 void
 grCParticleManager::Update( const float deltaT )
 {
-	CollectEmitrDataMods();
-
 	m_uPSys->UpdateSpawnClocks( m_aREmitr, m_vEActiveEmitr, m_vEActivateQue, deltaT );
-	m_uPSys->CpyEmitrAttData( m_vEUsrQue, m_aREmitr, m_aRAtt );
+	m_uPSys->CpyEmitrAttData( m_vEActiveEmitr, m_aREmitr, m_aRAtt );
 	m_uPSys->Activate( m_vEActivateQue, m_aREmitr, m_aRAtt, m_aR2DPart );
 	m_uPSys->Update( m_vEDeactivateQue, m_vEActiveEmitr, m_aREmitr, m_aRAtt, m_aR2DPart, deltaT );
 	m_uPSys->Deactivate( m_vEDeactivateQue, m_aREmitr, m_aR2DPart );
@@ -95,18 +89,4 @@ grCParticleManager::Update( const float deltaT )
 		}
 	}
 	// TEST DRAW
-}
-
-
-void
-grCParticleManager::CollectEmitrDataMods( void )
-{
-	if ( m_vEActiveEmitr.size() > 0 )
-	{
-		for ( sizeT i = 0; i < m_vEActiveEmitr.size(); ++i )
-		{
-			if ( m_aREmitr[ i ]->m_DataModified == true )
-				m_vEUsrQue.push_back( m_aREmitr[ i ]->m_Id );
-		}	
-	}
 }

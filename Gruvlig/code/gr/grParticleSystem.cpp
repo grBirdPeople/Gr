@@ -35,23 +35,24 @@ grCParticleSystem::UpdateSpawnClocks( uP<uP<grCParticleEmitter>[]>& rArEmitr,
 
 
 void
-grCParticleSystem::CpyEmitrAttData( vE<uInt>& rVeUsrQue,
+grCParticleSystem::CpyEmitrAttData( vE<uInt>& rVeActiveEmitr,
 									uP<uP<grCParticleEmitter>[]>& rArEmitr,
 									uP<uP<grSParticleAttribute>[]>& rArAtt )
 {
-	if ( rVeUsrQue.size() > 0 )
+	if ( rVeActiveEmitr.size() > 0 )
 	{
-		for ( sizeT i = 0; i < rVeUsrQue.size(); ++i )
+		for ( sizeT i = 0; i < rVeActiveEmitr.size(); ++i )
 		{
-			// Would be nice to have exactly which data has changed, saved in a bitset either in the emitr or the att, or something
+			if ( rArEmitr[ i ]->m_DataModified == true )
+			{
+				// Would be nice to have exactly which data has changed, saved in a bitset either in the emitr or the att, or something
 
-			grCParticleEmitter& rEmitr = *rArEmitr[ rVeUsrQue[ i ] ].get();
-			rEmitr.m_DataModified = false;
-			grSParticleAttribute& rAtt = *rArAtt[ rVeUsrQue[ i ] ].get();
-			rAtt = *rEmitr.m_uPAtt.get();
+				uInt id = rVeActiveEmitr[ i ];
+				grCParticleEmitter& rEmitr = *rArEmitr[ id ].get();
+				*rArAtt[ id ].get() = *rEmitr.m_uPAtt.get();
+				rEmitr.m_DataModified = false;
+			}
 		}
-
-		rVeUsrQue.clear();
 	}
 }
 
@@ -69,12 +70,12 @@ grCParticleSystem::Activate( vE<uInt>& rVeActivateQue,
 			grCParticleEmitter& rEmitr = *rArEmitr[ rVeActivateQue[ i ] ].get();
 			grSParticleAttribute& rAtt = *rArAtt[ rEmitr.m_Id ].get();
 			grSParticle& rPart = pAr2DPart[ rEmitr.m_Id ][ rEmitr.m_PartActive ];
+			++rEmitr.m_PartActive;
 
 			rPart.Position = rAtt.Position;
 			rPart.Velocity = rAtt.Velocity;
 			rPart.Lifetime = rAtt.Lifetime;
 
-			++rEmitr.m_PartActive;
 		}
 
 		rVeActivateQue.clear();
@@ -118,15 +119,15 @@ void grCParticleSystem::Deactivate( vE<std::pair<uInt, uInt>>& rVeDeactivateQue,
 	{
 		for ( sizeT i = 0; i < rVeDeactivateQue.size(); ++i )
 		{
-			uInt id = rVeDeactivateQue[ i ].first;
 			uInt partIdx = rVeDeactivateQue[ i ].second;
+			uInt id = rVeDeactivateQue[ i ].first;
 			sizeT active = rArEmitr[ id ]->m_PartActive;
+			--rArEmitr[ id ]->m_PartActive;
 
 			grSParticle& rTooPart = pAr2DPart[ id ][ partIdx ];
 			grSParticle& rFromPart = pAr2DPart[ id ][ active - 1 ];
 
 			rTooPart = rFromPart;
-			--rArEmitr[ id ]->m_PartActive;
 		}
 
 		rVeDeactivateQue.clear();

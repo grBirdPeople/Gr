@@ -3,8 +3,8 @@
 
 #include	"grCommon.h"
 
-class		grCParticleEmitter;
 struct		grSParticleAttribute;
+class		grCParticleEmitter;
 struct		grSParticle;
 
 
@@ -22,7 +22,7 @@ public:
 							vE<uInt>& rVeActivateQue,
 							const float deltaT );
 
-	void CpyEmitrAttData( vE<uInt>& rVeUsrQue,
+	void CpyEmitrAttData( vE<uInt>& rVeActiveEmitr,
 						  uP<uP<grCParticleEmitter>[]>& rArEmitr,
 						  uP<uP<grSParticleAttribute>[]>& rArAtt );
 
@@ -32,7 +32,8 @@ public:
 				   grSParticle** pArPart );
 
 	void Update( vE<std::pair<uInt, uInt>>& rVeDeactivateQue,
-				 vE<uInt>& rVeActiveEmitr, uP<uP<grCParticleEmitter>[]>& rArEmitr,
+				 vE<uInt>& rVeActiveEmitr,
+				 uP<uP<grCParticleEmitter>[]>& rArEmitr,
 				 uP<uP<grSParticleAttribute>[]>& rArAtt,
 				 grSParticle** pAr2DPart,
 				 const float deltaT );
