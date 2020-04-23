@@ -186,7 +186,7 @@ grCParticleSystem::ActvPosition( grSParticleAttribute& rAtt, grSParticle& rPart 
 	if ( grMath::CmpFloat( rAtt.PosOffsetRadius, 0.0f ) != true )
 	{
 		grV2f dir = grV2f( m_uPRand->Float( -1.0f, 1.0f ), m_uPRand->Float( -1.0f, 1.0f ) );
-		float dist = m_uPRand->Float( rAtt.PosOffsetRadius, 0.0f );
+		float dist = m_uPRand->Float( 0.0f, rAtt.PosOffsetRadius );
 		float rad = m_uPRand->Float( 0.0f, 359.9f ) * grMath::DegToRad;
 
 		grMath::RotatePoint( &dir, rad );

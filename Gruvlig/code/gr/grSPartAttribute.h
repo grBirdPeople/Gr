@@ -9,7 +9,7 @@ struct grSParticleAttribute
 	grSParticleAttribute( void )
 		: Position			( grV2f( 320.0f, 180.0f ) )	// TODO: Actually get screen origo
 		, MinMaxDirInDeg	( grV2f( 0.0f, 0.0f ) )
-		, MinMaxSpeed		( grV2f( 50.0f, 50.0f ) )
+		, MinMaxSpeed		( grV2f( 0.0f, 0.0f ) )
 		, MinMaxLife		( grV2f( 3.0f, 3.0f ) )
 		, PosOffsetRadius	( 0.0f )
 	{}
