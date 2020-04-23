@@ -72,8 +72,8 @@ grCParticleManager::Create( void )
 void
 grCParticleManager::Update( const float deltaT )
 {
-	m_uPSys->CpyEmitrAttData( m_vEActvEmitr, m_aREmitr, m_aRAtt );
-	m_uPSys->UpdateSpawnClocks( m_aREmitr, m_vEActvEmitr, m_vEActvQue, deltaT );
+	m_uPSys->Copy( m_vEActvEmitr, m_aREmitr, m_aRAtt );
+	m_uPSys->Spawn( m_aREmitr, m_vEActvEmitr, m_vEActvQue, deltaT );
 	m_uPSys->Activate( m_vEActvQue, m_aREmitr, m_aRAtt, m_aR2DPart );
 	m_uPSys->Update( m_vEDeactvQue, m_vEActvEmitr, m_aREmitr, m_aRAtt, m_aR2DPart, deltaT );
 	m_uPSys->Deactivate( m_vEDeactvQue, m_aREmitr, m_aR2DPart );

@@ -22,23 +22,22 @@ grCParticleSystem::~grCParticleSystem( void )
 
 
 void
-grCParticleSystem::CpyEmitrAttData( vE<uInt>& rVeActvEmitr,
-									uP<uP<grCParticleEmitter>[]>& rArEmitr,
-									uP<uP<grSParticleAttribute>[]>& rArAtt )
+grCParticleSystem::Copy( vE<uInt>& rVeActvEmitr,
+						 uP<uP<grCParticleEmitter>[]>& rArEmitr,
+						 uP<uP<grSParticleAttribute>[]>& rArAtt )
 {
 	if ( rVeActvEmitr.size() > 0 )
 	{
-		vE<sizeT> usrMods;
-		usrMods.reserve( ( sizeT )grCParticleEmitter::EUsrMods::SIZE );
 		sizeT actvEmitrSize = rVeActvEmitr.size();
 		for ( sizeT i = 0; i < actvEmitrSize; ++i )
 		{
 			if ( rArEmitr[ i ]->m_UsrMods.any() == true )
 			{
+				vE<sizeT> usrMods;
+				usrMods.reserve( ( sizeT )grCParticleEmitter::EUsrMods::SIZE );
 				uInt id = rVeActvEmitr[ i ];
 				grSParticleAttribute& rEmitrAtt = *rArEmitr[ id ]->m_uPAtt.get();
 				grSParticleAttribute& rSysAtt = *rArAtt[ id ].get();
-
 				usrMods = rArEmitr[ id ]->GetUsrModsSortd();
 				for ( sizeT i = 0; i < usrMods.size(); ++i )
 				{
@@ -72,7 +71,7 @@ grCParticleSystem::CpyEmitrAttData( vE<uInt>& rVeActvEmitr,
 
 
 void
-grCParticleSystem::UpdateSpawnClocks( uP<uP<grCParticleEmitter>[]>& rArEmitr,
+grCParticleSystem::Spawn( uP<uP<grCParticleEmitter>[]>& rArEmitr,
 									  vE<uInt>& rVeActiveEmitr,
 									  vE<uInt>& rVeActivateQue,
 									  const float deltaT )
@@ -110,16 +109,16 @@ grCParticleSystem::Activate( vE<uInt>& rVeActivateQue,
 			grSParticleAttribute& rAtt = *rArAtt[ rEmitr.m_Id ].get();
 			grSParticle& rPart = pAr2DPart[ rEmitr.m_Id ][ rEmitr.m_PartActive ];
 			
-			//rPart.Position = rAtt.Position;
-			//rPart.Velocity = rAtt.Velocity;
-			//rPart.Lifetime = rAtt.Lifetime;
+//rPart.Position = rAtt.Position;
+//rPart.Velocity = rAtt.Velocity;
+//rPart.Lifetime = rAtt.Lifetime;
 
-			ActivatePosition( rAtt, rPart );
-			ActivateVelocity( rAtt, rPart );			
-			ActivateLife( rAtt, rPart );
+ActvPosition( rAtt, rPart );
+ActvVelocity( rAtt, rPart );
+ActvLife( rAtt, rPart );
 
 
-			++rEmitr.m_PartActive;
+++rEmitr.m_PartActive;
 		}
 
 		rVeActivateQue.clear();
@@ -143,12 +142,12 @@ grCParticleSystem::Update( vE<std::pair<uInt, uInt>>& rVeDeactivateQue,
 		for ( sizeT i = 0; i < partSize; ++i )
 		{
 			grSParticle& rPart = pAr2DPart[ id ][ i ];
-			
-			rPart.Position += rPart.Velocity;
+
+			rPart.Position += rPart.Velocity * deltaT;
 			//rPart.Position += rPart.Velocity * 50.0f * deltaT;
 
 			rPart.Lifetime -= deltaT;
-			if( rPart.Lifetime < 0.0f )
+			if ( rPart.Lifetime < 0.0f )
 				rVeDeactivateQue.push_back( std::pair<uInt, uInt>( id, i ) );
 		}
 	}
@@ -181,10 +180,10 @@ void grCParticleSystem::Deactivate( vE<std::pair<uInt, uInt>>& rVeDeactivateQue,
 
 
 void
-grCParticleSystem::ActivatePosition( grSParticleAttribute& rAtt, grSParticle& rPart )
+grCParticleSystem::ActvPosition( grSParticleAttribute& rAtt, grSParticle& rPart )
 {
 	rPart.Position = rAtt.Position;
-	if ( grMath::CmpFloat( rAtt.PosOffsetRadius, 0.0f ) == false )
+	if ( grMath::CmpFloat( rAtt.PosOffsetRadius, 0.0f ) != true )
 	{
 		grV2f dir = grV2f( m_uPRand->Float( -1.0f, 1.0f ), m_uPRand->Float( -1.0f, 1.0f ) );
 		float dist = m_uPRand->Float( rAtt.PosOffsetRadius, 0.0f );
@@ -197,53 +196,51 @@ grCParticleSystem::ActivatePosition( grSParticleAttribute& rAtt, grSParticle& rP
 
 
 void
-grCParticleSystem::ActivateVelocity( grSParticleAttribute& rAtt, grSParticle& rPart )
+grCParticleSystem::ActvVelocity( grSParticleAttribute& rAtt, grSParticle& rPart )
 {
 	rAtt.MinMaxDirInDeg.x = grMath::Clamp( rAtt.MinMaxDirInDeg.x, 0.0f, 359.9f );
 	rAtt.MinMaxDirInDeg.y = grMath::Clamp( rAtt.MinMaxDirInDeg.y, 0.0f, 359.9f );
+
 	float deg = 0.0f;
-	if ( rAtt.MinMaxDirInDeg.x > rAtt.MinMaxDirInDeg.y ||
-		 grMath::CmpFloat( rAtt.MinMaxDirInDeg.x, rAtt.MinMaxDirInDeg.y ) == true )
+	if ( grMath::CmpFloat( rAtt.MinMaxDirInDeg.x, rAtt.MinMaxDirInDeg.y ) == false )
 	{
-		deg = rAtt.MinMaxSpeed.x;
+		if ( rAtt.MinMaxDirInDeg.x > rAtt.MinMaxDirInDeg.y )
+		{
+			float diff = ( 360.0f - rAtt.MinMaxDirInDeg.x );
+			deg = m_uPRand->Float( 0.0f, diff + rAtt.MinMaxDirInDeg.y );
+			deg -= diff;
+			if ( 0.0f > deg )
+				deg = 360.0f + deg;
+		}
+		else
+		{
+			deg = m_uPRand->Float( rAtt.MinMaxDirInDeg.x, rAtt.MinMaxDirInDeg.y );
+		}
 	}
-	else if ( grMath::CmpFloat( rAtt.MinMaxDirInDeg.x, rAtt.MinMaxDirInDeg.y ) == false )
+	else
 	{
-		float randNum = m_uPRand->Float( rAtt.MinMaxDirInDeg.x, rAtt.MinMaxDirInDeg.y );
-		deg = randNum;
+		deg = rAtt.MinMaxDirInDeg.x;
 	}
+
+	//float deg = ( grMath::CmpFloat( rAtt.MinMaxDirInDeg.x, rAtt.MinMaxDirInDeg.y ) == false )
+	//	? m_uPRand->Float( rAtt.MinMaxDirInDeg.x, rAtt.MinMaxDirInDeg.y )
+	//	: rAtt.MinMaxDirInDeg.x;
+
 	grV2f dir = grV2f( 0.0f, -1.0f );	
 	grMath::RotatePoint( &dir, deg * grMath::DegToRad );
 
-
-	float speed = 0.0f;
-	if ( rAtt.MinMaxSpeed.x > rAtt.MinMaxSpeed.y ||
-		 grMath::CmpFloat( rAtt.MinMaxSpeed.x, rAtt.MinMaxSpeed.y ) == true )
-	{
-		speed = rAtt.MinMaxSpeed.x;
-	}
-	else if ( grMath::CmpFloat( rAtt.MinMaxSpeed.x, rAtt.MinMaxSpeed.y ) == false )
-	{
-		float randNum = m_uPRand->Float( rAtt.MinMaxSpeed.x, rAtt.MinMaxSpeed.y );
-		speed = randNum;
-	}
+	float speed = ( grMath::CmpFloat( rAtt.MinMaxLife.x, rAtt.MinMaxLife.y ) == false )
+		? m_uPRand->Float( rAtt.MinMaxSpeed.x, rAtt.MinMaxSpeed.y )
+		: rAtt.MinMaxSpeed.x;
 
 	rPart.Velocity = dir * speed;
 }
 
 
 void
-grCParticleSystem::ActivateLife( grSParticleAttribute& rAtt, grSParticle& rPart )
+grCParticleSystem::ActvLife( grSParticleAttribute& rAtt, grSParticle& rPart )
 {
-	if ( rAtt.MinMaxLife.x > rAtt.MinMaxLife.y ||
-		 grMath::CmpFloat( rAtt.MinMaxLife.x, rAtt.MinMaxLife.y ) == true )
-	{
-		rPart.Lifetime = rAtt.MinMaxLife.x;
-		return;
-	}
-	if ( grMath::CmpFloat( rAtt.MinMaxLife.x, rAtt.MinMaxLife.y ) == false )
-	{
-		float randLife = m_uPRand->Float( rAtt.MinMaxLife.x, rAtt.MinMaxLife.y );
-		rPart.Lifetime = randLife;
-	}
+	rPart.Lifetime = ( grMath::CmpFloat( rAtt.MinMaxLife.x, rAtt.MinMaxLife.y ) == false )
+		? m_uPRand->Float( rAtt.MinMaxLife.x, rAtt.MinMaxLife.y )
+		: rAtt.MinMaxLife.x;
 }

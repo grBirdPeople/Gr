@@ -144,7 +144,7 @@ grSandbox::grSandbox( void )
 	//}
 
 	m_Emitr1.Position( grV2f( 320.0f, 180.0f ) );
-	//m_Emitr1.Direction( 0.0f, 359.0f );
+	m_Emitr1.Direction( 315.0f, 45.0f );
 	//m_Emitr1.Speed( 25.0f, 75.0f );
 	//m_Emitr1.Lifetime( 1.0f, 4.0f );
 }

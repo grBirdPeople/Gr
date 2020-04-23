@@ -19,14 +19,15 @@ public:
 	grCParticleSystem( const grCParticleSystem& ) = delete;
 	grCParticleSystem& operator=( const grCParticleSystem& ) = delete;
 
-	void CpyEmitrAttData( vE<uInt>& rVeActiveEmitr,
-						  uP<uP<grCParticleEmitter>[]>& rArEmitr,
-						  uP<uP<grSParticleAttribute>[]>& rArAtt );
+	void Copy( vE<uInt>& rVeActiveEmitr,
+			   uP<uP<grCParticleEmitter>[]>& rArEmitr,
+			   uP<uP<grSParticleAttribute>[]>& rArAtt );
 
-	void UpdateSpawnClocks( uP<uP<grCParticleEmitter>[]>& rArEmitr,
-							vE<uInt>& rVeActiveEmitr,
-							vE<uInt>& rVeActivateQue,
-							const float deltaT );
+	// TODO: Perhaps merge this with activate, uses the same stuff anyways and the code in spawn is basic
+	void Spawn( uP<uP<grCParticleEmitter>[]>& rArEmitr,
+				vE<uInt>& rVeActiveEmitr,
+				vE<uInt>& rVeActivateQue,
+				const float deltaT );
 
 	void Activate( vE<uInt>& rVeActivateQue,
 				   uP<uP<grCParticleEmitter>[]>& rArEmitr,
@@ -46,9 +47,9 @@ public:
 
 private:
 
-	void ActivatePosition( grSParticleAttribute& rAtt, grSParticle& rPart );
-	void ActivateVelocity( grSParticleAttribute& rAtt, grSParticle& rPart );
-	void ActivateLife( grSParticleAttribute& rAtt, grSParticle& rPart );
+	void ActvPosition( grSParticleAttribute& rAtt, grSParticle& rPart );
+	void ActvVelocity( grSParticleAttribute& rAtt, grSParticle& rPart );
+	void ActvLife( grSParticleAttribute& rAtt, grSParticle& rPart );
 
 	uP<grRandom>	m_uPRand;
 
