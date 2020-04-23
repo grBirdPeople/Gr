@@ -1,84 +1,50 @@
 #ifndef		_H_GRPARTICLEMANAGERPB_
 #define		_H_GRPARTICLEMANAGERPB_
 
-#define		PARTICLE_SYS		100
-#define		PARTICLE_PER_SYS	500
-#define		PARTICLE_TIMESTEP	1.0f / 120.0f
+#define		PARTICLE_SYTEMS			1				// If threads would happen each thread can have it's own
+#define		PARTICLE_EMITTERS		8				// Not really an emitter but I don't know what to call it so
+#define		PARTICLE_PER_EMITTER	128
 
-#include	"grParticlePB.h"
 #include	"grSingleton.h"
-
-struct		grParticlePB;
-struct		grParticleSetupPB;
-struct		grParticleSystemPB;
-
-using		vecParticle = std::vector<uPtr<grParticlePB>>;
-using		vecParticleSetup = std::vector<uPtr<grParticleSetupPB>>;
-
-
-// TODO: Setup is one particle attribute followed by all the particles per particle system instance.
-// Struct holds one attribute and a vector of max particles. Structs in vector.
-// One system exists. System iterates over struct vector. Test if: one or three loops of particle setups Activate/Deactivate/Update.
-// Make sure no pointer chasing is done on Activate/Deactivate/Update.
+#include	"grParticleEmitterPB.h"
+#include	"grParticleSystemPB.h"
 
 
 // grParticleManagerPB
 //////////////////////////////////////////////////
-class grParticleManagerPB : public grSingleton<grParticleManagerPB>
+class grCParticleManagerPB : public grSingleton<grCParticleManagerPB>
 {
 public:
 
-	grParticleManagerPB( void );
-	~grParticleManagerPB( void );
+	friend class grCore;	// Calls this update
 
 	//////////////////////////////////////////////////
 
-
+	grCParticleManagerPB( void );
+	~grCParticleManagerPB( void );
 
 	//////////////////////////////////////////////////
 
-	void Init( void );
-	grParticleSetupPB* const Create( void );	// TODO: This should return some minimal API
-	void Update( const float deltaT );
+	grCParticleEmitterPB* const CreateEmitter( void );
+	grCParticleEmitterPB* const GetEmitter( const uInt id );
 
 	//////////////////////////////////////////////////
 
 private:
 
-	vecParticleSetup			m_VecParticleSetup;
-	uPtr<grParticleSystemPB>	m_pParticleSystem;
+	void Update( const float deltaT );
 
-	uInt						m_SetupQuantity;
+	//////////////////////////////////////////////////
 
-	// TEST
-	float						m_TimeStepCounter;
+	using vecUpEmitter = std::vector<uP<grCParticleEmitterPB>>;
+	using vecUpSystem = std::vector<std::unique_ptr<grSParticleSystemPB>>;
 
-	// TEST
+	vecUpEmitter	m_VecUpEmitter;
+	vecUpSystem		m_VecUpSystem;
 
-};
-
-
-// grParticleSetupPB
-//////////////////////////////////////////////////
-struct grParticleSetupPB
-{
-	grParticleSetupPB( void )
-		: SpawnInMilliSec	( 1.0f / 500.0f )
-		, Id				( 0 )
-		, ParticlesActive	( 0 )
-		
-	{
-		SpawnCounter = SpawnInMilliSec;
-		VecParticle.reserve( PARTICLE_PER_SYS );
-		pParticleAttribute = nullptr;
-	}
-
-	vecParticle					VecParticle;
-	uPtr<grParticleAttributePB>	pParticleAttribute;
-	float						SpawnInMilliSec,
-								SpawnCounter;
-	uInt						Id,
-								ParticlesActive;
+	uInt	m_CreatedSystems,
+			m_CreatedEmitters,
+			m_TotalParticles;
 };
 
 #endif	// _H_GRPARTICLEMANAGERPB_

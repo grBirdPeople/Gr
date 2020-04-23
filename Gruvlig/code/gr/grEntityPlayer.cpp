@@ -4,11 +4,6 @@
 #include	"grInputManager.h"
 #include	"grCtrlPlayer.h"
 
-// TEST
-#include	"grParticleManager.h"
-#include	"grParticleSystem.h"
-// TEST
-
 
 // cTor
 //////////////////////////////////////////////////

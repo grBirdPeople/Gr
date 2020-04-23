@@ -8,41 +8,41 @@
 //////////////////////////////////////////////////
 namespace grAlgo
 {
-	// InsertionSort
+	// InsrtSort // Min To Max or Max To Min
 	//////////////////////////////////////////////////
 	template<typename T>
 	inline void
-	InsertSort( T* pArr, const uInt size, const uInt sortType = 0 )
+	InsrtSort( T* pArr, const uInt size, const bool minMax = true )
 	{
-		T currentNum;
-		uInt indexBefore;
+		T nowNum;
+		sizeT idxBefore;
 		
 		auto minToMax = [ & ]()
 		{
-			while( ( currentNum < pArr[ indexBefore ] ) && ( indexBefore >= 0 ) )
+			while( ( nowNum < pArr[ idxBefore ] ) && ( idxBefore >= 0 ) )
 			{
-				pArr[ indexBefore + 1 ]	= pArr[ indexBefore ];
-				indexBefore				= indexBefore - 1;
+				pArr[ idxBefore + 1 ]	= pArr[ idxBefore ];
+				idxBefore				= idxBefore - 1;
 			}
 		};
 		
 		auto maxToMin = [ & ]()
 		{
-			while( ( currentNum > pArr[ indexBefore ] ) && ( indexBefore >= 0 ) )
+			while( ( nowNum > pArr[ idxBefore ] ) && ( idxBefore >= 0 ) )
 			{
-				pArr[ indexBefore + 1 ]	= pArr[ indexBefore ];
-				indexBefore				= indexBefore - 1;
+				pArr[ idxBefore + 1 ]	= pArr[ idxBefore ];
+				idxBefore				= idxBefore - 1;
 			}
 		};
 		
 		for( uInt i = 1; i < size; ++i )
 		{
-			currentNum	= pArr[ i ];
-			indexBefore	= i - 1;
+			nowNum	= pArr[ i ];
+			idxBefore	= i - 1;
 			
-			( sortType == 0 ) ? minToMax() : maxToMin();
+			( minMax == true ) ? minToMax() : maxToMin();
 			
-			pArr[ indexBefore + 1 ] = currentNum;
+			pArr[ idxBefore + 1 ] = nowNum;
 		}
 	}
 }
