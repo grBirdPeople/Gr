@@ -143,7 +143,10 @@ grSandbox::grSandbox( void )
 	//	int j = 7;
 	//}
 
-	m_Emitr1.SetPosition( grV2f( 320.0f, 180.0f ) );
+	m_Emitr1.Position( grV2f( 320.0f, 180.0f ) );
+	//m_Emitr1.Direction( 0.0f, 359.0f );
+	//m_Emitr1.Speed( 25.0f, 75.0f );
+	//m_Emitr1.Lifetime( 1.0f, 4.0f );
 }
 
 
@@ -158,7 +161,7 @@ grSandbox::Update( const float deltaT )
 
 	if ( m_rInputMan.GetMouseMoved() == true )
 	{
-		m_Emitr1.SetPosition( m_rInputMan.GetMousePos() );
+		//m_Emitr1.Position( m_rInputMan.GetMousePos() );
 	}
 
 	//if ( m_rInputMan.GetMouseMoved() == true )

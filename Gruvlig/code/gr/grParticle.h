@@ -6,6 +6,7 @@
 
 struct grSParticle
 {
+	// insert Color
 	grV2f	Position;
 	grV2f	Velocity;
 	float	Lifetime;

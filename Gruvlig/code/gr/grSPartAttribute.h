@@ -7,14 +7,19 @@
 struct grSParticleAttribute
 {
 	grSParticleAttribute( void )
-		: Position	( grV2f() )
-		, Velocity	( grV2f( 0.0f, -1.0f ) )
-		, Lifetime	( 2.0f )		
+		: Position			( grV2f( 320.0f, 180.0f ) )	// TODO: Actually get screen origo
+		, MinMaxDirInDeg	( grV2f( 0.0f, 0.0f ) )
+		, MinMaxSpeed		( grV2f( 50.0f, 50.0f ) )
+		, MinMaxLife		( grV2f( 3.0f, 3.0f ) )
+		, PosOffsetRadius	( 0.0f )
 	{}
 
 	grV2f	Position;
-	grV2f	Velocity;
-	float	Lifetime;
+	grV2f	MinMaxDirInDeg;
+	grV2f	MinMaxSpeed;
+	grV2f	MinMaxLife;
+
+	float	PosOffsetRadius;
 };
 
 #endif	// _H_GRPARTICLE_ATTRIBUTE_
