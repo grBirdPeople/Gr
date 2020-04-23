@@ -143,10 +143,10 @@ grSandbox::grSandbox( void )
 	//	int j = 7;
 	//}
 
-	m_Emitr1.Position( grV2f( 320.0f, 180.0f ), 100.0f );
+	m_Emitr1.Position( grV2f( 320.0f, 270.0f ), 50.0f );
 	m_Emitr1.Direction( 315.0f, 45.0f );
-	//m_Emitr1.Speed( 25.0f, 75.0f );
-	//m_Emitr1.Lifetime( 1.0f, 4.0f );
+	m_Emitr1.Speed( 16.0f, 64.0f );
+	m_Emitr1.Lifetime( 0.1f, 5.0f );
 }
 
 
@@ -161,25 +161,9 @@ grSandbox::Update( const float deltaT )
 
 	if ( m_rInputMan.GetMouseMoved() == true )
 	{
-		//m_Emitr1.Position( m_rInputMan.GetMousePos() );
+		m_Emitr1.Position( m_rInputMan.GetMousePos() );
 	}
-
-	//if ( m_rInputMan.GetMouseMoved() == true )
-	//{
-	//	grCParticleAttributePB att = m_pPartEmitter_1->GetParticleAttribute();
-	//	att.Position = grMath::Lerp( att.Position, m_rInputMan.GetMousePos(), 0.75f );
-	//	att.Velocity = grV2f( att.Position - m_rInputMan.GetMousePos() ).Normalized() * 50.0f;
-	//	att.Lifetime = 3.0f;
-	//	m_pPartEmitter_1->SetParticleAttribute( att );
-	//}
-	//m_LastMouseX = m_rInputMan.GetMousePos().x;
-	//m_LastMouseY = m_rInputMan.GetMousePos().y;
-
-	//grCParticleAttributePB att = m_pPartEmitter_2->GetParticleAttribute();
-	//float deg = grMath::VecToDeg( att.Velocity );
-	//deg += 1.0f * deltaT;
-	//grMath::RotatePoint( &att.Velocity, deg * grMath::DegToRad );
-	//m_pPartEmitter_2->SetParticleAttribute( att );
+	m_LastMousePos = m_rInputMan.GetMousePos();
 
 
 

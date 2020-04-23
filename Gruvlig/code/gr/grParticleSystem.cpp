@@ -108,17 +108,12 @@ grCParticleSystem::Activate( vE<uInt>& rVeActivateQue,
 			grCParticleEmitter& rEmitr = *rArEmitr[ rVeActivateQue[ i ] ].get();
 			grSParticleAttribute& rAtt = *rArAtt[ rEmitr.m_Id ].get();
 			grSParticle& rPart = pAr2DPart[ rEmitr.m_Id ][ rEmitr.m_PartActive ];
-			
-//rPart.Position = rAtt.Position;
-//rPart.Velocity = rAtt.Velocity;
-//rPart.Lifetime = rAtt.Lifetime;
 
-ActvPosition( rAtt, rPart );
-ActvVelocity( rAtt, rPart );
-ActvLife( rAtt, rPart );
+			ActvPosition( rAtt, rPart );
+			ActvVelocity( rAtt, rPart );
+			ActvLife( rAtt, rPart );
 
-
-++rEmitr.m_PartActive;
+			++rEmitr.m_PartActive;
 		}
 
 		rVeActivateQue.clear();
@@ -202,7 +197,7 @@ grCParticleSystem::ActvVelocity( grSParticleAttribute& rAtt, grSParticle& rPart 
 	rAtt.MinMaxDirInDeg.y = grMath::Clamp( rAtt.MinMaxDirInDeg.y, 0.0f, 359.9f );
 
 	float deg = 0.0f;
-	if ( grMath::CmpFloat( rAtt.MinMaxDirInDeg.x, rAtt.MinMaxDirInDeg.y ) == false )
+	if ( grMath::CmpFloat( rAtt.MinMaxDirInDeg.x, rAtt.MinMaxDirInDeg.y ) != true )
 	{
 		if ( rAtt.MinMaxDirInDeg.x > rAtt.MinMaxDirInDeg.y )
 		{
@@ -222,14 +217,10 @@ grCParticleSystem::ActvVelocity( grSParticleAttribute& rAtt, grSParticle& rPart 
 		deg = rAtt.MinMaxDirInDeg.x;
 	}
 
-	//float deg = ( grMath::CmpFloat( rAtt.MinMaxDirInDeg.x, rAtt.MinMaxDirInDeg.y ) == false )
-	//	? m_uPRand->Float( rAtt.MinMaxDirInDeg.x, rAtt.MinMaxDirInDeg.y )
-	//	: rAtt.MinMaxDirInDeg.x;
-
 	grV2f dir = grV2f( 0.0f, -1.0f );	
 	grMath::RotatePoint( &dir, deg * grMath::DegToRad );
 
-	float speed = ( grMath::CmpFloat( rAtt.MinMaxLife.x, rAtt.MinMaxLife.y ) == false )
+	float speed = ( grMath::CmpFloat( rAtt.MinMaxSpeed.x, rAtt.MinMaxSpeed.y ) != true )
 		? m_uPRand->Float( rAtt.MinMaxSpeed.x, rAtt.MinMaxSpeed.y )
 		: rAtt.MinMaxSpeed.x;
 
@@ -240,7 +231,10 @@ grCParticleSystem::ActvVelocity( grSParticleAttribute& rAtt, grSParticle& rPart 
 void
 grCParticleSystem::ActvLife( grSParticleAttribute& rAtt, grSParticle& rPart )
 {
-	rPart.Lifetime = ( grMath::CmpFloat( rAtt.MinMaxLife.x, rAtt.MinMaxLife.y ) == false )
+	rAtt.MinMaxLife.x = grMath::Clamp( rAtt.MinMaxLife.x, 0.0f, grMath::Abs( rAtt.MinMaxLife.y ) );
+	rAtt.MinMaxLife.y = grMath::Clamp( rAtt.MinMaxLife.y, 0.0f, grMath::Abs( rAtt.MinMaxLife.y ) );
+
+	rPart.Lifetime = ( grMath::CmpFloat( rAtt.MinMaxLife.x, rAtt.MinMaxLife.y ) != true )
 		? m_uPRand->Float( rAtt.MinMaxLife.x, rAtt.MinMaxLife.y )
 		: rAtt.MinMaxLife.x;
 }

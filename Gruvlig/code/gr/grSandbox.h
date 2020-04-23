@@ -4,6 +4,7 @@
 #include	<SFML/Graphics/RenderWindow.hpp>
 
 #include	"grCommon.h"
+#include	"grV2.h"
 
 class		grActor;
 class		grMap;
@@ -50,8 +51,7 @@ private:
 
 	bool					m_bFlipFlop = true;
 
-	float					m_LastMouseX,
-							m_LastMouseY;
+	grV2f					m_LastMousePos;
 
 	sInt					m_PartSysIdOne,
 							m_PartSysIdTwo;
