@@ -12,8 +12,9 @@ struct grSParticle
 	float	Lifetime;
 
 	float	Spd,
-			SpdMod,
-			SpdOsc;
+			SpdMod;
+
+	uInt	SpdOsc;		
 
 	// insert Color
 	//grV2f	Position;

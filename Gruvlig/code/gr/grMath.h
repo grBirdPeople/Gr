@@ -14,10 +14,10 @@ namespace grMath
 {
 	// Const
 	//////////////////////////////////////////////////
+	const float Epsilon = 0.00001f;
 	const float Pi = 3.141592f;
 	const float DegToRad = Pi / 180.0f;
 	const float RadToDeg = 180 / Pi;
-	const float Epsilon = 0.00001f;
 
 	// Min
 	//////////////////////////////////////////////////
@@ -63,7 +63,7 @@ namespace grMath
 		return ( value < 0.0f ) ? -1.0f : ( value > 0.0f ) ? 1.0f : 0.0f;
 	}
 
-	// Sqrt // Babylonian method stolen from overflow but changed from doubles to floats
+	// Sqrt // Babylonian method cpied from overflow. Changed from doubles to floats
 	//////////////////////////////////////////////////
 	inline float Sqrt( const float value )
 	{

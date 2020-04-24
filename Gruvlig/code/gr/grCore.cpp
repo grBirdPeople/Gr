@@ -177,8 +177,8 @@ grCore::Run( void )
 void
 grCore::InitRenderWin( void )
 {
-	m_pCSettings->antialiasingLevel = m_Aa;
-	m_pRenderWin->create( sf::VideoMode( m_WinWidth, m_WinHeight ), m_AppName,sf::Style::None, *m_pCSettings );
+	m_pCSettings->antialiasingLevel = ( unsigned int )m_Aa;
+	m_pRenderWin->create( sf::VideoMode( ( unsigned int )m_WinWidth, ( unsigned int )m_WinHeight ), m_AppName,sf::Style::None, *m_pCSettings );
 	//m_pRenderWin->setFramerateLimit(m_FramesPerSec);
 	m_pRenderWin->setVerticalSyncEnabled( true );
 }

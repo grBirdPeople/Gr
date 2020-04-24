@@ -46,7 +46,7 @@ grCParticleSystem::Copy( vE<uInt>& rVeActvEmitr,
 					{
 						case ( sizeT )grCParticleEmitter::EUsrMods::POS:
 						rSysAtt.EmitrPos = rEmitrAtt.EmitrPos;
-						rSysAtt.PartPosOffsetRadius = rEmitrAtt.PartPosOffsetRadius;
+						rSysAtt.PartRadiusPosOffset = rEmitrAtt.PartRadiusPosOffset;
 						break;
 
 						case ( sizeT )grCParticleEmitter::EUsrMods::DIR_EMITR:
@@ -55,20 +55,21 @@ grCParticleSystem::Copy( vE<uInt>& rVeActvEmitr,
 						break;
 
 						case ( sizeT )grCParticleEmitter::EUsrMods::DIR_PART:
-						rSysAtt.PartMinMaxRotInDeg.x = grMath::Clamp( rEmitrAtt.PartMinMaxRotInDeg.x, 0.0f, 359.9f );
-						rSysAtt.PartMinMaxRotInDeg.y = grMath::Clamp( rEmitrAtt.PartMinMaxRotInDeg.y, 0.0f, 359.9f );
+						rSysAtt.PartRotInDegMinMax.x = grMath::Clamp( rEmitrAtt.PartRotInDegMinMax.x, 0.0f, 359.9f );
+						rSysAtt.PartRotInDegMinMax.y = grMath::Clamp( rEmitrAtt.PartRotInDegMinMax.y, 0.0f, 359.9f );
 						break;
 
 						case ( sizeT )grCParticleEmitter::EUsrMods::SPD:
-						rSysAtt.PartMinMaxSpd = grMath::Clamp( rEmitrAtt.PartMinMaxSpd.x, rEmitrAtt.PartMinMaxSpd.x, rEmitrAtt.PartMinMaxSpd.y );
-						rSysAtt.PartModSpd = rEmitrAtt.PartModSpd;
+						rSysAtt.PartSpdMinMax = grMath::Clamp( rEmitrAtt.PartSpdMinMax.x, rEmitrAtt.PartSpdMinMax.x, rEmitrAtt.PartSpdMinMax.y );
+						rSysAtt.PartSpdMod = rEmitrAtt.PartSpdMod;
+						rSysAtt.PartSpdOsc = rEmitrAtt.PartSpdOsc;
 						break;
 
 						case ( sizeT )grCParticleEmitter::EUsrMods::LIFE:
-						x = grMath::Clamp( rEmitrAtt.PartMinMaxLife.x, rEmitrAtt.PartMinMaxLife.x, rEmitrAtt.PartMinMaxLife.y );
-						y = grMath::Clamp( rEmitrAtt.PartMinMaxLife.y, rEmitrAtt.PartMinMaxLife.x, rEmitrAtt.PartMinMaxLife.y );
-						rSysAtt.PartMinMaxLife.x = grMath::Clamp( rEmitrAtt.PartMinMaxLife.x, 0.0f, x );
-						rSysAtt.PartMinMaxLife.y = grMath::Clamp( rEmitrAtt.PartMinMaxLife.y, 0.0f, y );
+						x = grMath::Clamp( rEmitrAtt.PartLifeMinMax.x, rEmitrAtt.PartLifeMinMax.x, rEmitrAtt.PartLifeMinMax.y );
+						y = grMath::Clamp( rEmitrAtt.PartLifeMinMax.y, rEmitrAtt.PartLifeMinMax.x, rEmitrAtt.PartLifeMinMax.y );
+						rSysAtt.PartLifeMinMax.x = grMath::Clamp( rEmitrAtt.PartLifeMinMax.x, 0.0f, x );
+						rSysAtt.PartLifeMinMax.y = grMath::Clamp( rEmitrAtt.PartLifeMinMax.y, 0.0f, y );
 						break;
 
 						default:
@@ -149,10 +150,15 @@ grCParticleSystem::Update( vE<std::pair<uInt, uInt>>& rVeDeactivateQue,
 		{
 			grSParticle& rPart = pAr2DPart[ emitrId ][ partIdx ];
 
-			rPart.Spd -= rPart.SpdMod;
+			// Speed
+			rPart.Spd = grMath::Lerp( rPart.Spd, rPart.Spd - rPart.SpdMod, 0.5f );
 			grV2f SpdAccel = rPart.Direction * rPart.Spd;
 
-			grV2f grav = grV2f( 0.0f, 75.0f );
+			//if( rPart.Spd > 0.0f )
+			//	rPart.Spd = grMath::Lerp( rPart.Spd, rPart.Spd * rPart.SpdOsc, 0.5f );
+
+
+			//grV2f grav = grV2f( 0.0f, 75.0f );
 			
 			rPart.Position += ( SpdAccel ) * deltaT;
 
@@ -193,10 +199,10 @@ void
 grCParticleSystem::ActvPosition( grSParticleAttribute& rAtt, grSParticle& rPart )
 {
 	rPart.Position = rAtt.EmitrPos;
-	if ( grMath::CmpFloat( rAtt.PartPosOffsetRadius, 0.0f ) != true )
+	if ( grMath::CmpFloat( rAtt.PartRadiusPosOffset, 0.0f ) != true )
 	{
 		grV2f dir = grV2f( m_uPRand->Float( -1.0f, 1.0f ), m_uPRand->Float( -1.0f, 1.0f ) );
-		float dist = m_uPRand->Float( 0.0f, rAtt.PartPosOffsetRadius );
+		float dist = m_uPRand->Float( 0.0f, rAtt.PartRadiusPosOffset );
 		float rad = m_uPRand->Float( 0.0f, 359.9f ) * grMath::DegToRad;
 
 		grMath::RotatePoint( &dir, rad );
@@ -210,24 +216,24 @@ grCParticleSystem::ActvVelocity( grSParticleAttribute& rAtt, grSParticle& rPart 
 {
 	// Direction
 	float deg = 0.0f;
-	if ( grMath::CmpFloat( rAtt.PartMinMaxRotInDeg.x, rAtt.PartMinMaxRotInDeg.y ) != true )
+	if ( grMath::CmpFloat( rAtt.PartRotInDegMinMax.x, rAtt.PartRotInDegMinMax.y ) != true )
 	{
-		if ( rAtt.PartMinMaxRotInDeg.x > rAtt.PartMinMaxRotInDeg.y )	
+		if ( rAtt.PartRotInDegMinMax.x > rAtt.PartRotInDegMinMax.y )	
 		{
-			float diff = ( 360.0f - rAtt.PartMinMaxRotInDeg.x );
-			deg = m_uPRand->Float( 0.0f, diff + rAtt.PartMinMaxRotInDeg.y );
+			float diff = ( 360.0f - rAtt.PartRotInDegMinMax.x );
+			deg = m_uPRand->Float( 0.0f, diff + rAtt.PartRotInDegMinMax.y );
 			deg -= diff;
 			if ( 0.0f > deg )
 				deg = 360.0f + deg;
 		}
 		else
 		{
-			deg = m_uPRand->Float( rAtt.PartMinMaxRotInDeg.x, rAtt.PartMinMaxRotInDeg.y );
+			deg = m_uPRand->Float( rAtt.PartRotInDegMinMax.x, rAtt.PartRotInDegMinMax.y );
 		}
 	}
 	else
 	{
-		deg = rAtt.PartMinMaxRotInDeg.x;
+		deg = rAtt.PartRotInDegMinMax.x;
 	}
 
 	deg += rAtt.EmitrRotInDeg;
@@ -235,19 +241,22 @@ grCParticleSystem::ActvVelocity( grSParticleAttribute& rAtt, grSParticle& rPart 
 	grMath::RotatePoint( &rPart.Direction, deg * grMath::DegToRad );
 
 	// Speed
-	if ( rAtt.PartMinMaxSpd.x > rAtt.PartMinMaxSpd.y )
-		rAtt.PartMinMaxSpd.x = rAtt.PartMinMaxSpd.y;
+	if ( rAtt.PartSpdMinMax.x > rAtt.PartSpdMinMax.y )
+		rAtt.PartSpdMinMax.x = rAtt.PartSpdMinMax.y;
 
-	rAtt.PartMinMaxSpd.x = grMath::Clamp( rAtt.PartMinMaxSpd.x, rAtt.PartMinMaxSpd.x, rAtt.PartMinMaxSpd.y );
+	rAtt.PartSpdMinMax.x = grMath::Clamp( rAtt.PartSpdMinMax.x, rAtt.PartSpdMinMax.x, rAtt.PartSpdMinMax.y );
 
-	rPart.Spd = ( grMath::CmpFloat( rAtt.PartMinMaxSpd.x, rAtt.PartMinMaxSpd.y ) != true )
-		? m_uPRand->Float( rAtt.PartMinMaxSpd.x, rAtt.PartMinMaxSpd.y )
-		: rAtt.PartMinMaxSpd.x;
+	rPart.Spd = ( grMath::CmpFloat( rAtt.PartSpdMinMax.x, rAtt.PartSpdMinMax.y ) != true )
+		? m_uPRand->Float( rAtt.PartSpdMinMax.x, rAtt.PartSpdMinMax.y )
+		: rAtt.PartSpdMinMax.x;
 
+	// This combined with scale could work
 	//float weight = m_uPRand->Float( 1.0f, 1.5f );
 	//rPart.Spd /= weight;
 
-	rPart.SpdMod = rAtt.PartModSpd;
+	rPart.SpdMod = rAtt.PartSpdMod;
+
+	rPart.SpdOsc = rAtt.PartSpdOsc;
 
 
 
@@ -266,7 +275,7 @@ grCParticleSystem::ActvVelocity( grSParticleAttribute& rAtt, grSParticle& rPart 
 void
 grCParticleSystem::ActvLife( grSParticleAttribute& rAtt, grSParticle& rPart )
 {
-	rPart.Lifetime = ( grMath::CmpFloat( rAtt.PartMinMaxLife.x, rAtt.PartMinMaxLife.y ) != true )
-		? m_uPRand->Float( rAtt.PartMinMaxLife.x, rAtt.PartMinMaxLife.y )
-		: rAtt.PartMinMaxLife.x;
+	rPart.Lifetime = ( grMath::CmpFloat( rAtt.PartLifeMinMax.x, rAtt.PartLifeMinMax.y ) != true )
+		? m_uPRand->Float( rAtt.PartLifeMinMax.x, rAtt.PartLifeMinMax.y )
+		: rAtt.PartLifeMinMax.x;
 }

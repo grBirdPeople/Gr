@@ -36,23 +36,24 @@ public:
 	inline void Position( const grV2f& rPos, const float radOffset = 0.0f )
 	{
 		m_uPAtt->EmitrPos = rPos;
-		m_uPAtt->PartPosOffsetRadius = radOffset;
+		m_uPAtt->PartRadiusPosOffset = radOffset;
 		m_UsrMods.set( ( uInt )EUsrMods::POS );
 	}
 	inline void DirectionPart( const float minDeg = 0.0f, const float maxDeg = 359.9f )		// Only werks with positive values
 	{
-		m_uPAtt->PartMinMaxRotInDeg = grV2f( minDeg, maxDeg );
+		m_uPAtt->PartRotInDegMinMax = grV2f( minDeg, maxDeg );
 		m_UsrMods.set( ( uInt )EUsrMods::DIR_PART );
 	}
-	inline void Speed( const float min, const float max = 0.0f, const float mod = 0.0f )
+	inline void Speed( const float min, const float max = 0.0f, const float mod = 0.0f, const bool osc = false )
 	{
-		m_uPAtt->PartMinMaxSpd = grV2f( min, max );
-		m_uPAtt->PartModSpd = mod;
+		m_uPAtt->PartSpdMinMax = grV2f( min, max );
+		m_uPAtt->PartSpdMod = mod;
+		m_uPAtt->PartSpdOsc = ( osc == false ) ? 0.0f : 1.0f;
 		m_UsrMods.set( ( uInt )EUsrMods::SPD );
 	}
 	inline void Lifetime( const float min, const float max )
 	{
-		m_uPAtt->PartMinMaxLife = grV2f( min, max );
+		m_uPAtt->PartLifeMinMax = grV2f( min, max );
 		m_UsrMods.set( ( uInt )EUsrMods::LIFE, true );
 	}
 

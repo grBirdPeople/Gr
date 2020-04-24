@@ -18,6 +18,7 @@
 #include	"grMapManager.h"
 #include	"grCParticleManager.h"
 #include	"grMath.h"
+#include	"grAlgo.h"
 
 
 // cTor
@@ -145,8 +146,8 @@ grSandbox::grSandbox( void )
 
 	m_Emitr1.Position( grV2f( 320.0f, 225.0f ), 0.0f );
 	m_Emitr1.DirectionPart( 315.0f, 45.0f );
-	m_Emitr1.Speed( 64.0f, 128.0f, 0.25f );
-	m_Emitr1.Lifetime( 0.1f, 3.0f );
+	m_Emitr1.Speed( 64.0f, 128.0f, 0.5f );
+	m_Emitr1.Lifetime( 0.1f, 3.3f );
 	//m_Emitr1.Speed( 100.0f, 100.0f );
 	//m_Emitr1.Lifetime( 10.0f, 10.0f );
 }

@@ -11,7 +11,6 @@ class		grMap;
 class		grIEntity;
 class		grInputManager;
 class		grCParticleManager;
-class		grCParticleEmitterPB;
 class		grCParticleEmitter;
 
 
@@ -45,9 +44,6 @@ private:
 
 	grIEntity*				m_pPlayer;
 	grIEntity*				m_pEnemy;
-
-	grCParticleEmitterPB*		m_pPartEmitter_1;
-	grCParticleEmitterPB*		m_pPartEmitter_2;
 
 	bool					m_bFlipFlop = true;
 
