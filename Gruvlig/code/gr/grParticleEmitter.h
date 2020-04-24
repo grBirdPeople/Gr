@@ -28,26 +28,32 @@ public:
 	{
 		return m_Id;
 	}
+	inline void DirectionEmitter( const float deg = 0.0f )
+	{
+		m_uPAtt->EmitrRotInDeg = deg;
+		m_UsrMods.set( ( sizeT )EUsrMods::DIR_EMITR );
+	}
 	inline void Position( const grV2f& rPos, const float radOffset = 0.0f )
 	{
-		m_uPAtt->Position = rPos;
-		m_uPAtt->PosOffsetRadius = radOffset;
-		m_UsrMods.set( ( sizeT )EUsrMods::POS );
+		m_uPAtt->EmitrPos = rPos;
+		m_uPAtt->PartPosOffsetRadius = radOffset;
+		m_UsrMods.set( ( uInt )EUsrMods::POS );
 	}
-	inline void Direction( const float minDeg, const float maxDeg )		// Only werks with positive values
+	inline void DirectionPart( const float minDeg = 0.0f, const float maxDeg = 359.9f )		// Only werks with positive values
 	{
-		m_uPAtt->MinMaxDirInDeg = grV2f( minDeg, maxDeg );
-		m_UsrMods.set( ( sizeT )EUsrMods::DIR_DEG );
+		m_uPAtt->PartMinMaxRotInDeg = grV2f( minDeg, maxDeg );
+		m_UsrMods.set( ( uInt )EUsrMods::DIR_PART );
 	}
-	inline void Speed( const float min, const float max )
+	inline void Speed( const float min, const float max = 0.0f, const float mod = 0.0f )
 	{
-		m_uPAtt->MinMaxSpeed = grV2f( min, max );
-		m_UsrMods.set( ( sizeT )EUsrMods::SPD );
+		m_uPAtt->PartMinMaxSpd = grV2f( min, max );
+		m_uPAtt->PartModSpd = mod;
+		m_UsrMods.set( ( uInt )EUsrMods::SPD );
 	}
 	inline void Lifetime( const float min, const float max )
 	{
-		m_uPAtt->MinMaxLife = grV2f( min, max );
-		m_UsrMods.set( ( sizeT )EUsrMods::LIFE_SEC, true );
+		m_uPAtt->PartMinMaxLife = grV2f( min, max );
+		m_UsrMods.set( ( uInt )EUsrMods::LIFE, true );
 	}
 
 private:
@@ -56,9 +62,10 @@ private:
 	enum class EUsrMods	// Max size is define EMITR_USR_SETTINGS - 1
 	{
 		POS,
-		DIR_DEG, 
+		DIR_EMITR,
+		DIR_PART, 
 		SPD,
-		LIFE_SEC,
+		LIFE,	// In sec
 		SIZE
 	};
 

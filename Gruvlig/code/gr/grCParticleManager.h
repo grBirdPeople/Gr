@@ -24,7 +24,7 @@ public:
 	grCParticleManager( void );
 	~grCParticleManager( void );
 
-	grCParticleEmitter& Create( void );
+	grCParticleEmitter& Create( void ); // The only interaction the user should have with the manager normally
 
 private:
 

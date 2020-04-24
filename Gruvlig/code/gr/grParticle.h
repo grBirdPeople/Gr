@@ -6,10 +6,19 @@
 
 struct grSParticle
 {
-	// insert Color
 	grV2f	Position;
-	grV2f	Velocity;
+	grV2f	Direction;
+
 	float	Lifetime;
+
+	float	Spd,
+			SpdMod,
+			SpdOsc;
+
+	// insert Color
+	//grV2f	Position;
+	//grV2f	Velocity;
+	//float	Lifetime;
 };
 
 #endif	// _H_GRPARTICLE_
