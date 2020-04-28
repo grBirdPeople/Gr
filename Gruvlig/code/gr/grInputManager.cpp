@@ -18,22 +18,22 @@ grInputManager::grInputManager( void )
 	m_MouseButton.reserve( m_MouseCount );
 	m_MouseButtonDown.reserve( m_MouseCount );
 
-	for ( uInt i = 0; i < m_KeyCount; i++ )
+	for ( intU i = 0; i < m_KeyCount; i++ )
 	{
 		m_Key.push_back( false );
 	}
 
-	for (uInt i = 0; i < m_KeyCount; i++)
+	for (intU i = 0; i < m_KeyCount; i++)
 	{
 		m_KeyDown.push_back( false );
 	}
 
-	for ( uInt i = 0; i < m_MouseCount; i++ )
+	for ( intU i = 0; i < m_MouseCount; i++ )
 	{
 		m_MouseButton.push_back( false );
 	}
 
-	for (uInt i = 0; i < m_MouseCount; i++)
+	for (intU i = 0; i < m_MouseCount; i++)
 	{
 		m_MouseButtonDown.push_back( false );
 	}
@@ -54,12 +54,12 @@ grInputManager::~grInputManager( void )
 inline void
 grInputManager::ResetKeys( void )
 {
-	for ( uInt i = 0; i < m_KeyCount; i++ )
+	for ( intU i = 0; i < m_KeyCount; i++ )
 	{
 		m_Key.push_back( false );
 	}
 
-	for ( uInt i = 0; i < m_KeyCount; i++ )
+	for ( intU i = 0; i < m_KeyCount; i++ )
 	{
 		m_KeyDown.push_back( false );
 	}
@@ -71,12 +71,12 @@ grInputManager::ResetKeys( void )
 inline void
 grInputManager::ResetMouse( void )
 {
-	for ( uInt i = 0; i < m_MouseCount; i++ )
+	for ( intU i = 0; i < m_MouseCount; i++ )
 	{
 		m_MouseButton.push_back( false );
 	}
 
-	for ( uInt i = 0; i < m_MouseCount; i++ )
+	for ( intU i = 0; i < m_MouseCount; i++ )
 	{
 		m_MouseButtonDown.push_back( false );
 	}

@@ -34,7 +34,7 @@ public:
 	//////////////////////////////////////////////////
 	
 	void CreateNavMesh( void );
-	vecNavNode* FindPath( const uInt startPos, const uInt endPos );
+	vecNavNode* FindPath( const intU startPos, const intU endPos );
 	void Debug( void );
 	
 	//////////////////////////////////////////////////
@@ -45,7 +45,7 @@ private:
 	float Heuristic( grNavNode* pNode, grNavNode* pEndNode );
 	void InsertSortByCost( vecNavNode& rVec );
 	void BuildNodePath( grNavNode* pEndNode );
-	bool FindInOpenOrClose( const uInt nodeId, const vecNavNode& vec );
+	bool FindInOpenOrClose( const intU nodeId, const vecNavNode& vec );
 	
 	////////////////////////////////////////////////
 

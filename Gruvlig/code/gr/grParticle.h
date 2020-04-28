@@ -2,19 +2,22 @@
 #define		_H_GRPARTICLE_
 
 #include	"grV2.h"
+#include	<SFML/Graphics/Color.hpp>
 
 
 struct grSParticle
 {
+	sf::Color Color;
+
 	grV2f	Position;
 	grV2f	Direction;
-
-	float	Lifetime;
 
 	float	Spd,
 			SpdMod;
 
-	uInt	SpdOsc;		
+	float	Lifetime;
+
+	bool	SpdOsc;
 
 	// insert Color
 	//grV2f	Position;

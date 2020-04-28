@@ -12,7 +12,7 @@ class		grRandom;
 //////////////////////////////////////////////////
 struct grSParticleSystemPB
 {
-	grSParticleSystemPB( const uInt id, const uInt partQuantity );
+	grSParticleSystemPB( const intU id, const intU partQuantity );
 	~grSParticleSystemPB( void );
 
 	grSParticleSystemPB( grSParticleSystemPB const& ) = delete;
@@ -31,8 +31,8 @@ private:
 	// As particles lifetimes can end in an non linear manner relative their memory adress, their idx get's stored here then sorted  at a later time and deactivated linearly
 	// Unsure if this saves time, perhaps if the particle quantity is large enough
 	// Might be handy anyway, unless it worsens performance, where it's easy to cut out
-	uP<grRandom>	uPRand;
-	uInt			Id;
+	pU<grRandom>	uPRand;
+	intU			Id;
 };
 
 #endif	// 

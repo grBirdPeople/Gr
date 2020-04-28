@@ -15,7 +15,7 @@ struct grSColor
 		B = 255;
 		A = 255;
 	}
-	grSColor( const uInt r, const uInt g, const uInt b, const uInt a )
+	grSColor( const intU r, const intU g, const intU b, const intU a )
 	{
 		R = r;
 		G = g;
@@ -23,7 +23,7 @@ struct grSColor
 		A = a;
 	}
 
-	uInt R, G, B, A;
+	intU R, G, B, A;
 };
 
 

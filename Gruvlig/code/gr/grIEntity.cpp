@@ -37,9 +37,9 @@ grIEntity::~grIEntity( void )
 // GetChildById
 //////////////////////////////////////////////////
 inline grIEntity*
-grIEntity::GetChildById( const uInt id )
+grIEntity::GetChildById( const intU id )
 {
-	for ( uInt i = 0; i < m_vecChildren.size(); ++i )
+	for ( intU i = 0; i < m_vecChildren.size(); ++i )
 	{
 		if ( m_vecChildren[ i ]->GetId() == id )
 		{
@@ -54,7 +54,7 @@ grIEntity::GetChildById( const uInt id )
 // GetChild
 //////////////////////////////////////////////////
 grIEntity*
-grIEntity::GetChildByIdx( const uInt idx )
+grIEntity::GetChildByIdx( const intU idx )
 {
 	if ( m_vecChildren.size() > 0 && m_vecChildren.size() > idx )
 	{
@@ -102,13 +102,13 @@ grIEntity::AddChild( grIEntity* pChild )
 // ReleaseChild by id
 //////////////////////////////////////////////////
 void
-grIEntity::ReleaseChildById( const uInt id )
+grIEntity::ReleaseChildById( const intU id )
 {
 	// TODO: When there is hash, smoke some here
 
-	for ( uInt i = 0; i < m_vecChildren.size(); ++i )
+	for ( intU i = 0; i < m_vecChildren.size(); ++i )
 	{
-		if ( m_vecChildren[ i ]->GetId() == ( uInt )id )
+		if ( m_vecChildren[ i ]->GetId() == ( intU )id )
 		{
 			m_vecChildren[ i ]->ResetPosOnRelease();
 			m_vecChildren[ i ]->SetParent( nullptr );
@@ -126,11 +126,11 @@ grIEntity::ReleaseChildById( const uInt id )
 // ReleaseChild by idx
 //////////////////////////////////////////////////
 void
-grIEntity::ReleaseChildByIdx( const uInt idx )
+grIEntity::ReleaseChildByIdx( const intU idx )
 {
 #ifdef DEBUG
-	sInt size = ( sInt )m_vecChildren.size() - 1;
-	if ( ( sInt )idx > size )
+	intS size = ( intS )m_vecChildren.size() - 1;
+	if ( ( intS )idx > size )
 	{
 		std::cerr << "grIEntity::ReleaseChildByIdx(): Out of range. Idx was: " << idx << std::endl;
 		return;
@@ -175,7 +175,7 @@ grIEntity::EnableDisableRecursively( grIEntity& rEntity )
 {
 	if ( rEntity.m_vecChildren.size() > 0 )
 	{
-		for ( sInt i = ( sInt )rEntity.m_vecChildren.size() - 1; i >= 0; --i )	// TODO: Fix loop as this only works because of casting which also is stupid overhead anyway
+		for ( intS i = ( intS )rEntity.m_vecChildren.size() - 1; i >= 0; --i )	// TODO: Fix loop as this only works because of casting which also is stupid overhead anyway
 		{
 			grIEntity& ent = *rEntity.m_vecChildren[ i ];
 			if ( ent.m_vecChildren.size() > 0 )
@@ -197,7 +197,7 @@ grIEntity::UpdatePosRecursively( grIEntity& rEntity )
 {
 	if ( rEntity.m_vecChildren.size() > 0 )
 	{
-		for ( uInt i = 0; i < rEntity.m_vecChildren.size(); ++i )
+		for ( intU i = 0; i < rEntity.m_vecChildren.size(); ++i )
 		{
 			grIEntity& rEnt = *rEntity.m_vecChildren[ i ];
 			grV2f parentPos = rEnt.m_pParent->GetPosition();
@@ -219,7 +219,7 @@ grIEntity::DestroyRecursively( grIEntity& rEntity )
 {
 	if ( rEntity.m_vecChildren.size() > 0 )
 	{
-		for ( uInt i = 0; i < rEntity.m_vecChildren.size(); ++i )
+		for ( intU i = 0; i < rEntity.m_vecChildren.size(); ++i )
 		{
 			DestroyRecursively( *rEntity.m_vecChildren[ i ] );
 		}

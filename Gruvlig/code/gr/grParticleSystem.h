@@ -13,36 +13,36 @@ class grCParticleSystem
 {
 public:
 
-	grCParticleSystem( const uInt id, const sizeT partMax );
+	grCParticleSystem( const intU id, const sizeT partMax );
 	~grCParticleSystem( void );
 
 	grCParticleSystem( const grCParticleSystem& ) = delete;
 	grCParticleSystem& operator=( const grCParticleSystem& ) = delete;
 
-	void Copy( vE<uInt>& rVeActiveEmitr,
-			   uP<uP<grCParticleEmitter>[]>& rArEmitr,
-			   uP<uP<grSParticleAttribute>[]>& rArAtt );
+	void Copy( vE<intU>& rVeActiveEmitr,
+			   pU<pU<grCParticleEmitter>[]>& rArEmitr,
+			   pU<pU<grSParticleAttribute>[]>& rArAtt );
 
 	// TODO: Perhaps merge this with activate, uses the same stuff anyways and the code in spawn is basic
-	void Spawn( uP<uP<grCParticleEmitter>[]>& rArEmitr,
-				vE<uInt>& rVeActiveEmitr,
-				vE<uInt>& rVeActivateQue,
+	void QueSpawn( pU<pU<grCParticleEmitter>[]>& rArEmitr,
+				vE<intU>& rVeActiveEmitr,
+				vE<intU>& rVeActivateQue,
 				const float deltaT );
 
-	void Activate( vE<uInt>& rVeActivateQue,
-				   uP<uP<grCParticleEmitter>[]>& rArEmitr,
-				   uP<uP<grSParticleAttribute>[]>& rArAtt,
+	void Activate( vE<intU>& rVeActivateQue,
+				   pU<pU<grCParticleEmitter>[]>& rArEmitr,
+				   pU<pU<grSParticleAttribute>[]>& rArAtt,
 				   grSParticle** pArPart );
 
-	void Update( vE<std::pair<uInt, uInt>>& rVeDeactivateQue,
-				 vE<uInt>& rVeActiveEmitr,
-				 uP<uP<grCParticleEmitter>[]>& rArEmitr,
-				 uP<uP<grSParticleAttribute>[]>& rArAtt,
+	void Update( vE<std::pair<intU, intU>>& rVeDeactivateQue,
+				 vE<intU>& rVeActiveEmitr,
+				 pU<pU<grCParticleEmitter>[]>& rArEmitr,
+				 pU<pU<grSParticleAttribute>[]>& rArAtt,
 				 grSParticle** pAr2DPart,
 				 const float deltaT );
 
-	void Deactivate( vE<std::pair<uInt, uInt>>& rVeDeactivateQue,
-					 uP<uP<grCParticleEmitter>[]>& rArEmitr,
+	void Deactivate( vE<std::pair<intU, intU>>& rVeDeactivateQue,
+					 pU<pU<grCParticleEmitter>[]>& rArEmitr,
 					 grSParticle** pAr2DPart );
 
 private:
@@ -51,9 +51,9 @@ private:
 	void ActvVelocity( grSParticleAttribute& rAtt, grSParticle& rPart );
 	void ActvLife( grSParticleAttribute& rAtt, grSParticle& rPart );
 
-	uP<grRandom>	m_uPRand;
+	pU<grRandom>	m_uPRand;
 
-	uInt	m_Id,
+	intU	m_Id,
 			m_PartMax; // A little weird // Defined in part man and passed to this from part man create
 };
 

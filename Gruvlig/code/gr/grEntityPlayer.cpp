@@ -7,7 +7,7 @@
 
 // cTor
 //////////////////////////////////////////////////
-grEntityPlayer::grEntityPlayer( const grEnums::EntityType type, const str& rName, const grV2f& rPos, const uInt id )
+grEntityPlayer::grEntityPlayer( const grEnums::EntityType type, const str& rName, const grV2f& rPos, const intU id )
 	: m_pCtrl	( new grCtrlPlayer( this ) )
 {
 	m_PosWorld		= rPos;

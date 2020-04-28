@@ -11,8 +11,8 @@
 grMap::grMap( const str& uniqueName,
 			const str& strMap,
 			const grV2f& tileSize,
-			const uInt numTilesX,
-			const uInt numTilesY )
+			const intU numTilesX,
+			const intU numTilesY )
 	: m_pMapData	( new sMapData{ uniqueName, strMap, tileSize, numTilesX, numTilesY } )
 	, m_pNavMesh	( nullptr )
 {}
@@ -57,7 +57,7 @@ grMap::FindValidPos( const grV2f& pos )
 		float halfTileX = m_pMapData->TileSize.x * 0.5f;
 		float halfTileY = m_pMapData->TileSize.y * 0.5f;
 
-		for ( uInt node = 0; node < m_pNavMesh->GetNavNodes().size(); ++node )
+		for ( intU node = 0; node < m_pNavMesh->GetNavNodes().size(); ++node )
 		{
 			float minX = m_pNavMesh->GetNavNodes()[ node ]->m_MidPos.x - halfTileX;
 			float maxX = m_pNavMesh->GetNavNodes()[ node ]->m_MidPos.x + halfTileX;

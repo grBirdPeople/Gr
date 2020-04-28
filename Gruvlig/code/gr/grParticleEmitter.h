@@ -18,13 +18,13 @@ public:
 	friend class grCParticleManager;
 	friend class grCParticleSystem;
 
-	grCParticleEmitter( const uInt id );
+	grCParticleEmitter( const intU id );
 	~grCParticleEmitter( void );
 
 	grCParticleEmitter( const grCParticleEmitter& ) = delete;
 	grCParticleEmitter& operator=( const grCParticleEmitter& ) = delete;
 
-	inline const uInt Id( void ) const
+	inline const intU Id( void ) const
 	{
 		return m_Id;
 	}
@@ -37,24 +37,23 @@ public:
 	{
 		m_uPAtt->EmitrPos = rPos;
 		m_uPAtt->PartRadiusPosOffset = radOffset;
-		m_UsrMods.set( ( uInt )EUsrMods::POS );
+		m_UsrMods.set( ( intU )EUsrMods::POS );
 	}
-	inline void DirectionPart( const float minDeg = 0.0f, const float maxDeg = 359.9f )		// Only werks with positive values
+	inline void DirectionParticle( const float minDeg = 0.0f, const float maxDeg = 359.9f )		// Only werks with positive values
 	{
 		m_uPAtt->PartRotInDegMinMax = grV2f( minDeg, maxDeg );
-		m_UsrMods.set( ( uInt )EUsrMods::DIR_PART );
+		m_UsrMods.set( ( intU )EUsrMods::DIR_PART );
 	}
-	inline void Speed( const float min, const float max = 0.0f, const float mod = 0.0f, const bool osc = false )
+	inline void Speed( const float min, const float max = 0.0f, const float minMod = 0.0f, const float maxMod = 0.0f )
 	{
 		m_uPAtt->PartSpdMinMax = grV2f( min, max );
-		m_uPAtt->PartSpdMod = mod;
-		m_uPAtt->PartSpdOsc = ( osc == false ) ? 0.0f : 1.0f;
-		m_UsrMods.set( ( uInt )EUsrMods::SPD );
+		m_uPAtt->PartSpdModMinMax = grV2f( minMod, maxMod );
+		m_UsrMods.set( ( intU )EUsrMods::SPD );
 	}
-	inline void Lifetime( const float min, const float max )
+	inline void Lifetime( const float min, const float max, const float mod = 0.0f )
 	{
 		m_uPAtt->PartLifeMinMax = grV2f( min, max );
-		m_UsrMods.set( ( uInt )EUsrMods::LIFE, true );
+		m_UsrMods.set( ( intU )EUsrMods::LIFE, true );
 	}
 
 private:
@@ -70,7 +69,7 @@ private:
 		SIZE
 	};
 
-	vE<uInt> GetUsrModsSortd( void )	// Called from grCParticleSystem::CpyEmitrAttData
+	vE<intU> GetUsrModsSortd( void )	// Called from grCParticleSystem::CpyEmitrAttData
 	{
 		vE<sizeT>	m_UsrModsSortdReturn;
 		for ( sizeT i = 0; i < m_UsrMods.size(); ++i )
@@ -83,14 +82,14 @@ private:
 		return m_UsrModsSortdReturn;
 	}
 
-	uP<grSParticleAttribute>	m_uPAtt;
+	pU<grSParticleAttribute>	m_uPAtt;
 
 	std::bitset<EMITR_USR_SETTINGS>	m_UsrMods;
 
 	float	m_SpawnRate,
 			m_SpawnTimer;
 
-	uInt	m_Id,
+	intU	m_Id,
 			m_PartActive;
 };
 

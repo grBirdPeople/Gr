@@ -21,7 +21,7 @@ namespace grMath
 
 	// Min
 	//////////////////////////////////////////////////
-	inline sInt	Min( sInt a, sInt b )
+	inline intS	Min( intS a, intS b )
 	{
 		return ( a < b ) ? a : ( b < a ) ? b : a;
 	}
@@ -32,7 +32,7 @@ namespace grMath
 
 	// Max
 	//////////////////////////////////////////////////
-	inline sInt	Max( sInt a, sInt b )
+	inline intS	Max( intS a, intS b )
 	{
 		return ( a > b ) ? a : ( b > a ) ? b : a;
 	}
@@ -43,9 +43,9 @@ namespace grMath
 
 	// Abs
 	//////////////////////////////////////////////////
-	inline uInt	Abs( sInt value )
+	inline intU	Abs( intS value )
 	{
-		return ( value < 0 ) ? ( uInt )-value : ( uInt )value;
+		return ( value < 0 ) ? ( intU )-value : ( intU )value;
 	}
 	inline float Abs( float value )
 	{
@@ -54,7 +54,7 @@ namespace grMath
 
 	// Sign
 	//////////////////////////////////////////////////
-	inline sInt	Sign( sInt value )
+	inline intS	Sign( intS value )
 	{
 		return ( value < 0 ) ? -1 : ( value > 0 ) ? 1 : 0;
 	}
@@ -142,11 +142,11 @@ namespace grMath
 	{
 		return ( value < min ) ? min : ( value > max ) ? max : value;
 	}
-	inline sInt Clamp( sInt value, sInt min, sInt max )
+	inline intS Clamp( intS value, intS min, intS max )
 	{
 		return ( value < min ) ? min : ( value > max ) ? max : value;
 	}
-	inline sInt Clamp( uInt value, uInt min, uInt max )
+	inline intS Clamp( intU value, intU min, intU max )
 	{
 		return ( value < min ) ? min : ( value > max ) ? max : value;
 	}

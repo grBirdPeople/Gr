@@ -12,9 +12,9 @@ namespace grAlgo
 	//////////////////////////////////////////////////
 	template<typename T>
 	inline void
-	InsrtSort( T* pArr, const uInt size, const bool minToMax = true )
+	InsrtSort( T* pArr, const intU size, const bool minToMax = true )
 	{
-		auto MinToMax = [ & ]( T* arr, const T& nowNum, sInt& before )
+		auto MinToMax = [ & ]( T* arr, const T& nowNum, intS& before )
 		{
 			while ( ( before >= 0 ) && ( nowNum < arr[ before ] ) )
 			{
@@ -23,7 +23,7 @@ namespace grAlgo
 			}
 		};
 
-		auto MaxToMin = [ & ]( T* arr, const T& nowNum, sInt& before )
+		auto MaxToMin = [ & ]( T* arr, const T& nowNum, intS& before )
 		{
 			while ( ( before >= 0 ) && ( nowNum > arr[ before ] ) )
 			{
@@ -33,8 +33,8 @@ namespace grAlgo
 		};
 
 		T nowNum;
-		sInt idxBefore;
-		for ( uInt i = 1; i < size; ++i )
+		intS idxBefore;
+		for ( intU i = 1; i < size; ++i )
 		{
 			nowNum = pArr[ i ];
 			idxBefore = i - 1;
@@ -47,7 +47,7 @@ namespace grAlgo
 	inline void
 	InsrtSort( vE<T>& rVec, const bool minToMax = true )
 	{
-		auto MinToMax = [ & ]( vE<T>& rV, const T& nowNum, sInt& before )
+		auto MinToMax = [ & ]( vE<T>& rV, const T& nowNum, intS& before )
 		{
 			while ( ( before >= 0 ) && ( nowNum < rV[ before ] ) )
 			{
@@ -56,7 +56,7 @@ namespace grAlgo
 			}
 		};
 
-		auto MaxToMin = [ & ]( vE<T>& rV, const T& nowNum, sInt& before )
+		auto MaxToMin = [ & ]( vE<T>& rV, const T& nowNum, intS& before )
 		{
 			while ( ( before >= 0 ) && ( nowNum > rV[ before ] ) )
 			{
@@ -66,8 +66,8 @@ namespace grAlgo
 		};
 
 		T nowNum;
-		sInt idxBefore;
-		for ( uInt i = 1; i < rVec.size(); ++i )
+		intS idxBefore;
+		for ( intU i = 1; i < rVec.size(); ++i )
 		{
 			nowNum = rVec[ i ];
 			idxBefore = i - 1;

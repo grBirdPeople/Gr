@@ -11,28 +11,24 @@ struct grSParticleAttribute
 		, EmitrDir				( grV2f( 0.0f, -1.0 ) )
 		, PartRotInDegMinMax	( grV2f( 315.0f, 45.0f ) )
 		, PartSpdMinMax			( grV2f( 16.0f, 64.0f ) )
+		, PartSpdModMinMax		( grV2f( 0.0f, 0.0f ) )
 		, PartLifeMinMax		( grV2f( 2.0f, 4.0f ) )
 
 		, EmitrRotInDeg			( 0.0f )
 		, PartRadiusPosOffset	( 20.0f )
 		, PartRotInDeg			( 0.0f )
-
-		, PartSpdMod			( 0.0f )
-		, PartSpdOsc			( 0.0f )
 	{}
 
 	grV2f	EmitrPos;
 	grV2f	EmitrDir;
 	grV2f	PartRotInDegMinMax;
 	grV2f	PartSpdMinMax;
+	grV2f	PartSpdModMinMax;
 	grV2f	PartLifeMinMax;
 
 	float	EmitrRotInDeg,
 			PartRadiusPosOffset,
 			PartRotInDeg;
-
-	float	PartSpdMod,
-			PartSpdOsc;
 };
 
 #endif	// _H_GRPARTICLE_ATTRIBUTE_

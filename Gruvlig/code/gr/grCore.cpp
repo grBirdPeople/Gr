@@ -13,7 +13,7 @@
 
 // cTor
 //////////////////////////////////////////////////
-grCore::grCore( const uInt winWidth, const uInt winHeight, const uInt frameRate, const str& rAppName )
+grCore::grCore( const intU winWidth, const intU winHeight, const intU frameRate, const str& rAppName )
 	: m_AppName				( rAppName )
 	, m_TotalTimeElapsed	( 0.0 )
 	, m_Dt					( 0.0 )
@@ -157,7 +157,7 @@ grCore::Run( void )
 				case eEvent::MouseMoved: rInputMan.SetMouseMoved( grV2f( ( float )m_pSfEvent->mouseMove.x, ( float )m_pSfEvent->mouseMove.y ) ); break;																	break;
 				case eEvent::MouseButtonPressed: rInputMan.SetMouseDown( m_pSfEvent->mouseButton.button ); break;
 				case eEvent::MouseButtonReleased: rInputMan.SetMouseUp( m_pSfEvent->mouseButton.button ); break;
-				case eEvent::MouseWheelScrolled: rInputMan.SetMouseScroll( ( uInt )m_pSfEvent->mouseWheelScroll.delta ); break;
+				case eEvent::MouseWheelScrolled: rInputMan.SetMouseScroll( ( intU )m_pSfEvent->mouseWheelScroll.delta ); break;
 			};
 		}
 		

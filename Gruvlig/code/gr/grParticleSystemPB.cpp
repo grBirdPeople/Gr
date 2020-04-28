@@ -12,7 +12,7 @@
 
 // cTor
 //////////////////////////////////////////////////
-grSParticleSystemPB::grSParticleSystemPB( const uInt id, const uInt partQuantity )
+grSParticleSystemPB::grSParticleSystemPB( const intU id, const intU partQuantity )
     : uPRand                    ( new grRandom )
     , Id                        ( id )
 {}
@@ -201,14 +201,14 @@ grSParticleSystemPB::Deactivate( grCParticleEmitterPB& rEmitter )
 {
     if ( rEmitter.uPPartDeactivateQue->Quantity() > 0 )
     {
-        uInt size = rEmitter.uPPartDeactivateQue->Quantity();
-        for ( uInt i = 0; i < size; ++i )
+        intU size = rEmitter.uPPartDeactivateQue->Quantity();
+        for ( intU i = 0; i < size; ++i )
             rEmitter.uPArrPartDeactivateSortd[ i ] = rEmitter.uPPartDeactivateQue->Pull();
             //uPArrDeactivateIdSortd[ i ] = rEmitter.uPPartDeactivateQue->Pull();
 
-        grAlgo::InsrtSort<uInt>( rEmitter.uPArrPartDeactivateSortd.get(), size );
+        grAlgo::InsrtSort<intU>( rEmitter.uPArrPartDeactivateSortd.get(), size );
 
-        for ( uInt idx = 0; idx < size; ++idx )
+        for ( intU idx = 0; idx < size; ++idx )
         {
             grSParticlePB& rTooPart = *rEmitter.vecUpParticles[ rEmitter.uPArrPartDeactivateSortd[ idx ] ];
             grSParticlePB& rFromPart = *rEmitter.vecUpParticles[ rEmitter.PartActive - 1 ];

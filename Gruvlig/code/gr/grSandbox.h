@@ -49,7 +49,7 @@ private:
 
 	grV2f					m_LastMousePos;
 
-	sInt					m_PartSysIdOne,
+	intS					m_PartSysIdOne,
 							m_PartSysIdTwo;
 };
 

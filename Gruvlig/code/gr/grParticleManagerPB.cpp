@@ -23,7 +23,7 @@ grCParticleManagerPB::grCParticleManagerPB( void )
 
     for ( sizeT i = 0; i < PARTICLE_SYTEMS; ++i )
     {
-        m_VecUpSystem.push_back( std::make_unique<grSParticleSystemPB>( ( uInt )i, PARTICLE_PER_EMITTER ) );
+        m_VecUpSystem.push_back( std::make_unique<grSParticleSystemPB>( ( intU )i, PARTICLE_PER_EMITTER ) );
         ++m_CreatedSystems;
     }
 }
@@ -54,7 +54,7 @@ grCParticleManagerPB::CreateEmitter( void )
 {
     assert( m_CreatedEmitters <= PARTICLE_EMITTERS && "grCParticleManagerPB::Create(): Max emitters already created" );
 
-    uInt id = m_CreatedEmitters;
+    intU id = m_CreatedEmitters;
     ++m_CreatedEmitters;
     m_TotalParticles += PARTICLE_PER_EMITTER;
 
@@ -67,7 +67,7 @@ grCParticleManagerPB::CreateEmitter( void )
 // GetEmitter
 //////////////////////////////////////////////////
 grCParticleEmitterPB* const
-grCParticleManagerPB::GetEmitter( const uInt id )
+grCParticleManagerPB::GetEmitter( const intU id )
 {
     assert( m_CreatedEmitters <= PARTICLE_EMITTERS && "grCParticleManagerPB::GetEmitter(): Emittor id out of range" );
     return m_VecUpEmitter[ id ].get();

@@ -5,7 +5,7 @@
 
 // cTor
 //////////////////////////////////////////////////
-grEntityEnemy::grEntityEnemy( const grEnums::EntityType type, const str& rName, const grV2f& rPos, const uInt id )
+grEntityEnemy::grEntityEnemy( const grEnums::EntityType type, const str& rName, const grV2f& rPos, const intU id )
 {
 	m_PosWorld		= rPos;
 	m_PosLocal		= rPos;

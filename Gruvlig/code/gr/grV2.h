@@ -64,7 +64,7 @@ struct grV2
 
 	//////////////////////////////////////////////////
 
-	inline T& operator[]( const uInt idx )
+	inline T& operator[]( const intU idx )
 	{
 		if ( idx < 0 || idx > 1 )
 		{
@@ -101,6 +101,6 @@ std::ostream& operator<< ( std::ostream& out, const grV2<T>& rV2 )
 //////////////////////////////////////////////////
 typedef	grV2<double>	grV2d;
 typedef	grV2<float>		grV2f;
-typedef	grV2<sInt>		grV2i;
+typedef	grV2<intS>		grV2i;
 
 #endif		//_GRV2_
