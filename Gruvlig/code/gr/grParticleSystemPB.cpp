@@ -44,7 +44,7 @@ grSParticleSystemPB::Activate( grCParticleEmitterPB& rEmitter, const float delta
             grSParticlePB& rPart = *rEmitter.vecUpParticles[ rEmitter.PartActive ].get();
             grCParticleAttributePB& rAtt = rEmitter.GetParticleAttribute();
 
-            rPart.Color = rAtt.Color;
+            //rPart.Color = rAtt.Color;
             rPart.Position = rAtt.Position;
             rPart.Velocity = rAtt.Velocity;
             rPart.Lifetime = rAtt.Lifetime;
@@ -146,9 +146,9 @@ grSParticleSystemPB::Update( grCParticleEmitterPB& rEmitter, const float deltaT 
             rEmitter.vecUpParticles[ idx ]->Position += rEmitter.vecUpParticles[ idx ]->Velocity * deltaT;
 
             // TEST DRAW
-            grBBox box( grV2f( 20.0f, 20.0f ), rEmitter.vecUpParticles[ idx ]->Position );
-            grSColor color = rEmitter.vecUpParticles[ idx ]->Color;
-            grDebugManager::Instance().AddBBox( box, sf::Color( color.R, color.G, color.B, color.A ) );
+            //grBBox box( grV2f( 20.0f, 20.0f ), rEmitter.vecUpParticles[ idx ]->Position );
+            //grSColor color = rEmitter.vecUpParticles[ idx ]->Color;
+            //grDebugManager::Instance().AddBBox( box, sf::Color( color.R, color.G, color.B, color.A ) );
             // TEST DRAW
         }
     }

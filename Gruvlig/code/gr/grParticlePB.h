@@ -6,25 +6,25 @@
 #include	"grMath.h"
 
 
-struct grSColor
-{
-	grSColor( void )
-	{
-		R = 255;
-		G = 255;
-		B = 255;
-		A = 255;
-	}
-	grSColor( const intU r, const intU g, const intU b, const intU a )
-	{
-		R = r;
-		G = g;
-		B = b;
-		A = a;
-	}
-
-	intU R, G, B, A;
-};
+//struct grSColor
+//{
+//	grSColor( void )
+//	{
+//		R = 255;
+//		G = 255;
+//		B = 255;
+//		A = 255;
+//	}
+//	grSColor( const intU r, const intU g, const intU b, const intU a )
+//	{
+//		R = r;
+//		G = g;
+//		B = b;
+//		A = a;
+//	}
+//
+//	intU R, G, B, A;
+//};
 
 
 // grSParticlePB // Multiple instances // // Always allowed to directly copy the whole object
@@ -33,15 +33,15 @@ struct grSParticlePB
 {
 	//Phys based
 	grSParticlePB( void )
-		: Color		( grSColor() )
-		, Position	( grV2f() )
+		: Position	( grV2f() )		
+		//Color		( grSColor() )
 		, Velocity	( grV2f( 0.0f, 0.0f ) )
 		, Lifetime	( 0.0f )
 	{}
 
 	//////////////////////////////////////////////////
 
-	grSColor	Color;
+	//grSColor	Color;
 
 	grV2f	Position;
 	grV2f	Velocity;
@@ -59,16 +59,16 @@ public:
 
 	//////////////////////////////////////////////////
 
-	grCParticleAttributePB( void )
-		: Color		( grSColor() )
-		, Position	( grV2f() )
+	grCParticleAttributePB( void )		
+		: Position	( grV2f() )
+		//Color		( grSColor() )
 		, Velocity	( grV2f() )
 		, Lifetime	( 0.0f )
 	{}
 
 	//////////////////////////////////////////////////
 
-	grSColor	Color;
+	//grSColor	Color;
 
 	grV2f	Position;
 	grV2f	Velocity;

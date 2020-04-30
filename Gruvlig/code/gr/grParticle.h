@@ -1,8 +1,30 @@
 #ifndef		_H_GRPARTICLE_
 #define		_H_GRPARTICLE_
 
-#include	"grV2.h"
 #include	<SFML/Graphics/Color.hpp>
+
+#include	"grV2.h"
+
+
+//struct grSColor
+//{
+//	grSColor( void )
+//	{
+//		R = 255;
+//		G = 255;
+//		B = 255;
+//		A = 255;
+//	}
+//	grSColor( const intU r, const intU g, const intU b, const intU a )
+//	{
+//		R = r;
+//		G = g;
+//		B = b;
+//		A = a;
+//	}
+//
+//	intU R, G, B, A;
+//};
 
 
 struct grSParticle
@@ -17,7 +39,7 @@ struct grSParticle
 
 	float	Lifetime;
 
-	bool	SpdOsc;
+	bool	bSpdOsc;
 
 	// insert Color
 	//grV2f	Position;

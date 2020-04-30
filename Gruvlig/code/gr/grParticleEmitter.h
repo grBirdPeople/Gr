@@ -28,10 +28,14 @@ public:
 	{
 		return m_Id;
 	}
-	inline void DirectionEmitter( const float deg = 0.0f )
+	inline void DirectionEmitter( const float degAbs = 0.0f )
 	{
-		m_uPAtt->EmitrRotInDeg = deg;
+		m_uPAtt->EmitrRotInDeg = degAbs;
 		m_UsrMods.set( ( sizeT )EUsrMods::DIR_EMITR );
+	}
+	inline const float GetDirectionEmitter( void ) const
+	{
+		return m_uPAtt->EmitrRotInDeg;
 	}
 	inline void Position( const grV2f& rPos, const float radOffset = 0.0f )
 	{
@@ -39,20 +43,24 @@ public:
 		m_uPAtt->PartRadiusPosOffset = radOffset;
 		m_UsrMods.set( ( intU )EUsrMods::POS );
 	}
-	inline void DirectionParticle( const float minDeg = 0.0f, const float maxDeg = 359.9f )		// Only werks with positive values
+	inline void DirectionParticle( const grV2f& rMinMaxDegAbs = grV2f( 0.0f, 359.9f ) )
 	{
-		m_uPAtt->PartRotInDegMinMax = grV2f( minDeg, maxDeg );
+		m_uPAtt->PartRotInDegMinMax = rMinMaxDegAbs;
 		m_UsrMods.set( ( intU )EUsrMods::DIR_PART );
 	}
-	inline void Speed( const float min, const float max = 0.0f, const float minMod = 0.0f, const float maxMod = 0.0f )
+	inline const grV2f& GetDirectionParticle( void ) const
 	{
-		m_uPAtt->PartSpdMinMax = grV2f( min, max );
-		m_uPAtt->PartSpdModMinMax = grV2f( minMod, maxMod );
+		return m_uPAtt->PartRotInDegMinMax;
+	}
+	inline void Speed( const grV2f& rMinMax = grV2f( 0.0f, 0.0f ), const grV2f& rMinMaxMod = grV2f( 0.0f, 0.0f ) )
+	{
+		m_uPAtt->PartSpdMinMax = rMinMax;
+		m_uPAtt->PartSpdModMinMax = rMinMaxMod;
 		m_UsrMods.set( ( intU )EUsrMods::SPD );
 	}
-	inline void Lifetime( const float min, const float max, const float mod = 0.0f )
+	inline void Lifetime( const grV2f& rMinMax = grV2f( 0.0f, 0.0f ) )
 	{
-		m_uPAtt->PartLifeMinMax = grV2f( min, max );
+		m_uPAtt->PartLifeMinMax = rMinMax;
 		m_UsrMods.set( ( intU )EUsrMods::LIFE, true );
 	}
 
@@ -71,7 +79,7 @@ private:
 
 	vE<intU> GetUsrModsSortd( void )	// Called from grCParticleSystem::CpyEmitrAttData
 	{
-		vE<sizeT>	m_UsrModsSortdReturn;
+		vE<sizeT> m_UsrModsSortdReturn;
 		for ( sizeT i = 0; i < m_UsrMods.size(); ++i )
 		{
 			if ( m_UsrMods[ i ] == true )

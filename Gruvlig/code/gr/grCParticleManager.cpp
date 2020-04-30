@@ -84,7 +84,7 @@ grCParticleManager::Update( const float deltaT )
 		intU active = m_aREmitr[ id ]->m_PartActive;
 		for ( sizeT part = 0; part < active; ++part )
 		{
-			grBBox box( grV2f( 0.25f, 0.25f ), m_aR2DPart[ m_vEActvEmitr[ id ] ][ part ].Position );
+			grBBox box( grV2f( 0.5f, 0.5f ), m_aR2DPart[ m_vEActvEmitr[ id ] ][ part ].Position );
 			grDebugManager::Instance().AddBBox( box, sf::Color( 255, 125, 0 ) );
 		}
 	}

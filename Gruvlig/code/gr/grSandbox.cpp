@@ -29,7 +29,10 @@ grSandbox::grSandbox( void )
 	, m_Emitr1			( grCParticleManager::Instance().Create() )
 	, m_PartSysIdOne	( -1 )
 	, m_PartSysIdTwo	( -1 )
+	, m_RendWin			( grCore::Instance().GetRenderWin() )
 {
+	m_RendWin.setMouseCursorVisible( false );
+
 	// Create maps and navmeshes
 	grMapManager::Instance().GetMap( "map_00" )->CreateNavMesh();	// TODO: Don't like this. Other way around ( navmeshmanager create navmesh ( map ))
 	grMapManager::Instance().GetMap( "map_01" )->CreateNavMesh();
@@ -144,10 +147,10 @@ grSandbox::grSandbox( void )
 	//	int j = 7;
 	//}
 
-	m_Emitr1.Position( grV2f( 320.0f, 225.0f ), 0.0f );
-	m_Emitr1.DirectionParticle( 0.0f, 360.0f );
-	m_Emitr1.Speed( -50.0f, 50.0f, 1.3f, 3.3 );
-	m_Emitr1.Lifetime( 0.3f, 2.3f );
+	m_Emitr1.Position( grV2f( 320.0f, 180.0f ), 100.0f );
+	m_Emitr1.DirectionParticle( grV2f( 0.0f, 0.0f ) );
+	m_Emitr1.Speed( grV2f( -25.0f, 25.0f ), grV2f( 0.1f, 2.3 ) );
+	m_Emitr1.Lifetime( grV2f( 0.3f, 2.3f ) );
 }
 
 
@@ -158,12 +161,30 @@ grSandbox::Update( const float deltaT )
 {
 	// Particle things
 
-	if ( m_rInputMan.GetMouseMoved() == true )
+	if ( m_rInputMan.GetMouseMoved() )
 	{
 		m_Emitr1.Position( m_rInputMan.GetMousePos() );
 	}
 	m_LastMousePos = m_rInputMan.GetMousePos();
 
+
+	m_ParticleAnimCounter -= deltaT;
+	if ( m_ParticleAnimCounter < 0.0f )
+	{
+		m_ParticleAnimCounter += m_ParticleAnimT;
+		float deg = m_Emitr1.GetDirectionParticle().x + 45.0f;
+		m_Emitr1.DirectionParticle( grV2f( deg, deg ) );
+	}
+	//if ( m_rInputMan.GetMouseScrollForwards() )
+	//{
+	//	float deg = m_Emitr1.GetDirectionParticle().x + 45.0f;
+	//	m_Emitr1.DirectionParticle( grV2f( deg, deg ) );
+	//}
+	//if ( m_rInputMan.GetMouseScrollBackwards () )
+	//{
+	//	float deg = m_Emitr1.GetDirectionParticle().x - 45.0f;
+	//	m_Emitr1.DirectionParticle( grV2f( deg, deg ) );
+	//}
 
 
 

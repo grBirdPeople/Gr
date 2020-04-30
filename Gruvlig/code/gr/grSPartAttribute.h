@@ -1,6 +1,8 @@
 #ifndef		_H_GRPARTICLE_ATTRIBUTE_
 #define		_H_GRPARTICLE_ATTRIBUTE_
 
+#include	<SFML/Graphics/Color.hpp>
+
 #include	"grV2.h"
 
 

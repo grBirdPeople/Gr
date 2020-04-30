@@ -13,6 +13,11 @@ class		grInputManager;
 class		grCParticleManager;
 class		grCParticleEmitter;
 
+namespace sf
+{
+	class RenderWindow;
+}
+
 
 // grSandbox
 //////////////////////////////////////////////////
@@ -34,6 +39,8 @@ public:
 
 private:
 
+	sf::RenderWindow&		m_RendWin;
+
 	grInputManager&			m_rInputMan;
 	grCParticleManager&		m_rPartMan;
 
@@ -51,6 +58,10 @@ private:
 
 	intS					m_PartSysIdOne,
 							m_PartSysIdTwo;
+
+	float					m_ParticleAnimT = 0.25f,
+							m_ParticleAnimCounter = 0.0f;
+
 };
 
 
