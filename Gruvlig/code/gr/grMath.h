@@ -14,7 +14,7 @@ namespace grMath
 {
 	// Const
 	//////////////////////////////////////////////////
-	const float Epsilon = 0.00001f;
+	const float Epsilon = 0.01f;
 	const float Pi = 3.141592f;
 	const float DegToRad = Pi / 180.0f;
 	const float RadToDeg = 180 / Pi;
@@ -165,16 +165,18 @@ namespace grMath
 
 	// VecToRad
 	//////////////////////////////////////////////////
-	inline float VecToRad( grV2f& rVec )
+	inline float VecToRad( const grV2f& rVec )
 	{
-		return std::atan2f( rVec.y, rVec.x );
+		grV2f v = rVec;
+		return std::atan2f( v.y, v.x );
 	}
 
 	// VecToDeg
 	//////////////////////////////////////////////////
-	inline float VecToDeg( grV2f& rVec )
+	inline float VecToDeg( const grV2f& rVec )
 	{
-		return std::atan2f( rVec.y, rVec.x ) * RadToDeg;
+		grV2f v = rVec;
+		return std::atan2f( v.y, v.x ) * RadToDeg;
 	}
 
 	// RadToVec
@@ -218,8 +220,16 @@ namespace grMath
 	//////////////////////////////////////////////////
 	inline bool CmpFloat( const float numOne, const float numTwo )
 	{
-		float num = Abs( numOne - numTwo );
 		return Abs( numOne - numTwo ) < Epsilon;
+	}
+
+	// CmpVector
+	//////////////////////////////////////////////////
+	inline bool CmpVec( const grV2f& rVecOne, const grV2f& rVecTwo )
+	{
+		float x = Abs( rVecOne.x - rVecTwo.x );
+		float y = Abs( rVecOne.y - rVecTwo.y );
+		return ( x < Epsilon ) && ( y < Epsilon );
 	}
 }
 

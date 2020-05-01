@@ -3,7 +3,7 @@
 
 #define		PART_SYS_MAX	2
 #define		PART_EMITR_MAX	100
-#define		PART_PART_MAX	10000
+#define		PART_PART_MAX	5000
 
 #include	"grSingleton.h"
 #include	"grParticleEmitter.h"
@@ -24,7 +24,7 @@ public:
 	grCParticleManager( void );
 	~grCParticleManager( void );
 
-	grCParticleEmitter& Create( void ); // The only interaction the user should have with the manager normally
+	grCParticleEmitter& Create( void ); // The only interaction the user should have with the manager under regular circumstances
 
 private:
 
@@ -32,13 +32,13 @@ private:
 
 	// TODO: Fox the order for array decleration order vs. system call order. Also some array's could probably be put in a struct.
 
-	// The system should perhaps own some of the arrays because of practicality
+	// The system should perhaps own some of the arrays because of practicality, or not because of straightforwardness... which definitely is a word
 	pU<pU<grCParticleEmitter>[]>	m_aREmitr;
 	pU<pU<grSParticleAttribute>[]>	m_aRAtt;
 	grSParticle**					m_aR2DPart;	// Can't figure out how to do this with unique ptr's so...
 
 	// Stores id's sorted from min to max so we always update linearly.
-	// The goal is to read and jump in memory as efficiently as possible as the arrays are passed to different system calls.
+	// The goal is to read/write/jump in memory as efficiently as possible as the arrays are passed to different system calls.
 	// Their decleration order needs to be looked over if system calls change and/or get's added, so that's a pretty big downside right now.
 
 	vE<intU>			m_vEActvEmitr;	// Emitter id('s) to update

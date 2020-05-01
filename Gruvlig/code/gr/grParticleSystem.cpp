@@ -113,12 +113,17 @@ grCParticleSystem::QueSpawn( pU<pU<grCParticleEmitter>[]>& rArEmitr,
 		for ( sizeT i = 0; i < actvEmitrSize; ++i )
 		{
 			grCParticleEmitter& rEmitr = *rArEmitr[ rVeActiveEmitr[ i ] ].get();
-			rEmitr.m_SpawnTimer -= deltaT;
-			while ( rEmitr.m_SpawnTimer < 0.0f )
+			rEmitr.m_SpawnTimerMs -= deltaT;
+			while ( rEmitr.m_SpawnTimerMs < 0.0f )
 			{
-				rEmitr.m_SpawnTimer += rEmitr.m_SpawnRate;
-				if ( rEmitr.m_PartActive < m_PartMax )
-					rVeActivateQue.push_back( rEmitr.m_Id );
+				if ( rEmitr.m_PartActive == m_PartMax )
+				{
+					rEmitr.m_SpawnTimerMs = 0.0f;
+					return;
+				}
+
+				rEmitr.m_SpawnTimerMs += rEmitr.m_SpawnRateMs;
+				rVeActivateQue.push_back( rEmitr.m_Id );
 			}
 		}
 	}
@@ -179,6 +184,7 @@ grCParticleSystem::Update( vE<std::pair<intU, intU>>& rVeDeactivateQue,
 					rPart.SpdMod *= -1.0f;
 				else if ( rPart.SpdMod < 0.0f && rAtt.PartSpdMinMax.x > rPart.Spd )
 					rPart.SpdMod *= -1.0f;
+
 			}
 			rPart.Spd = grMath::Lerp( rPart.Spd, rPart.Spd + rPart.SpdMod, 0.25f );
 
@@ -280,6 +286,11 @@ grCParticleSystem::ActvVelocity( grSParticleAttribute& rAtt, grSParticle& rPart 
 	{
 		rPart.SpdMod = m_uPRand->Float( rAtt.PartSpdModMinMax.x, rAtt.PartSpdModMinMax.y );
 		rPart.bSpdOsc = true;
+	}
+	else
+	{
+		rPart.SpdMod = rAtt.PartSpdModMinMax.x;
+		rPart.bSpdOsc = false;
 	}
 
 	

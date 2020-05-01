@@ -7,6 +7,7 @@
 
 #include	"grCommon.h"
 #include	"grV2.h"
+#include	"grMath.h"
 
 #include	"grSPartAttribute.h"
 
@@ -24,9 +25,26 @@ public:
 	grCParticleEmitter( const grCParticleEmitter& ) = delete;
 	grCParticleEmitter& operator=( const grCParticleEmitter& ) = delete;
 
-	inline const intU Id( void ) const
+	inline const intU GetId( void ) const
 	{
 		return m_Id;
+	}
+	inline void SetSpawnRate( const float spawnPerSec )
+	{
+		m_SpawnPerSec = grMath::Abs( spawnPerSec );
+		if ( m_SpawnPerSec > 0.0f )
+		{
+			m_SpawnRateMs = 1.0f / m_SpawnPerSec;
+			m_SpawnTimerMs = 0.0f;
+			return;
+		}
+
+		m_SpawnRateMs = 0.0f;
+		m_SpawnTimerMs = 0.0f;
+	}
+	inline const float GetSpawnRate( void ) const
+	{
+		return m_SpawnPerSec;
 	}
 	inline void DirectionEmitter( const float degAbs = 0.0f )
 	{
@@ -43,12 +61,16 @@ public:
 		m_uPAtt->PartRadiusPosOffset = radOffset;
 		m_UsrMods.set( ( intU )EUsrMods::POS );
 	}
+	inline grV2f& GetPosition( void ) const
+	{
+		return m_uPAtt->EmitrPos;
+	}
 	inline void DirectionParticle( const grV2f& rMinMaxDegAbs = grV2f( 0.0f, 359.9f ) )
 	{
 		m_uPAtt->PartRotInDegMinMax = rMinMaxDegAbs;
 		m_UsrMods.set( ( intU )EUsrMods::DIR_PART );
 	}
-	inline const grV2f& GetDirectionParticle( void ) const
+	inline grV2f& GetDirectionParticle( void ) const
 	{
 		return m_uPAtt->PartRotInDegMinMax;
 	}
@@ -66,7 +88,7 @@ public:
 
 private:
 
-	// TODO: It's a little problematic that the enum decleration order needs to match the data copy switch in systems or vv. Look into auto thing.
+	// TODO: It's a little problematic that the enum decleration order needs to match the data copy switch in systems and vv. Look into auto thing.
 	enum class EUsrMods	// Max size is define EMITR_USR_SETTINGS - 1
 	{
 		POS,
@@ -94,8 +116,9 @@ private:
 
 	std::bitset<EMITR_USR_SETTINGS>	m_UsrMods;
 
-	float	m_SpawnRate,
-			m_SpawnTimer;
+	float	m_SpawnPerSec,	
+			m_SpawnRateMs,
+			m_SpawnTimerMs;
 
 	intU	m_Id,
 			m_PartActive;

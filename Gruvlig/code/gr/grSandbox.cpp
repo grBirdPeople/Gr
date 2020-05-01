@@ -147,10 +147,21 @@ grSandbox::grSandbox( void )
 	//	int j = 7;
 	//}
 
-	m_Emitr1.Position( grV2f( 320.0f, 180.0f ), 100.0f );
+	m_Emitr1.Position( grV2f( 320.0f, 180.0f ), 50.0f );
 	m_Emitr1.DirectionParticle( grV2f( 0.0f, 0.0f ) );
-	m_Emitr1.Speed( grV2f( -25.0f, 25.0f ), grV2f( 0.1f, 2.3 ) );
-	m_Emitr1.Lifetime( grV2f( 0.3f, 2.3f ) );
+	m_Emitr1.Speed( grV2f( -50.0f, 50.0f ), grV2f( 0.1f, 2.3 ) );
+	m_Emitr1.Lifetime( grV2f( 0.3f, 1.0f ) );
+
+	m_aREmitrPos.push_back( grV2f( 320.0f, 180.0f ) );
+	m_aREmitrPos.push_back( grV2f( 280.0f, 180.0f ) );	// Diagonal
+	m_aREmitrPos.push_back( grV2f( 240.0f, 220.0f ) );	// Diagonal
+	m_aREmitrPos.push_back( grV2f( 240.0f, 260.0f ) );
+	m_aREmitrPos.push_back( grV2f( 280.0f, 300.0f ) );	// Diagonal
+	m_aREmitrPos.push_back( grV2f( 320.0f, 300.0f ) );	// Diagonal
+	m_aREmitrPos.push_back( grV2f( 360.0f, 260.0f ) );
+	m_aREmitrPos.push_back( grV2f( 360.0f, 220.0f ) );	// Diagonal
+
+	m_NxtEmitrPos = 1;
 }
 
 
@@ -160,13 +171,16 @@ void
 grSandbox::Update( const float deltaT )
 {
 	// Particle things
-
 	if ( m_rInputMan.GetMouseMoved() )
 	{
 		m_Emitr1.Position( m_rInputMan.GetMousePos() );
+
+		//grV2f dir = ( m_LastMousePos - m_Emitr1.GetPosition() ).Normalized();
+		//float deg = grMath::VecToDeg( dir ) + 90.0f;
+		//if ( deg < 0.0f ) deg = 360.0f + deg;
+		//m_Emitr1.DirectionParticle( grV2f( deg - 10.0f, deg + 10.0f ) );
 	}
 	m_LastMousePos = m_rInputMan.GetMousePos();
-
 
 	m_ParticleAnimCounter -= deltaT;
 	if ( m_ParticleAnimCounter < 0.0f )
@@ -175,16 +189,16 @@ grSandbox::Update( const float deltaT )
 		float deg = m_Emitr1.GetDirectionParticle().x + 45.0f;
 		m_Emitr1.DirectionParticle( grV2f( deg, deg ) );
 	}
-	//if ( m_rInputMan.GetMouseScrollForwards() )
-	//{
-	//	float deg = m_Emitr1.GetDirectionParticle().x + 45.0f;
-	//	m_Emitr1.DirectionParticle( grV2f( deg, deg ) );
-	//}
-	//if ( m_rInputMan.GetMouseScrollBackwards () )
-	//{
-	//	float deg = m_Emitr1.GetDirectionParticle().x - 45.0f;
-	//	m_Emitr1.DirectionParticle( grV2f( deg, deg ) );
-	//}
+	
+
+	if ( m_rInputMan.GetMouseScrollForwards() )
+	{
+		m_Emitr1.SetSpawnRate( m_Emitr1 .GetSpawnRate() + 50.0f );
+	}
+	if ( m_rInputMan.GetMouseScrollBackwards () )
+	{
+		m_Emitr1.SetSpawnRate( m_Emitr1.GetSpawnRate() - 50.0f );
+	}
 
 
 

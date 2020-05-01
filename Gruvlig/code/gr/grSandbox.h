@@ -62,6 +62,9 @@ private:
 	float					m_ParticleAnimT = 0.25f,
 							m_ParticleAnimCounter = 0.0f;
 
+	vE<grV2f>				m_aREmitrPos;
+	sizeT					m_NxtEmitrPos;
+
 };
 
 
