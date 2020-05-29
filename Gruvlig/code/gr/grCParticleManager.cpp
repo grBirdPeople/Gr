@@ -12,8 +12,8 @@
 
 
 grCParticleManager::grCParticleManager( void )
-	: m_aREmitr			( new uP<grCParticleEmitter>[ PART_EMITR_MAX ] )
-	, m_aRAtt			( new uP<grSParticleAttribute>[ PART_EMITR_MAX ] )
+	: m_aREmitr			( new pU<grCParticleEmitter>[ PART_EMITR_MAX ] )
+	, m_aRAtt			( new pU<grSParticleAttribute>[ PART_EMITR_MAX ] )
 	, m_aR2DPart		( new grSParticle*[ PART_EMITR_MAX ] )
 
 	, m_uPSys			( new grCParticleSystem( 0, PART_PART_MAX ) )
@@ -73,7 +73,7 @@ void
 grCParticleManager::Update( const float deltaT )
 {
 	m_uPSys->Copy( m_vEActvEmitr, m_aREmitr, m_aRAtt );
-	m_uPSys->Spawn( m_aREmitr, m_vEActvEmitr, m_vEActvQue, deltaT );
+	m_uPSys->QueSpawn( m_aREmitr, m_vEActvEmitr, m_vEActvQue, deltaT );
 	m_uPSys->Activate( m_vEActvQue, m_aREmitr, m_aRAtt, m_aR2DPart );
 	m_uPSys->Update( m_vEDeactvQue, m_vEActvEmitr, m_aREmitr, m_aRAtt, m_aR2DPart, deltaT );
 	m_uPSys->Deactivate( m_vEDeactvQue, m_aREmitr, m_aR2DPart );
@@ -81,11 +81,11 @@ grCParticleManager::Update( const float deltaT )
 	// TEST DRAW
 	for ( sizeT id = 0; id < m_vEActvEmitr.size(); ++id )
 	{
-		uInt active = m_aREmitr[ id ]->m_PartActive;
+		intU active = m_aREmitr[ id ]->m_PartActive;
 		for ( sizeT part = 0; part < active; ++part )
 		{
-			grBBox box( grV2f( 20.0f, 20.0f ), m_aR2DPart[ m_vEActvEmitr[ id ] ][ part ].Position );
-			grDebugManager::Instance().AddBBox( box, sf::Color( 255, 125, 0 ) );
+			grBBox box( grV2f( 5.5f, 5.5f ), m_aR2DPart[ m_vEActvEmitr[ id ] ][ part ].Pos );
+			grDebugManager::Instance().AddBBox( box, m_aR2DPart[ m_vEActvEmitr[ id ] ][ part ].Color );
 		}
 	}
 	// TEST DRAW

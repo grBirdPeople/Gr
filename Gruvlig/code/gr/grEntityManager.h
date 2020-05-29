@@ -38,20 +38,20 @@ private:
 			void		Disable				( grIEntity* rEntity );
 			grIEntity*	CreatePlayer		( const grEnums::EntityType type, const str& rUniqueName, const grV2f& rPos );
 			grIEntity*	CreateEnemy			( const grEnums::EntityType type, const str& rUniqueName, const grV2f& rPos );
-	inline	uInt		CreateAndGetId		( void)	const																		{ uInt id = m_Id;	++m_Id;	return id; }
+	inline	intU		CreateAndGetId		( void)	const																		{ intU id = m_Id;	++m_Id;	return id; }
 
 
 	//////////////////////////////////////////////////
 	
 	grEntityEnemy*	m_pArrEnemy[ MAX_ENEMY ];
-	uInt			m_EnemiesActive;
-	uInt			m_EnemyQuantity;
+	intU			m_EnemiesActive;
+	intU			m_EnemyQuantity;
 
 	grEntityPlayer*	m_pPlayerEntity;
 	
 	//////////////////////////////////////////////////
 	
-	static	uInt	m_Id;
+	static	intU	m_Id;
 
 };
 

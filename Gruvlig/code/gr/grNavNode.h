@@ -14,7 +14,7 @@ class grNavNode
 {
 public:
 
-	grNavNode	( const grV2f pos, const uInt id )
+	grNavNode	( const grV2f pos, const intU id )
 		: m_pArrNeighbour		{}
 		, m_ArrNeighbourCostG	{}
 		, m_MidPos				( pos )
@@ -24,12 +24,12 @@ public:
 		, m_NumOfNeighbours		( 0 )
 		, m_pParent				( nullptr )
 	{
-		for( uInt i = 0; i < ADJACENT_NODES; ++i )
+		for( intU i = 0; i < ADJACENT_NODES; ++i )
 		{
 			m_pArrNeighbour[ i ] = nullptr;
 		}
 
-		for( uInt i = 0; i < ADJACENT_NODES; ++i )
+		for( intU i = 0; i < ADJACENT_NODES; ++i )
 		{
 			m_ArrNeighbourCostG[ i ] = 0;
 		}
@@ -37,7 +37,7 @@ public:
 
 	~grNavNode	( void )
 	{
-		for ( uInt i = 0; i < ADJACENT_NODES; ++i )
+		for ( intU i = 0; i < ADJACENT_NODES; ++i )
 		{
 			m_pArrNeighbour[ i ] = nullptr;
 		}
@@ -55,8 +55,8 @@ public:
 	float			m_CostG;									// Previous nodes G + the distance from previous node to this node
 	float			m_CostF;									// G + H (heuristic calc in NavMesh.hpp)
 	
-	uInt			m_Id;
-	uInt			m_NumOfNeighbours;
+	intU			m_Id;
+	intU			m_NumOfNeighbours;
 	
 	grNavNode*		m_pParent;
 

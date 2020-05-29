@@ -13,13 +13,13 @@ public:
 
 	friend struct grSParticleSystemPB;
 
-	using vecUpPart = std::vector<uP<grSParticlePB>>;
+	using vecUpPart = std::vector<pU<grSParticlePB>>;
 
 	//////////////////////////////////////////////////
 
-	grCParticleEmitterPB( const uInt id, const sizeT size )
-		: uPPartDeactivateQue		( new grStruct::grLoopQue<uInt>( size ) )		
-		, uPArrPartDeactivateSortd	( new uInt[ size ] )
+	grCParticleEmitterPB( const intU id, const sizeT size )
+		: uPPartDeactivateQue		( new grStruct::grLoopQue<intU>( size ) )		
+		, uPArrPartDeactivateSortd	( new intU[ size ] )
 		, SpawnCounter				( 0.0f )
 		, SpawnInMilliSec			( 1.0f / 25.0f )	// Set to zero when particle API or their likes exists
 		, Id						( id )
@@ -55,7 +55,7 @@ public:
 
 	//////////////////////////////////////////////////
 
-	const uInt GetId( void ) const
+	const intU GetId( void ) const
 	{
 		return Id;
 	}
@@ -78,17 +78,17 @@ private:
 
 	vecUpPart	vecUpParticles;
 
-	uP<grStruct::grLoopQue<uInt>>	uPPartDeactivateQue;
+	pU<grStruct::grLoopQue<intU>>	uPPartDeactivateQue;
 
-	uP<uInt[]>	uPArrPartDeactivateSortd;
+	pU<intU[]>	uPArrPartDeactivateSortd;
 
-	uP<grCParticleAttributePB>	uPPartAttribute;
+	pU<grCParticleAttributePB>	uPPartAttribute;
 
 
 	float	SpawnCounter,
 			SpawnInMilliSec;
 
-	uInt	Id,
+	intU	Id,
 			PartActive;
 
 	sizeT	PartSize;

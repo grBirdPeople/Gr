@@ -1,12 +1,13 @@
 #ifndef		_H_GRPARTICLE_EMITTER_
 #define		_H_GRPARTICLE_EMITTER_
 
-#define		EMITR_USR_SETTINGS	8	// Umh not so safe, probably look for option
+#define		EMITR_USR_SETTINGS	8	// Umh maual and unsafe, look for auto opt
 
 #include	<bitset>
 
 #include	"grCommon.h"
 #include	"grV2.h"
+#include	"grMath.h"
 
 #include	"grSPartAttribute.h"
 
@@ -18,53 +19,104 @@ public:
 	friend class grCParticleManager;
 	friend class grCParticleSystem;
 
-	grCParticleEmitter( const uInt id );
+	grCParticleEmitter( const intU id );
 	~grCParticleEmitter( void );
 
 	grCParticleEmitter( const grCParticleEmitter& ) = delete;
 	grCParticleEmitter& operator=( const grCParticleEmitter& ) = delete;
 
-	inline const uInt Id( void ) const
+	inline const intU GetId( void ) const
 	{
 		return m_Id;
 	}
-	inline void Position( const grV2f& rPos, const float radOffset = 0.0f )
+	inline void SetSpawnRate( const float spawnPerSec )
 	{
-		m_uPAtt->Position = rPos;
-		m_uPAtt->PosOffsetRadius = radOffset;
-		m_UsrMods.set( ( sizeT )EUsrMods::POS );
+		m_SpawnPerSec = grMath::Abs( spawnPerSec );
+		if ( m_SpawnPerSec > 0.0f )
+		{
+			m_SpawnRateMs = 1.0f / m_SpawnPerSec;
+			m_SpawnTimerMs = 0.0f;
+			return;
+		}
+
+		m_SpawnRateMs = 0.0f;
+		m_SpawnTimerMs = 0.0f;
 	}
-	inline void Direction( const float minDeg, const float maxDeg )		// Only werks with positive values
+	inline const float GetSpawnRate( void ) const
 	{
-		m_uPAtt->MinMaxDirInDeg = grV2f( minDeg, maxDeg );
-		m_UsrMods.set( ( sizeT )EUsrMods::DIR_DEG );
+		return m_SpawnPerSec;
 	}
-	inline void Speed( const float min, const float max )
+	inline void SetDirectionEmitter( const float degAbs = 0.0f )
 	{
-		m_uPAtt->MinMaxSpeed = grV2f( min, max );
-		m_UsrMods.set( ( sizeT )EUsrMods::SPD );
+		m_uPAtt->EmitrRotInDeg = degAbs;
+		m_UsrMods.set( ( sizeT )EUsrMods::DIR_EMITR );
 	}
-	inline void Lifetime( const float min, const float max )
+	inline const float GetDirectionEmitter( void ) const
 	{
-		m_uPAtt->MinMaxLife = grV2f( min, max );
-		m_UsrMods.set( ( sizeT )EUsrMods::LIFE_SEC, true );
+		return m_uPAtt->EmitrRotInDeg;
+	}
+	inline void SetPosition( const grV2f& rPos, const float radOffset = 0.0f )
+	{
+		m_uPAtt->EmitrPos = rPos;
+		m_uPAtt->PartRadiusPosOffset = radOffset;
+		m_UsrMods.set( ( intU )EUsrMods::POS );
+	}
+	inline grV2f& GetPosition( void ) const
+	{
+		return m_uPAtt->EmitrPos;
+	}
+	inline void SetDirectionParticle( const grV2f& rMinMaxDegAbs = grV2f( 0.0f, 359.9f ) )
+	{
+		m_uPAtt->PartRotInDegMinMax = rMinMaxDegAbs;
+		m_UsrMods.set( ( intU )EUsrMods::DIR_PART );
+	}
+	inline grV2f& GetDirectionParticle( void ) const
+	{
+		return m_uPAtt->PartRotInDegMinMax;
+	}
+	inline void SetSpeed( const grV2f& rMinMax = grV2f( 0.0f, 0.0f ), const grV2f& rMinMaxMod = grV2f( 0.0f, 0.0f ) )
+	{
+		m_uPAtt->PartSpdMinMax = rMinMax;
+		m_uPAtt->PartSpdModMinMax = rMinMaxMod;
+		m_UsrMods.set( ( intU )EUsrMods::SPD );
+	}
+	inline const grV2f& GetSpeed( void ) const
+	{
+		return m_uPAtt->PartSpdMinMax;
+	}
+	inline void SetLifetime( const grV2f& rMinMax = grV2f( 0.0f, 0.0f ) )
+	{
+		m_uPAtt->PartLifeMinMax = rMinMax;
+		m_UsrMods.set( ( intU )EUsrMods::LIFE );
+	}
+	inline const grV2f& GetLifetime( void ) const
+	{
+		return m_uPAtt->PartLifeMinMax;
+	}
+	inline void SetColor( const sf::Color& rFrom, const sf::Color& rToo )
+	{
+		m_uPAtt->PartColMinMax.From = { rFrom.r, rFrom.g, rFrom.b, rFrom.a };
+		m_uPAtt->PartColMinMax.Too = { rToo.r, rToo.g, rToo.b, rToo.a };
+		m_UsrMods.set( ( intU )EUsrMods::COL );
 	}
 
 private:
 
-	// TODO: It's a little problematic that the enum decleration order needs to match the data copy switch in systems or vv. Look into auto thing.
+	// TODO: It's a little problematic that the enum decleration order needs to match the data copy switch in systems and vv. Look into auto thing.
 	enum class EUsrMods	// Max size is define EMITR_USR_SETTINGS - 1
 	{
 		POS,
-		DIR_DEG, 
+		DIR_EMITR,
+		DIR_PART, 
 		SPD,
-		LIFE_SEC,
+		LIFE,	// In sec
+		COL,
 		SIZE
 	};
 
-	vE<uInt> GetUsrModsSortd( void )	// Called from grCParticleSystem::CpyEmitrAttData
+	vE<intU> GetUsrModsSortd( void )	// Called from grCParticleSystem::CpyEmitrAttData
 	{
-		vE<sizeT>	m_UsrModsSortdReturn;
+		vE<sizeT> m_UsrModsSortdReturn;
 		for ( sizeT i = 0; i < m_UsrMods.size(); ++i )
 		{
 			if ( m_UsrMods[ i ] == true )
@@ -75,14 +127,15 @@ private:
 		return m_UsrModsSortdReturn;
 	}
 
-	uP<grSParticleAttribute>	m_uPAtt;
+	pU<grSParticleAttribute>	m_uPAtt;
 
 	std::bitset<EMITR_USR_SETTINGS>	m_UsrMods;
 
-	float	m_SpawnRate,
-			m_SpawnTimer;
+	float	m_SpawnPerSec,	
+			m_SpawnRateMs,
+			m_SpawnTimerMs;
 
-	uInt	m_Id,
+	intU	m_Id,
 			m_PartActive;
 };
 

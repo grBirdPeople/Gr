@@ -19,8 +19,8 @@ private:
 		str			Name;
 		str			StrMap;
 		grV2f		TileSize;
-		uInt		TilesX;
-		uInt		TilesY;
+		intU		TilesX;
+		intU		TilesY;
 	};
 	
 	//////////////////////////////////////////////////
@@ -30,8 +30,8 @@ public:
 				grMap			( const str& uniqueName,
 								const str& strMap,
 								const grV2f& tileSize,
-								const uInt numTilesX,
-								const uInt numTilesY );
+								const intU numTilesX,
+								const intU numTilesY );
 
 				~grMap			( void );
 	

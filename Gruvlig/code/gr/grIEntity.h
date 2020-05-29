@@ -24,11 +24,11 @@ public:
 	
 	//////////////////////////////////////////////////
 	
-	inline grIEntity* GetChildById( const uInt id );
-	grIEntity* GetChildByIdx( const uInt idx );
+	inline grIEntity* GetChildById( const intU id );
+	grIEntity* GetChildByIdx( const intU idx );
 	const str& GetName( void ) const { return m_Name; }
 	void SetName( const str& rName ) { m_Name = rName; }
-	uInt GetId( void ) const { return m_Id; }
+	intU GetId( void ) const { return m_Id; }
 	grEnums::EntityType	GetType( void ) const { return m_Type; }
 	bool GetEnable( void ) const { return m_bIsEnabled; }
 	inline void SetEnable( const bool bEnable );
@@ -40,8 +40,8 @@ public:
 	//////////////////////////////////////////////////
 
 	void AddChild( grIEntity* pChild );
-	void ReleaseChildById( const uInt id );
-	void ReleaseChildByIdx( const uInt idx );
+	void ReleaseChildById( const intU id );
+	void ReleaseChildByIdx( const intU idx );
 	void Update( void );	// Call this from every derived class Update() (technically only necessary if the instance has either a parent or children set)
 
 	//////////////////////////////////////////////////
@@ -70,7 +70,7 @@ protected:
 
 	str					m_Name;
 
-	uInt				m_Id;
+	intU				m_Id;
 
 	grEnums::EntityType	m_Type;
 	

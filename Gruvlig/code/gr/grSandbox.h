@@ -4,14 +4,19 @@
 #include	<SFML/Graphics/RenderWindow.hpp>
 
 #include	"grCommon.h"
+#include	"grV2.h"
 
 class		grActor;
 class		grMap;
 class		grIEntity;
 class		grInputManager;
 class		grCParticleManager;
-class		grCParticleEmitterPB;
 class		grCParticleEmitter;
+
+namespace sf
+{
+	class RenderWindow;
+}
 
 
 // grSandbox
@@ -34,10 +39,12 @@ public:
 
 private:
 
-	grInputManager&			m_rInputMan;
-	grCParticleManager&		m_rPartMan;
+	sf::RenderWindow&		m_RendWin;
 
-	grCParticleEmitter&		m_Emitr1;
+	grInputManager&			m_rInputMan;
+	//grCParticleManager&		m_rPartMan;
+
+	//grCParticleEmitter&		m_Emitr1;
 
 	grMap*					m_pMap;
 	grActor*				m_pActor;
@@ -45,16 +52,16 @@ private:
 	grIEntity*				m_pPlayer;
 	grIEntity*				m_pEnemy;
 
-	grCParticleEmitterPB*		m_pPartEmitter_1;
-	grCParticleEmitterPB*		m_pPartEmitter_2;
-
 	bool					m_bFlipFlop = true;
 
-	float					m_LastMouseX,
-							m_LastMouseY;
+	grV2f					m_LastMousePos;
 
-	sInt					m_PartSysIdOne,
+	intS					m_PartSysIdOne,
 							m_PartSysIdTwo;
+
+	float					m_ParticleAnimT = 0.25f,
+							m_ParticleAnimCounter = 0.0f;
+
 };
 
 

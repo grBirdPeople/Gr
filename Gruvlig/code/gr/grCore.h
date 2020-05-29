@@ -25,7 +25,8 @@ class grCore : public grSingleton<grCore>
 {
 public:
 
-	grCore( const uInt winWidth = 640, const uInt winHeight = 360, const uInt frameRate = 60, const str& rAppName = "grFramework" );
+	grCore( const intU winWidth = 640, const intU winHeight = 360, const intU frameRate = 60, const str& rAppName = "grFramework" );
+	//grCore( const intU winWidth = 1920, const intU winHeight = 1080, const intU frameRate = 60, const str& rAppName = "grFramework" );
 	~grCore( void );
 
 	//////////////////////////////////////////////////
@@ -43,12 +44,12 @@ public:
 		return *m_pRenderWin;
 	}
 										  
-	inline void SetAA ( const uInt aa )
+	inline void SetAA ( const intU aa )
 	{
 		m_Aa = aa;
 		m_pCSettings->antialiasingLevel = ( unsigned int )m_Aa;
 	}		 							  
-	inline void SetFramerateLimit( const uInt frameRateLimit )
+	inline void SetFramerateLimit( const intU frameRateLimit )
 	{
 		m_FramesPerSec = frameRateLimit;
 		m_pRenderWin->setFramerateLimit( ( unsigned int )m_FramesPerSec );
@@ -87,7 +88,7 @@ private:
 	double		m_TotalTimeElapsed,
 				m_Dt;
 	
-	uInt		m_WinWidth,
+	intU		m_WinWidth,
 				m_WinHeight,
 				m_FramesPerSec,
 				m_Aa;

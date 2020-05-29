@@ -34,16 +34,16 @@ public:
 		return m_RandFloat( m_Mt );
 	}
 
-	inline sInt IntS( const sInt min, const sInt max )
+	inline intS IntS( const intS min, const intS max )
 	{
 		m_RandIntS.param( std::uniform_int_distribution<signed int>::param_type( ( signed int )min, ( signed int )max ) );
-		return ( sInt )m_RandIntS( m_Mt );
+		return ( intS )m_RandIntS( m_Mt );
 	}
 
-	inline uInt IntU( const uInt max )
+	inline intU IntU( const intU min, const intU max )
 	{
-		m_RandIntU.param( std::uniform_int_distribution<unsigned int>::param_type( 0, ( unsigned int )max ) );
-		return ( uInt )m_RandIntU( m_Mt );
+		m_RandIntU.param( std::uniform_int_distribution<unsigned int>::param_type( ( unsigned int )min , ( unsigned int )max ) );
+		return ( intU )m_RandIntU( m_Mt );
 	}
 
 	//////////////////////////////////////////////////

@@ -5,10 +5,6 @@
 
 class		grCtrlPlayer;
 
-// TEST
-class		grParticleSystem;
-// TEST
-
 
 // grEntityPlayer
 //////////////////////////////////////////////////
@@ -16,7 +12,7 @@ class grEntityPlayer : public grIEntity
 {
 public:
 
-			grEntityPlayer	( const grEnums::EntityType type, const str& rName, const grV2f& rPos, const uInt id );
+			grEntityPlayer	( const grEnums::EntityType type, const str& rName, const grV2f& rPos, const intU id );
 			~grEntityPlayer	( void );
 
 	//////////////////////////////////////////////////
@@ -30,11 +26,6 @@ private:
 	float				m_SpdWalk = 300.0f;
 
 	grCtrlPlayer*		m_pCtrl;
-
-	// TEST
-	//grParticleSystem*	m_pPartSys;
-	// TEST
-
 };
 
 #endif		//_GRENTITYPLAYER_H_

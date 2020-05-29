@@ -13,7 +13,7 @@ grEntityManager::grEntityManager( void )
 	, m_EnemyQuantity	( 0 )
 	, m_pPlayerEntity	( nullptr )
 {
-	for( uInt i = 0; i < MAX_ENEMY; ++i )
+	for( intU i = 0; i < MAX_ENEMY; ++i )
 	{
 		m_pArrEnemy[ i ] = nullptr;
 	}
@@ -24,7 +24,7 @@ grEntityManager::grEntityManager( void )
 //////////////////////////////////////////////////
 grEntityManager::~grEntityManager( void )
 {
-	for( uInt i = 0; i < m_EnemyQuantity; ++i )
+	for( intU i = 0; i < m_EnemyQuantity; ++i )
 	{
 		DELANDNULL( m_pArrEnemy[ i ] );
 	}
@@ -59,14 +59,14 @@ void
 grEntityManager::DestroyEntity( grIEntity* pEntity )
 {
 	grEnums::EntityType entityType = pEntity->GetType();
-	uInt entityId = pEntity->GetId();
+	intU entityId = pEntity->GetId();
 
 	switch ( entityType )
 	{
 	case grEnums::EntityType::ENEMY:
 	{
 		grEntityEnemy* pEnemy = (grEntityEnemy*)pEntity;
-		for ( uInt i = 0; i < m_EnemyQuantity; ++i )
+		for ( intU i = 0; i < m_EnemyQuantity; ++i )
 		{
 			if ( m_pArrEnemy[ i ]->GetId() == entityId )
 			{
@@ -129,7 +129,7 @@ grEntityManager::Update( const float deltaT )
 		}
 	}
 
-	for( uInt i = 0; i < m_EnemyQuantity; ++i )
+	for( intU i = 0; i < m_EnemyQuantity; ++i )
 	{
 		if ( m_pArrEnemy[ i ] != nullptr )
 		{
@@ -147,8 +147,8 @@ grEntityManager::Update( const float deltaT )
 void
 grEntityManager::Enable( grIEntity* pEntity )
 {
-	uInt id = pEntity->GetId();
-	for ( uInt i = m_EnemiesActive; i < m_EnemyQuantity; ++i )
+	intU id = pEntity->GetId();
+	for ( intU i = m_EnemiesActive; i < m_EnemyQuantity; ++i )
 	{
 		if ( m_pArrEnemy[ i ]->GetId() == id )
 		{
@@ -160,7 +160,7 @@ grEntityManager::Enable( grIEntity* pEntity )
 				return;
 			}
 
-			for ( uInt j = 0; j < m_EnemyQuantity; ++j )
+			for ( intU j = 0; j < m_EnemyQuantity; ++j )
 			{
 				m_pArrEnemy[ i ] = m_pArrEnemy[ j ];
 				m_pArrEnemy[ j ] = tmp;
@@ -178,8 +178,8 @@ grEntityManager::Enable( grIEntity* pEntity )
 void
 grEntityManager::Disable( grIEntity* pEntity )
 {
-	uInt id = pEntity->GetId();
-	for ( uInt i = 0; i < m_EnemiesActive; ++i )
+	intU id = pEntity->GetId();
+	for ( intU i = 0; i < m_EnemiesActive; ++i )
 	{
 		if ( m_pArrEnemy[ i ]->GetId() == id )
 		{
@@ -239,4 +239,4 @@ grEntityManager::CreateEnemy( const grEnums::EntityType type, const str& rUnique
 
 // Static
 //////////////////////////////////////////////////
-uInt grEntityManager::m_Id = 0;
+intU grEntityManager::m_Id = 0;

@@ -5,7 +5,7 @@
 
 // cTor
 //////////////////////////////////////////////////
-grEntityEnemy::grEntityEnemy( const grEnums::EntityType type, const str& rName, const grV2f& rPos, const uInt id )
+grEntityEnemy::grEntityEnemy( const grEnums::EntityType type, const str& rName, const grV2f& rPos, const intU id )
 {
 	m_PosWorld		= rPos;
 	m_PosLocal		= rPos;
@@ -30,7 +30,7 @@ grEntityEnemy::Update( const float deltaT )
 	grIEntity::Update();
 
 #ifdef DEBUG
-	//grBBox box( grV2f( 10.0f, 10.0f ), GetPosition() );
-	//grDebugManager::Instance().AddBBox( box, sf::Color::Magenta );
+	grBBox box( grV2f( 10.0f, 10.0f ), GetPosition() );
+	grDebugManager::Instance().AddBBox( box, sf::Color::Magenta );
 #endif // DEBUG
 }

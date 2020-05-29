@@ -24,13 +24,13 @@ public:
 
 	~grNavMeshManager( void )
 	{
-		for ( uInt i = 0; i < m_VecNavMesh.size(); ++ i )
+		for ( intU i = 0; i < m_VecNavMesh.size(); ++ i )
 		{ DELANDNULL( m_VecNavMesh[ i ] ); }
 	}
 
 	//////////////////////////////////////////////////
 
-	void SetNavMeshToDebug( const sInt idx );
+	void SetNavMeshToDebug( const intS idx );
 	
 	//////////////////////////////////////////////////
 	
@@ -47,7 +47,7 @@ private:
 
 	vecNavMesh	m_VecNavMesh;
 
-	sInt m_NavMeshRenderIdx;
+	intS m_NavMeshRenderIdx;
 };
 
 #endif		//_GRNAVMESHMANAGER_H_

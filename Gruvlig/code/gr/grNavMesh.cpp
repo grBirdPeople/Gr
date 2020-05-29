@@ -16,7 +16,7 @@ grNavMesh::~grNavMesh(void)
 		node = nullptr;
 	}
 
-	for ( uInt i = 0; i < m_VecNode.size(); ++i )
+	for ( intU i = 0; i < m_VecNode.size(); ++i )
 	{
 		DELANDNULL( m_VecNode[ i ] );
 	}
@@ -31,19 +31,19 @@ grNavMesh::CreateNavMesh()
 	str strMap			= m_pOwnerMap.GetMapData()->StrMap;
 	grV2f tileSize		= m_pOwnerMap.GetMapData()->TileSize;
 	grV2f nodeMidPos	= tileSize * 0.5f;
-	uInt nodesX			= m_pOwnerMap.GetMapData()->TilesX;
-	uInt nodesY			= m_pOwnerMap.GetMapData()->TilesY;
+	intU nodesX			= m_pOwnerMap.GetMapData()->TilesX;
+	intU nodesY			= m_pOwnerMap.GetMapData()->TilesY;
 
-	uInt mapIndex	= 0;
-	uInt nodeIndex	= 0;
+	intU mapIndex	= 0;
+	intU nodeIndex	= 0;
 	
-	uInt reserveSize = nodesX * nodesY;
+	intU reserveSize = nodesX * nodesY;
 	m_VecNode.reserve( reserveSize );
 	m_VecPath.reserve( reserveSize );
 	
-	for( uInt y = 0; y < nodesY; ++y )
+	for( intU y = 0; y < nodesY; ++y )
 	{
-		for( uInt x = 0; x < nodesX; ++x )
+		for( intU x = 0; x < nodesX; ++x )
 		{
 			if( strMap[ mapIndex ] == '#' )
 			{
@@ -67,17 +67,17 @@ grNavMesh::CreateNavMesh()
 	grNavNode* pNeighbourNode;
 	
 	// Not very optimized but it runs once on init so eh
-	for( uInt i = 0; i < m_VecNode.size(); ++i )
+	for( intU i = 0; i < m_VecNode.size(); ++i )
 	{
 		grNavNode* pCurrentNode = m_VecNode[ i ];
 		
-		for( uInt j = 0; j < m_VecNode.size(); ++j )
+		for( intU j = 0; j < m_VecNode.size(); ++j )
 		{
 			if ( j == i ) { continue; }
 			
 			pNeighbourNode			= m_VecNode[ j ];
 			float dist				= ( pNeighbourNode->m_MidPos - pCurrentNode->m_MidPos ).Magnitude();
-			uInt numOfNeighbours	= pCurrentNode->m_NumOfNeighbours;
+			intU numOfNeighbours	= pCurrentNode->m_NumOfNeighbours;
 			
 			if( dist < maxPossibleNeighbourDist )
 			{
@@ -95,7 +95,7 @@ grNavMesh::CreateNavMesh()
 // FindPath
 //////////////////////////////////////////////////
 vecNavNode*
-grNavMesh::FindPath( const uInt startPos, const uInt endPos )
+grNavMesh::FindPath( const intU startPos, const intU endPos )
 {
 	m_VecPath.clear();
 
@@ -168,8 +168,8 @@ grNavMesh::AStar( grNavNode* pStartNode, grNavNode* pEndNode )
 			return true;
 		}
 		
-		uInt numOfNeighbours = pCurrentNode->m_NumOfNeighbours;
-		for( uInt i = 0; i < numOfNeighbours; ++i )
+		intU numOfNeighbours = pCurrentNode->m_NumOfNeighbours;
+		for( intU i = 0; i < numOfNeighbours; ++i )
 		{
 			grNavNode* neighbourNode = pCurrentNode->m_pArrNeighbour[ i ];
 		
@@ -221,11 +221,11 @@ grNavMesh::InsertSortByCost( vecNavNode& rVec )
 {
 	if ( rVec.size() > 1 )
 	{
-		uInt vecSize			= ( uInt )rVec.size();
-		sInt idxBefore			= 0;
+		intU vecSize			= ( intU )rVec.size();
+		intS idxBefore			= 0;
 		grNavNode* currentNode	= nullptr;
 
-		for ( uInt idxNow = 1; idxNow < vecSize; ++idxNow )
+		for ( intU idxNow = 1; idxNow < vecSize; ++idxNow )
 		{
 			currentNode	= rVec[ idxNow ];
 			idxBefore	= idxNow - 1;
@@ -267,9 +267,9 @@ grNavMesh::BuildNodePath( grNavNode* pEndNode )
 // FindInOpenClose
 //////////////////////////////////////////////////
 inline bool
-grNavMesh::FindInOpenOrClose( const uInt nodeId, const vecNavNode& vec )
+grNavMesh::FindInOpenOrClose( const intU nodeId, const vecNavNode& vec )
 {
-	for( uInt i = 0; i < vec.size(); ++i )
+	for( intU i = 0; i < vec.size(); ++i )
 	{
 		if ( nodeId == vec[ i ]->m_Id ) { return true; }
 	}

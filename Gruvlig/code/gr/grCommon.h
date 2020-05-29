@@ -14,16 +14,16 @@
 
 //////////////////////////////////////////////////
 
-template<typename Q> using uP = std::unique_ptr<Q>;
-template<typename W> using sP = std::shared_ptr<W>;
-
-template<typename E> using vE = std::vector<E>;
+template<typename T> using pU = std::unique_ptr<T>;
+template<typename T> using pS = std::shared_ptr<T>;
+template<typename T> using pW = std::weak_ptr<T>;
+template<typename T, typename Y> using pR = std::pair<T, Y>;
+template<typename T> using vE = std::vector<T>;
 
 using str = std::string;
-
 using sizeT = std::size_t;
-using sInt = int64_t;
-using uInt = uint64_t;
+using intS = int64_t;
+using intU = uint64_t;
 
 //////////////////////////////////////////////////
 

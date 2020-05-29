@@ -13,7 +13,7 @@
 
 // cTor
 //////////////////////////////////////////////////
-grCore::grCore( const uInt winWidth, const uInt winHeight, const uInt frameRate, const str& rAppName )
+grCore::grCore( const intU winWidth, const intU winHeight, const intU frameRate, const str& rAppName )
 	: m_AppName				( rAppName )
 	, m_TotalTimeElapsed	( 0.0 )
 	, m_Dt					( 0.0 )
@@ -35,9 +35,8 @@ grCore::grCore( const uInt winWidth, const uInt winHeight, const uInt frameRate,
 	grEntityManager::Initialize();
 	grMapManager::Initialize();
 	grNavMeshManager::Initialize();
-	//grParticleManager::Initialize();
 	//grCParticleManagerPB::Initialize();
-	grCParticleManager::Initialize();
+	//grCParticleManager::Initialize();
 
 #ifdef DEBUG
 	grDebugManager::Initialize();
@@ -58,7 +57,7 @@ grCore::~grCore( void )
 	grDebugManager::DeInitialize();
 #endif // DEBUG
 
-	grCParticleManager::DeInitialize();
+	//grCParticleManager::DeInitialize();
 	//grCParticleManagerPB::DeInitialize();
 	//grParticleManager::DeInitialize();
 	grNavMeshManager::DeInitialize();
@@ -97,7 +96,7 @@ grCore::Update( void )
 	grEntityManager::Instance().Update( GetDeltaT() );
 	//grParticleManager::Instance().Update( GetDeltaT() );
 	//grCParticleManagerPB::Instance().Update( GetDeltaT() );
-	grCParticleManager::Instance().Update( GetDeltaT() );
+	//grCParticleManager::Instance().Update( GetDeltaT() );
 
 #ifdef DEBUG
 	grNavMeshManager::Instance().Debug();
@@ -157,7 +156,7 @@ grCore::Run( void )
 				case eEvent::MouseMoved: rInputMan.SetMouseMoved( grV2f( ( float )m_pSfEvent->mouseMove.x, ( float )m_pSfEvent->mouseMove.y ) ); break;																	break;
 				case eEvent::MouseButtonPressed: rInputMan.SetMouseDown( m_pSfEvent->mouseButton.button ); break;
 				case eEvent::MouseButtonReleased: rInputMan.SetMouseUp( m_pSfEvent->mouseButton.button ); break;
-				case eEvent::MouseWheelScrolled: rInputMan.SetMouseScroll( ( uInt )m_pSfEvent->mouseWheelScroll.delta ); break;
+				case eEvent::MouseWheelScrolled: rInputMan.SetMouseScroll( ( intU )m_pSfEvent->mouseWheelScroll.delta ); break;
 			};
 		}
 		
@@ -177,8 +176,8 @@ grCore::Run( void )
 void
 grCore::InitRenderWin( void )
 {
-	m_pCSettings->antialiasingLevel = m_Aa;
-	m_pRenderWin->create( sf::VideoMode( m_WinWidth, m_WinHeight ), m_AppName,sf::Style::None, *m_pCSettings );
+	m_pCSettings->antialiasingLevel = ( unsigned int )m_Aa;
+	m_pRenderWin->create( sf::VideoMode( ( unsigned int )m_WinWidth, ( unsigned int )m_WinHeight ), m_AppName,sf::Style::None, *m_pCSettings );
 	//m_pRenderWin->setFramerateLimit(m_FramesPerSec);
 	m_pRenderWin->setVerticalSyncEnabled( true );
 }

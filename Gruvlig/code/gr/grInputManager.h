@@ -25,7 +25,7 @@ public:
 	inline const bool GetKey( sf::Keyboard::Key key ) const { return m_Key[ key ]; }
 	inline const bool GetKeyDown( sf::Keyboard::Key key )
 	{
-		uInt idx = (uInt)key;
+		intU idx = (intU)key;
 		if ( sf::Keyboard::isKeyPressed( key ) == true && m_KeyDown[ idx ] == false  )
 		{
 			m_KeyDown[ idx ] = true;
@@ -38,7 +38,7 @@ public:
 	inline const bool GetMouse( sf::Mouse::Button button ) const { return m_MouseButton[ button ]; }
 	inline const bool GetMouseDown( sf::Mouse::Button button )
 	{
-		uInt idx = (uInt)button;
+		intU idx = (intU)button;
 		if ( sf::Mouse::isButtonPressed( button ) == true && m_MouseButtonDown[ idx ] == false )
 		{
 			m_MouseButtonDown[ idx ] = true;
@@ -50,12 +50,12 @@ public:
 	inline void SetMouseUp( sf::Mouse::Button button )
 	{
 		m_MouseButton[ button ] = false;
-		m_MouseButtonDown[ (uInt)button ] = false;
+		m_MouseButtonDown[ (intU)button ] = false;
 	}
-	inline sInt GetMouseScroll( void ) const { return m_MouseScroll; }
+	inline intS GetMouseScroll( void ) const { return m_MouseScroll; }
 	inline bool GetMouseScrollForwards( void ) const { return ( m_MouseScroll > 0 ) ? true : false; }
 	inline bool GetMouseScrollBackwards( void ) const { return ( m_MouseScroll < 0 ) ? true : false; }
-	inline void SetMouseScroll( const sInt scrollDir ) { m_MouseScroll = scrollDir; }
+	inline void SetMouseScroll( const intS scrollDir ) { m_MouseScroll = scrollDir; }
 
 	inline bool GetMouseMoved( void ) const { return m_bMouseMoved; }
 	inline grV2f& GetMousePos( void ) { return m_MousePos; }
@@ -94,9 +94,9 @@ private:
 
 	grV2f				m_MousePos;
 
-	sInt				m_MouseScroll;
+	intS				m_MouseScroll;
 
-	uInt				m_KeyCount,
+	intU				m_KeyCount,
 						m_MouseCount;
 
 	bool				m_bMouseMoved;

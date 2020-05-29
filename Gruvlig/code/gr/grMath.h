@@ -14,14 +14,14 @@ namespace grMath
 {
 	// Const
 	//////////////////////////////////////////////////
+	const float Epsilon = 0.01f;
 	const float Pi = 3.141592f;
 	const float DegToRad = Pi / 180.0f;
 	const float RadToDeg = 180 / Pi;
-	const float Epsilon = 0.00001f;
 
 	// Min
 	//////////////////////////////////////////////////
-	inline sInt	Min( sInt a, sInt b )
+	inline intS	Min( intS a, intS b )
 	{
 		return ( a < b ) ? a : ( b < a ) ? b : a;
 	}
@@ -32,7 +32,7 @@ namespace grMath
 
 	// Max
 	//////////////////////////////////////////////////
-	inline sInt	Max( sInt a, sInt b )
+	inline intS	Max( intS a, intS b )
 	{
 		return ( a > b ) ? a : ( b > a ) ? b : a;
 	}
@@ -43,18 +43,18 @@ namespace grMath
 
 	// Abs
 	//////////////////////////////////////////////////
-	inline uInt	Abs( sInt value )
-	{
-		return ( value < 0 ) ? ( uInt )-value : ( uInt )value;
-	}
 	inline float Abs( float value )
 	{
 		return ( value < 0.0f ) ? -value : value;
 	}
+	inline intS	Abs( intS value )
+	{
+		return ( value < 0 ) ? ( intS )-value : ( intS )value;
+	}
 
 	// Sign
 	//////////////////////////////////////////////////
-	inline sInt	Sign( sInt value )
+	inline intS	Sign( intS value )
 	{
 		return ( value < 0 ) ? -1 : ( value > 0 ) ? 1 : 0;
 	}
@@ -63,7 +63,7 @@ namespace grMath
 		return ( value < 0.0f ) ? -1.0f : ( value > 0.0f ) ? 1.0f : 0.0f;
 	}
 
-	// Sqrt // Babylonian method stolen from overflow but changed from doubles to floats
+	// Sqrt // Babylonian method cpied from overflow. Changed from doubles to floats
 	//////////////////////////////////////////////////
 	inline float Sqrt( const float value )
 	{
@@ -142,11 +142,11 @@ namespace grMath
 	{
 		return ( value < min ) ? min : ( value > max ) ? max : value;
 	}
-	inline sInt Clamp( sInt value, sInt min, sInt max )
+	inline intS Clamp( intS value, intS min, intS max )
 	{
 		return ( value < min ) ? min : ( value > max ) ? max : value;
 	}
-	inline sInt Clamp( uInt value, uInt min, uInt max )
+	inline intS Clamp( intU value, intU min, intU max )
 	{
 		return ( value < min ) ? min : ( value > max ) ? max : value;
 	}
@@ -165,16 +165,18 @@ namespace grMath
 
 	// VecToRad
 	//////////////////////////////////////////////////
-	inline float VecToRad( grV2f& rVec )
+	inline float VecToRad( const grV2f& rVec )
 	{
-		return std::atan2f( rVec.y, rVec.x );
+		grV2f v = rVec;
+		return std::atan2f( v.y, v.x );
 	}
 
 	// VecToDeg
 	//////////////////////////////////////////////////
-	inline float VecToDeg( grV2f& rVec )
+	inline float VecToDeg( const grV2f& rVec )
 	{
-		return std::atan2f( rVec.y, rVec.x ) * RadToDeg;
+		grV2f v = rVec;
+		return std::atan2f( v.y, v.x ) * RadToDeg;
 	}
 
 	// RadToVec
@@ -218,8 +220,16 @@ namespace grMath
 	//////////////////////////////////////////////////
 	inline bool CmpFloat( const float numOne, const float numTwo )
 	{
-		float num = Abs( numOne - numTwo );
 		return Abs( numOne - numTwo ) < Epsilon;
+	}
+
+	// CmpVector
+	//////////////////////////////////////////////////
+	inline bool CmpVec( const grV2f& rVecOne, const grV2f& rVecTwo )
+	{
+		float x = Abs( rVecOne.x - rVecTwo.x );
+		float y = Abs( rVecOne.y - rVecTwo.y );
+		return ( x < Epsilon ) && ( y < Epsilon );
 	}
 }
 
