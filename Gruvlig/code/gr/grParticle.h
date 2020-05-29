@@ -29,22 +29,21 @@
 
 struct grSParticle
 {
-	sf::Color Color;
+	struct SCol { float R = 0.0f, G = 0.0f, B = 0.0f, A = 0.0f; };
 
-	grV2f	Position;
-	grV2f	Direction;
+	sf::Color	Color;
+	SCol		ColRate;
+	SCol		ColAccumulator;
 
-	float	Spd,
-			SpdMod;
+	grV2f		Pos;
+	grV2f		Dir;
 
-	float	Lifetime;
+	float		Spd,
+				SpdMod;
 
-	bool	bSpdOsc;
+	float		Life;
 
-	// insert Color
-	//grV2f	Position;
-	//grV2f	Velocity;
-	//float	Lifetime;
+	bool		bSpdOsc;
 };
 
 #endif	// _H_GRPARTICLE_

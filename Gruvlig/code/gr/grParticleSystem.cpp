@@ -55,7 +55,7 @@ grCParticleSystem::Copy( vE<intU>& rVeActvEmitr,
 							: ( rEmitrAtt.EmitrRotInDeg < 0.0f ) ? 360.0f + rEmitrAtt.EmitrRotInDeg
 							: rEmitrAtt.EmitrRotInDeg;
 
-						rEmitrAtt.EmitrDir.Set( 0.0f, -0.1f );
+						rEmitrAtt.EmitrDir.Set( 0.0f, -1.0f );
 						grMath::RotatePoint( &rEmitrAtt.EmitrDir, rEmitrAtt.EmitrRotInDeg * grMath::DegToRad );
 
 						rSysAtt.EmitrDir = rEmitrAtt.EmitrDir;
@@ -89,6 +89,18 @@ grCParticleSystem::Copy( vE<intU>& rVeActvEmitr,
 						case ( sizeT )grCParticleEmitter::EUsrMods::LIFE:
 						rSysAtt.PartLifeMinMax.x = grMath::Clamp( rEmitrAtt.PartLifeMinMax.x, 0.1f, rEmitrAtt.PartLifeMinMax.x );
 						rSysAtt.PartLifeMinMax.y = grMath::Clamp( rEmitrAtt.PartLifeMinMax.y, rEmitrAtt.PartLifeMinMax.x, rEmitrAtt.PartLifeMinMax.y );
+						break;
+
+						case ( sizeT )grCParticleEmitter::EUsrMods::COL:
+						rSysAtt.PartColMinMax.From.R = grMath::Clamp( ( intU )rSysAtt.PartColMinMax.From.R, 0, 255 );
+						rSysAtt.PartColMinMax.From.G = grMath::Clamp( ( intU )rSysAtt.PartColMinMax.From.G, 0, 255 );
+						rSysAtt.PartColMinMax.From.B = grMath::Clamp( ( intU )rSysAtt.PartColMinMax.From.B, 0, 255 );
+						rSysAtt.PartColMinMax.From.A = grMath::Clamp( ( intU )rSysAtt.PartColMinMax.From.A, 0, 255 );
+
+						rSysAtt.PartColMinMax.Too.R = grMath::Clamp( ( intU )rSysAtt.PartColMinMax.Too.R, 0, 255 );
+						rSysAtt.PartColMinMax.Too.G = grMath::Clamp( ( intU )rSysAtt.PartColMinMax.Too.G, 0, 255 );
+						rSysAtt.PartColMinMax.Too.B = grMath::Clamp( ( intU )rSysAtt.PartColMinMax.Too.B, 0, 255 );
+						rSysAtt.PartColMinMax.Too.A = grMath::Clamp( ( intU )rSysAtt.PartColMinMax.Too.A, 0, 255 );
 						break;
 
 						default:
@@ -150,6 +162,7 @@ grCParticleSystem::Activate( vE<intU>& rVeActivateQue,
 			ActvPosition( rAtt, rPart );
 			ActvVelocity( rAtt, rPart );
 			ActvLife( rAtt, rPart );
+			ActvColor( rAtt, rPart );
 		}
 
 		rVeActivateQue.clear();
@@ -189,15 +202,60 @@ grCParticleSystem::Update( vE<std::pair<intU, intU>>& rVeDeactivateQue,
 			rPart.Spd = grMath::Lerp( rPart.Spd, rPart.Spd + rPart.SpdMod, 0.25f );
 
 			// Accel
-			grV2f accel = rPart.Direction * rPart.Spd;
+			grV2f accel = rPart.Dir * rPart.Spd;
 
 			// Position
-			rPart.Position += ( accel ) * deltaT;
+			rPart.Pos += ( accel ) * deltaT;
 
 			// Lifetime
-			rPart.Lifetime -= deltaT;
-			if ( rPart.Lifetime < 0.0f )
+			rPart.Life -= deltaT;
+			if ( rPart.Life < 0.0f )
 				rVeDeactivateQue.push_back( pR<intU, intU>( emitrId, partIdx ) );
+
+			// Color
+				//a.r + ( b.r - a.r ) * t,
+				//a.g + ( b.g - a.g ) * t,
+				//a.b + ( b.b - a.b ) * t,
+				//a.a + ( b.a - a.a ) * t
+
+			//float target = ( float )rAtt.PartColMinMax.Too.G;
+			//float now = ( float )rPart.Color.g;
+			//float result = ( target - now ) * ( rPart.ColRate.G * deltaT ) + target;
+
+			//rPart.Color.g = result;
+
+			//printf( "%g \n", result );
+
+			//rPart.ColAccumulator.R += rPart.ColRate.R * deltaT;
+			//rPart.ColAccumulator.G += rPart.ColRate.G * deltaT;
+			//rPart.ColAccumulator.B += rPart.ColRate.B * deltaT;
+			//rPart.ColAccumulator.A += rPart.ColRate.A * deltaT;
+
+			//if ( rPart.ColAccumulator.R > 1.0f || rPart.ColAccumulator.R < -1.0f )
+			//{
+			//	rPart.Color.r += ( rPart.ColAccumulator.R > 1.0f ) ? 1 : -1;
+			//	rPart.ColAccumulator.R = 0.0f;
+			//}
+			//if ( rPart.ColAccumulator.G > 1.0f || rPart.ColAccumulator.G < -1.0f )
+			//{
+			//	rPart.Color.g += ( rPart.ColAccumulator.G > 1.0f ) ? 1 : -1;
+			//	rPart.ColAccumulator.G = 0.0f;
+			//}
+			//if ( rPart.ColAccumulator.B > 1.0f || rPart.ColAccumulator.B < -1.0f )
+			//{
+			//	rPart.Color.b += ( rPart.ColAccumulator.B > 1.0f ) ? 1 : -1;
+			//	rPart.ColAccumulator.B = 0.0f;
+			//}
+			//if ( rPart.ColAccumulator.A > 1.0f || rPart.ColAccumulator.A < -1.0f )
+			//{
+			//	rPart.Color.a += ( rPart.ColAccumulator.A > 1.0f ) ? 1 : -1;
+			//	rPart.ColAccumulator.A = 0.0f;
+			//}
+
+			//rPart.Color.r += ( sf::Uint8 )rPart.ColMod.R * deltaT;
+			//rPart.Color.g += ( sf::Uint8 )rPart.ColMod.G * deltaT;
+			//rPart.Color.b += ( sf::Uint8 )rPart.ColMod.B * deltaT;
+			//rPart.Color.a += ( sf::Uint8 )rPart.ColMod.A * deltaT;
 		}
 	}
 }
@@ -231,7 +289,7 @@ void grCParticleSystem::Deactivate( vE<std::pair<intU, intU>>& rVeDeactivateQue,
 void
 grCParticleSystem::ActvPosition( grSParticleAttribute& rAtt, grSParticle& rPart )
 {
-	rPart.Position = rAtt.EmitrPos;
+	rPart.Pos = rAtt.EmitrPos;
 	if ( grMath::CmpFloat( rAtt.PartRadiusPosOffset, 0.0f ) != true )
 	{
 		grV2f dir = grV2f( m_uPRand->Float( -1.0f, 1.0f ), m_uPRand->Float( -1.0f, 1.0f ) );
@@ -239,7 +297,7 @@ grCParticleSystem::ActvPosition( grSParticleAttribute& rAtt, grSParticle& rPart 
 		float dist = m_uPRand->Float( 0.0f, rAtt.PartRadiusPosOffset );
 
 		grMath::RotatePoint( &dir, rad );
-		rPart.Position += dir * dist;
+		rPart.Pos += dir * dist;
 	}
 }
 
@@ -269,8 +327,8 @@ grCParticleSystem::ActvVelocity( grSParticleAttribute& rAtt, grSParticle& rPart 
 		deg = rAtt.PartRotInDegMinMax.x;
 	}
 
-	rPart.Direction = rAtt.EmitrDir;
-	grMath::RotatePoint( &rPart.Direction, deg * grMath::DegToRad );
+	rPart.Dir = rAtt.EmitrDir;
+	grMath::RotatePoint( &rPart.Dir, deg * grMath::DegToRad );
 
 	// Speed
 	if ( rAtt.PartSpdMinMax.x > rAtt.PartSpdMinMax.y )
@@ -315,7 +373,31 @@ grCParticleSystem::ActvVelocity( grSParticleAttribute& rAtt, grSParticle& rPart 
 void
 grCParticleSystem::ActvLife( grSParticleAttribute& rAtt, grSParticle& rPart )
 {
-	rPart.Lifetime = ( grMath::CmpFloat( rAtt.PartLifeMinMax.x, rAtt.PartLifeMinMax.y ) != true )
+	rPart.Life = ( grMath::CmpFloat( rAtt.PartLifeMinMax.x, rAtt.PartLifeMinMax.y ) != true )
 		? m_uPRand->Float( rAtt.PartLifeMinMax.x, rAtt.PartLifeMinMax.y )
 		: rAtt.PartLifeMinMax.x;
+}
+
+
+void
+grCParticleSystem::ActvColor( grSParticleAttribute& rAtt, grSParticle& rPart )
+{
+	rPart.Color.r = rAtt.PartColMinMax.From.R;
+	rPart.Color.g = rAtt.PartColMinMax.From.G;
+	rPart.Color.b = rAtt.PartColMinMax.From.B;
+	rPart.Color.a = rAtt.PartColMinMax.From.A;
+
+	if ( rAtt.PartColMinMax.From != rAtt.PartColMinMax.Too )
+	{
+		float r = ( float )rAtt.PartColMinMax.Too.R - ( float )rAtt.PartColMinMax.From.R;
+		float g = ( float )rAtt.PartColMinMax.Too.G - ( float )rAtt.PartColMinMax.From.G;
+		float b = ( float )rAtt.PartColMinMax.Too.B - ( float )rAtt.PartColMinMax.From.B;
+		float a = ( float )rAtt.PartColMinMax.Too.A - ( float )rAtt.PartColMinMax.From.A;
+
+		float t = rPart.Life * 60.0f;
+		rPart.ColRate.R = !grMath::CmpFloat( r, 0.0f ) ? r / t : 0.0f;
+		rPart.ColRate.G = !grMath::CmpFloat( g, 0.0f ) ? g / t : 0.0f;
+		rPart.ColRate.B = !grMath::CmpFloat( b, 0.0f ) ? b / t : 0.0f;
+		rPart.ColRate.A = !grMath::CmpFloat( a, 0.0f ) ? a / t : 0.0f;
+	}
 }

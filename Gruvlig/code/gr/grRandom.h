@@ -40,9 +40,9 @@ public:
 		return ( intS )m_RandIntS( m_Mt );
 	}
 
-	inline intU IntU( const intU max )
+	inline intU IntU( const intU min, const intU max )
 	{
-		m_RandIntU.param( std::uniform_int_distribution<unsigned int>::param_type( 0, ( unsigned int )max ) );
+		m_RandIntU.param( std::uniform_int_distribution<unsigned int>::param_type( ( unsigned int )min , ( unsigned int )max ) );
 		return ( intU )m_RandIntU( m_Mt );
 	}
 

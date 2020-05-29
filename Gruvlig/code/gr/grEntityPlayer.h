@@ -5,10 +5,6 @@
 
 class		grCtrlPlayer;
 
-// TEST
-class		grParticleSystem;
-// TEST
-
 
 // grEntityPlayer
 //////////////////////////////////////////////////
@@ -30,11 +26,6 @@ private:
 	float				m_SpdWalk = 300.0f;
 
 	grCtrlPlayer*		m_pCtrl;
-
-	// TEST
-	//grParticleSystem*	m_pPartSys;
-	// TEST
-
 };
 
 #endif		//_GRENTITYPLAYER_H_

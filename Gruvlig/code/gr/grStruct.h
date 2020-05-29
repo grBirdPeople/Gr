@@ -109,7 +109,7 @@ namespace grStruct
 		grLinearActivity& operator=( const grLinearActivity& ) = delete;
 		T& operator[]( const sizeT idx )
 		{
-#ifdef	DEBUG
+#ifdef DEBUG
 			assert( idx >= 0 && "grStruct::grReuseArray::[]: Idx was less then zero" );
 			assert( idx < m_Capacity && "grStruct::grReuseArray::[]: Idx was out of range" );
 #endif	// DEBUG
@@ -127,7 +127,7 @@ namespace grStruct
 		}
 		void Push( T value )
 		{
-#ifdef	DEBUG
+#ifdef DEBUG
 			if ( m_Size >= m_Capacity )
 			{
 				std::puts( "grStruct::grActivateArray::Push(): Max elements reached" );
@@ -140,7 +140,7 @@ namespace grStruct
 		}
 		T& Activate( void )
 		{
-#ifdef	DEBUG
+#ifdef DEBUG
 			if ( m_Active == m_Size )
 			{
 				std::puts( "grStruct::grActivateArray::Activate(): All elements already active. Ref to the last element in array returned" );
@@ -326,6 +326,5 @@ namespace grStruct
 
 	};
 }
-
 
 #endif	// _GRSTRUCTS_H_

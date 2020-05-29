@@ -1,7 +1,7 @@
 #ifndef		_H_GRPARTICLE_EMITTER_
 #define		_H_GRPARTICLE_EMITTER_
 
-#define		EMITR_USR_SETTINGS	8	// Umh not so safe, probably look for option
+#define		EMITR_USR_SETTINGS	8	// Umh maual and unsafe, look for auto opt
 
 #include	<bitset>
 
@@ -46,7 +46,7 @@ public:
 	{
 		return m_SpawnPerSec;
 	}
-	inline void DirectionEmitter( const float degAbs = 0.0f )
+	inline void SetDirectionEmitter( const float degAbs = 0.0f )
 	{
 		m_uPAtt->EmitrRotInDeg = degAbs;
 		m_UsrMods.set( ( sizeT )EUsrMods::DIR_EMITR );
@@ -55,7 +55,7 @@ public:
 	{
 		return m_uPAtt->EmitrRotInDeg;
 	}
-	inline void Position( const grV2f& rPos, const float radOffset = 0.0f )
+	inline void SetPosition( const grV2f& rPos, const float radOffset = 0.0f )
 	{
 		m_uPAtt->EmitrPos = rPos;
 		m_uPAtt->PartRadiusPosOffset = radOffset;
@@ -65,7 +65,7 @@ public:
 	{
 		return m_uPAtt->EmitrPos;
 	}
-	inline void DirectionParticle( const grV2f& rMinMaxDegAbs = grV2f( 0.0f, 359.9f ) )
+	inline void SetDirectionParticle( const grV2f& rMinMaxDegAbs = grV2f( 0.0f, 359.9f ) )
 	{
 		m_uPAtt->PartRotInDegMinMax = rMinMaxDegAbs;
 		m_UsrMods.set( ( intU )EUsrMods::DIR_PART );
@@ -74,16 +74,30 @@ public:
 	{
 		return m_uPAtt->PartRotInDegMinMax;
 	}
-	inline void Speed( const grV2f& rMinMax = grV2f( 0.0f, 0.0f ), const grV2f& rMinMaxMod = grV2f( 0.0f, 0.0f ) )
+	inline void SetSpeed( const grV2f& rMinMax = grV2f( 0.0f, 0.0f ), const grV2f& rMinMaxMod = grV2f( 0.0f, 0.0f ) )
 	{
 		m_uPAtt->PartSpdMinMax = rMinMax;
 		m_uPAtt->PartSpdModMinMax = rMinMaxMod;
 		m_UsrMods.set( ( intU )EUsrMods::SPD );
 	}
-	inline void Lifetime( const grV2f& rMinMax = grV2f( 0.0f, 0.0f ) )
+	inline const grV2f& GetSpeed( void ) const
+	{
+		return m_uPAtt->PartSpdMinMax;
+	}
+	inline void SetLifetime( const grV2f& rMinMax = grV2f( 0.0f, 0.0f ) )
 	{
 		m_uPAtt->PartLifeMinMax = rMinMax;
-		m_UsrMods.set( ( intU )EUsrMods::LIFE, true );
+		m_UsrMods.set( ( intU )EUsrMods::LIFE );
+	}
+	inline const grV2f& GetLifetime( void ) const
+	{
+		return m_uPAtt->PartLifeMinMax;
+	}
+	inline void SetColor( const sf::Color& rFrom, const sf::Color& rToo )
+	{
+		m_uPAtt->PartColMinMax.From = { rFrom.r, rFrom.g, rFrom.b, rFrom.a };
+		m_uPAtt->PartColMinMax.Too = { rToo.r, rToo.g, rToo.b, rToo.a };
+		m_UsrMods.set( ( intU )EUsrMods::COL );
 	}
 
 private:
@@ -96,6 +110,7 @@ private:
 		DIR_PART, 
 		SPD,
 		LIFE,	// In sec
+		COL,
 		SIZE
 	};
 

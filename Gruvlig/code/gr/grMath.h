@@ -43,13 +43,13 @@ namespace grMath
 
 	// Abs
 	//////////////////////////////////////////////////
-	inline intU	Abs( intS value )
-	{
-		return ( value < 0 ) ? ( intU )-value : ( intU )value;
-	}
 	inline float Abs( float value )
 	{
 		return ( value < 0.0f ) ? -value : value;
+	}
+	inline intS	Abs( intS value )
+	{
+		return ( value < 0 ) ? ( intS )-value : ( intS )value;
 	}
 
 	// Sign

@@ -50,6 +50,7 @@ private:
 	void ActvPosition( grSParticleAttribute& rAtt, grSParticle& rPart );
 	void ActvVelocity( grSParticleAttribute& rAtt, grSParticle& rPart );
 	void ActvLife( grSParticleAttribute& rAtt, grSParticle& rPart );
+	void ActvColor( grSParticleAttribute& rAtt, grSParticle& rPart );	// Change over T is dependent of lifetime so allways do color after
 
 	pU<grRandom>	m_uPRand;
 

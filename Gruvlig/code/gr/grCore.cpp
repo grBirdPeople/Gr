@@ -35,9 +35,8 @@ grCore::grCore( const intU winWidth, const intU winHeight, const intU frameRate,
 	grEntityManager::Initialize();
 	grMapManager::Initialize();
 	grNavMeshManager::Initialize();
-	//grParticleManager::Initialize();
 	//grCParticleManagerPB::Initialize();
-	grCParticleManager::Initialize();
+	//grCParticleManager::Initialize();
 
 #ifdef DEBUG
 	grDebugManager::Initialize();
@@ -58,7 +57,7 @@ grCore::~grCore( void )
 	grDebugManager::DeInitialize();
 #endif // DEBUG
 
-	grCParticleManager::DeInitialize();
+	//grCParticleManager::DeInitialize();
 	//grCParticleManagerPB::DeInitialize();
 	//grParticleManager::DeInitialize();
 	grNavMeshManager::DeInitialize();
@@ -97,7 +96,7 @@ grCore::Update( void )
 	grEntityManager::Instance().Update( GetDeltaT() );
 	//grParticleManager::Instance().Update( GetDeltaT() );
 	//grCParticleManagerPB::Instance().Update( GetDeltaT() );
-	grCParticleManager::Instance().Update( GetDeltaT() );
+	//grCParticleManager::Instance().Update( GetDeltaT() );
 
 #ifdef DEBUG
 	grNavMeshManager::Instance().Debug();

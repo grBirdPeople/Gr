@@ -3,7 +3,6 @@
 #include	"grEntityManager.h"
 
 
-
 // cTor
 //////////////////////////////////////////////////
 grIEntity::grIEntity( void )

@@ -5,7 +5,7 @@
 
 grCParticleEmitter::grCParticleEmitter( const intU id )
 	: m_uPAtt			( new grSParticleAttribute() )
-	, m_SpawnPerSec		( 800.0f )
+	, m_SpawnPerSec		( 1.0f )
 	, m_SpawnRateMs		( 1.0f / m_SpawnPerSec )
 	, m_SpawnTimerMs	( 0.0f )
 	, m_Id				( id )

@@ -25,20 +25,23 @@
 //////////////////////////////////////////////////
 grSandbox::grSandbox( void )
 	: m_rInputMan		( grInputManager::Instance() )
-	, m_rPartMan		( grCParticleManager::Instance() )
-	, m_Emitr1			( grCParticleManager::Instance().Create() )
+	//, m_rPartMan		( grCParticleManager::Instance() )
+	//, m_Emitr1			( grCParticleManager::Instance().Create() )
 	, m_PartSysIdOne	( -1 )
 	, m_PartSysIdTwo	( -1 )
 	, m_RendWin			( grCore::Instance().GetRenderWin() )
 {
-	m_RendWin.setMouseCursorVisible( false );
+	// Hide mouse cursor
+	m_RendWin.setMouseCursorVisible( true );
 
 	// Create maps and navmeshes
 	grMapManager::Instance().GetMap( "map_00" )->CreateNavMesh();	// TODO: Don't like this. Other way around ( navmeshmanager create navmesh ( map ))
 	grMapManager::Instance().GetMap( "map_01" )->CreateNavMesh();
 
 	m_pMap = grMapManager::Instance().GetMap( "map_00" );
-	grNavMeshManager::Instance().SetNavMeshToDebug( -1 );	// TODO: Don't know if I want to keep the map stuff,
+
+	// Disable navmesh debug render
+	grNavMeshManager::Instance().SetNavMeshToDebug( 0 );	// TODO: Don't know if I want to keep the map stuff,
 															// but maybe better if this is called auto in grMap and also updated from there instead of in core
 
 	// Create an actor and add it to a map
@@ -64,7 +67,7 @@ grSandbox::grSandbox( void )
 	//m_pPlayer->SetEnable( false );
 	//entityMan.DestroyEntity( pEnemy_1 );
 
-	//// HashMap
+	//// Poor HashMap
 	//grHashMap<grIEntity*> map( 5 );
 	//map.Put( 3, m_pPlayer );
 	//map.Put( 3, m_pEnemy );
@@ -147,21 +150,11 @@ grSandbox::grSandbox( void )
 	//	int j = 7;
 	//}
 
-	m_Emitr1.Position( grV2f( 320.0f, 180.0f ), 50.0f );
-	m_Emitr1.DirectionParticle( grV2f( 0.0f, 0.0f ) );
-	m_Emitr1.Speed( grV2f( -50.0f, 50.0f ), grV2f( 0.1f, 2.3 ) );
-	m_Emitr1.Lifetime( grV2f( 0.3f, 1.0f ) );
-
-	m_aREmitrPos.push_back( grV2f( 320.0f, 180.0f ) );
-	m_aREmitrPos.push_back( grV2f( 280.0f, 180.0f ) );	// Diagonal
-	m_aREmitrPos.push_back( grV2f( 240.0f, 220.0f ) );	// Diagonal
-	m_aREmitrPos.push_back( grV2f( 240.0f, 260.0f ) );
-	m_aREmitrPos.push_back( grV2f( 280.0f, 300.0f ) );	// Diagonal
-	m_aREmitrPos.push_back( grV2f( 320.0f, 300.0f ) );	// Diagonal
-	m_aREmitrPos.push_back( grV2f( 360.0f, 260.0f ) );
-	m_aREmitrPos.push_back( grV2f( 360.0f, 220.0f ) );	// Diagonal
-
-	m_NxtEmitrPos = 1;
+	//m_Emitr1.SetPosition( grV2f( 320.0f, 180.0f ), 50.0f );
+	//m_Emitr1.SetDirectionParticle( grV2f( 0.0f, 360.0f ) );
+	//m_Emitr1.SetSpeed( grV2f( -25.0f, 25.0f ), grV2f( 0.1f, 2.3 ) );
+	//m_Emitr1.SetLifetime( grV2f( 1.0f, 1.0f ) );
+	//m_Emitr1.SetColor( sf::Color( 0, 255, 0, 255 ), sf::Color( 0, 0, 0, 255 ) );
 }
 
 
@@ -173,7 +166,7 @@ grSandbox::Update( const float deltaT )
 	// Particle things
 	if ( m_rInputMan.GetMouseMoved() )
 	{
-		m_Emitr1.Position( m_rInputMan.GetMousePos() );
+		//m_Emitr1.SetPosition( m_rInputMan.GetMousePos() );
 
 		//grV2f dir = ( m_LastMousePos - m_Emitr1.GetPosition() ).Normalized();
 		//float deg = grMath::VecToDeg( dir ) + 90.0f;
@@ -182,22 +175,23 @@ grSandbox::Update( const float deltaT )
 	}
 	m_LastMousePos = m_rInputMan.GetMousePos();
 
-	m_ParticleAnimCounter -= deltaT;
-	if ( m_ParticleAnimCounter < 0.0f )
-	{
-		m_ParticleAnimCounter += m_ParticleAnimT;
-		float deg = m_Emitr1.GetDirectionParticle().x + 45.0f;
-		m_Emitr1.DirectionParticle( grV2f( deg, deg ) );
-	}
+
+	//m_ParticleAnimCounter -= deltaT;
+	//if ( m_ParticleAnimCounter < 0.0f )
+	//{
+	//	m_ParticleAnimCounter += m_ParticleAnimT;
+	//	float deg = m_Emitr1.GetDirectionParticle().x + 45.0f;
+	//	m_Emitr1.DirectionParticle( grV2f( deg, deg ) );
+	//}
 	
 
 	if ( m_rInputMan.GetMouseScrollForwards() )
 	{
-		m_Emitr1.SetSpawnRate( m_Emitr1 .GetSpawnRate() + 50.0f );
+		//m_Emitr1.SetSpawnRate( m_Emitr1 .GetSpawnRate() + 50.0f );
 	}
 	if ( m_rInputMan.GetMouseScrollBackwards () )
 	{
-		m_Emitr1.SetSpawnRate( m_Emitr1.GetSpawnRate() - 50.0f );
+		//m_Emitr1.SetSpawnRate( m_Emitr1.GetSpawnRate() - 50.0f );
 	}
 
 
@@ -219,20 +213,20 @@ grSandbox::Update( const float deltaT )
 	// Navmesh things
 	if ( m_pMap != nullptr )
 	{
-		//grCore& rCore = grCore::Instance();
-		//if ( m_rInputMan.GetMouse( sf::Mouse::Button::Left ) )
-		//{
-		//	grV2f mousePos = grV2f( ( float )sf::Mouse::getPosition( rCore.GetRenderWin() ).x, ( float )sf::Mouse::getPosition( rCore.GetRenderWin() ).y );
-		//	m_pActor->SetEnd( m_pMap, mousePos );
-		//	m_pActor->FindPath( m_pMap );
-		//}
+		grCore& rCore = grCore::Instance();
+		if ( m_rInputMan.GetMouse( sf::Mouse::Button::Left ) )
+		{
+			grV2f mousePos = grV2f( ( float )sf::Mouse::getPosition( rCore.GetRenderWin() ).x, ( float )sf::Mouse::getPosition( rCore.GetRenderWin() ).y );
+			m_pActor->SetEnd( m_pMap, mousePos );
+			m_pActor->FindPath( m_pMap );
+		}
 
-		//if ( m_rInputMan.GetMouse( sf::Mouse::Button::Right ) )
-		//{
-		//	grV2f mousePos = grV2f( ( float )sf::Mouse::getPosition( rCore.GetRenderWin() ).x, ( float )sf::Mouse::getPosition( rCore.GetRenderWin() ).y );
-		//	m_pActor->SetStart( m_pMap, mousePos );
-		//	m_pActor->FindPath( m_pMap );
-		//}
+		if ( m_rInputMan.GetMouse( sf::Mouse::Button::Right ) )
+		{
+			grV2f mousePos = grV2f( ( float )sf::Mouse::getPosition( rCore.GetRenderWin() ).x, ( float )sf::Mouse::getPosition( rCore.GetRenderWin() ).y );
+			m_pActor->SetStart( m_pMap, mousePos );
+			m_pActor->FindPath( m_pMap );
+		}
 	}
 }
 
