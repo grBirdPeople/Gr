@@ -38,10 +38,10 @@ grSandbox::grSandbox( void )
 	grMapManager::Instance().GetMap( "map_00" )->CreateNavMesh();	// TODO: Don't like this. Other way around ( navmeshmanager create navmesh ( map ))
 	grMapManager::Instance().GetMap( "map_01" )->CreateNavMesh();
 
-	m_pMap = grMapManager::Instance().GetMap( "map_00" );
+	m_pMap = grMapManager::Instance().GetMap( "map_01" );
 
 	// Disable navmesh debug render
-	grNavMeshManager::Instance().SetNavMeshToDebug( 0 );	// TODO: Don't know if I want to keep the map stuff,
+	grNavMeshManager::Instance().SetNavMeshToDebug( 1 );	// TODO: Don't know if I want to keep the map stuff,
 															// but maybe better if this is called auto in grMap and also updated from there instead of in core
 
 	// Create an actor and add it to a map
