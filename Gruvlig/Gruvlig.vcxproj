@@ -178,6 +178,7 @@
     <ClCompile Include="code\gr\grNavMeshManager.cpp" />
     <ClCompile Include="code\gr\grParticleEmitter.cpp" />
     <ClCompile Include="code\gr\grParticleSystem.cpp" />
+    <ClCompile Include="code\gr\grParticleTest.cpp" />
     <ClCompile Include="code\gr\grSandbox.cpp" />
     <ClCompile Include="code\gr\main.cpp" />
   </ItemGroup>
@@ -245,6 +246,7 @@
     <ClInclude Include="code\gr\grNavNode.h" />
     <ClInclude Include="code\gr\grParticle.h" />
     <ClInclude Include="code\gr\grParticleSystem.h" />
+    <ClInclude Include="code\gr\grParticleTest.h" />
     <ClInclude Include="code\gr\grSPartAttribute.h" />
     <ClInclude Include="code\gr\grParticleEmitter.h" />
     <ClInclude Include="code\gr\grParticleEmitterPB.h" />

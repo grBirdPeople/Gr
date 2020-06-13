@@ -14,13 +14,17 @@ namespace grMath
 {
 	// Const
 	//////////////////////////////////////////////////
-	const float Epsilon = 0.01f;
+	const float Epsilon = 0.001f;
 	const float Pi = 3.141592f;
 	const float DegToRad = Pi / 180.0f;
 	const float RadToDeg = 180 / Pi;
 
 	// Min
 	//////////////////////////////////////////////////
+	inline sizeT Min( sizeT a, sizeT b )
+	{
+		return ( a < b ) ? a : ( b < a ) ? b : a;
+	}
 	inline intS	Min( intS a, intS b )
 	{
 		return ( a < b ) ? a : ( b < a ) ? b : a;
@@ -225,7 +229,7 @@ namespace grMath
 
 	// CmpVector
 	//////////////////////////////////////////////////
-	inline bool CmpVec( const grV2f& rVecOne, const grV2f& rVecTwo )
+	inline bool CmpV2f( const grV2f& rVecOne, const grV2f& rVecTwo )
 	{
 		float x = Abs( rVecOne.x - rVecTwo.x );
 		float y = Abs( rVecOne.y - rVecTwo.y );

@@ -10,8 +10,9 @@ class		grActor;
 class		grMap;
 class		grIEntity;
 class		grInputManager;
-class		grCParticleManager;
-class		grCParticleEmitter;
+//class		grCParticleManager;
+//class		grCParticleEmitter;
+class		grCParticleSys;
 
 namespace sf
 {
@@ -45,6 +46,8 @@ private:
 	//grCParticleManager&		m_rPartMan;
 
 	//grCParticleEmitter&		m_Emitr1;
+
+	grCParticleSys*			m_pPartSys;
 
 	grMap*					m_pMap;
 	grActor*				m_pActor;
