@@ -2,6 +2,7 @@
 //
 //#include	"grAlgo.h"
 //#include	"grCommon.h"
+#include	"grDefine.h"
 #include	"grCore.h"
 //#include	"grNavNode.h"
 //#include	"grV2.h"

@@ -20,13 +20,16 @@
 #include	"grMath.h"
 #include	"grAlgo.h"
 
+#include	"grParticleTest.h"
+
 
 // cTor
 //////////////////////////////////////////////////
 grSandbox::grSandbox( void )
 	: m_rInputMan		( grInputManager::Instance() )
 	//, m_rPartMan		( grCParticleManager::Instance() )
-	//, m_Emitr1			( grCParticleManager::Instance().Create() )
+	//, m_Emitr1		( grCParticleManager::Instance().Create() )
+	, m_pPartSys		( new grCParticleSys( 100, 150.0f ) )
 	, m_PartSysIdOne	( -1 )
 	, m_PartSysIdTwo	( -1 )
 	, m_RendWin			( grCore::Instance().GetRenderWin() )
@@ -38,10 +41,10 @@ grSandbox::grSandbox( void )
 	grMapManager::Instance().GetMap( "map_00" )->CreateNavMesh();	// TODO: Don't like this. Other way around ( navmeshmanager create navmesh ( map ))
 	grMapManager::Instance().GetMap( "map_01" )->CreateNavMesh();
 
-	m_pMap = grMapManager::Instance().GetMap( "map_00" );
+	m_pMap = grMapManager::Instance().GetMap( "map_01" );
 
 	// Disable navmesh debug render
-	grNavMeshManager::Instance().SetNavMeshToDebug( 0 );	// TODO: Don't know if I want to keep the map stuff,
+	grNavMeshManager::Instance().SetNavMeshToDebug( 1 );	// TODO: Don't know if I want to keep the map stuff,
 															// but maybe better if this is called auto in grMap and also updated from there instead of in core
 
 	// Create an actor and add it to a map
@@ -155,6 +158,11 @@ grSandbox::grSandbox( void )
 	//m_Emitr1.SetSpeed( grV2f( -25.0f, 25.0f ), grV2f( 0.1f, 2.3 ) );
 	//m_Emitr1.SetLifetime( grV2f( 1.0f, 1.0f ) );
 	//m_Emitr1.SetColor( sf::Color( 0, 255, 0, 255 ), sf::Color( 0, 0, 0, 255 ) );
+
+
+
+	m_pPartSys->AddLifeGenerator( grV2f( 0.25f, 0.25f ) );
+	m_pPartSys->AddPositionGenerator( grV2f( 640.0f * 0.75f, 360.0f * 0.75f ), grV2f( 640.0f - 20.0f, 360.0f - 20.0f ) );
 }
 
 
@@ -164,6 +172,9 @@ void
 grSandbox::Update( const float deltaT )
 {
 	// Particle things
+	m_pPartSys->Update( deltaT );
+
+
 	if ( m_rInputMan.GetMouseMoved() )
 	{
 		//m_Emitr1.SetPosition( m_rInputMan.GetMousePos() );

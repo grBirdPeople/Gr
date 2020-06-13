@@ -8,11 +8,17 @@
 //////////////////////////////////////////////////
 namespace grAlgo
 {
-	// InsrtSort // Min To Max or Max To Min
-	//////////////////////////////////////////////////
+	template<typename T>
+	inline void Swap( T& a, T& b)
+	{
+		T tmp = a;
+		a = b;
+		b = tmp;
+	}
+
 	template<typename T>
 	inline void
-	InsrtSort( T* pArr, const intU size, const bool minToMax = true )
+	InsrtSort( T* pArr, const intU size, const bool minToMax = true )	// Min To Max or Max To Min
 	{
 		auto MinToMax = [ & ]( T* arr, const T& nowNum, intS& before )
 		{
@@ -45,7 +51,7 @@ namespace grAlgo
 
 	template<typename T>
 	inline void
-	InsrtSort( vE<T>& rVec, const bool minToMax = true )
+	InsrtSort( vE<T>& rVec, const bool minToMax = true )	// Min To Max or Max To Min
 	{
 		auto MinToMax = [ & ]( vE<T>& rV, const T& nowNum, intS& before )
 		{

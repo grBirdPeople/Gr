@@ -1,7 +1,6 @@
 #include	"grCore.h"
 
 #include	"grDebugManager.h"
-#include	"grDefine.h"
 #include	"grEntityManager.h"
 #include	"grInputManager.h"
 #include	"grMapManager.h"
