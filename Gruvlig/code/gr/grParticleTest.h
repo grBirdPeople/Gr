@@ -130,12 +130,19 @@ struct grSPositionGenerator
 };
 
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
+enum class EGeneratorTypes
+{
+	LIFE = 0,
+	POSITION,
+	SIZE
+};
+
+
 struct grSEmitter
 {
 	grSEmitter( const float rate, const sizeT size )
-		: Rate	( rate )
-		, Size	( size )
+		: SpawnRate	( rate )
+		, MaxParticleSize	( size )
 	{
 		m_PositionGen.reset( nullptr );
 		m_LifeGen.reset( nullptr );
@@ -145,14 +152,20 @@ struct grSEmitter
 	grSEmitter( const grSEmitter& ) = delete;
 	grSEmitter& operator=( const grSEmitter& ) = delete;
 
-	void Emit( pU<grSParticle>& rParticle, const float deltaT )
+	void Emit( pU<grSParticle>& rParticle, const pU<EGeneratorTypes[]>& rTrackedGenerator, const sizeT trackedSize, const float deltaT )
 	{
-		sizeT maxNew = ( sizeT )( Rate * (double)deltaT );
+		sizeT maxNew = ( sizeT )( SpawnRate * ( double )deltaT );
 		sizeT startIdx = rParticle->m_Alive;
-		sizeT endIdx = grMath::Min( rParticle->m_Alive + maxNew, Size - 1 );
+		sizeT endIdx = grMath::Min( rParticle->m_Alive + maxNew, MaxParticleSize - 1 );
 
-		if ( m_LifeGen )		m_LifeGen->Generate( rParticle, startIdx, endIdx, m_puRand, deltaT );
-		if ( m_PositionGen )	m_PositionGen->Generate( rParticle, startIdx, endIdx, m_puRand, deltaT );
+		for ( sizeT i = 0; i < trackedSize; ++i )
+		{
+			switch ( rTrackedGenerator[ i ] )
+			{
+				case EGeneratorTypes::LIFE:		m_LifeGen->Generate( rParticle, startIdx, endIdx, m_puRand, deltaT );		break;
+				case EGeneratorTypes::POSITION:	m_PositionGen->Generate( rParticle, startIdx, endIdx, m_puRand, deltaT );	break;
+			}
+		}
 	}
 
 	// All types of generators goes here
@@ -160,8 +173,9 @@ struct grSEmitter
 	pU<grSPositionGenerator>	m_PositionGen;
 
 	pU<grRandom>	m_puRand;
-	float			Rate;
-	sizeT			Size;
+
+	float	SpawnRate;
+	sizeT	MaxParticleSize;
 };
 
 
@@ -193,11 +207,10 @@ struct grSPositionUpdater
 };
 
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
 struct grSUpdater
 {
 	grSUpdater( const sizeT size )
-		: Size	( size )
+		: MaxParticleSize	( size )
 	{
 		LifeUp.reset( nullptr );
 	}
@@ -205,17 +218,23 @@ struct grSUpdater
 	grSUpdater( const grSUpdater& ) = delete;
 	grSUpdater& operator=( const grSUpdater& ) = delete;
 
-	void Update( pU<grSParticle>& rParticle, const float deltaT )
+	void Update( pU<grSParticle>& rParticle, const pU<EGeneratorTypes[]>& rTrackedGenerator, const sizeT trackedSize, const float deltaT )
 	{
-		if( PositionUp )	PositionUp->Update( rParticle, deltaT );
-		if( LifeUp )		LifeUp->Update( rParticle, deltaT );
+		for ( sizeT i = 0; i < trackedSize; ++i )
+		{
+			switch ( rTrackedGenerator[ i ] )
+			{
+				case EGeneratorTypes::LIFE:		LifeUp->Update( rParticle, deltaT );		break;
+				case EGeneratorTypes::POSITION:	PositionUp->Update( rParticle, deltaT );	break;
+			}
+		}
 	}
 
 	// All types of updaters goes here
 	pU<grSLifeUpdater>		LifeUp;
 	pU<grSPositionUpdater>	PositionUp;
 
-	sizeT	Size;
+	sizeT	MaxParticleSize;
 };
 
 
@@ -236,11 +255,17 @@ public:
 	void Update( const float deltaT );
 
 private:
+	void AddTrackedGenerator( const EGeneratorTypes type );
+
+private:
 	pU<grSParticle>	m_puParticle;
 	pU<grSEmitter>	m_puEmitter;
 	pU<grSUpdater>	m_puUpdater;
 
-	sizeT	m_MaxSize;
+	pU<EGeneratorTypes[]>	m_puTrackedGenerator;
+
+	sizeT	m_MaxParticleSize,
+			m_TrackedGeneratorSize;
 };
 
 #endif	// _GRPARTICLETEST_H_
