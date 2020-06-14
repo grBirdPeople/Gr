@@ -2,13 +2,12 @@
 
 
 grCParticleSys::grCParticleSys( const intU particleSize, const float spawnRate )
-	: m_MaxSize			( particleSize )
-	, m_UpdatersSize	( 0 )
+	: m_MaxSize	( particleSize )
 {
 	m_puParticle.reset( new grSParticle( m_MaxSize ) );
 
-	//for ( sizeT i = 0; i < m_MaxSize; ++i )
-	//	m_puParticle->m_upColor[ i ] = grSColor();
+	for ( sizeT i = 0; i < m_MaxSize; ++i )
+		m_puParticle->m_upColor[ i ] = grSColor();
 
 	for ( sizeT i = 0; i < m_MaxSize; ++i )
 		m_puParticle->m_upAcceleration[ i ] = grV2f();

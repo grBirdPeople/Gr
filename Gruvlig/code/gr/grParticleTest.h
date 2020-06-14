@@ -36,7 +36,7 @@ struct grSParticle
 	grSParticle( const grSParticle& ) = delete;
 	grSParticle& operator=( grSParticle& ) = delete;
 
-	void Swap( const sizeT idx )
+	void SwapWithLast( const sizeT idx )
 	{
 		sizeT last = m_Alive - 1;
 		grAlgo::Swap( m_upColor[ idx ],			m_upColor[ last ] );
@@ -52,7 +52,7 @@ struct grSParticle
 	pU<grV2f[]>		m_upPosition;
 	pU<float[]>		m_upLife;
 
-	sizeT			m_Alive;
+	sizeT	m_Alive;
 };
 
 
@@ -96,7 +96,7 @@ struct grSPositionGenerator
 		if ( grMath::CmpV2f( min, max ) == false )
 			Same = !Same;
 
-		// Make sure both the min values are less then the max values for rand to work in the generate method
+		// Make sure both of the min values are less then the max values for rand to work in the generate method
 		Min = min;
 		Max = max;
 		if ( max.x < min.x )
@@ -147,7 +147,7 @@ struct grSEmitter
 
 	void Emit( pU<grSParticle>& rParticle, const float deltaT )
 	{
-		sizeT maxNew = ( sizeT )Rate * deltaT;
+		sizeT maxNew = ( sizeT )( Rate * (double)deltaT );
 		sizeT startIdx = rParticle->m_Alive;
 		sizeT endIdx = grMath::Min( rParticle->m_Alive + maxNew, Size - 1 );
 
@@ -176,7 +176,7 @@ struct grSLifeUpdater
 			if ( rParticle->m_upLife[ i ] <= 0.0f )
 			{
 				rParticle->m_upLife[ i ] = 0.0f;
-				rParticle->Swap( i );
+				rParticle->SwapWithLast( i );
 				--rParticle->m_Alive;
 			}
 		}
@@ -207,8 +207,8 @@ struct grSUpdater
 
 	void Update( pU<grSParticle>& rParticle, const float deltaT )
 	{
-		if( PositionUp ) PositionUp->Update( rParticle, deltaT );
-		if( LifeUp ) LifeUp->Update( rParticle, deltaT );
+		if( PositionUp )	PositionUp->Update( rParticle, deltaT );
+		if( LifeUp )		LifeUp->Update( rParticle, deltaT );
 	}
 
 	// All types of updaters goes here
@@ -239,8 +239,8 @@ private:
 	pU<grSParticle>	m_puParticle;
 	pU<grSEmitter>	m_puEmitter;
 	pU<grSUpdater>	m_puUpdater;
-	sizeT			m_MaxSize;
-	sizeT			m_UpdatersSize;
+
+	sizeT	m_MaxSize;
 };
 
 #endif	// _GRPARTICLETEST_H_
