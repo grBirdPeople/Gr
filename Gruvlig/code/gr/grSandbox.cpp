@@ -29,7 +29,7 @@ grSandbox::grSandbox( void )
 	: m_rInputMan		( grInputManager::Instance() )
 	//, m_rPartMan		( grCParticleManager::Instance() )
 	//, m_Emitr1		( grCParticleManager::Instance().Create() )
-	, m_pPartSys		( new grCParticleSys( 1000, 145.0f ) )
+	, m_pPartSys		( new grCParticleSys( 1000, 150.0f ) )
 	, m_PartSysIdOne	( -1 )
 	, m_PartSysIdTwo	( -1 )
 	, m_RendWin			( grCore::Instance().GetRenderWin() )
@@ -161,8 +161,10 @@ grSandbox::grSandbox( void )
 
 
 	
-	m_pPartSys->CreateLife( grV2f( 0.1f, 0.9f ) );
-	m_pPartSys->CreatePosition( grV2f( 640.0f * 0.75f, 360.0f * 0.75f ), grV2f( 640.0f * 0.95f, 360.0f * 0.95f ) );
+	m_pPartSys->CreateForceBasic( grV2f( -10000.0f, -10000.0f ), grV2f( 10000.0f, -10000.0f ) );
+	m_pPartSys->CreatePosition( grV2f( 640.0f * 0.75f, 360.0f * 0.75f ), grV2f( 640.0f * 0.75f, 360.0f * 0.75f ) );
+	//m_pPartSys->CreatePosition( grV2f( -10.0f, -10.0f ), grV2f( 10.0f , 10.0f ) );
+	m_pPartSys->CreateLife( grV2f( 1.5f, 1.5f ) );
 }
 
 

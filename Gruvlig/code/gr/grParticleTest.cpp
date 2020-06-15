@@ -1,8 +1,9 @@
 #include	"grParticleTest.h"
 
 
-grCParticleSys::grCParticleSys( const intU particleSize, const float spawnRate )
-	: m_MaxParticleSize	( particleSize )
+grCParticleSys::grCParticleSys( const intU particleSize, const float spawnRate, const grV2f& position )
+	: m_PositionSys		( grV2f() )
+	, m_MaxParticleSize	( particleSize )
 {
 	// Particle data
 	m_puParticle.reset( new grSParticle( m_MaxParticleSize ) );
@@ -36,22 +37,16 @@ grCParticleSys::~grCParticleSys( void )
 void
 grCParticleSys::SetPosition( const grV2f& position )
 {
-#ifdef DEBUG
-	if ( m_puEmitter->m_upPositionGen == nullptr )
-	{
-		std::cerr << "grCParticleSys::SetPosition(): PositionGenerator was null, no default position set" << std::endl;
-		return;
-	}
-#endif
-
-	m_puEmitter->m_upPositionGen->Default = position;
+	m_PositionSys = position;
 }
 
 
-void grCParticleSys::CreateLife( const grV2f& minMax )
+// TODO: Seperate generator & updater into unique calls
+void
+grCParticleSys::CreateForceBasic( const grV2f& min, const grV2f& max )
 {
-	m_puEmitter->m_upLifeGen.reset( new grSLifeGenerator( minMax ) );
-	m_puUpdater->m_upLifeUp.reset( new grSLifeUpdater() );
+	m_puEmitter->m_upForceBasicGen.reset( new grSForceBasicGenerator( min, max ) );
+	m_puUpdater->m_upForceBasicUp.reset( new grSForceBasicUpdater() );
 }
 
 
@@ -59,7 +54,15 @@ void
 grCParticleSys::CreatePosition( const grV2f& min, const grV2f& max )
 {
 	m_puEmitter->m_upPositionGen.reset( new grSPositionGenerator( min, max ) );
-	m_puUpdater->m_upPositionUp.reset( new grSPositionUpdater() );
+}
+
+
+// TODO: Seperate generator & updater into unique calls
+void
+grCParticleSys::CreateLife( const grV2f& minMax )
+{
+	m_puEmitter->m_upLifeGen.reset( new grSLifeGenerator( minMax ) );
+	m_puUpdater->m_upLifeUp.reset( new grSLifeUpdater() );
 }
 
 
@@ -71,7 +74,7 @@ grCParticleSys::CreatePosition( const grV2f& min, const grV2f& max )
 void
 grCParticleSys::Update( const float deltaT )
 {
-	m_puEmitter->Emit( m_puParticle, deltaT );
+	m_puEmitter->Emit( m_puParticle, m_PositionSys, deltaT );
 	m_puUpdater->Update( m_puParticle, deltaT );
 
 

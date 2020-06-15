@@ -23,12 +23,12 @@ namespace grMath
 	//////////////////////////////////////////////////
 	inline sizeT Min( const sizeT a, const sizeT b )
 	{
-		float value = ( a < b ) ? a : ( b < a ) ? b : a;
+		sizeT value = ( a < b ) ? a : ( b < a ) ? b : a;
 		return value;
 	}
 	inline intS	Min( const intS a, const intS b )
 	{
-		float value = ( a < b ) ? a : ( b < a ) ? b : a;
+		intS value = ( a < b ) ? a : ( b < a ) ? b : a;
 		return value;
 	}
 	inline float Min( const float a, const float b )
@@ -41,12 +41,12 @@ namespace grMath
 	//////////////////////////////////////////////////
 	inline sizeT Max( const sizeT a, const sizeT b )
 	{
-		float value = ( a > b ) ? a : ( b > a ) ? b : a;
+		sizeT value = ( a > b ) ? a : ( b > a ) ? b : a;
 		return value;
 	}
 	inline intS	Max( const intS a, const intS b )
 	{
-		float value = ( a > b ) ? a : ( b > a ) ? b : a;
+		intS value = ( a > b ) ? a : ( b > a ) ? b : a;
 		return value;
 	}
 	inline float Max( const float a, const float b )
