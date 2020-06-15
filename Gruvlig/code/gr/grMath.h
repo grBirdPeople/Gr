@@ -17,32 +17,52 @@ namespace grMath
 	const float Epsilon = 0.001f;
 	const float Pi = 3.141592f;
 	const float DegToRad = Pi / 180.0f;
-	const float RadToDeg = 180 / Pi;
+	const float RadToDeg = 180.0f / Pi;
 
 	// Min
 	//////////////////////////////////////////////////
-	inline sizeT Min( sizeT a, sizeT b )
+	inline sizeT Min( const sizeT a, const sizeT b )
 	{
-		return ( a < b ) ? a : ( b < a ) ? b : a;
+		float value = ( a < b ) ? a : ( b < a ) ? b : a;
+		return value;
 	}
-	inline intS	Min( intS a, intS b )
+	inline intS	Min( const intS a, const intS b )
 	{
-		return ( a < b ) ? a : ( b < a ) ? b : a;
+		float value = ( a < b ) ? a : ( b < a ) ? b : a;
+		return value;
 	}
-	inline float Min( float a, float b )							// Untested
+	inline float Min( const float a, const float b )
 	{
-		return ( a < b ) ? a : ( b < a ) ? b : a;
+		float value = ( a < b ) ? a : ( b < a ) ? b : a;
+		return value;
 	}
 
 	// Max
 	//////////////////////////////////////////////////
-	inline intS	Max( intS a, intS b )
+	inline sizeT Max( const sizeT a, const sizeT b )
 	{
-		return ( a > b ) ? a : ( b > a ) ? b : a;
+		float value = ( a > b ) ? a : ( b > a ) ? b : a;
+		return value;
 	}
-	inline float Max( float a, float b )							// Untested
+	inline intS	Max( const intS a, const intS b )
 	{
-		return ( a > b ) ? a : ( b > a ) ? b : a;
+		float value = ( a > b ) ? a : ( b > a ) ? b : a;
+		return value;
+	}
+	inline float Max( const float a, const float b )
+	{
+		float value = ( a > b ) ? a : ( b > a ) ? b : a;
+		return value;
+	}
+
+	// RangeCheckV2f
+	//////////////////////////////////////////////////
+	inline void RangeCheckPairV2f( grV2f& min, grV2f& max )
+	{
+		if ( min.x > max.x )
+			min.x = max.x;
+		if ( min.y > max.y )
+			min.y = max.y;
 	}
 
 	// Abs
@@ -94,7 +114,7 @@ namespace grMath
 			y = ( y + x / y ) / 2.0f;
 		}
 
-		return ( float )ldexp( y, exp / 2 );			// multiply answer by 2^(exp/2)
+		return ( float )ldexp( y, exp / 2 );		// multiply answer by 2^(exp/2)
 	}
 
 	// Lerp
@@ -132,7 +152,7 @@ namespace grMath
 
 	// MoveToZero
 	//////////////////////////////////////////////////
-	inline float MoveToZero( float from, float speed )						// Untested
+	inline float MoveToZero( float from, float speed )				// Untested
 	{
 		float cpyFrom = from;
 		float sign = Sign( from );

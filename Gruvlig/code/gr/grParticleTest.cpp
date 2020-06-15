@@ -2,8 +2,7 @@
 
 
 grCParticleSys::grCParticleSys( const intU particleSize, const float spawnRate )
-	: m_MaxParticleSize			( particleSize )
-	, m_TrackedGeneratorSize	( 0 )
+	: m_MaxParticleSize	( particleSize )
 {
 	// Particle data
 	m_puParticle.reset( new grSParticle( m_MaxParticleSize ) );
@@ -27,13 +26,6 @@ grCParticleSys::grCParticleSys( const intU particleSize, const float spawnRate )
 	// Emitters & Updaters
 	m_puEmitter.reset( new grSEmitter( spawnRate, m_MaxParticleSize ) );
 	m_puUpdater.reset( new grSUpdater( m_MaxParticleSize ) );
-
-
-	// Tracker for which generators that have been added. This exists to avoid using if statement in the runtime loop
-	sizeT size = ( sizeT )EGeneratorTypes::SIZE;
-	m_puTrackedGenerator.reset( new EGeneratorTypes[ size ] );
-	for( sizeT i = 0; i < size; ++i )
-		m_puTrackedGenerator[ i ] = EGeneratorTypes::SIZE;
 }
 
 
@@ -41,20 +33,33 @@ grCParticleSys::~grCParticleSys( void )
 {}
 
 
-void grCParticleSys::AddLifeGenerator( const grV2f& minMax )
+void
+grCParticleSys::SetPosition( const grV2f& position )
 {
-	m_puEmitter->m_LifeGen.reset( new grSLifeGenerator( minMax ) );
-	m_puUpdater->LifeUp.reset( new grSLifeUpdater() );
-	AddTrackedGenerator( EGeneratorTypes::LIFE );
+#ifdef DEBUG
+	if ( m_puEmitter->m_upPositionGen == nullptr )
+	{
+		std::cerr << "grCParticleSys::SetPosition(): PositionGenerator was null, no default position set" << std::endl;
+		return;
+	}
+#endif
+
+	m_puEmitter->m_upPositionGen->Default = position;
+}
+
+
+void grCParticleSys::CreateLife( const grV2f& minMax )
+{
+	m_puEmitter->m_upLifeGen.reset( new grSLifeGenerator( minMax ) );
+	m_puUpdater->m_upLifeUp.reset( new grSLifeUpdater() );
 }
 
 
 void
-grCParticleSys::AddPositionGenerator( const grV2f& min, const grV2f& max )
+grCParticleSys::CreatePosition( const grV2f& min, const grV2f& max )
 {
-	m_puEmitter->m_PositionGen.reset( new grSPositionGenerator( min, max ) );
-	m_puUpdater->PositionUp.reset( new grSPositionUpdater() );
-	AddTrackedGenerator( EGeneratorTypes::POSITION );
+	m_puEmitter->m_upPositionGen.reset( new grSPositionGenerator( min, max ) );
+	m_puUpdater->m_upPositionUp.reset( new grSPositionUpdater() );
 }
 
 
@@ -66,8 +71,8 @@ grCParticleSys::AddPositionGenerator( const grV2f& min, const grV2f& max )
 void
 grCParticleSys::Update( const float deltaT )
 {
-	m_puEmitter->Emit( m_puParticle, m_puTrackedGenerator, m_TrackedGeneratorSize, deltaT );
-	m_puUpdater->Update( m_puParticle, m_puTrackedGenerator, m_TrackedGeneratorSize, deltaT );
+	m_puEmitter->Emit( m_puParticle, deltaT );
+	m_puUpdater->Update( m_puParticle, deltaT );
 
 
 	// TEST DRAW
@@ -78,14 +83,4 @@ grCParticleSys::Update( const float deltaT )
 		grDebugManager::Instance().AddBBox( box, sf::Color::Green );
 	}
 	// TEST DRAW
-}
-
-
-void grCParticleSys::AddTrackedGenerator( const EGeneratorTypes type )
-{
-	if ( m_puTrackedGenerator[ ( sizeT )type ] == EGeneratorTypes::SIZE )
-	{
-		m_puTrackedGenerator[ ( sizeT )type ] = type;
-		++m_TrackedGeneratorSize;
-	}
 }

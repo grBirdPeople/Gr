@@ -160,9 +160,9 @@ grSandbox::grSandbox( void )
 	//m_Emitr1.SetColor( sf::Color( 0, 255, 0, 255 ), sf::Color( 0, 0, 0, 255 ) );
 
 
-
-	m_pPartSys->AddLifeGenerator( grV2f( 0.1f, 1.0f ) );
-	m_pPartSys->AddPositionGenerator( grV2f( 640.0f * 0.75f, 360.0f * 0.75f ), grV2f( 640.0f - 20.0f, 360.0f - 20.0f ) );
+	
+	m_pPartSys->CreateLife( grV2f( 0.1f, 0.9f ) );
+	m_pPartSys->CreatePosition( grV2f( 640.0f * 0.75f, 360.0f * 0.75f ), grV2f( 640.0f * 0.95f, 360.0f * 0.95f ) );
 }
 
 
