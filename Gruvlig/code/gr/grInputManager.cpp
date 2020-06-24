@@ -6,37 +6,20 @@
 // cTor
 //////////////////////////////////////////////////
 grInputManager::grInputManager( void )
-	: m_MousePos		( grV2f() )
+	: m_MousePos	( grV2f() )
 	, m_MouseScroll	( 0 )
 	, m_bMouseMoved	( false )
 {
 	m_KeyCount = sf::Keyboard::KeyCount;
 	m_MouseCount = sf::Mouse::ButtonCount;
 
-	m_Key.reserve( m_KeyCount );
-	m_KeyDown.reserve( m_KeyCount );
-	m_MouseButton.reserve( m_MouseCount );
-	m_MouseButtonDown.reserve( m_MouseCount );
+	m_puKey.reset( new bool[ m_KeyCount ] );
+	m_puKeyDown.reset( new bool[ m_KeyCount ] );
+	m_puMouseButton.reset( new bool[ m_MouseCount ] );
+	m_puMouseButtonDown.reset( new bool[ m_MouseCount ] );
 
-	for ( intU i = 0; i < m_KeyCount; i++ )
-	{
-		m_Key.push_back( false );
-	}
-
-	for (intU i = 0; i < m_KeyCount; i++)
-	{
-		m_KeyDown.push_back( false );
-	}
-
-	for ( intU i = 0; i < m_MouseCount; i++ )
-	{
-		m_MouseButton.push_back( false );
-	}
-
-	for (intU i = 0; i < m_MouseCount; i++)
-	{
-		m_MouseButtonDown.push_back( false );
-	}
+	ResetKeys();
+	ResetMouse();
 }
 
 
@@ -54,15 +37,11 @@ grInputManager::~grInputManager( void )
 inline void
 grInputManager::ResetKeys( void )
 {
-	for ( intU i = 0; i < m_KeyCount; i++ )
-	{
-		m_Key.push_back( false );
-	}
+	for ( sizeT i = 0; i < m_KeyCount; ++i )
+		m_puKey[ i ] = false;
 
-	for ( intU i = 0; i < m_KeyCount; i++ )
-	{
-		m_KeyDown.push_back( false );
-	}
+	for ( sizeT i = 0; i < m_KeyCount; ++i )
+		m_puKeyDown[ i ] = false;
 }
 
 
@@ -71,15 +50,11 @@ grInputManager::ResetKeys( void )
 inline void
 grInputManager::ResetMouse( void )
 {
-	for ( intU i = 0; i < m_MouseCount; i++ )
-	{
-		m_MouseButton.push_back( false );
-	}
+	for ( sizeT i = 0; i < m_MouseCount; ++i )
+		m_puMouseButton[ i ] = false;
 
-	for ( intU i = 0; i < m_MouseCount; i++ )
-	{
-		m_MouseButtonDown.push_back( false );
-	}
+	for ( sizeT i = 0; i < m_MouseCount; ++i )
+		m_puMouseButtonDown[ i ] = false;
 
 	m_MouseScroll = 0;
 	m_bMouseMoved = false;
