@@ -33,14 +33,14 @@
 struct grSColor
 {
 	grSColor( void )
-		: r( 255 )
-		, g( 255 )
-		, b( 255 )
-		, a( 1.0f )
+		: R( 255 )
+		, G( 255 )
+		, B( 255 )
+		, A( 1.0f )
 	{}
 
-	float	a;
-	intU	r, g, b;
+	float	A;
+	intU	R, G, B;
 };
 
 
@@ -48,25 +48,29 @@ struct grSColor
 struct grSParticle
 {
 	grSParticle( const sizeT size )
-		: m_Alive	( 0 )
+		: Alive	( 0 )
 	{
-		m_upColor.reset( new grSColor[ size ] );
-		m_upAcceleration.reset( new grV2f[ size ] );
-		m_upVelocity.reset( new grV2f[ size ] );
-		m_upPosition.reset( new grV2f[ size ] );
-		m_upLife.reset( new float[ size ] );
+		puColor.reset( new grSColor[ size ] );
+		puScale.reset( new grV2f[ size] );
+		puAcceleration.reset( new grV2f[ size ] );
+		puVelocity.reset( new grV2f[ size ] );
+		puPosition.reset( new grV2f[ size ] );
+		puMass.reset( new float[ size ] );
+		puLife.reset( new float[ size ] );
 	}
 
 	grSParticle( const grSParticle& ) = delete;
 	grSParticle& operator=( grSParticle& ) = delete;
 
-	pU<grSColor[]>	m_upColor;
-	pU<grV2f[]>		m_upAcceleration;
-	pU<grV2f[]>		m_upVelocity;
-	pU<grV2f[]>		m_upPosition;
-	pU<float[]>		m_upLife;
+	pU<grSColor[]>	puColor;
+	pU<grV2f[]>		puScale;
+	pU<grV2f[]>		puAcceleration;
+	pU<grV2f[]>		puVelocity;
+	pU<grV2f[]>		puPosition;
+	pU<float[]>		puMass;
+	pU<float[]>		puLife;
 
-	sizeT	m_Alive;
+	sizeT	Alive;
 };
 
 
@@ -76,31 +80,31 @@ struct grSForceBasicGenerator
 	grSForceBasicGenerator( const grV2f& min, const grV2f& max )
 		: Min	( min )
 		, Max	( max )
-		, Same	( true )
+		, Equal	( true )
 	{
 		// Make sure both of the min values are less then the max values for rand to work in the generate method
 		grMath::RangeCheckPairV2f( Min, Max );
 
 		if ( grMath::CmpV2f( min, max ) == false )
-			Same = !Same;
+			Equal = !Equal;
 	}
 
 	void Generate( pU<grSParticle>& rParticle, const sizeT startIdx, const sizeT endIdx, const pU<grRandom>& rRand, const float deltaT )
 	{
-		if ( Same )
+		if ( Equal )
 		{
 			for ( sizeT i = startIdx; i < endIdx; ++i )
-				rParticle->m_upAcceleration[ i ] = Min;
+				rParticle->puAcceleration[ i ] += Min;
 
 			return;
 		}
 
 		for ( sizeT i = startIdx; i < endIdx; ++i )
-			rParticle->m_upAcceleration[ i ] = rRand->V2f( Min, Max );
+			rParticle->puAcceleration[ i ] += rRand->V2fx2( Min, Max );
 	}
 
 	grV2f	Min, Max;
-	bool	Same;
+	bool	Equal;
 };
 
 
@@ -109,31 +113,31 @@ struct grSPositionGenerator
 	grSPositionGenerator( const grV2f& min, const grV2f& max )
 		: Min	( min )
 		, Max	( max )
-		, Same	( true )
+		, Equal	( true )
 	{
 		// Make sure both of the min values are less then the max values for rand to work in the generate method
 		grMath::RangeCheckPairV2f( Min, Max );
 
 		if ( grMath::CmpV2f( min, max ) == false )
-			Same = !Same;
+			Equal = !Equal;
 	}
 
 	void Generate( pU<grSParticle>& rParticle, const grV2f& positionalBasis, const sizeT startIdx, const sizeT endIdx, const pU<grRandom>& rRand, const float deltaT )
 	{
-		if ( Same )
+		if ( Equal )
 		{
 			for ( sizeT i = startIdx; i < endIdx + 1; ++i )
-				rParticle->m_upPosition[ i ] = Min + positionalBasis;
+				rParticle->puPosition[ i ] = Min + positionalBasis;
 
 			return;
 		}
 
 		for ( sizeT i = startIdx; i < endIdx + 1; ++i )
-			rParticle->m_upPosition[ i ] = grV2f( rRand->Float( Min.x, Max.x ), rRand->Float( Min.y, Max.y ) ) + positionalBasis;
+			rParticle->puPosition[ i ] = grV2f( rRand->V2fx2( Min, Max ) ) + positionalBasis;
 	}
 
 	grV2f	Min, Max;
-	bool	Same;
+	bool	Equal;
 };
 
 
@@ -141,7 +145,7 @@ struct grSLifeGenerator
 {
 	grSLifeGenerator( const grV2f& minMax )
 		: MinMax	( grV2f( minMax ) )
-		, Same		( true )
+		, Equal		( true )
 	{
 		if ( MinMax.x < 0.0f )
 			MinMax.x = 0.0f;
@@ -150,27 +154,27 @@ struct grSLifeGenerator
 			MinMax.y = MinMax.x;
 
 		if ( grMath::CmpFloat( MinMax.x, MinMax.y ) == false )
-			Same = !Same;
+			Equal = !Equal;
 	}
 
 	void Generate( pU<grSParticle>& rParticle, const sizeT startIdx, const sizeT endIdx, const pU<grRandom>& rRand, const float deltaT )
 	{
-		rParticle->m_Alive += endIdx - startIdx;
+		rParticle->Alive += endIdx - startIdx;
 
-		if ( Same )
+		if ( Equal )
 		{
 			for ( sizeT i = startIdx; i < endIdx + 1; ++i )
-				rParticle->m_upLife[ i ] = MinMax.x;
+				rParticle->puLife[ i ] = MinMax.x;
 
 			return;
 		}
 
 		for ( sizeT i = startIdx; i < endIdx + 1; ++i )
-			rParticle->m_upLife[ i ] = rRand->Float( MinMax.x, MinMax.y );
+			rParticle->puLife[ i ] = rRand->Float( MinMax.x, MinMax.y );
 	}
 
 	grV2f	MinMax;
-	bool	Same;
+	bool	Equal;
 };
 
 
@@ -180,35 +184,37 @@ struct grSEmitter
 		: SpawnRate			( spawnRate )
 		, MaxParticleSize	( size )
 	{
-		m_puRand.reset( new grRandom() );
+		puRand.reset( new grRandom() );
 	}
 
 	grSEmitter( const grSEmitter& ) = delete;
 	grSEmitter& operator=( const grSEmitter& ) = delete;
 
-	void Emit( pU<grSParticle>& rParticle, const grV2f& positonalBasis, const float deltaT )
+	void Emit( pU<grSParticle>& rParticle, const grV2f& positionalBasis, const float deltaT )
 	{
 		// Find out how many new particles to generate new data for
 		sizeT maxNew, startIdx, endIdx;
 		maxNew = ( sizeT )( SpawnRate * deltaT );	// Ok to ignore this warning? Seems to be generated because of the multiplie operator expecting doubles. Don't really want to cast
-		startIdx = rParticle->m_Alive;
-		endIdx = grMath::Min( rParticle->m_Alive + maxNew, MaxParticleSize - 1 );
+		startIdx = rParticle->Alive;
+		endIdx = grMath::Min( rParticle->Alive + maxNew, MaxParticleSize - 1 );
 
-		// TODO: Would be cool to not need conditionals. Do not wan't the indirections from a virtual interface base so some type of eventlist might be an option
+		// TODO: Would be cool to not need conditionals as I'm unsure how the compiler handles them
+		// Do not wan't the indirections from a virtual interface-base so instead some type of event-like thing might be an option
+
 		// Update all generators
-		if ( m_upForceBasicGen )	m_upForceBasicGen->Generate( rParticle, startIdx, endIdx, m_puRand, deltaT );
-		if ( m_upPositionGen )		m_upPositionGen->Generate( rParticle, positonalBasis, startIdx, endIdx, m_puRand, deltaT );
-		if ( m_upLifeGen )			m_upLifeGen->Generate( rParticle, startIdx, endIdx, m_puRand, deltaT );
+		if ( puForceBasicGen )	puForceBasicGen->Generate( rParticle, startIdx, endIdx, puRand, deltaT );
+		if ( puPositionGen )	puPositionGen->Generate( rParticle, positionalBasis, startIdx, endIdx, puRand, deltaT );
+		if ( puLifeGen )		puLifeGen->Generate( rParticle, startIdx, endIdx, puRand, deltaT );
 	}
 
 	// No slow virtual stuff allowed so each generator has it's own place
 	// If multiple generators of the same type can produce cool results change to arrays
 	// All types of generators goes here
-	pU<grSLifeGenerator>		m_upLifeGen;
-	pU<grSForceBasicGenerator>	m_upForceBasicGen;
-	pU<grSPositionGenerator>	m_upPositionGen;
+	pU<grSLifeGenerator>		puLifeGen;
+	pU<grSForceBasicGenerator>	puForceBasicGen;
+	pU<grSPositionGenerator>	puPositionGen;
 
-	pU<grRandom>	m_puRand;
+	pU<grRandom>	puRand;
 
 	float	SpawnRate;
 	sizeT	MaxParticleSize;
@@ -220,15 +226,8 @@ struct grSForceBasicUpdater
 {
 	void Update( pU<grSParticle>& rParticle, const float deltaT )
 	{
-		for ( sizeT i = 0; i < rParticle->m_Alive; ++i )
-			rParticle->m_upVelocity[ i ] += rParticle->m_upAcceleration[ i ] * deltaT;
-
-		for ( sizeT i = 0; i < rParticle->m_Alive; ++i )
-			rParticle->m_upPosition[ i ] += rParticle->m_upVelocity[ i ] * deltaT;
-
-		// Reset all velocity values
-		for ( sizeT i = 0; i < rParticle->m_Alive; ++i )
-			rParticle->m_upVelocity[ i ] = grV2f();
+		for ( sizeT i = 0; i < rParticle->Alive; ++i )
+			rParticle->puVelocity[ i ] = rParticle->puAcceleration[ i ];
 	}
 };
 
@@ -237,26 +236,36 @@ struct grSLifeUpdater
 {
 	void Update( pU<grSParticle>& rParticle, const float deltaT )
 	{
-		for ( sizeT i = 0; i < rParticle->m_Alive; ++i )
+		for ( sizeT i = 0; i < rParticle->Alive; ++i )
 		{
-			rParticle->m_upLife[ i ] -= deltaT;
-			if ( rParticle->m_upLife[ i ] <= 0.0f )
+			rParticle->puLife[ i ] -= deltaT;
+			if ( rParticle->puLife[ i ] <= 0.0f )
 			{
-				rParticle->m_upLife[ i ] = 0.0f;
-				SwapNowWithLast( rParticle, i );
-				--rParticle->m_Alive;
+				rParticle->puLife[ i ] = 0.0f;
+				Kill( rParticle, i );
+				--rParticle->Alive;
 			}
 		}
 	}
 
-	void SwapNowWithLast( pU<grSParticle>& rParticle, const sizeT nowIdx )
+	void Kill( pU<grSParticle>& rParticle, const sizeT nowIdx )
 	{
-		sizeT last = rParticle->m_Alive - 1;
-		grAlgo::Swap( rParticle->m_upColor[ nowIdx ],			rParticle->m_upColor[ last ] );
-		grAlgo::Swap( rParticle->m_upAcceleration[ nowIdx ],	rParticle->m_upAcceleration[ last ] );
-		grAlgo::Swap( rParticle->m_upVelocity[ nowIdx ],		rParticle->m_upVelocity[ last ] );
-		grAlgo::Swap( rParticle->m_upPosition[ nowIdx ],		rParticle->m_upPosition[ last ] );
-		grAlgo::Swap( rParticle->m_upLife[ nowIdx ],			rParticle->m_upLife[ last ] );
+		sizeT last = rParticle->Alive - 1;		
+		grAlgo::Swap( rParticle->puColor[ nowIdx ],			rParticle->puColor[ last ] );
+		grAlgo::Swap( rParticle->puScale[ nowIdx ],			rParticle->puScale[ last ] );
+		grAlgo::Swap( rParticle->puAcceleration[ nowIdx ],	rParticle->puAcceleration[ last ] );
+		grAlgo::Swap( rParticle->puVelocity[ nowIdx ],		rParticle->puVelocity[ last ] );
+		grAlgo::Swap( rParticle->puPosition[ nowIdx ],		rParticle->puPosition[ last ] );
+		grAlgo::Swap( rParticle->puMass[ nowIdx ],			rParticle->puLife[ last ] );
+		grAlgo::Swap( rParticle->puLife[ nowIdx ],			rParticle->puLife[ last ] );
+
+		rParticle->puColor[ last ] = grSColor();
+		rParticle->puScale[ last ] = grV2f();
+		rParticle->puAcceleration[ last ] = grV2f();
+		rParticle->puVelocity[ last ] = grV2f();
+		rParticle->puPosition[ last ] = grV2f();
+		rParticle->puMass[ last ] = 0.0f;
+		rParticle->puLife[ last ] = 0.0f;
 	}
 };
 
@@ -274,14 +283,17 @@ struct grSUpdater
 	{
 		// TODO: Would be cool to not need conditionals. Do not wan't the indirections from a virtual interface base so some type of eventlist might be an option
 		// Update all updaters
-		if ( m_upForceBasicUp )	m_upForceBasicUp->Update( rParticle, deltaT );
-		if ( m_upLifeUp )		m_upLifeUp->Update( rParticle, deltaT );
+		if ( upForceBasicUp )	upForceBasicUp->Update( rParticle, deltaT );
+		if ( upLifeUp )			upLifeUp->Update( rParticle, deltaT );
+
+		for ( sizeT i = 0; i < rParticle->Alive; ++i )
+			rParticle->puPosition[ i ] += rParticle->puVelocity[ i ] * deltaT;
 	}
 
 	// No slow virtual stuff allowed so each updater has it's own place
 	// All types of updaters goes here
-	pU<grSLifeUpdater>			m_upLifeUp;
-	pU<grSForceBasicUpdater>	m_upForceBasicUp;
+	pU<grSLifeUpdater>			upLifeUp;
+	pU<grSForceBasicUpdater>	upForceBasicUp;
 
 	sizeT	MaxParticleSize;
 };
@@ -312,8 +324,7 @@ private:
 	pU<grSEmitter>	m_puEmitter;
 	pU<grSUpdater>	m_puUpdater;
 
-	// TODO: Implement this as a positional basis, ex; if the particles would spawn from a moving target
-	grV2f	m_PositionSys;
+	grV2f	m_SysPosition;
 
 	sizeT	m_MaxParticleSize;
 };

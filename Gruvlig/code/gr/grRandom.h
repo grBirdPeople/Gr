@@ -19,17 +19,17 @@ public:
 
 	grRandom( void )
 	{
-		ReSeed();
+		Seed();
 	}
 
 	//////////////////////////////////////////////////
 
-	inline void ReSeed( void )
+	inline void Seed( void )
 	{		
 		m_Mt.seed( std::random_device{}() );
 	}
 
-	inline grV2f V2f( const grV2f& v1, const grV2f& v2 )
+	inline grV2f V2fx2( const grV2f& v1, const grV2f& v2 )
 	{
 		grV2f v;
 		m_RandFloat.param( std::uniform_real_distribution<float>::param_type( v1.x, v2.x ) );
@@ -37,6 +37,12 @@ public:
 		m_RandFloat.param( std::uniform_real_distribution<float>::param_type( v1.y, v2.y ) );
 		v.y = m_RandFloat( m_Mt );
 		return v;
+	}
+
+	inline grV2f V2f( const grV2f& v )
+	{
+		m_RandFloat.param( std::uniform_real_distribution<float>::param_type( v.x, v.y ) );
+		return m_RandFloat( m_Mt );
 	}
 
 	inline float Float( const float min, const float max )

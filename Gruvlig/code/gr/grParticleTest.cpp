@@ -2,26 +2,32 @@
 
 
 grCParticleSys::grCParticleSys( const intU particleSize, const float spawnRate, const grV2f& position )
-	: m_PositionSys		( grV2f() )
+	: m_SysPosition		( grV2f() )
 	, m_MaxParticleSize	( particleSize )
 {
 	// Particle data
 	m_puParticle.reset( new grSParticle( m_MaxParticleSize ) );
 
 	for ( sizeT i = 0; i < m_MaxParticleSize; ++i )
-		m_puParticle->m_upColor[ i ] = grSColor();
+		m_puParticle->puColor[ i ] = grSColor();
 
 	for ( sizeT i = 0; i < m_MaxParticleSize; ++i )
-		m_puParticle->m_upAcceleration[ i ] = grV2f();
+		m_puParticle->puScale[ i ] = grV2f();
 
 	for ( sizeT i = 0; i < m_MaxParticleSize; ++i )
-		m_puParticle->m_upVelocity[ i ] = grV2f();
+		m_puParticle->puAcceleration[ i ] = grV2f();
 
 	for ( sizeT i = 0; i < m_MaxParticleSize; ++i )
-		m_puParticle->m_upPosition[ i ] = grV2f();
+		m_puParticle->puVelocity[ i ] = grV2f();
 
 	for ( sizeT i = 0; i < m_MaxParticleSize; ++i )
-		m_puParticle->m_upLife[ i ] = 0.0f;
+		m_puParticle->puPosition[ i ] = grV2f();
+
+	for ( sizeT i = 0; i < m_MaxParticleSize; ++i )
+		m_puParticle->puMass[ i ] = 0.0f;
+
+	for ( sizeT i = 0; i < m_MaxParticleSize; ++i )
+		m_puParticle->puLife[ i ] = 0.0f;
 
 
 	// Emitters & Updaters
@@ -37,7 +43,7 @@ grCParticleSys::~grCParticleSys( void )
 void
 grCParticleSys::SetPosition( const grV2f& position )
 {
-	m_PositionSys = position;
+	m_SysPosition = position;
 }
 
 
@@ -45,15 +51,15 @@ grCParticleSys::SetPosition( const grV2f& position )
 void
 grCParticleSys::CreateForceBasic( const grV2f& min, const grV2f& max )
 {
-	m_puEmitter->m_upForceBasicGen.reset( new grSForceBasicGenerator( min, max ) );
-	m_puUpdater->m_upForceBasicUp.reset( new grSForceBasicUpdater() );
+	m_puEmitter->puForceBasicGen.reset( new grSForceBasicGenerator( min, max ) );
+	m_puUpdater->upForceBasicUp.reset( new grSForceBasicUpdater() );
 }
 
 
 void
 grCParticleSys::CreatePosition( const grV2f& min, const grV2f& max )
 {
-	m_puEmitter->m_upPositionGen.reset( new grSPositionGenerator( min, max ) );
+	m_puEmitter->puPositionGen.reset( new grSPositionGenerator( min, max ) );
 }
 
 
@@ -61,8 +67,8 @@ grCParticleSys::CreatePosition( const grV2f& min, const grV2f& max )
 void
 grCParticleSys::CreateLife( const grV2f& minMax )
 {
-	m_puEmitter->m_upLifeGen.reset( new grSLifeGenerator( minMax ) );
-	m_puUpdater->m_upLifeUp.reset( new grSLifeUpdater() );
+	m_puEmitter->puLifeGen.reset( new grSLifeGenerator( minMax ) );
+	m_puUpdater->upLifeUp.reset( new grSLifeUpdater() );
 }
 
 
@@ -74,16 +80,16 @@ grCParticleSys::CreateLife( const grV2f& minMax )
 void
 grCParticleSys::Update( const float deltaT )
 {
-	m_puEmitter->Emit( m_puParticle, m_PositionSys, deltaT );
+	m_puEmitter->Emit( m_puParticle, m_SysPosition, deltaT );
 	m_puUpdater->Update( m_puParticle, deltaT );
 
 
 	// TEST DRAW
-	printf( "%s %d \n", "PartsAlive: ", m_puParticle->m_Alive );
-	for ( sizeT idx = 0; idx < m_puParticle->m_Alive; ++idx )
+	printf( "%s %d \n", "PartsAlive: ", m_puParticle->Alive );
+	for ( sizeT idx = 0; idx < m_puParticle->Alive; ++idx )
 	{
-		grBBox box( grV2f( 5.5f, 5.5f ), m_puParticle->m_upPosition[ idx ] );
-		grDebugManager::Instance().AddBBox( box, sf::Color::Green );
+		grBBox box( grV2f( 1.5f, 1.5f ), m_puParticle->puPosition[ idx ] );
+		grDebugManager::Instance().AddBBox( box, sf::Color::White );
 	}
 	// TEST DRAW
 }
