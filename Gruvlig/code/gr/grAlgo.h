@@ -11,9 +11,9 @@ namespace grAlgo
 	template<typename T>
 	inline void Swap( T& a, T& b)
 	{
-		T tmp = a;
-		a = b;
-		b = tmp;
+		T tmp = b;
+		b = a;
+		a = tmp;
 	}
 
 	template<typename T>
