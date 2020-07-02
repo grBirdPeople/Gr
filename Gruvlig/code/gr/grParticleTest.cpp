@@ -31,13 +31,20 @@ grCParticleSys::grCParticleSys( const intU particleSize, const float spawnRate, 
 
 
 	// Emitters & Updaters
-	m_puEmitter.reset( new grSEmitter( spawnRate, m_MaxParticleSize ) );
+	m_puEmitter.reset( new grSEmitter( 1.0f / grMath::Abs( spawnRate ), m_MaxParticleSize ) );
 	m_puUpdater.reset( new grSUpdater( m_MaxParticleSize ) );
 }
 
 
 grCParticleSys::~grCParticleSys( void )
 {}
+
+
+void
+grCParticleSys::SetSpawnRate( const float spawnRate )
+{
+	m_puEmitter->SpawnRate = 1.0f / grMath::Abs( spawnRate );
+}
 
 
 void
@@ -85,7 +92,7 @@ grCParticleSys::Update( const float deltaT )
 
 
 	// TEST DRAW
-	printf( "%s %d \n", "PartsAlive: ", m_puParticle->Alive );
+	printf( "Max: %d %2s Alive: %d \n", m_MaxParticleSize, "", m_puParticle->Alive );
 	for ( sizeT idx = 0; idx < m_puParticle->Alive; ++idx )
 	{
 		grBBox box( grV2f( 1.5f, 1.5f ), m_puParticle->puPosition[ idx ] );

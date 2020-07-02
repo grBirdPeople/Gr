@@ -182,6 +182,8 @@ struct grSEmitter
 {
 	grSEmitter( const float spawnRate, const sizeT size )
 		: SpawnRate			( spawnRate )
+		, SpawnAccT			( 0.0f )
+		, NewSpawns			( 0 )
 		, MaxParticleSize	( size )
 	{
 		puRand.reset( new grRandom() );
@@ -192,32 +194,42 @@ struct grSEmitter
 
 	void Emit( pU<grSParticle>& rParticle, const grV2f& positionalBasis, const float deltaT )
 	{
-		// Find out how many new particles to generate new data for
-		sizeT maxNew, startIdx, endIdx;
-		maxNew = ( sizeT )( SpawnRate * deltaT );	// Ok to ignore this warning? Seems to be generated because of the multiplie operator expecting doubles. Don't really want to cast
-		startIdx = rParticle->Alive;
-		endIdx = grMath::Min( rParticle->Alive + maxNew, MaxParticleSize - 1 );
+		SpawnAccT += deltaT;
+		while ( SpawnAccT >= SpawnRate )
+		{
+			SpawnAccT -= SpawnRate;
+			NewSpawns += 1;
+		}
 
-		// TODO: Would be cool to not need conditionals as I'm unsure how the compiler handles them
-		// Do not wan't the indirections from a virtual interface-base so instead some type of event-like thing might be an option
+		if ( NewSpawns > 0 )
+		{
+			// Find array indices
+			sizeT startIdx, endIdx;
+			startIdx = rParticle->Alive;
+			endIdx = grMath::Min( rParticle->Alive + NewSpawns, MaxParticleSize - 1 );
 
-		// Update all generators
-		if ( puForceBasicGen )	puForceBasicGen->Generate( rParticle, startIdx, endIdx, puRand, deltaT );
-		if ( puPositionGen )	puPositionGen->Generate( rParticle, positionalBasis, startIdx, endIdx, puRand, deltaT );
-		if ( puLifeGen )		puLifeGen->Generate( rParticle, startIdx, endIdx, puRand, deltaT );
+			// Update all generators
+			if ( puForceBasicGen )	puForceBasicGen->Generate( rParticle, startIdx, endIdx, puRand, deltaT );
+			if ( puPositionGen )	puPositionGen->Generate( rParticle, positionalBasis, startIdx, endIdx, puRand, deltaT );
+			if ( puLifeGen )		puLifeGen->Generate( rParticle, startIdx, endIdx, puRand, deltaT );
+		}
+
+		NewSpawns = 0;
 	}
 
-	// No slow virtual stuff allowed so each generator has it's own place
-	// If multiple generators of the same type can produce cool results change to arrays
 	// All types of generators goes here
+	// No slow virtual stuff allowed so each generator has it's own place
+	// If multiple generators of the same type would produce cool results perhaps change to arrays
 	pU<grSLifeGenerator>		puLifeGen;
 	pU<grSForceBasicGenerator>	puForceBasicGen;
 	pU<grSPositionGenerator>	puPositionGen;
 
 	pU<grRandom>	puRand;
 
-	float	SpawnRate;
-	sizeT	MaxParticleSize;
+	float	SpawnRate,
+			SpawnAccT;
+	sizeT	NewSpawns,
+			MaxParticleSize;
 };
 
 
@@ -241,7 +253,6 @@ struct grSLifeUpdater
 			rParticle->puLife[ i ] -= deltaT;
 			if ( rParticle->puLife[ i ] <= 0.0f )
 			{
-				rParticle->puLife[ i ] = 0.0f;
 				Kill( rParticle, i );
 				--rParticle->Alive;
 			}
@@ -250,22 +261,28 @@ struct grSLifeUpdater
 
 	void Kill( pU<grSParticle>& rParticle, const sizeT nowIdx )
 	{
-		sizeT last = rParticle->Alive - 1;		
+		//for( sizeT i = 0; i < rParticle->Alive; ++i )
+		//	printf( "%g \n", rParticle->puLife[ i ] );
+
+		sizeT last = rParticle->Alive - 1;
+
+		rParticle->puColor[ nowIdx ] = grSColor();
+		rParticle->puScale[ nowIdx ] = grV2f();
+		rParticle->puAcceleration[ nowIdx ] = grV2f();
+		rParticle->puVelocity[ nowIdx ] = grV2f();
+		rParticle->puPosition[ nowIdx ] = grV2f();
+		rParticle->puMass[ nowIdx ] = 0.0f;
+		rParticle->puLife[ nowIdx ] = 0.0f;
+
 		grAlgo::Swap( rParticle->puColor[ nowIdx ],			rParticle->puColor[ last ] );
 		grAlgo::Swap( rParticle->puScale[ nowIdx ],			rParticle->puScale[ last ] );
 		grAlgo::Swap( rParticle->puAcceleration[ nowIdx ],	rParticle->puAcceleration[ last ] );
 		grAlgo::Swap( rParticle->puVelocity[ nowIdx ],		rParticle->puVelocity[ last ] );
 		grAlgo::Swap( rParticle->puPosition[ nowIdx ],		rParticle->puPosition[ last ] );
-		grAlgo::Swap( rParticle->puMass[ nowIdx ],			rParticle->puLife[ last ] );
+		grAlgo::Swap( rParticle->puMass[ nowIdx ],			rParticle->puMass[ last ] );
 		grAlgo::Swap( rParticle->puLife[ nowIdx ],			rParticle->puLife[ last ] );
 
-		rParticle->puColor[ last ] = grSColor();
-		rParticle->puScale[ last ] = grV2f();
-		rParticle->puAcceleration[ last ] = grV2f();
-		rParticle->puVelocity[ last ] = grV2f();
-		rParticle->puPosition[ last ] = grV2f();
-		rParticle->puMass[ last ] = 0.0f;
-		rParticle->puLife[ last ] = 0.0f;
+
 	}
 };
 
@@ -283,11 +300,11 @@ struct grSUpdater
 	{
 		// TODO: Would be cool to not need conditionals. Do not wan't the indirections from a virtual interface base so some type of eventlist might be an option
 		// Update all updaters
-		if ( upForceBasicUp )	upForceBasicUp->Update( rParticle, deltaT );
-		if ( upLifeUp )			upLifeUp->Update( rParticle, deltaT );
-
 		for ( sizeT i = 0; i < rParticle->Alive; ++i )
 			rParticle->puPosition[ i ] += rParticle->puVelocity[ i ] * deltaT;
+
+		if ( upForceBasicUp )	upForceBasicUp->Update( rParticle, deltaT );
+		if ( upLifeUp )			upLifeUp->Update( rParticle, deltaT );
 	}
 
 	// No slow virtual stuff allowed so each updater has it's own place
@@ -309,6 +326,7 @@ public:
 	grCParticleSys( const grCParticleSys& ) = delete;
 	grCParticleSys& operator=( const grCParticleSys& ) = delete;
 
+	void SetSpawnRate( const float spawnRate );
 	void SetPosition( const grV2f& position );
 
 	// TODO: Could be better to use injection here as that would make it possible store and share behaviours externaly
