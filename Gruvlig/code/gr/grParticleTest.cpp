@@ -92,7 +92,7 @@ grCParticleSys::Update( const float deltaT )
 
 
 	// TEST DRAW
-	printf( "Max: %d %2s Alive: %d \n", m_MaxParticleSize, "", m_puParticle->Alive );
+	//printf( "Max: %d %2s Alive: %d \n", m_MaxParticleSize, "", m_puParticle->Alive );
 	for ( sizeT idx = 0; idx < m_puParticle->Alive; ++idx )
 	{
 		grBBox box( grV2f( 1.5f, 1.5f ), m_puParticle->puPosition[ idx ] );
