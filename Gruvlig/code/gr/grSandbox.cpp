@@ -29,7 +29,7 @@ grSandbox::grSandbox( void )
 	: m_rInputMan		( grInputManager::Instance() )
 	//, m_rPartMan		( grCParticleManager::Instance() )
 	//, m_Emitr1		( grCParticleManager::Instance().Create() )
-	, m_pPartSys		( new grCParticleSys( 10000, 1000.0f ) )
+	, m_pPartSys		( new grCParticleSys( 5000, 1000.0f ) )
 	, m_PartSysIdOne	( -1 )
 	, m_PartSysIdTwo	( -1 )
 	, m_RendWin			( grCore::Instance().GetRenderWin() )
@@ -160,11 +160,11 @@ grSandbox::grSandbox( void )
 	//m_Emitr1.SetColor( sf::Color( 0, 255, 0, 255 ), sf::Color( 0, 0, 0, 255 ) );
 
 
-	m_pPartSys->SetSpawnRate( 1000.0f );
-	m_pPartSys->CreateForceBasic( grV2f( 0.0f, 100.0f ), grV2f( 0.0f, 100.0f ) );
-	//m_pPartSys->CreatePosition( grV2f( 640.0f * 0.75f, 360.0f * 0.75f ), grV2f( 640.0f * 0.75f, 360.0f * 0.75f ) );
-	m_pPartSys->CreatePosition( grV2f( 640.0f * 0.75f, 360.0f * 0.5f ), grV2f( 640.0f * 0.9f, 360.0f * 0.5f ) );
-	m_pPartSys->CreateLife( grV2f( 0.5f, 1.5f ) );
+	m_pPartSys->EmitRate( 1000.0f );
+	m_pPartSys->PositionSys( grV2f( 640.0f * 0.75f, 360.0f * 0.25f ) );
+	m_pPartSys->PositionOffset( grV2f( -40.0f, 0.0f ), grV2f( 40.0f, 0.0f ) );
+	m_pPartSys->ForceBasic( grV2f( 0.0f, 10.0f ), grV2f( 0.0f, 100.0f ) );
+	m_pPartSys->Life( grV2f( 0.5f, 1.5f ) );
 }
 
 
@@ -176,9 +176,11 @@ grSandbox::Update( const float deltaT )
 	// Particle things
 	m_pPartSys->Update( deltaT );
 
-
 	if ( m_rInputMan.GetMouseMoved() )
 	{
+		m_pPartSys->PositionSys( m_rInputMan.GetMousePos() );
+
+
 		//m_pPartSys->SetPosition( m_rInputMan.GetMousePos() );
 
 		//m_Emitr1.SetPosition( m_rInputMan.GetMousePos() );

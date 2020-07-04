@@ -22,7 +22,8 @@ public:
 		Seed();
 	}
 
-	//////////////////////////////////////////////////
+	grRandom( const grRandom& ) = delete;
+	grRandom& operator=( const grRandom& ) = delete;
 
 	inline void Seed( void )
 	{		
@@ -63,10 +64,7 @@ public:
 		return ( intU )m_RandIntU( m_Mt );
 	}
 
-	//////////////////////////////////////////////////
-
 private:
-
 	std::mt19937	m_Mt;
 
 	uniform_float	m_RandFloat;
