@@ -9,42 +9,6 @@
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-//// Saved for later
-
-// currentColour = (targetColour - currentColour) * rate + currentColour
-
-//particles[ i ].colour.r = ( 255 - particles[ i ].colour.r ) * rate + particles[ i ].colour.r;
-//particles[ i ].colour.g = ( 255 - particles[ i ].colour.g ) * rate + particles[ i ].colour.g;
-//particles[ i ].colour.b = ( 255 - particles[ i ].colour.b ) * rate + particles[ i ].colour.b;
-
-
-//int interpolate( int startValue, int endValue, int stepNumber, int lastStepNumber )
-//{
-//	return ( endValue - startValue ) * stepNumber / lastStepNumber + startValue;
-//}
-
-
-//rPart.Color.r = rAtt.PartColMinMax.From.R;
-//rPart.Color.g = rAtt.PartColMinMax.From.G;
-//rPart.Color.b = rAtt.PartColMinMax.From.B;
-//rPart.Color.a = rAtt.PartColMinMax.From.A;
-//
-//if ( rAtt.PartColMinMax.From != rAtt.PartColMinMax.Too )
-//{
-//	float r = ( float )rAtt.PartColMinMax.Too.R - ( float )rAtt.PartColMinMax.From.R;
-//	float g = ( float )rAtt.PartColMinMax.Too.G - ( float )rAtt.PartColMinMax.From.G;
-//	float b = ( float )rAtt.PartColMinMax.Too.B - ( float )rAtt.PartColMinMax.From.B;
-//	float a = ( float )rAtt.PartColMinMax.Too.A - ( float )rAtt.PartColMinMax.From.A;
-//
-//	float t = rPart.Life * 60.0f;
-//	rPart.ColRate.R = !grMath::CmpFloat( r, 0.0f ) ? r / t : 0.0f;
-//	rPart.ColRate.G = !grMath::CmpFloat( g, 0.0f ) ? g / t : 0.0f;
-//	rPart.ColRate.B = !grMath::CmpFloat( b, 0.0f ) ? b / t : 0.0f;
-//	rPart.ColRate.A = !grMath::CmpFloat( a, 0.0f ) ? a / t : 0.0f;
-//}
-
-
 struct grSColor
 {
 	grSColor( intU r = 255, intU g = 255, intU b = 255, intU a = 255 )
@@ -105,7 +69,7 @@ struct grSParticle
 	}
 
 	pU<grSColor[]>	puColorStart;
-	pU<grSColor[]>	puColorEnd;
+	pU<grSColor[]>	puColorEnd; // TODO: Don't like this one. Figure out how to communicate start and end colors to the updater without binding
 	pU<grV2f[]>		puScale;
 	pU<grV2f[]>		puAcceleration;
 	pU<grV2f[]>		puVelocity;
@@ -125,48 +89,37 @@ struct grSGeneratorBase
 		YES = 1
 	};
 
-	void SetBase( const grSColor& startIn, const grSColor& endIn, grSColor& startOut, grSColor& endOut )
+	void SetBase( grSColor& rStart, grSColor& rEnd )
 	{
-		startOut = startIn;
-		endOut = endIn;
+		rStart.R = grMath::Clamp( rStart.R, 0, 255 );
+		rStart.G = grMath::Clamp( rStart.G, 0, 255 );
+		rStart.B = grMath::Clamp( rStart.B, 0, 255 );
+		rStart.A = grMath::Clamp( rStart.A, 0, 255 );
 
-		startOut.R = grMath::Clamp( startOut.R, 0, 255 );
-		startOut.G = grMath::Clamp( startOut.G, 0, 255 );
-		startOut.B = grMath::Clamp( startOut.B, 0, 255 );
-		startOut.A = grMath::Clamp( startOut.A, 0, 255 );
+		rEnd.R = grMath::Clamp( rEnd.R, 0, 255 );
+		rEnd.G = grMath::Clamp( rEnd.G, 0, 255 );
+		rEnd.B = grMath::Clamp( rEnd.B, 0, 255 );
+		rEnd.A = grMath::Clamp( rEnd.A, 0, 255 );
 
-		endOut.R = grMath::Clamp( endOut.R, 0, 255 );
-		endOut.G = grMath::Clamp( endOut.G, 0, 255 );
-		endOut.B = grMath::Clamp( endOut.B, 0, 255 );
-		endOut.A = grMath::Clamp( endOut.A, 0, 255 );
-
-		if ( grMath::CmpIntU( startOut.R, endOut.R ) &&
-			 grMath::CmpIntU( startOut.G, endOut.G ) &&
-			 grMath::CmpIntU( startOut.B, endOut.B ) &&
-			 grMath::CmpIntU( startOut.A, endOut.A ) )
+		if ( grMath::CmpIntU( rStart.R, rEnd.R ) &&
+			 grMath::CmpIntU( rStart.G, rEnd.G ) &&
+			 grMath::CmpIntU( rStart.B, rEnd.B ) &&
+			 grMath::CmpIntU( rStart.A, rEnd.A ) )
 		{
 			Equal = EEqual::YES;
 		}
 	}
 
-	void SetBase( const grV2f& minIn, const grV2f& maxIn, grV2f& minOut, grV2f& maxOut )
+	void SetBase( grV2f& rMin, grV2f& rMax )
 	{
-		minOut = minIn;
-		maxOut = maxIn;
-
-		grMath::RangeCheckV2fx2( minOut, maxOut );
-		Equal = grMath::CmpV2f( minOut, maxOut ) ? EEqual::YES : EEqual::NO;
+		grMath::RangeCheckV2fx2( rMin, rMax );
+		Equal = grMath::CmpV2f( rMin, rMax ) ? EEqual::YES : EEqual::NO;
 	}
 
-	void SetBase( const grV2f& in, grV2f& out )
+	void SetBase( grV2f& rMinMax )
 	{
-		out = in;
-
-		if ( out.x < 0.0f )
-			out.x = 0.0f;
-
-		grMath::RangeCheckV2f( out );
-		Equal = grMath::CmpFloat( out.x, out.y ) ? EEqual::YES : EEqual::NO;
+		grMath::RangeCheckV2f( rMinMax );
+		Equal = grMath::CmpFloat( rMinMax.x, rMinMax.y ) ? EEqual::YES : EEqual::NO;
 	}
 
 	EEqual Equal;
@@ -174,9 +127,11 @@ struct grSGeneratorBase
 
 struct grSColorGenerator : public grSGeneratorBase
 {
-	void Set( const grSColor& start, const grSColor& end )
+	void Set( const grSColor& rStart, const grSColor& rEnd )
 	{
-		SetBase( start, end, LocalStart, LocalEnd );
+		LocalStart = rStart;
+		LocalEnd = rEnd;
+		SetBase( LocalStart, LocalEnd );
 	}
 
 	void Generate( pU<grSParticle>& rParticle, const sizeT startIdx, const sizeT endIdx, const pU<grRandom>& rRand )
@@ -243,7 +198,9 @@ struct grSForceBasicGenerator : public grSGeneratorBase
 {
 	void Set( const grV2f& min, const grV2f& max )
 	{
-		SetBase( min, max, LocalMin, LocalMax );
+		LocalMin = min;
+		LocalMax = max;
+		SetBase( LocalMin, LocalMax );
 	}
 
 	void Generate( pU<grSParticle>& rParticle, const sizeT startIdx, const sizeT endIdx, const pU<grRandom>& rRand )
@@ -268,7 +225,9 @@ struct grSPositionGenerator : public grSGeneratorBase
 {
 	void Set( const grV2f& min, const grV2f& max )
 	{
-		SetBase( min, max, LocalMin, LocalMax );
+		LocalMin = min;
+		LocalMax = max;
+		SetBase( LocalMin, LocalMax );
 	}
 
 	void Generate( pU<grSParticle>& rParticle, const grV2f& positionSys, const sizeT startIdx, const sizeT endIdx, const pU<grRandom>& rRand )
@@ -291,13 +250,13 @@ struct grSPositionGenerator : public grSGeneratorBase
 
 struct grSMassGenerator : public grSGeneratorBase
 {
-	void Set( const grV2f& minMax )
+	void Set( const grV2f& rMinMax )
 	{
-		grV2f min = minMax;
-		if( min.x < 1.0f )
-			min.x = 1.0f;
+		LocalMinMax = rMinMax;
+		if ( LocalMinMax.x < 1.0f )
+			LocalMinMax.x = 1.0f;
 
-		SetBase( min, LocalMin );
+		SetBase( LocalMinMax );
 	}
 
 	void Generate( pU<grSParticle>& rParticle, const sizeT startIdx, const sizeT endIdx, const pU<grRandom>& rRand )
@@ -305,23 +264,27 @@ struct grSMassGenerator : public grSGeneratorBase
 		if ( Equal == grSGeneratorBase::EEqual::NO )
 		{
 			for ( sizeT i = startIdx; i < endIdx; ++i )
-				rParticle->puMass[ i ] = rRand->Float( LocalMin.x, LocalMin.y );
+				rParticle->puMass[ i ] = rRand->Float( LocalMinMax.x, LocalMinMax.y );
 
 			return;
 		}
 
 		for ( sizeT i = startIdx; i < endIdx; ++i )
-			rParticle->puMass[ i ] = LocalMin.x;
+			rParticle->puMass[ i ] = LocalMinMax.x;
 	}
 
-	grV2f LocalMin;
+	grV2f LocalMinMax;
 };
 
 struct grSLifeGenerator : public grSGeneratorBase
 {
 	void Set( const grV2f& minMax )
 	{
-		SetBase( minMax, LocalMin );
+		LocalMinMax = minMax;
+		if ( LocalMinMax.x < 0.0f )
+			LocalMinMax.x = 0.0f;
+
+		SetBase( LocalMinMax );
 	}
 
 	void Generate( pU<grSParticle>& rParticle, const sizeT startIdx, const sizeT endIdx, const pU<grRandom>& rRand )
@@ -329,16 +292,16 @@ struct grSLifeGenerator : public grSGeneratorBase
 		if ( Equal == grSGeneratorBase::EEqual::NO )
 		{
 			for ( sizeT i = startIdx; i < endIdx; ++i )
-				rParticle->puLife[ i ] = rRand->Float( LocalMin.x, LocalMin.y );
+				rParticle->puLife[ i ] = rRand->Float( LocalMinMax.x, LocalMinMax.y );
 
 			return;
 		}
 
 		for ( sizeT i = startIdx; i < endIdx; ++i )
-			rParticle->puLife[ i ] = LocalMin.x;
+			rParticle->puLife[ i ] = LocalMinMax.x;
 	}
 
-	grV2f LocalMin;
+	grV2f LocalMinMax;
 };
 
 struct grSEmitter
