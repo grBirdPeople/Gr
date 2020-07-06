@@ -6,7 +6,7 @@
 #include	"grMapManager.h"
 #include	"grNavMeshManager.h"
 //#include	"grParticleManagerPB.h"
-#include	"grCParticleManager.h"
+//#include	"grCParticleManager.h"
 #include	"grSandbox.h"
 
 

@@ -21,9 +21,9 @@ namespace grMath
 
 	// Min
 	//////////////////////////////////////////////////
-	inline sizeT Min( const sizeT a, const sizeT b )
+	inline intU	Min( const intU a, const intU b )
 	{
-		sizeT value = ( a < b ) ? a : ( b < a ) ? b : a;
+		intU value = ( a < b ) ? a : ( b < a ) ? b : a;
 		return value;
 	}
 	inline intS	Min( const intS a, const intS b )
@@ -39,9 +39,9 @@ namespace grMath
 
 	// Max
 	//////////////////////////////////////////////////
-	inline sizeT Max( const sizeT a, const sizeT b )
+	inline intU Max( const intU a, const intU b )
 	{
-		sizeT value = ( a > b ) ? a : ( b > a ) ? b : a;
+		intU value = ( a > b ) ? a : ( b > a ) ? b : a;
 		return value;
 	}
 	inline intS	Max( const intS a, const intS b )
@@ -57,12 +57,22 @@ namespace grMath
 
 	// RangeCheckV2f
 	//////////////////////////////////////////////////
-	inline void RangeCheckPairV2f( grV2f& min, grV2f& max )
+	inline void RangeCheckIntU( const intU a, intU& b )
+	{
+		if ( a > b )
+			b = a;
+	}
+	inline void RangeCheckV2f( grV2f& v )
+	{
+		if ( v.x > v.y )
+			v.y = v.x;
+	}
+	inline void RangeCheckV2fx2( const grV2f& min, grV2f& max )
 	{
 		if ( min.x > max.x )
-			min.x = max.x;
+			max.x = min.x;
 		if ( min.y > max.y )
-			min.y = max.y;
+			max.y = min.y;
 	}
 
 	// Abs
@@ -177,7 +187,7 @@ namespace grMath
 
 	// RotatePoint
 	//////////////////////////////////////////////////
-	inline void RotatePoint( grV2f* pPoint, const float rotInRad )
+	inline void RotatePoint( grV2f* pPoint, const float rotInRad ) // TODO: Change from ptr to ref when old particle code is gone
 	{
 		float sin = std::sin( rotInRad );
 		float cos = std::cos( rotInRad );
@@ -242,13 +252,14 @@ namespace grMath
 
 	// ZeroCmp
 	//////////////////////////////////////////////////
+	inline bool CmpIntU( const intU numOne, const intU numTwo )
+	{
+		return ( numOne == numTwo );
+	}
 	inline bool CmpFloat( const float numOne, const float numTwo )
 	{
 		return Abs( numOne - numTwo ) < Epsilon;
 	}
-
-	// CmpVector
-	//////////////////////////////////////////////////
 	inline bool CmpV2f( const grV2f& rVecOne, const grV2f& rVecTwo )
 	{
 		float x = Abs( rVecOne.x - rVecTwo.x );
