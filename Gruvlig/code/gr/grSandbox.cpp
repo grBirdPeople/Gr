@@ -162,9 +162,11 @@ grSandbox::grSandbox( void )
 
 	m_pPartSys->EmitRate( 1000.0f );
 	m_pPartSys->PositionSys( grV2f( 640.0f * 0.75f, 360.0f * 0.25f ) );
+	m_pPartSys->Color( grSColor( 255, 255, 255, 255 ), grSColor( 0, 50, 255, 0 ) );
 	m_pPartSys->PositionOffset( grV2f( -40.0f, 0.0f ), grV2f( 40.0f, 0.0f ) );
 	m_pPartSys->ForceBasic( grV2f( 0.0f, 10.0f ), grV2f( 0.0f, 100.0f ) );
-	m_pPartSys->Life( grV2f( 0.5f, 1.5f ) );
+	m_pPartSys->Mass( grV2f( 1.0f, 2.0f ) );
+	m_pPartSys->Life( grV2f( 0.5f, 2.5f ) );
 }
 
 

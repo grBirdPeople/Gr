@@ -1,19 +1,11 @@
 #include	"grParticleTest.h"
 
 
-grCParticleSys::grCParticleSys( const intU particleSize, const float emitRate, const grV2f& position )
-	: m_puParticle		( std::make_unique<grSParticle>( particleSize ) )
-	, m_puEmitter		( std::make_unique<grSEmitter>( 1.0f / grMath::Abs( emitRate ), particleSize ) )
-	, m_puUpdater		( std::make_unique<grSUpdater>() )
+grCParticleSys::grCParticleSys( const grV2f& position, const float emitRate, const intU size )
+	: m_puParticle	( std::make_unique<grSParticle>( size ) )
+	, m_puEmitter	( std::make_unique<grSEmitter>( position, 1.0f / grMath::Abs( emitRate ), size ) )
+	, m_puUpdater	( std::make_unique<grSUpdater>() )
 {}
-
-
-void
-grCParticleSys::PositionSys( const grV2f& position )
-{
-	m_puEmitter->PositionSys = position;
-}
-
 
 void
 grCParticleSys::EmitRate( const float emitRate )
@@ -21,19 +13,23 @@ grCParticleSys::EmitRate( const float emitRate )
 	m_puEmitter->EmitRate = 1.0f / grMath::Abs( emitRate );
 }
 
-
 void
-grCParticleSys::Life( const grV2f& minMax )
+grCParticleSys::PositionSys( const grV2f& position )
 {
-	if( m_puEmitter->puLife == nullptr )
-		m_puEmitter->puLife = std::make_unique<grSLifeGenerator>();
-
-	m_puEmitter->puLife->Set( minMax );
-
-	if ( m_puUpdater->puLife == nullptr )
-		m_puUpdater->puLife = std::make_unique<grSLifeUpdater>();
+	m_puEmitter->PositionSys = position;
 }
 
+void
+grCParticleSys::Color( const grSColor& start, const grSColor& end )
+{
+	if ( m_puEmitter->puColor == nullptr )
+		m_puEmitter->puColor = std::make_unique<grSColorGenerator>();
+
+	m_puEmitter->puColor->Set( start, end );
+
+	if( m_puUpdater->puColor == nullptr )
+		m_puUpdater->puColor = std::make_unique<grSColorUpdater>();
+}
 
 void
 grCParticleSys::ForceBasic( const grV2f& min, const grV2f& max )
@@ -47,7 +43,6 @@ grCParticleSys::ForceBasic( const grV2f& min, const grV2f& max )
 		m_puUpdater->puForceBasic = std::make_unique<grSForceBasicUpdater>();
 }
 
-
 void
 grCParticleSys::PositionOffset( const grV2f& min, const grV2f& max )
 {
@@ -55,11 +50,28 @@ grCParticleSys::PositionOffset( const grV2f& min, const grV2f& max )
 		m_puEmitter->puPosition = std::make_unique<grSPositionGenerator>();
 
 	m_puEmitter->puPosition->Set( min, max );
-
-	if( m_puUpdater->puPosition == nullptr )
-		m_puUpdater->puPosition = std::make_unique<grSPositionUpdater>();
 }
 
+void
+grCParticleSys::Mass( const grV2f& minMax )
+{
+	if ( m_puEmitter->puMass == nullptr )
+		m_puEmitter->puMass = std::make_unique<grSMassGenerator>();
+
+	m_puEmitter->puMass->Set( minMax );
+}
+
+void
+grCParticleSys::Life( const grV2f& minMax )
+{
+	if ( m_puEmitter->puLife == nullptr )
+		m_puEmitter->puLife = std::make_unique<grSLifeGenerator>();
+
+	m_puEmitter->puLife->Set( minMax );
+
+	if ( m_puUpdater->puLife == nullptr )
+		m_puUpdater->puLife = std::make_unique<grSLifeUpdater>();
+}
 
 // TEST DRAW
 #include	"grBBox.h"
@@ -73,11 +85,14 @@ grCParticleSys::Update( const float deltaT )
 	m_puUpdater->Update( m_puParticle, deltaT );
 
 	// TEST DRAW
-	printf( "Max: %d %2s Alive: %d \n", m_puEmitter->MaxParticleSize, "", m_puParticle->Alive );
-	for ( sizeT idx = 0; idx < m_puParticle->Alive; ++idx )
+	//printf( "Max: %d %2s Alive: %d \n", m_puEmitter->Size, "", m_puParticle->Alive );
+	for ( sizeT i = 0; i < m_puParticle->Alive; ++i )
 	{
-		grBBox box( grV2f( 1.5f, 1.5f ), m_puParticle->puPosition[ idx ] );
-		grDebugManager::Instance().AddBBox( box, sf::Color::White );
+		grBBox box( grV2f( 1.5f, 1.5f ), m_puParticle->puPosition[ i ] );
+		grDebugManager::Instance().AddBBox( box, sf::Color( m_puParticle->puColorStart[ i ].R,
+															m_puParticle->puColorStart[ i ].G,
+															m_puParticle->puColorStart[ i ].B,
+															m_puParticle->puColorStart[ i ].A ) );
 	}
 	// TEST DRAW
 }
