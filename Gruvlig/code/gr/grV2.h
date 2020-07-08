@@ -13,8 +13,12 @@
 template <typename T>
 struct grV2
 {
-	grV2( const T& X = 0.0f, const T& Y = 0.0f ) : x( X ) , y( Y )	{}
-	inline	grV2( const grV2<T>& rV2 )	{ *this = rV2; }
+	grV2( const T& X = 0.0f, const T& Y = 0.0f )
+		: x( X ) ,y( Y )
+	{}
+	grV2( const grV2<T>& rV2 )
+		: x( rV2.x ), y( rV2.y )
+	{}
 
 	//////////////////////////////////////////////////
 

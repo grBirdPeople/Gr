@@ -47,7 +47,7 @@ private:
 
 	//grCParticleEmitter&		m_Emitr1;
 
-	grCParticleSys*			m_pPartSys;
+	grCParticleSys*			m_pPartSys1;
 
 	grMap*					m_pMap;
 	grActor*				m_pActor;
