@@ -20,15 +20,15 @@ grCParticleSys::PositionSys( const grV2f& position )
 }
 
 void
-grCParticleSys::Color( const grSColor& start, const grSColor& end )
+grCParticleSys::Color( const grColor::SRgba& start, const grColor::SRgba& end, const bool hsv, const bool randomize )
 {
 	if ( m_puEmitter->puColor == nullptr )
 		m_puEmitter->puColor = std::make_unique<grSColorGenerator>();
 
-	m_puEmitter->puColor->Set( start, end );
+	m_puEmitter->puColor->Set( start, end, randomize );
 
 	if( m_puUpdater->puColor == nullptr )
-		m_puUpdater->puColor = std::make_unique<grSColorUpdater>();
+		m_puUpdater->puColor = std::make_unique<grSColorUpdater>( hsv );
 }
 
 void
@@ -89,10 +89,10 @@ grCParticleSys::Update( const float deltaT )
 	for ( sizeT i = 0; i < m_puParticle->Alive; ++i )
 	{
 		grBBox box( grV2f( 1.5f, 1.5f ), m_puParticle->puPosition[ i ] );
-		grDebugManager::Instance().AddBBox( box, sf::Color( m_puParticle->puColorStart[ i ].R,
-															m_puParticle->puColorStart[ i ].G,
-															m_puParticle->puColorStart[ i ].B,
-															m_puParticle->puColorStart[ i ].A ) );
+		grDebugManager::Instance().AddBBox( box, sf::Color( ( sf::Uint8 )m_puParticle->puColorStart[ i ].R,
+															( sf::Uint8 )m_puParticle->puColorStart[ i ].G,
+															( sf::Uint8 )m_puParticle->puColorStart[ i ].B,
+															( sf::Uint8 )m_puParticle->puColorStart[ i ].A ) );
 	}
 	// TEST DRAW
 }

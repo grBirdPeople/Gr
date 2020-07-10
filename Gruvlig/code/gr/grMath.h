@@ -14,6 +14,7 @@ namespace grMath
 {
 	// Const
 	//////////////////////////////////////////////////
+	const float EpsilonColor = ( float )1e-10;
 	const float Epsilon = 0.001f;
 	const float Pi = 3.141592f;
 	const float DegToRad = Pi / 180.0f;
@@ -62,17 +63,17 @@ namespace grMath
 		if ( a > b )
 			b = a;
 	}
-	inline void RangeCheckV2f( grV2f& v )
+	inline void RangeCheckV2f( grV2f& rV )
 	{
-		if ( v.x > v.y )
-			v.y = v.x;
+		if ( rV.x > rV.y )
+			rV.y = rV.x;
 	}
-	inline void RangeCheckV2fx2( const grV2f& min, grV2f& max )
+	inline void RangeCheckV2fx2( const grV2f& rMin, grV2f& rMax )
 	{
-		if ( min.x > max.x )
-			max.x = min.x;
-		if ( min.y > max.y )
-			max.y = min.y;
+		if ( rMin.x > rMax.x )
+			rMax.x = rMin.x;
+		if ( rMin.y > rMax.y )
+			rMax.y = rMin.y;
 	}
 
 	// Abs
@@ -83,7 +84,7 @@ namespace grMath
 	}
 	inline intS	Abs( intS value )
 	{
-		return ( value < 0 ) ? ( intS )-value : ( intS )value;
+		return ( value < 0 ) ? -value : value;
 	}
 
 	// Sign
@@ -97,7 +98,7 @@ namespace grMath
 		return ( value < 0.0f ) ? -1.0f : ( value > 0.0f ) ? 1.0f : 0.0f;
 	}
 
-	// Sqrt // Babylonian method cpied from overflow. Changed from doubles to floats
+	// Sqrt // Babylonian method copied from overflow. Changed from doubles to floats
 	//////////////////////////////////////////////////
 	inline float Sqrt( const float value )
 	{
@@ -129,30 +130,30 @@ namespace grMath
 
 	// Lerp
 	//////////////////////////////////////////////////
-	inline float Lerp( float from, float to, float value )
+	inline float Lerp( float start, float end, float value )
 	{
-		return ( value <= 0.0f ) ? from : ( value >= 1.0f ) ? to : ( to - from ) * value + from;
+		return ( value <= 0.0f ) ? start : ( value >= 1.0f ) ? end : ( end - start ) * value + start;
 	}
-	inline grV2f Lerp( grV2f& rVec1, grV2f& rVec2, float value )
+	inline grV2f Lerp( grV2f& rStart, grV2f& rEnd, float value )
 	{
 		if ( value <= 0.0f )
 		{
-			return rVec1;
+			return rStart;
 		}
 		else if ( value >= 1.0f )
 		{
-			return rVec2;
+			return rEnd;
 		}
 
-		grV2f vec;
-		vec.x = rVec1.x + ( rVec2.x - rVec1.x ) * value;
-		vec.y = rVec1.y + ( rVec2.y - rVec1.y ) * value;
-		return vec;
+		grV2f v;
+		v.x = rStart.x + ( rEnd.x - rStart.x ) * value;
+		v.y = rStart.y + ( rEnd.y - rStart.y ) * value;
+		return v;
 	}
 
 	// MoveTo
 	//////////////////////////////////////////////////
-	inline float MoveTo( float from, float to, float speed )		// Untested
+	inline float MoveTo( float from, float to, float speed )	// Untested
 	{
 		float cpyFrom = from;
 		float sign = Sign( to - cpyFrom );
@@ -162,7 +163,7 @@ namespace grMath
 
 	// MoveToZero
 	//////////////////////////////////////////////////
-	inline float MoveToZero( float from, float speed )				// Untested
+	inline float MoveToZero( float from, float speed )			// Untested
 	{
 		float cpyFrom = from;
 		float sign = Sign( from );
@@ -199,17 +200,17 @@ namespace grMath
 
 	// VecToRad
 	//////////////////////////////////////////////////
-	inline float VecToRad( const grV2f& rVec )
+	inline float VecToRad( const grV2f& rV )
 	{
-		grV2f v = rVec;
+		grV2f v = rV;
 		return std::atan2f( v.y, v.x );
 	}
 
 	// VecToDeg
 	//////////////////////////////////////////////////
-	inline float VecToDeg( const grV2f& rVec )
+	inline float VecToDeg( const grV2f& rV )
 	{
-		grV2f v = rVec;
+		grV2f v = rV;
 		return std::atan2f( v.y, v.x ) * RadToDeg;
 	}
 
@@ -260,11 +261,22 @@ namespace grMath
 	{
 		return Abs( numOne - numTwo ) < Epsilon;
 	}
-	inline bool CmpV2f( const grV2f& rVecOne, const grV2f& rVecTwo )
+	inline bool CmpV2f( const grV2f& rA, const grV2f& rB )
 	{
-		float x = Abs( rVecOne.x - rVecTwo.x );
-		float y = Abs( rVecOne.y - rVecTwo.y );
+		float x = Abs( rA.x - rB.x );
+		float y = Abs( rA.y - rB.y );
 		return ( x < Epsilon ) && ( y < Epsilon );
+	}
+
+	// Step
+	//////////////////////////////////////////////////
+	inline intU Step( const intU A, const intU B )
+	{
+		return ( A >= B ) ? 0 : 1;
+	}
+	inline intU Step( const float A, const float B )
+	{
+		return ( A >= B ) ? 0 : 1;
 	}
 }
 

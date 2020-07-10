@@ -225,6 +225,7 @@
     <ClInclude Include="code\gr\grAlgo.h" />
     <ClInclude Include="code\gr\grBBox.h" />
     <ClInclude Include="code\gr\grBox2D.h" />
+    <ClInclude Include="code\gr\grColor.h" />
     <ClInclude Include="code\gr\grCommon.h" />
     <ClInclude Include="code\gr\grCore.h" />
     <ClInclude Include="code\gr\grCParticleManager.h" />
