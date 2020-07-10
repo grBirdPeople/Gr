@@ -1,11 +1,51 @@
 #ifndef		_GRSTRUCTS_H_
 #define		_GRSTRUCTS_H_
 
+#include	<chrono>
 #include	"grCommon.h"
 
 
 namespace grStruct
 {
+	// STimerOneShot // Simply create an instance at the start of a block
+	//////////////////////////////////////////////////
+	struct STimerOneShot
+	{
+		enum class ETimer
+		{
+			NS = 0,
+			MS,
+			S
+		};
+
+		STimerOneShot( ETimer timeType = ETimer::MS )
+			: Start		( std::chrono::high_resolution_clock::now() )
+			, End		( Start )
+			, Duration	( 0.0f )
+			, TimeType	( timeType )
+		{}
+
+		~STimerOneShot( void )
+		{
+			End = std::chrono::high_resolution_clock::now();
+			Duration = End - Start;
+			switch( TimeType )
+			{
+				case ETimer::NS: printf( "Time (ns): %g \n", Duration.count() * 1000000000.0f ); break;
+				case ETimer::MS: printf( "Time (ms): %g \n", Duration.count() * 1000.0f ); break;
+				case ETimer::S: printf( "Time (s): %g \n", Duration.count() ); break;
+			}
+		}
+
+		STimerOneShot( const STimerOneShot& ) = delete;
+		STimerOneShot& operator=( const STimerOneShot& ) = delete;
+
+	private:
+		std::chrono::time_point<std::chrono::steady_clock> Start,End;
+		std::chrono::duration<float> Duration;
+		ETimer TimeType;
+	};
+
 	// grLoopQue // Dynamic array which copies the data // Push/Pull // First in/First out
 	//////////////////////////////////////////////////
 	template<typename T>
@@ -24,7 +64,6 @@ namespace grStruct
 			if ( arrT != nullptr )
 				delete[] arrT;
 		}
-
 		grLoopQue( grLoopQue const& ) = delete;
 		grLoopQue& operator=( grLoopQue const& ) = delete;
 
@@ -32,6 +71,7 @@ namespace grStruct
 		{
 			return Active;
 		}
+
 		inline void Push( const T& rT )
 		{
 			if ( Active == Size )
@@ -49,9 +89,12 @@ namespace grStruct
 			arrT[ insrtIdx ] = rT;
 			++Active;
 		}
+
 		inline T Pull( void )
 		{
+#ifdef DEBUG
 			assert( ( Active > 0 ) && "grLoopQue::Pull(): Que is empty" );
+#endif // DEBUG
 
 			sizeT idx = StrtIdx;
 			++StrtIdx;
@@ -61,9 +104,12 @@ namespace grStruct
 			--Active;
 			return arrT[ idx ];
 		}
+
 		inline T Pop( void )
 		{
+#ifdef DEBUG
 			assert( ( Active > 0 ) && "grLoopQue::Pop(): Que is empty" );
+#endif // DEBUG
 
 			sizeT idx = StrtIdx + ( Size - 1 );
 			if ( idx > ( Size - 1 ) )
@@ -72,6 +118,7 @@ namespace grStruct
 			--Active;
 			return arrT[ idx ];
 		}
+
 		inline void Reset( void )
 		{
 			StrtIdx = 0;
@@ -79,7 +126,6 @@ namespace grStruct
 		}
 
 	private:
-
 		T*	arrT;
 
 		sizeT	Size,
@@ -88,7 +134,7 @@ namespace grStruct
 	};
 
 
-	// grLinearActivity
+	// grLinearActivity // Experimental and not really tested
 	//////////////////////////////////////////////////
 	template<typename T>
 	class grLinearActivity
@@ -121,10 +167,12 @@ namespace grStruct
 		{
 			return m_Size;
 		}
+
 		const sizeT Active( void ) const
 		{
 			return m_Active;
 		}
+
 		void Push( T value )
 		{
 #ifdef DEBUG
@@ -166,7 +214,6 @@ namespace grStruct
 		}
 
 	private:
-
 		pU<T[]> Arr;
 
 		sizeT	m_Capacity,
@@ -190,13 +237,15 @@ namespace grStruct
 	};
 
 
-	// grHashMap // More like a hash set but eh // Uses buckets // Open-adress where only unique unsigned int's are allowed as keys // Never tested for reals for reals
+	// grHashMap // Experimental and not really tested
+	// More like a hash set but eh // Uses buckets // Open-adress where only unique unsigned int's are allowed as keys
 	//////////////////////////////////////////////////
 	template<typename T>
 	class grHashMap
 	{
-	public:	// TODO: Linera probing is used for search (if non unique keys where allowed). Perhaps add alts. dependent of map size like Plus 3 Rehash, Qaudratic Probing (failed)^2 or Double Hashing
-
+	public:
+		// TODO: Linera probing is used for search (if non unique keys where allowed).
+		// Maybe add alts. dependent of map size like Plus 3 Rehash, Qaudratic Probing (failed)^2 or Double Hashing
 		grHashMap( const intU maxSize )
 			: m_MaxSize	( maxSize )
 			, m_NowSize	( 0 )
@@ -215,10 +264,12 @@ namespace grStruct
 		{
 			return m_NowSize;
 		}
+
 		inline bool Exists( const intU key )
 		{
 			return ( HashKey( key ) == true ) ? true : false;
 		}
+
 		inline std::vector<intU> UsedKeys( void )
 		{
 			std::vector<intU> keys;
@@ -232,6 +283,7 @@ namespace grStruct
 
 			return keys;
 		}
+
 		inline void Put( const intU key, const T value )
 		{
 			if ( m_NowSize == m_MaxSize )
@@ -264,12 +316,14 @@ namespace grStruct
 			m_vecUsedKeys[ hashIdx ] = key;
 			++m_NowSize;
 		}
+
 		inline T Get( const intU key )
 		{
 			grHashNode<T>* pNode = Find( key );
 			assert( pNode != nullptr && "grHashMap::Get(): Key does not exist" );
 			return pNode->m_Value;
 		}
+
 		inline void Del( const intU key )
 		{
 			grHashNode<T>* pNode = Find( key );
@@ -287,14 +341,12 @@ namespace grStruct
 			--m_NowSize;
 		}
 
-		//////////////////////////////////////////////////
-
 	private:
-
 		inline intS HashKey( const intU key )
 		{
 			return key % m_MaxSize;
 		}
+
 		inline grHashNode<T>* Find( const intU key )
 		{
 			intU count = 0;
@@ -316,14 +368,11 @@ namespace grStruct
 			return pNode;
 		}
 
-		//////////////////////////////////////////////////
-
 		std::vector<grHashNode<T>*>	m_vecNode;
 		std::vector<intS>			m_vecUsedKeys;
 
 		intU	m_MaxSize,
 				m_NowSize;
-
 	};
 }
 

@@ -22,17 +22,17 @@ namespace grMath
 
 	// Min
 	//////////////////////////////////////////////////
-	inline intU	Min( const intU a, const intU b ) noexcept
+	inline intU	Min( const intU a, const intU b )
 	{
 		intU value = ( a < b ) ? a : ( b < a ) ? b : a;
 		return value;
 	}
-	inline intS	Min( const intS a, const intS b ) noexcept
+	inline intS	Min( const intS a, const intS b )
 	{
 		intS value = ( a < b ) ? a : ( b < a ) ? b : a;
 		return value;
 	}
-	inline float Min( const float a, const float b ) noexcept
+	inline float Min( const float a, const float b )
 	{
 		float value = ( a < b ) ? a : ( b < a ) ? b : a;
 		return value;
@@ -40,17 +40,17 @@ namespace grMath
 
 	// Max
 	//////////////////////////////////////////////////
-	inline intU Max( const intU a, const intU b ) noexcept
+	inline intU Max( const intU a, const intU b )
 	{
 		intU value = ( a > b ) ? a : ( b > a ) ? b : a;
 		return value;
 	}
-	inline intS	Max( const intS a, const intS b ) noexcept
+	inline intS	Max( const intS a, const intS b )
 	{
 		intS value = ( a > b ) ? a : ( b > a ) ? b : a;
 		return value;
 	}
-	inline float Max( const float a, const float b ) noexcept
+	inline float Max( const float a, const float b )
 	{
 		float value = ( a > b ) ? a : ( b > a ) ? b : a;
 		return value;
@@ -58,17 +58,17 @@ namespace grMath
 
 	// RangeCheckV2f
 	//////////////////////////////////////////////////
-	inline void RangeCheckIntU( const intU a, intU& b ) noexcept
+	inline void RangeCheckIntU( const intU a, intU& b )
 	{
 		if ( a > b )
 			b = a;
 	}
-	inline void RangeCheckV2f( grV2f& rV ) noexcept
+	inline void RangeCheckV2f( grV2f& rV )
 	{
 		if ( rV.x > rV.y )
 			rV.y = rV.x;
 	}
-	inline void RangeCheckV2fx2( const grV2f& rMin, grV2f& rMax ) noexcept
+	inline void RangeCheckV2fx2( const grV2f& rMin, grV2f& rMax )
 	{
 		if ( rMin.x > rMax.x )
 			rMax.x = rMin.x;
@@ -78,29 +78,29 @@ namespace grMath
 
 	// Abs
 	//////////////////////////////////////////////////
-	inline float Abs( float value ) noexcept
+	inline float Abs( float value )
 	{
 		return ( value < 0.0f ) ? -value : value;
 	}
-	inline intS	Abs( intS value ) noexcept
+	inline intS	Abs( intS value )
 	{
 		return ( value < 0 ) ? -value : value;
 	}
 
 	// Sign
 	//////////////////////////////////////////////////
-	inline intS	Sign( intS value ) noexcept
+	inline intS	Sign( intS value )
 	{
 		return ( value < 0 ) ? -1 : ( value > 0 ) ? 1 : 0;
 	}
-	inline float Sign( float value ) noexcept
+	inline float Sign( float value )
 	{
 		return ( value < 0.0f ) ? -1.0f : ( value > 0.0f ) ? 1.0f : 0.0f;
 	}
 
 	// Sqrt // Babylonian method copied from overflow. Changed from doubles to floats
 	//////////////////////////////////////////////////
-	inline float Sqrt( const float value ) noexcept
+	inline float Sqrt( const float value )
 	{
 		float x = value;
 		if ( x <= 0.0f )
@@ -130,11 +130,11 @@ namespace grMath
 
 	// Lerp
 	//////////////////////////////////////////////////
-	inline float Lerp( float start, float end, float value ) noexcept
+	inline float Lerp( float start, float end, float value )
 	{
 		return ( value <= 0.0f ) ? start : ( value >= 1.0f ) ? end : ( end - start ) * value + start;
 	}
-	inline grV2f Lerp( grV2f& rStart, grV2f& rEnd, float value ) noexcept
+	inline grV2f Lerp( grV2f& rStart, grV2f& rEnd, float value )
 	{
 		if ( value <= 0.0f )
 		{
@@ -153,7 +153,7 @@ namespace grMath
 
 	// MoveTo
 	//////////////////////////////////////////////////
-	inline float MoveTo( float from, float to, float speed ) noexcept	// Untested
+	inline float MoveTo( float from, float to, float speed )	// Untested
 	{
 		float cpyFrom = from;
 		float sign = Sign( to - cpyFrom );
@@ -163,7 +163,7 @@ namespace grMath
 
 	// MoveToZero
 	//////////////////////////////////////////////////
-	inline float MoveToZero( float from, float speed ) noexcept			// Untested
+	inline float MoveToZero( float from, float speed )			// Untested
 	{
 		float cpyFrom = from;
 		float sign = Sign( from );
@@ -173,7 +173,7 @@ namespace grMath
 
 	// Clamp
 	//////////////////////////////////////////////////
-	inline float Clamp( float value, float min, float max ) noexcept
+	inline float Clamp( float value, float min, float max )
 	{
 		return ( value < min ) ? min : ( value > max ) ? max : value;
 	}
@@ -181,14 +181,14 @@ namespace grMath
 	{
 		return ( value < min ) ? min : ( value > max ) ? max : value;
 	}
-	inline intS Clamp( intU value, intU min, intU max ) noexcept
+	inline intS Clamp( intU value, intU min, intU max )
 	{
 		return ( value < min ) ? min : ( value > max ) ? max : value;
 	}
 
 	// RotatePoint
 	//////////////////////////////////////////////////
-	inline void RotatePoint( grV2f* pPoint, const float rotInRad ) noexcept // TODO: Change from ptr to ref when old particle code is gone
+	inline void RotatePoint( grV2f* pPoint, const float rotInRad ) // TODO: Change from ptr to ref when old particle code is gone
 	{
 		float sin = std::sin( rotInRad );
 		float cos = std::cos( rotInRad );
@@ -200,7 +200,7 @@ namespace grMath
 
 	// VecToRad
 	//////////////////////////////////////////////////
-	inline float VecToRad( const grV2f& rV ) noexcept
+	inline float VecToRad( const grV2f& rV )
 	{
 		grV2f v = rV;
 		return std::atan2f( v.y, v.x );
@@ -208,7 +208,7 @@ namespace grMath
 
 	// VecToDeg
 	//////////////////////////////////////////////////
-	inline float VecToDeg( const grV2f& rV ) noexcept
+	inline float VecToDeg( const grV2f& rV )
 	{
 		grV2f v = rV;
 		return std::atan2f( v.y, v.x ) * RadToDeg;
@@ -216,7 +216,7 @@ namespace grMath
 
 	// RadToVec
 	//////////////////////////////////////////////////
-	inline grV2f RadToVec( float rad, const bool counterClock = false ) noexcept
+	inline grV2f RadToVec( float rad, const bool counterClock = false )
 	{
 		grV2f vec;
 		if ( counterClock == true )
@@ -234,7 +234,7 @@ namespace grMath
 
 	// DegToVec
 	//////////////////////////////////////////////////
-	inline grV2f DegToVec( float deg, const bool counterClock = false ) noexcept
+	inline grV2f DegToVec( float deg, const bool counterClock = false )
 	{
 		grV2f vec;
 		float rad = deg * DegToRad;
@@ -253,15 +253,15 @@ namespace grMath
 
 	// ZeroCmp
 	//////////////////////////////////////////////////
-	inline bool CmpIntU( const intU numOne, const intU numTwo ) noexcept
+	inline bool CmpIntU( const intU numOne, const intU numTwo )
 	{
 		return ( numOne == numTwo );
 	}
-	inline bool CmpFloat( const float numOne, const float numTwo ) noexcept
+	inline bool CmpFloat( const float numOne, const float numTwo )
 	{
 		return Abs( numOne - numTwo ) < Epsilon;
 	}
-	inline bool CmpV2f( const grV2f& rA, const grV2f& rB ) noexcept
+	inline bool CmpV2f( const grV2f& rA, const grV2f& rB )
 	{
 		float x = Abs( rA.x - rB.x );
 		float y = Abs( rA.y - rB.y );
@@ -270,11 +270,11 @@ namespace grMath
 
 	// Step
 	//////////////////////////////////////////////////
-	inline intU Step( const intU A, const intU B ) noexcept
+	inline intU Step( const intU A, const intU B )
 	{
 		return ( A >= B ) ? 0 : 1;
 	}
-	inline intU Step( const float A, const float B ) noexcept
+	inline intU Step( const float A, const float B )
 	{
 		return ( A >= B ) ? 0 : 1;
 	}

@@ -28,12 +28,11 @@ namespace grColor
 		float H, S, V, A;
 	};
 
-	// Rgba2Hsva
+	// Rgba2Hsva // Taken from stackoverflow
 	//////////////////////////////////////////////////
-	inline SHsva Rgba2Hsva( SRgba& rRgba ) noexcept
+	inline SHsva Rgba2Hsva( SRgba& rRgba )
 	{
-		SHsva	out;
-		out.A = rRgba.A;
+		SHsva	out( 0.0f, 0.0f, 0.0f, rRgba.A );
 
 		float min = rRgba.R < rRgba.G ? rRgba.R : rRgba.G;
 		min = min < rRgba.B ? min : rRgba.B;
@@ -77,9 +76,9 @@ namespace grColor
 		return out;
 	}
 
-	// Hsva2Rgba
+	// Hsva2Rgba // Taken from stackoverflow
 	//////////////////////////////////////////////////
-	inline SRgba Hsva2Rgba( SHsva& rHsva ) noexcept
+	inline SRgba Hsva2Rgba( SHsva& rHsva )
 	{
 		SRgba	out;
 		out.A = rHsva.A;
@@ -139,7 +138,7 @@ namespace grColor
 	}
 
 
-	// Non working translation from GLSL to C++
+	// Attempt at traslating GLSL to C++ - Not working atm
 
 	//// Hue2Rgb
 	////////////////////////////////////////////////////
@@ -202,8 +201,7 @@ namespace grColor
 
 
 
-// HLSL taken from http://www.chilliant.com/rgb2hsv.html
-
+// HLSL code taken from http://www.chilliant.com/rgb2hsv.html
 //float3 HSVtoRGB( in float3 HSV )
 //{
 //	float3 RGB = HUEtoRGB( HSV.x );
@@ -237,7 +235,7 @@ namespace grColor
 //}
 
 
-// GLSL taken from http://lolengine.net/blog/2013/07/27/rgb-to-hsv-in-glsl
+// GLSL code taken from http://lolengine.net/blog/2013/07/27/rgb-to-hsv-in-glsl
 //vec3 rgb2hsv( vec3 c )
 //{
 //	vec4 K = vec4( 0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0 );
