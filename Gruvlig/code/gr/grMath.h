@@ -86,6 +86,10 @@ namespace grMath
 	{
 		return ( value < 0 ) ? -value : value;
 	}
+	inline grV2f Abs( grV2f& value )
+	{
+		return grV2f( Abs( value.x ), Abs( value.y ) );
+	}
 
 	// Sign
 	//////////////////////////////////////////////////

@@ -20,14 +20,15 @@ class grDebugManager : public grSingleton<grDebugManager>
 public:
 	
 	grDebugManager( void )
+		: m_MaxBBox( 5000 )
 	{
-		m_VecBBoxDebug.reserve( 10000 );
+		m_VecBBoxDebug.reserve( m_MaxBBox );
 	}
 
 	//////////////////////////////////////////////////
 
 	void AddBBox( grBBox& rBBox, const sf::Color color );
-	inline void DebugRender( sf::RenderWindow& rRenderWin )
+	inline void Render( sf::RenderWindow& rRenderWin )
 	{
 		if ( m_VecBBoxDebug.size() > 0 )
 		{
@@ -43,7 +44,7 @@ public:
 private:
 
 	vecVertexArray	m_VecBBoxDebug;
-
+	sizeT	m_MaxBBox;
 };
 
 #endif		//_GRDEBUGMANAGER_H_

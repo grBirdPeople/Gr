@@ -1,9 +1,9 @@
 #include	"grParticleTest.h"
 
 
-grCParticleSys::grCParticleSys( const grV2f& position, const float emitRate, const intU size )
+grCParticleSys::grCParticleSys( const intU size, const float emitRate, const grV2f& position )
 	: m_puParticle	( std::make_unique<grSParticle>( size ) )
-	, m_puEmitter	( std::make_unique<grSEmitter>( position, 1.0f / grMath::Abs( emitRate ), size ) )
+	, m_puEmitter	( std::make_unique<grSEmitter>( size, 1.0f / grMath::Abs( emitRate ), position ) )
 	, m_puUpdater	( std::make_unique<grSUpdater>() )
 {}
 
@@ -14,7 +14,7 @@ grCParticleSys::EmitRate( const float emitRate )
 }
 
 void
-grCParticleSys::PositionSys( const grV2f& position )
+grCParticleSys::PositionSystem( const grV2f& position )
 {
 	m_puEmitter->PositionSys = position;
 }
@@ -32,9 +32,21 @@ grCParticleSys::Color( const grColor::SRgba& start, const grColor::SRgba& end, c
 }
 
 void
+grCParticleSys::Scale( const grV2f& start, const grV2f& end )
+{
+	if ( m_puEmitter->puScale == nullptr )
+		m_puEmitter->puScale = std::make_unique<grSScaleGenerator>();
+
+	m_puEmitter->puScale->Set( start, end );
+
+	if( m_puEmitter->puScale->Equal == EParticleEqual::NO )
+		m_puUpdater->puScale = std::make_unique<grSScaleUpdater>();
+}
+
+void
 grCParticleSys::ForceBasic( const grV2f& min, const grV2f& max )
 {
-	if( m_puEmitter->puForceBasic == nullptr )
+	if ( m_puEmitter->puForceBasic == nullptr )
 		m_puEmitter->puForceBasic = std::make_unique<grSForceBasicGenerator>();
 
 	m_puEmitter->puForceBasic->Set( min, max );
@@ -44,7 +56,7 @@ grCParticleSys::ForceBasic( const grV2f& min, const grV2f& max )
 }
 
 void
-grCParticleSys::PositionOffset( const grV2f& min, const grV2f& max )
+grCParticleSys::Position( const grV2f& min, const grV2f& max )
 {
 	if( m_puEmitter->puPosition == nullptr )
 		m_puEmitter->puPosition = std::make_unique<grSPositionGenerator>();
@@ -88,7 +100,8 @@ grCParticleSys::Update( const float deltaT )
 	//printf( "Max: %d %2s Alive: %d \n", m_puEmitter->Size, "", m_puParticle->Alive );
 	for ( sizeT i = 0; i < m_puParticle->Alive; ++i )
 	{
-		grBBox box( grV2f( 1.5f, 1.5f ), m_puParticle->puPosition[ i ] );
+		//grBBox box( grV2f( 1.5f, 1.5f ), m_puParticle->puPosition[ i ] );
+		grBBox box( m_puParticle->puScaleStart[ i ], m_puParticle->puPosition[ i ] );
 		grDebugManager::Instance().AddBBox( box, sf::Color( ( sf::Uint8 )m_puParticle->puColorStart[ i ].R,
 															( sf::Uint8 )m_puParticle->puColorStart[ i ].G,
 															( sf::Uint8 )m_puParticle->puColorStart[ i ].B,

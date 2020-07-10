@@ -114,7 +114,7 @@ grCore::Render( void )
 	
 #ifdef	DEBUG
 	m_pSandbox->Render( *m_pRenderWin );
-	grDebugManager::Instance().DebugRender( *m_pRenderWin );
+	grDebugManager::Instance().Render( *m_pRenderWin );
 #endif	//DEBUG_MODE
 
 	//////////////////////////////////////////////////
