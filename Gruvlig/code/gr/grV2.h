@@ -8,7 +8,7 @@
 #include	"grCommon.h"
 
 
-// grV2
+// grV2 // Not safe for move copy and move assign
 //////////////////////////////////////////////////
 template <typename T>
 struct grV2

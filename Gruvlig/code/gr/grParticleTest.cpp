@@ -97,10 +97,9 @@ grCParticleSys::Update( const float deltaT )
 	m_puUpdater->Update( m_puParticle, deltaT );
 
 	// TEST DRAW
-	//printf( "Max: %d %2s Alive: %d \n", m_puEmitter->Size, "", m_puParticle->Alive );
+	printf( "Max: %d %2s Alive: %d \n", m_puEmitter->Size, "", m_puParticle->Alive );
 	for ( sizeT i = 0; i < m_puParticle->Alive; ++i )
 	{
-		//grBBox box( grV2f( 1.5f, 1.5f ), m_puParticle->puPosition[ i ] );
 		grBBox box( m_puParticle->puScaleStart[ i ], m_puParticle->puPosition[ i ] );
 		grDebugManager::Instance().AddBBox( box, sf::Color( ( sf::Uint8 )m_puParticle->puColorStart[ i ].R,
 															( sf::Uint8 )m_puParticle->puColorStart[ i ].G,

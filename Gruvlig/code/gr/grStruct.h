@@ -1,15 +1,95 @@
 #ifndef		_GRSTRUCTS_H_
 #define		_GRSTRUCTS_H_
 
+#include	<memory>
+#include	<assert.h>
 #include	<chrono>
+#include	<mutex>
+
 #include	"grCommon.h"
 
 
 namespace grStruct
 {
+	// grArr // Dynamic array // // Thread safe // Not safe for move copy and move assign
+	//////////////////////////////////////////////////
+	template <typename T>
+	class grArr
+	{
+	public:
+		grArr()
+			: m_upArr( std::make_unique<T[]>( 0 ) )
+			, m_Size( 0 )
+			, m_Count( 0 )
+		{}
+		grArr( const size_t size )
+			: m_upArr( std::make_unique<T[]>( size ) )
+			, m_Size( size )
+			, m_Count( 0 )
+		{}
+		grArr( const grArr<T>& rArr )
+		{
+			Cpy( rArr );
+		}
+		grArr<T>& operator=( const grArr<T>& rArr )
+		{
+			Cpy( rArr );
+			return *this;
+		}
+		inline void Reset( const size_t size )
+		{
+			std::lock_guard<std::mutex> lock( m_Lock );
+			m_upArr.reset( new T[ size ] );
+			m_Size = 0;
+			m_Count = 0;
+		}
+		inline void Push( const T& value )
+		{
+			assert( m_Size > m_Count && "grArr::Push: Array full" );
+			std::lock_guard<std::mutex> lock( m_Lock );
+			m_upArr[ m_Count++ ] = value;
+		}
+		inline void Set( const size_t idx, const T& value )
+		{
+			assert( idx < m_Size && "grArr::Set: Idx out of range" );
+			std::lock_guard<std::mutex> lock( m_Lock );
+			m_upArr[ m_Count++ ] = value;
+		}
+		inline const T& Get( const size_t idx ) const
+		{
+			assert( idx < m_Count && "grArr::Get: Idx out of range" );
+			return m_upArr[ idx ];
+		}
+		inline const size_t Size() const
+		{
+			return m_Size;
+		}
+		inline const size_t Count() const
+		{
+			return m_Count;
+		}
+
+	private:
+		inline void Cpy( const grArr<T>& rArr )
+		{
+			std::lock_guard<std::mutex> lock( m_Lock );
+
+			m_upArr.reset( new T[ m_Size ] );
+			for ( size_t i = 0; i < rArr.m_Count; ++i )
+				m_upArr[ i ] = rArr.m_upArr[ i ];
+
+			m_Size = rArr.m_Size;
+			m_Count = rArr.m_Count;
+		}
+
+		std::unique_ptr<T[]> m_upArr;
+		std::mutex m_Lock;
+		size_t m_Size, m_Count;
+	};
+
 	// STimerOneShot // Simply create an instance at the start of a block
 	//////////////////////////////////////////////////
-	struct STimerOneShot
+	struct grSTimerOneShot
 	{
 		enum class ETimer
 		{
@@ -18,14 +98,14 @@ namespace grStruct
 			S
 		};
 
-		STimerOneShot( ETimer timeType = ETimer::MS )
+		grSTimerOneShot( ETimer timeType = ETimer::MS )
 			: Start		( std::chrono::high_resolution_clock::now() )
 			, End		( Start )
 			, Duration	( 0.0f )
 			, TimeType	( timeType )
 		{}
 
-		~STimerOneShot( void )
+		~grSTimerOneShot( void )
 		{
 			End = std::chrono::high_resolution_clock::now();
 			Duration = End - Start;
@@ -37,8 +117,8 @@ namespace grStruct
 			}
 		}
 
-		STimerOneShot( const STimerOneShot& ) = delete;
-		STimerOneShot& operator=( const STimerOneShot& ) = delete;
+		grSTimerOneShot( const grSTimerOneShot& ) = delete;
+		grSTimerOneShot& operator=( const grSTimerOneShot& ) = delete;
 
 	private:
 		std::chrono::time_point<std::chrono::steady_clock> Start,End;
@@ -46,91 +126,105 @@ namespace grStruct
 		ETimer TimeType;
 	};
 
-	// grLoopQue // Dynamic array which copies the data // Push/Pull // First in/First out
+	// grLoopQue // First in/First out // Thread safe // Not move safe
 	//////////////////////////////////////////////////
 	template<typename T>
 	class grLoopQue
 	{
 	public:
-
-		grLoopQue( const intU size )
-			: arrT		( new T[ size ] )
-			, Size		( size )
-			, StrtIdx	( 0 )
-			, Active	( 0 )
+		grLoopQue()
+			: m_puArr	( std::make_unique<T[]>( 0 ) )
+			, m_Size	( 0 )
+			, m_StrtIdx	( 0 )
+			, m_Count	( 0 )
 		{}
-		~grLoopQue( void )
+		grLoopQue( const intU size )
+			: m_puArr	( std::make_unique<T[]>( size ) )
+			, m_Size	( size )
+			, m_StrtIdx	( 0 )
+			, m_Count	( 0 )
+		{}
+		grLoopQue( const grLoopQue& que )
 		{
-			if ( arrT != nullptr )
-				delete[] arrT;
+			Cpy( que );
 		}
-		grLoopQue( grLoopQue const& ) = delete;
-		grLoopQue& operator=( grLoopQue const& ) = delete;
-
-		inline const intU Quantity( void ) const
+		grLoopQue& operator=( const grLoopQue& que )
 		{
-			return Active;
+			Cpy( que );
+			return *this;
 		}
 
+		inline const intU Size( void ) const
+		{
+			return m_Size;
+		}
+		inline const intU Count( void ) const
+		{
+			return m_Count;
+		}
 		inline void Push( const T& rT )
 		{
-			if ( Active == Size )
-			{
 #ifdef DEBUG
-				std::puts( "grLoopQue::Push(): Size maxed out. No element was added.\n" );
-#endif // DEBUG
-				return;
-			}
-
-			intU insrtIdx = StrtIdx + Active;
-			if ( Size - 1 < insrtIdx )
-				insrtIdx = insrtIdx - Size;
-
-			arrT[ insrtIdx ] = rT;
-			++Active;
-		}
-
-		inline T Pull( void )
-		{
-#ifdef DEBUG
-			assert( ( Active > 0 ) && "grLoopQue::Pull(): Que is empty" );
+			assert( m_Count != m_Size && "grLoopQue::Push() : Size maxed out." );
 #endif // DEBUG
 
-			sizeT idx = StrtIdx;
-			++StrtIdx;
-			if ( Size - 1 < StrtIdx )
-				StrtIdx = StrtIdx - Size;
+			intU insrtIdx = m_StrtIdx + m_Count;
 
-			--Active;
-			return arrT[ idx ];
+			std::lock_guard<std::mutex> lock( m_Lock );
+
+			if ( m_Size - 1 < insrtIdx )
+				insrtIdx = insrtIdx - m_Size;
+
+			m_puArr[ insrtIdx ] = rT;
+			++m_Count;
 		}
-
-		inline T Pop( void )
+		inline T Pull( void )	// Last element
 		{
 #ifdef DEBUG
-			assert( ( Active > 0 ) && "grLoopQue::Pop(): Que is empty" );
+			assert( ( m_Count > 0 ) && "grLoopQue::Pull(): Que is empty" );
 #endif // DEBUG
 
-			sizeT idx = StrtIdx + ( Size - 1 );
-			if ( idx > ( Size - 1 ) )
-				idx =idx - Size;
+			sizeT idx = m_StrtIdx;
 
-			--Active;
-			return arrT[ idx ];
+			std::unique_lock<std::mutex> lock( m_Lock );
+
+			++m_StrtIdx;
+			if ( m_StrtIdx > m_Size - 1 )
+				m_StrtIdx = m_StrtIdx - m_Size;
+
+			--m_Count;
+
+			lock.unlock();
+
+			return m_puArr[ idx ];
 		}
-
-		inline void Reset( void )
+		inline void Reset( const sizeT size )
 		{
-			StrtIdx = 0;
-			Active = 0;
+			std::lock_guard<std::mutex> lock( m_Lock );
+
+			m_puArr.reset( new T[ size ] );
+			m_Size = size;
+			m_StrtIdx = 0;
+			m_Count = 0;
 		}
 
 	private:
-		T*	arrT;
+		inline void Cpy( const grLoopQue<T>& que )
+		{
+			std::lock_guard<std::mutex> lock( m_Lock );
 
-		sizeT	Size,
-				StrtIdx,
-				Active;
+			m_puArr.reset( new T[ que.m_Size ] );
+			for( sizeT i = 0; i < que.m_Size; ++i )
+				m_puArr[ i ] = que.m_puArr[ i ];
+
+			m_Size = que.m_Size;
+			m_StrtIdx = que.m_StrtIdx;
+			m_Count = que.m_Count;
+		}
+
+		pU<T[]> m_puArr;
+		std::mutex m_Lock;
+		sizeT m_Size, m_StrtIdx, m_Count;
 	};
 
 
