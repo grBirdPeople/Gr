@@ -11,7 +11,7 @@
 
 namespace grStruct
 {
-	// grArr // Dynamic array // // Thread safe // Not safe for move copy and move assign
+	// grArr // Dynamic array // Basic thread safety
 	//////////////////////////////////////////////////
 	template <typename T>
 	class grArr
@@ -36,6 +36,9 @@ namespace grStruct
 			Cpy( rArr );
 			return *this;
 		}
+		grArr( grArr<T>&& rArr ) noexcept = delete;
+		grArr<T>& operator=( grArr<T>&& rArr ) noexcept = delete;
+
 		inline void Reset( const size_t size )
 		{
 			std::lock_guard<std::mutex> lock( m_Lock );
@@ -87,46 +90,7 @@ namespace grStruct
 		size_t m_Size, m_Count;
 	};
 
-	// STimerOneShot // Simply create an instance at the start of a block
-	//////////////////////////////////////////////////
-	struct grSTimerOneShot
-	{
-		enum class ETimer
-		{
-			NS = 0,
-			MS,
-			S
-		};
-
-		grSTimerOneShot( ETimer timeType = ETimer::MS )
-			: Start		( std::chrono::high_resolution_clock::now() )
-			, End		( Start )
-			, Duration	( 0.0f )
-			, TimeType	( timeType )
-		{}
-
-		~grSTimerOneShot( void )
-		{
-			End = std::chrono::high_resolution_clock::now();
-			Duration = End - Start;
-			switch( TimeType )
-			{
-				case ETimer::NS: printf( "Time (ns): %g \n", Duration.count() * 1000000000.0f ); break;
-				case ETimer::MS: printf( "Time (ms): %g \n", Duration.count() * 1000.0f ); break;
-				case ETimer::S: printf( "Time (s): %g \n", Duration.count() ); break;
-			}
-		}
-
-		grSTimerOneShot( const grSTimerOneShot& ) = delete;
-		grSTimerOneShot& operator=( const grSTimerOneShot& ) = delete;
-
-	private:
-		std::chrono::time_point<std::chrono::steady_clock> Start,End;
-		std::chrono::duration<float> Duration;
-		ETimer TimeType;
-	};
-
-	// grLoopQue // First in/First out // Thread safe // Not move safe
+	// grLoopQue // First in/First out // Basic thread safety
 	//////////////////////////////////////////////////
 	template<typename T>
 	class grLoopQue
@@ -153,6 +117,9 @@ namespace grStruct
 			Cpy( que );
 			return *this;
 		}
+		grLoopQue( grLoopQue&& que ) noexcept = delete;
+		grLoopQue& operator=( grLoopQue&& que ) noexcept = delete;
+
 
 		inline const intU Size( void ) const
 		{
@@ -186,16 +153,13 @@ namespace grStruct
 
 			sizeT idx = m_StrtIdx;
 
-			std::unique_lock<std::mutex> lock( m_Lock );
+			std::lock_guard<std::mutex> lock( m_Lock );
 
 			++m_StrtIdx;
 			if ( m_StrtIdx > m_Size - 1 )
 				m_StrtIdx = m_StrtIdx - m_Size;
 
 			--m_Count;
-
-			lock.unlock();
-
 			return m_puArr[ idx ];
 		}
 		inline void Reset( const sizeT size )
@@ -227,8 +191,53 @@ namespace grStruct
 		sizeT m_Size, m_StrtIdx, m_Count;
 	};
 
+	// grSTimerOneShot // Simply create an instance at the start of a block
+	//////////////////////////////////////////////////
+	struct grSTimerOneShot
+	{
+		enum class ETimer
+		{
+			NS = 0,
+			MS,
+			S
+		};
 
-	// grLinearActivity // Experimental and not really tested
+		grSTimerOneShot( ETimer timeType = ETimer::MS )
+			: Start		( std::chrono::high_resolution_clock::now() )
+			, End		( Start )
+			, Duration	( 0.0f )
+			, TimeType	( timeType )
+		{}
+
+		~grSTimerOneShot()
+		{
+			End = std::chrono::high_resolution_clock::now();
+			Duration = End - Start;
+			switch ( TimeType )
+			{
+				case ETimer::NS: printf( "Time (ns): %g \n", Duration.count() * 1000000000.0f ); break;
+				case ETimer::MS: printf( "Time (ms): %g \n", Duration.count() * 1000.0f ); break;
+				case ETimer::S: printf( "Time (s): %g \n", Duration.count() ); break;
+			}
+		}
+
+		grSTimerOneShot( const grSTimerOneShot& ) = delete;
+		grSTimerOneShot( grSTimerOneShot&& ) noexcept = delete;
+		grSTimerOneShot& operator=( const grSTimerOneShot& ) = delete;
+		grSTimerOneShot& operator=( grSTimerOneShot&& ) noexcept = delete;
+
+	private:
+		std::chrono::time_point<std::chrono::steady_clock> Start, End;
+		std::chrono::duration<float> Duration;
+		ETimer TimeType;
+	};
+
+
+	// Experimantal stuff
+	////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+	// grLinearActivity
 	//////////////////////////////////////////////////
 	template<typename T>
 	class grLinearActivity

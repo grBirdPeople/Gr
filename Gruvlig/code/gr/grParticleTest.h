@@ -29,6 +29,8 @@ struct grSParticle
 	{}
 	grSParticle( const grSParticle& ) = delete;
 	grSParticle& operator=( const grSParticle& ) = delete;
+	grSParticle( grSParticle&& ) noexcept = delete;
+	grSParticle& operator=( grSParticle&& ) noexcept = delete;
 
 	inline void Kill( const sizeT nowIdx )
 	{
@@ -58,17 +60,17 @@ struct grSParticle
 		--Alive;
 	}
 
-	pU<SRgba[]>	puColorStart;
-	pU<SRgba[]>	puColorEnd;
-	pU<grV2f[]>	puScaleStart;
-	pU<grV2f[]>	puScaleEnd;
-	pU<grV2f[]>	puAcceleration;
-	pU<grV2f[]>	puVelocity;
-	pU<grV2f[]>	puPosition;
-	pU<float[]>	puMass;
-	pU<float[]>	puLife;
+	pU<SRgba[]> puColorStart;
+	pU<SRgba[]> puColorEnd;
+	pU<grV2f[]> puScaleStart;
+	pU<grV2f[]> puScaleEnd;
+	pU<grV2f[]> puAcceleration;
+	pU<grV2f[]> puVelocity;
+	pU<grV2f[]> puPosition;
+	pU<float[]> puMass;
+	pU<float[]> puLife;
 
-	sizeT	Alive;
+	sizeT Alive;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -78,7 +80,7 @@ enum class EParticleEqual
 	YES = 1
 };
 
-struct grSGeneratorBase
+struct grSBaseGenerate
 {
 	inline void SetBaseColor( grColor::SRgba& rStart, grColor::SRgba& rEnd )
 	{
@@ -123,7 +125,7 @@ struct grSGeneratorBase
 	EParticleEqual Equal;
 };
 
-struct grSColorGenerator : public grSGeneratorBase
+struct grSColorGenerate : public grSBaseGenerate
 {
 	inline void Set( const grColor::SRgba& rStart, const grColor::SRgba& rEnd, const bool randomize )
 	{
@@ -172,12 +174,11 @@ struct grSColorGenerator : public grSGeneratorBase
 			rParticle->puColorEnd[ i ] = LocalEnd;
 	}
 
-	SRgba	LocalStart,
-			LocalEnd;
-	bool	Rand;
+	SRgba LocalStart, LocalEnd;
+	bool Rand;
 };
 
-struct grSScaleGenerator : public grSGeneratorBase
+struct grSScaleGenerate : public grSBaseGenerate
 {
 	inline void Set( const grV2f& start, const grV2f& end )
 	{
@@ -216,11 +217,10 @@ struct grSScaleGenerator : public grSGeneratorBase
 			rParticle->puScaleStart[ i ] = LocalStart;
 	}
 
-	grV2f	LocalStart,
-			LocalEnd;
+	grV2f LocalStart, LocalEnd;
 };
 
-struct grSForceBasicGenerator : public grSGeneratorBase
+struct grSForceBasicGenerate : public grSBaseGenerate
 {
 	inline void Set( const grV2f& min, const grV2f& max )
 	{
@@ -247,7 +247,7 @@ struct grSForceBasicGenerator : public grSGeneratorBase
 			LocalMax;
 };
 
-struct grSPositionGenerator : public grSGeneratorBase
+struct grSPositionGenerate : public grSBaseGenerate
 {
 	inline void Set( const grV2f& min, const grV2f& max )
 	{
@@ -274,7 +274,7 @@ struct grSPositionGenerator : public grSGeneratorBase
 			LocalMax;
 };
 
-struct grSMassGenerator : public grSGeneratorBase
+struct grSMassGenerate : public grSBaseGenerate
 {
 	inline void Set( const grV2f& rMinMax )
 	{
@@ -302,7 +302,7 @@ struct grSMassGenerator : public grSGeneratorBase
 	grV2f LocalMinMax;
 };
 
-struct grSLifeGenerator : public grSGeneratorBase
+struct grSLifeGenerate : public grSBaseGenerate
 {
 	inline void Set( const grV2f& minMax )
 	{
@@ -342,6 +342,8 @@ struct grSEmitter
 	{}
 	grSEmitter( const grSEmitter& ) = delete;
 	grSEmitter& operator=( const grSEmitter& ) = delete;
+	grSEmitter( grSEmitter&& ) noexcept = delete;
+	grSEmitter& operator=( grSEmitter&& ) noexcept = delete;
 
 	inline void Emit( pU<grSParticle>& rParticle, const float deltaT ) noexcept
 	{
@@ -378,29 +380,27 @@ struct grSEmitter
 	// All types of generators goes here
 	// No slow virtual stuff allowed so each generator has it's own place
 	// TODO: If multiple generators of the same type would be allowed and produce cool results perhaps change to arrays
-	pU<grSColorGenerator>		puColor;
-	pU<grSScaleGenerator>		puScale;
-	pU<grSForceBasicGenerator>	puForceBasic;
-	pU<grSPositionGenerator>	puPosition;
-	pU<grSMassGenerator>		puMass;
-	pU<grSLifeGenerator>		puLife;
+	pU<grSColorGenerate> puColor;
+	pU<grSScaleGenerate> puScale;
+	pU<grSForceBasicGenerate> puForceBasic;
+	pU<grSPositionGenerate> puPosition;
+	pU<grSMassGenerate> puMass;
+	pU<grSLifeGenerate> puLife;
 
-	pU<grRandom>	puRand;	// Is slightly greater than 5mb so instead of each generator containing one it's passed
+	pU<grRandom> puRand;	// Is slightly greater than 5mb so instead of each generator containing one it's passed
 
-	grV2f	PositionSys;
-	float	EmitRate,
-			SpawnAccT;
-	sizeT	EmitAcc,
-			Size;
+	grV2f PositionSys;
+	float EmitRate, SpawnAccT;
+	sizeT EmitAcc, Size;
 };
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-struct grSColorUpdater
+struct grSColorUpdate
 {
 	// TODO: Only create updater instance if colors are NOT equal
 
-	grSColorUpdater( const bool hsv )
+	grSColorUpdate( const bool hsv )
 		: Hsv	( hsv )
 	{}
 
@@ -445,7 +445,7 @@ struct grSColorUpdater
 	bool Hsv;
 };
 
-struct grSScaleUpdater
+struct grSScaleUpdate
 {
 	inline void Update( pU<grSParticle>& rParticle, const float deltaT )
 	{
@@ -461,7 +461,7 @@ struct grSScaleUpdater
 	}
 };
 
-struct grSForceBasicUpdater
+struct grSForceBasicUpdate
 {
 	inline void Update( pU<grSParticle>& rParticle )
 	{
@@ -470,7 +470,7 @@ struct grSForceBasicUpdater
 	}
 };
 
-struct grSPositionUpdater
+struct grSPositionUpdate
 {
 	inline void Update( pU<grSParticle>& rParticle, const float deltaT )
 	{
@@ -479,7 +479,7 @@ struct grSPositionUpdater
 	}
 };
 
-struct grSLifeUpdater
+struct grSLifeUpdate
 {
 	inline void Update( pU<grSParticle>& rParticle, const float deltaT )
 	{
@@ -492,13 +492,15 @@ struct grSLifeUpdater
 	}
 };
 
-struct grSUpdater
+struct grSUpdate
 {
-	grSUpdater( void )
-	: puPosition	( std::make_unique<grSPositionUpdater>() )
+	grSUpdate( void )
+	: puPosition ( std::make_unique<grSPositionUpdate>() )
 	{}
-	grSUpdater( const grSUpdater& ) = delete;
-	grSUpdater& operator=( const grSUpdater& ) = delete;
+	grSUpdate( const grSUpdate& ) = delete;
+	grSUpdate& operator=( const grSUpdate& ) = delete;
+	grSUpdate( grSUpdate&& ) noexcept = delete;
+	grSUpdate& operator=( grSUpdate&& ) noexcept = delete;
 
 	inline void Update( pU<grSParticle>& rParticle, const float deltaT )
 	{
@@ -513,11 +515,11 @@ struct grSUpdater
 
 	// No slow virtual stuff allowed so each updater has it's own place
 	// All types of updaters goes here
-	pU<grSColorUpdater>			puColor;
-	pU<grSScaleUpdater>			puScale;
-	pU<grSForceBasicUpdater>	puForceBasic;
-	pU<grSPositionUpdater>		puPosition;
-	pU<grSLifeUpdater>			puLife;
+	pU<grSColorUpdate> puColor;
+	pU<grSScaleUpdate> puScale;
+	pU<grSForceBasicUpdate> puForceBasic;
+	pU<grSPositionUpdate> puPosition;
+	pU<grSLifeUpdate> puLife;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -527,6 +529,8 @@ public:
 	grCParticleSys( const intU size = 2000, const float emitRate = 1000.0f, const grV2f& position = grV2f( 320.0f, 180.0f ) );
 	grCParticleSys( const grCParticleSys& ) = delete;
 	grCParticleSys& operator=( const grCParticleSys& ) = delete;
+	grCParticleSys( grCParticleSys&& ) noexcept = delete;
+	grCParticleSys& operator=( grCParticleSys&& ) noexcept = delete;
 
 	void EmitRate( const float emitRate );
 	void PositionSystem( const grV2f& position );
@@ -544,9 +548,9 @@ public:
 	void Update( const float deltaT );
 
 private:
-	pU<grSParticle>	m_puParticle;
-	pU<grSEmitter>	m_puEmitter;
-	pU<grSUpdater>	m_puUpdater;
+	pU<grSParticle> m_puParticle;
+	pU<grSEmitter> m_puEmit;
+	pU<grSUpdate> m_puUpdate;
 
 	// TODO: Needs activation choices for emission: start/stop/timer/infinite
 };
