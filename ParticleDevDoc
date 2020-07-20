@@ -39,7 +39,7 @@ foreach rgb: ( end - start ) / Life
 Possible ring effect:
 cos((x^2 + y^2)^0.5)
 
-Packed struct/class syntax:
+Possiblea cked struct/class syntax:
 struct/class __attribute__ ((__packed__)) Hej {}
 
 SFGUI:

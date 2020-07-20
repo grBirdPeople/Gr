@@ -90,23 +90,23 @@ namespace grStruct
 		size_t m_Size, m_Count;
 	};
 
-	// grLoopQue // First in/First out // Basic thread safety
+	// grLoopQue // FIFO // Basic thread safety
 	//////////////////////////////////////////////////
 	template<typename T>
 	class grLoopQue
 	{
 	public:
 		grLoopQue()
-			: m_puArr	( std::make_unique<T[]>( 0 ) )
-			, m_Size	( 0 )
-			, m_StrtIdx	( 0 )
-			, m_Count	( 0 )
+			: m_puArr		( std::make_unique<T[]>( 0 ) )
+			, m_Capacity	( 0 )
+			, m_Size		( 0 )
+			, m_StrtIdx		( 0 )
 		{}
-		grLoopQue( const intU size )
-			: m_puArr	( std::make_unique<T[]>( size ) )
-			, m_Size	( size )
-			, m_StrtIdx	( 0 )
-			, m_Count	( 0 )
+		grLoopQue( const sizeT capacity )
+			: m_puArr		( std::make_unique<T[]>( capacity ) )
+			, m_Capacity	( capacity )
+			, m_Size		( 0 )
+			, m_StrtIdx		( 0 )
 		{}
 		grLoopQue( const grLoopQue& que )
 		{
@@ -120,56 +120,52 @@ namespace grStruct
 		grLoopQue( grLoopQue&& que ) noexcept = delete;
 		grLoopQue& operator=( grLoopQue&& que ) noexcept = delete;
 
-
-		inline const intU Size( void ) const
+		inline const sizeT Capacity( void ) const
+		{
+			return m_Capacity;
+		}
+		inline const sizeT Size( void ) const
 		{
 			return m_Size;
 		}
-		inline const intU Count( void ) const
+		inline bool Push( const T& rT )
 		{
-			return m_Count;
-		}
-		inline void Push( const T& rT )
-		{
-#ifdef DEBUG
-			assert( m_Count != m_Size && "grLoopQue::Push() : Size maxed out." );
-#endif // DEBUG
-
-			intU insrtIdx = m_StrtIdx + m_Count;
-
 			std::lock_guard<std::mutex> lock( m_Lock );
 
-			if ( m_Size - 1 < insrtIdx )
-				insrtIdx = insrtIdx - m_Size;
+			if ( m_Size == m_Capacity )
+				return false;
 
-			m_puArr[ insrtIdx ] = rT;
-			++m_Count;
+			sizeT idx = m_Size + m_StrtIdx;
+			if ( idx > m_Capacity - 1 )
+				idx -= m_Capacity;
+
+			++m_Size;
+			m_puArr[ idx ] = rT;
+			return true;
 		}
-		inline T Pull( void )	// Last element
+		inline bool Pop( T& rT )	// Last element
 		{
-#ifdef DEBUG
-			assert( ( m_Count > 0 ) && "grLoopQue::Pull(): Que is empty" );
-#endif // DEBUG
-
-			sizeT idx = m_StrtIdx;
-
 			std::lock_guard<std::mutex> lock( m_Lock );
 
-			++m_StrtIdx;
-			if ( m_StrtIdx > m_Size - 1 )
-				m_StrtIdx = m_StrtIdx - m_Size;
+			if ( m_Size < 1 )
+				return false;
 
-			--m_Count;
-			return m_puArr[ idx ];
+			sizeT idx = m_StrtIdx++;
+			if ( m_StrtIdx > m_Capacity - 1 )
+				m_StrtIdx -= m_Capacity;
+
+			--m_Size;
+			rT = m_puArr[ idx ];
+			return true;
 		}
 		inline void Reset( const sizeT size )
 		{
 			std::lock_guard<std::mutex> lock( m_Lock );
 
 			m_puArr.reset( new T[ size ] );
-			m_Size = size;
+			m_Capacity = size;
 			m_StrtIdx = 0;
-			m_Count = 0;
+			m_Size = 0;
 		}
 
 	private:
@@ -177,18 +173,18 @@ namespace grStruct
 		{
 			std::lock_guard<std::mutex> lock( m_Lock );
 
-			m_puArr.reset( new T[ que.m_Size ] );
-			for( sizeT i = 0; i < que.m_Size; ++i )
+			m_puArr.reset( new T[ que.m_Capacity ] );
+			for( sizeT i = 0; i < que.m_Capacity; ++i )
 				m_puArr[ i ] = que.m_puArr[ i ];
 
-			m_Size = que.m_Size;
+			m_Capacity = que.m_Capacity;
 			m_StrtIdx = que.m_StrtIdx;
-			m_Count = que.m_Count;
+			m_Size = que.m_Size;
 		}
 
 		pU<T[]> m_puArr;
 		std::mutex m_Lock;
-		sizeT m_Size, m_StrtIdx, m_Count;
+		sizeT m_Capacity, m_Size, m_StrtIdx;
 	};
 
 	// grSTimerOneShot // Simply create an instance at the start of a block
