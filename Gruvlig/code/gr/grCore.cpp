@@ -13,18 +13,18 @@
 // cTor
 //////////////////////////////////////////////////
 grCore::grCore( const intU winWidth, const intU winHeight, const intU frameRate, const str& rAppName )
-	: m_AppName				( rAppName )
-	, m_TotalTimeElapsed	( 0.0 )
-	, m_Dt					( 0.0 )
-	, m_WinWidth			( winWidth )
-	, m_WinHeight			( winHeight )
-	, m_FramesPerSec		( frameRate )
-	, m_Aa					( AA_DEFAULT )
-	, m_VSync				( true )
-	, m_pRenderWin			( new sf::RenderWindow )
-	, m_pCSettings			( new sf::ContextSettings )
-	, m_pSfEvent			( new sf::Event )
-	, m_pEngineClock		( new sf::Clock )
+	: m_AppName			( rAppName )
+	, m_TotalElapsedT	( 0.0 )
+	, m_Dt				( 0.0 )
+	, m_WinWidth		( winWidth )
+	, m_WinHeight		( winHeight )
+	, m_FramesPerSec	( frameRate )
+	, m_Aa				( AA_DEFAULT )
+	, m_VSync			( true )
+	, m_puRenderWin		( std::make_unique<sf::RenderWindow>() )
+	, m_puCSettings		( std::make_unique<sf::ContextSettings>() )
+	, m_puEvent			( std::make_unique<sf::Event>() )
+	, m_puClock			( std::make_unique<sf::Clock>() )
 {
 	InitRenderWin();
 
@@ -45,13 +45,11 @@ grCore::grCore( const intU winWidth, const intU winHeight, const intU frameRate,
 
 // dTor
 //////////////////////////////////////////////////
-grCore::~grCore( void )
+grCore::~grCore()
 {
 #ifdef DEBUG
 	if ( m_pSandbox != nullptr )
-	{
 		DELANDNULL( m_pSandbox );
-	}
 
 	grDebugManager::DeInitialize();
 #endif // DEBUG
@@ -66,26 +64,18 @@ grCore::~grCore( void )
 
 	//////////////////////////////////////////////////
 
-	if ( m_pRenderWin )
+	if ( m_puRenderWin )
 	{
-		if ( m_pRenderWin->isOpen() == true )
-		{
-			m_pRenderWin->close();
-		}
-
-		DELANDNULL( m_pRenderWin );
+		if ( m_puRenderWin->isOpen() == true )
+			m_puRenderWin->close();
 	}
-
-	if ( m_pSfEvent )		{ DELANDNULL( m_pSfEvent ); }
-	if ( m_pEngineClock )	{ DELANDNULL( m_pEngineClock ); }
-	if ( m_pCSettings )		{ DELANDNULL( m_pCSettings ); }
 }
 
 
 // Update
 //////////////////////////////////////////////////
 void
-grCore::Update( void )
+grCore::Update()
 {
 #ifdef DEBUG
 	m_pSandbox->Update( GetDeltaT() );
@@ -106,27 +96,27 @@ grCore::Update( void )
 // Render
 //////////////////////////////////////////////////
 void
-grCore::Render( void )	
+grCore::Render()	
 {
-	m_pRenderWin->clear();
+	m_puRenderWin->clear();
 	
 	//////////////////////////////////////////////////
 	
 #ifdef	DEBUG
-	m_pSandbox->Render( *m_pRenderWin );
-	grDebugManager::Instance().DebugRender( *m_pRenderWin );
+	m_pSandbox->Render( *m_puRenderWin );
+	grDebugManager::Instance().Render( *m_puRenderWin );
 #endif	//DEBUG_MODE
 
 	//////////////////////////////////////////////////
 	
-	m_pRenderWin->display();
+	m_puRenderWin->display();
 }
 
 
 // Init
 //////////////////////////////////////////////////
 void
-grCore::Init( void )
+grCore::Init()
 {
 #ifdef	DEBUG
 	m_pSandbox = new grSandbox();
@@ -137,31 +127,31 @@ grCore::Init( void )
 // Run
 //////////////////////////////////////////////////
 void
-grCore::Run( void )
+grCore::Run()
 {
-	double timeLast	= m_pEngineClock->getElapsedTime().asSeconds();
+	double timeLast	= m_puClock->getElapsedTime().asSeconds();
 	grInputManager& rInputMan = grInputManager::Instance();
 
-	while ( m_pRenderWin->isOpen() )
+	while ( m_puRenderWin->isOpen() )
 	{
-		while ( m_pRenderWin->pollEvent( *m_pSfEvent ) )
+		while ( m_puRenderWin->pollEvent( *m_puEvent ) )
 		{
-			switch( m_pSfEvent->type )
+			switch( m_puEvent->type )
 			{
-				case eEvent::Closed: Terminate(); break;
+				//case sf::Event::Closed: Terminate(); break;
 				// Input
-				case eEvent::KeyPressed: rInputMan.SetKeyDown( m_pSfEvent->key.code ); break;
-				case eEvent::KeyReleased: rInputMan.SetKeyUp( m_pSfEvent->key.code ); break;
-				case eEvent::MouseMoved: rInputMan.SetMouseMoved( grV2f( ( float )m_pSfEvent->mouseMove.x, ( float )m_pSfEvent->mouseMove.y ) ); break;																	break;
-				case eEvent::MouseButtonPressed: rInputMan.SetMouseDown( m_pSfEvent->mouseButton.button ); break;
-				case eEvent::MouseButtonReleased: rInputMan.SetMouseUp( m_pSfEvent->mouseButton.button ); break;
-				case eEvent::MouseWheelScrolled: rInputMan.SetMouseScroll( ( intU )m_pSfEvent->mouseWheelScroll.delta ); break;
+				case sf::Event::KeyPressed: rInputMan.SetKeyDown( m_puEvent->key.code ); break;
+				case sf::Event::KeyReleased: rInputMan.SetKeyUp( m_puEvent->key.code ); break;
+				case sf::Event::MouseMoved: rInputMan.SetMouseMoved( grV2f( ( float )m_puEvent->mouseMove.x, ( float )m_puEvent->mouseMove.y ) ); break;																	break;
+				case sf::Event::MouseButtonPressed: rInputMan.SetMouseDown( m_puEvent->mouseButton.button ); break;
+				case sf::Event::MouseButtonReleased: rInputMan.SetMouseUp( m_puEvent->mouseButton.button ); break;
+				case sf::Event::MouseWheelScrolled: rInputMan.SetMouseScroll( ( intU )m_puEvent->mouseWheelScroll.delta ); break;
 			};
 		}
 		
-		m_TotalTimeElapsed = m_pEngineClock->getElapsedTime().asSeconds();
-		m_Dt = m_TotalTimeElapsed - timeLast;
-		timeLast = m_TotalTimeElapsed;
+		m_TotalElapsedT = m_puClock->getElapsedTime().asSeconds();
+		m_Dt = m_TotalElapsedT - timeLast;
+		timeLast = m_TotalElapsedT;
 		
 		Update();
 		Render();
@@ -173,11 +163,11 @@ grCore::Run( void )
 // InitRWin
 //////////////////////////////////////////////////
 void
-grCore::InitRenderWin( void )
+grCore::InitRenderWin()
 {
-	m_pCSettings->antialiasingLevel = ( unsigned int )m_Aa;
-	m_pRenderWin->create( sf::VideoMode( ( unsigned int )m_WinWidth, ( unsigned int )m_WinHeight ), m_AppName,sf::Style::None, *m_pCSettings );
-	//m_pRenderWin->setFramerateLimit(m_FramesPerSec);
-	m_pRenderWin->setVerticalSyncEnabled( true );
+	m_puCSettings->antialiasingLevel = ( unsigned int )m_Aa;
+	m_puRenderWin->create( sf::VideoMode( ( unsigned int )m_WinWidth, ( unsigned int )m_WinHeight ), m_AppName,sf::Style::None, *m_puCSettings );
+	//m_puRenderWin->setFramerateLimit( m_FramesPerSec );
+	//m_puRenderWin->setVerticalSyncEnabled( true );
 }
 

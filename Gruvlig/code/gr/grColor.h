@@ -10,7 +10,7 @@ namespace grColor
 	//////////////////////////////////////////////////
 	struct SRgba
 	{
-		SRgba( const intU r = 255, const intU g = 255, const intU b = 255, const intU a = 255 )
+		SRgba( const uint16_t r = 255, const uint16_t g = 255, const uint16_t b = 255, const uint16_t a = 255 )
 			: R( ( float )r ) , G( ( float )g ) , B( ( float )b ) , A( ( float )a )
 		{}
 
@@ -93,7 +93,7 @@ namespace grColor
 		float hh = rHsva.H;
 		if ( hh >= 360.0f ) hh = 0.0f;
 		hh /= 60.0f;
-		sizeT i = ( sizeT )hh;
+		uint16_t i = ( uint16_t )hh;
 		float ff = hh - i;
 		float p = rHsva.V * ( 1.0f - rHsva.S );
 		float q = rHsva.V * ( 1.0f - ( rHsva.S * ff ) );

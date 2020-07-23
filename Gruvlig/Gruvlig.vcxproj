@@ -166,7 +166,6 @@
     <ClCompile Include="code\gr\grCore.cpp" />
     <ClCompile Include="code\gr\grCParticleManager.cpp" />
     <ClCompile Include="code\gr\grCtrlPlayer.cpp" />
-    <ClCompile Include="code\gr\grDebugManager.cpp" />
     <ClCompile Include="code\gr\grEntityEnemy.cpp" />
     <ClCompile Include="code\gr\grEntityManager.cpp" />
     <ClCompile Include="code\gr\grEntityPlayer.cpp" />

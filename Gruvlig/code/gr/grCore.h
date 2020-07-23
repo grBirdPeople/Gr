@@ -11,11 +11,6 @@
 #include	"grCommon.h"
 #include	"grSingleton.h"
 
-typedef		sf::ContextSettings	cSettings;
-typedef		sf::Clock			gClock;
-typedef		sf::Event			eEvent;
-typedef		sf::RenderWindow	rWin;
-
 class		grSandbox;
 
 
@@ -24,86 +19,72 @@ class		grSandbox;
 class grCore : public grSingleton<grCore>
 {
 public:
-
-	grCore( const intU winWidth = 640, const intU winHeight = 360, const intU frameRate = 60, const str& rAppName = "grFramework" );
+	grCore( const intU winWidth = 640, const intU winHeight = 360, const intU frameRate = 120, const str& rAppName = "grFramework" );
 	//grCore( const intU winWidth = 1920, const intU winHeight = 1080, const intU frameRate = 60, const str& rAppName = "grFramework" );
-	~grCore( void );
+	~grCore();
 
 	//////////////////////////////////////////////////
 	
-	inline double GetGameTimeElapsed( void ) const
+	inline double GetGameTimeElapsed() const
 	{
-		return m_TotalTimeElapsed;
+		return m_TotalElapsedT;
 	}
-	inline float GetDeltaT( void ) const
+	inline float GetDeltaT() const
 	{
 		return (float)m_Dt;
 	}
-	inline rWin& GetRenderWin( void ) const
+	inline sf::RenderWindow& GetRenderWin() const
 	{
-		return *m_pRenderWin;
-	}
-										  
+		return *m_puRenderWin;
+	}								  
 	inline void SetAA ( const intU aa )
 	{
 		m_Aa = aa;
-		m_pCSettings->antialiasingLevel = ( unsigned int )m_Aa;
+		m_puCSettings->antialiasingLevel = ( unsigned int )m_Aa;
 	}		 							  
 	inline void SetFramerateLimit( const intU frameRateLimit )
 	{
 		m_FramesPerSec = frameRateLimit;
-		m_pRenderWin->setFramerateLimit( ( unsigned int )m_FramesPerSec );
+		m_puRenderWin->setFramerateLimit( ( unsigned int )m_FramesPerSec );
 	}
 	inline void SetVSync( const bool vSync )
 	{
 		m_VSync = vSync;
-		m_pRenderWin->setVerticalSyncEnabled( m_VSync );
-	}
-					
-	void Init( void );
-	void Run( void );
+		m_puRenderWin->setVerticalSyncEnabled( m_VSync );
+	}			
+	void Init();
+	void Run();
 	
 	//////////////////////////////////////////////////
 	
 private:
 
-	void InitRenderWin( void );
-	void Update	( void );
-	void Render( void );
-	inline void	Terminate( void )
+	void InitRenderWin();
+	void Update();
+	void Render();
+	inline void	Terminate()
 	{
-		if ( m_pRenderWin != nullptr )
+		if ( m_puRenderWin != nullptr )
 		{
-			if ( m_pRenderWin->isOpen() == true )
-			{
-				m_pRenderWin->close();
-			}
+			if ( m_puRenderWin->isOpen() == true )
+				m_puRenderWin->close();
 		}
 	}
 
 	//////////////////////////////////////////////////
 
-	str			m_AppName;
-	
-	double		m_TotalTimeElapsed,
-				m_Dt;
-	
-	intU		m_WinWidth,
-				m_WinHeight,
-				m_FramesPerSec,
-				m_Aa;
-				
-	bool		m_VSync;
-	
-	rWin*		m_pRenderWin;
-	cSettings*	m_pCSettings;
-	eEvent*		m_pSfEvent;
-	gClock*		m_pEngineClock;
+	str m_AppName;
+	double m_TotalElapsedT, m_Dt;
+	intU m_WinWidth, m_WinHeight, m_FramesPerSec, m_Aa;
+	bool m_VSync;
+	pU<sf::RenderWindow> m_puRenderWin;
+	pU<sf::ContextSettings> m_puCSettings;
+	pU<sf::Event> m_puEvent;
+	pU<sf::Clock> m_puClock;
 
 #ifdef DEBUG
 	grSandbox* m_pSandbox;
 #endif // DEBUG
-
 };
 
 #endif		//_GRCORE_H_

@@ -12,36 +12,25 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 typedef grColor::SRgba SRgba;
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
 struct grSParticle
 {
 	grSParticle( const sizeT size )
 		: puColorStart		( std::make_unique<SRgba[]>( size ) )
 		, puColorEnd		( std::make_unique<SRgba[]>( size ) )
-		, puScale			( std::make_unique<grV2f[]>( size ) )		
+		, puScaleStart		( std::make_unique<grV2f[]>( size ) )
+		, puScaleEnd		( std::make_unique<grV2f[]>( size ) )
 		, puAcceleration	( std::make_unique<grV2f[]>( size ) )
 		, puVelocity		( std::make_unique<grV2f[]>( size ) )
 		, puPosition		( std::make_unique<grV2f[]>( size ) )
 		, puMass			( std::make_unique<float[]>( size ) )
 		, puLife			( std::make_unique<float[]>( size ) )
 		, Alive				( 0 )
-	{
-		for( sizeT i = 0; i < size; ++i )
-			puMass[ i ] = 1.0f;
-
-		//// TEST: Unique ptr dynamic array 2D
-		//pU<pU<int[]>[]> smartPtr2D = std::make_unique<pU<int[]>[]>( 3 );
-		//for ( sizeT i = 0; i < 3; ++i )
-		//{
-		//	pU<int[]> smartPtr1D = std::make_unique<int[]>( 3 );
-		//	for ( sizeT j = 0; j < 3; ++j )
-		//		smartPtr1D[ j ] = j;
-
-		//	smartPtr2D[ i ] = std::move( smartPtr1D );
-		//}
-		//// TEST
-	}
+	{}
 	grSParticle( const grSParticle& ) = delete;
 	grSParticle& operator=( const grSParticle& ) = delete;
+	grSParticle( grSParticle&& ) noexcept = delete;
+	grSParticle& operator=( grSParticle&& ) noexcept = delete;
 
 	inline void Kill( const sizeT nowIdx )
 	{
@@ -52,7 +41,8 @@ struct grSParticle
 
 		grAlgo::Swap( puColorStart[ nowIdx ], puColorStart[ last ] );
 		grAlgo::Swap( puColorEnd[ nowIdx ], puColorEnd[ last ] );
-		grAlgo::Swap( puScale[ nowIdx ], puScale[ last ] );
+		grAlgo::Swap( puScaleStart[ nowIdx ], puScaleStart[ last ] );
+		grAlgo::Swap( puScaleEnd[ nowIdx ], puScaleEnd[ last ] );
 		grAlgo::Swap( puAcceleration[ nowIdx ], puAcceleration[ last ] );
 		grAlgo::Swap( puVelocity[ nowIdx ], puVelocity[ last ] );
 		grAlgo::Swap( puPosition[ nowIdx ], puPosition[ last ] );
@@ -70,28 +60,29 @@ struct grSParticle
 		--Alive;
 	}
 
-	pU<SRgba[]>	puColorStart;
-	pU<SRgba[]>	puColorEnd;
-	pU<grV2f[]>	puScale;
-	pU<grV2f[]>	puAcceleration;
-	pU<grV2f[]>	puVelocity;
-	pU<grV2f[]>	puPosition;
-	pU<float[]>	puMass;
-	pU<float[]>	puLife;
+	pU<SRgba[]> puColorStart;
+	pU<SRgba[]> puColorEnd;
+	pU<grV2f[]> puScaleStart;
+	pU<grV2f[]> puScaleEnd;
+	pU<grV2f[]> puAcceleration;
+	pU<grV2f[]> puVelocity;
+	pU<grV2f[]> puPosition;
+	pU<float[]> puMass;
+	pU<float[]> puLife;
 
-	sizeT	Alive;
+	sizeT Alive;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-struct grSGeneratorBase
+enum class EParticleEqual
 {
-	enum class EEqual
-	{
-		NO = 0,
-		YES = 1
-	};
+	NO = 0,
+	YES = 1
+};
 
-	inline void SetBase( grColor::SRgba& rStart, grColor::SRgba& rEnd )
+struct grSBaseGenerate
+{
+	inline void SetBaseColor( grColor::SRgba& rStart, grColor::SRgba& rEnd )
 	{
 		rStart.R = grMath::Clamp( rStart.R, 0, 255 );
 		rStart.G = grMath::Clamp( rStart.G, 0, 255 );
@@ -108,33 +99,40 @@ struct grSGeneratorBase
 			 grMath::CmpFloat( rStart.B, rEnd.B ) &&
 			 grMath::CmpFloat( rStart.A, rEnd.A ) )
 		{
-			Equal = EEqual::YES;
+			Equal = EParticleEqual::YES;
 		}
 	}
 
-	inline void SetBase( grV2f& rMin, grV2f& rMax )
+	inline void SetBaseStartEnd( grV2f& rStart, grV2f& rEnd )
+	{
+		rStart = grMath::Abs( rStart );
+		rEnd = grMath::Abs( rEnd );
+		Equal = grMath::CmpV2f( rStart, rEnd ) ? EParticleEqual::YES : EParticleEqual::NO;
+	}
+
+	inline void SetBaseMinMaxX2( grV2f& rMin, grV2f& rMax )
 	{
 		grMath::RangeCheckV2fx2( rMin, rMax );
-		Equal = grMath::CmpV2f( rMin, rMax ) ? EEqual::YES : EEqual::NO;
+		Equal = grMath::CmpV2f( rMin, rMax ) ? EParticleEqual::YES : EParticleEqual::NO;
 	}
 
-	inline void SetBase( grV2f& rMinMax )
+	inline void SetBaseMinMax( grV2f& rMinMax )
 	{
 		grMath::RangeCheckV2f( rMinMax );
-		Equal = grMath::CmpFloat( rMinMax.x, rMinMax.y ) ? EEqual::YES : EEqual::NO;
+		Equal = grMath::CmpFloat( rMinMax.x, rMinMax.y ) ? EParticleEqual::YES : EParticleEqual::NO;
 	}
 
-	EEqual Equal;
+	EParticleEqual Equal;
 };
 
-struct grSColorGenerator : public grSGeneratorBase
+struct grSColorGenerate : public grSBaseGenerate
 {
 	inline void Set( const grColor::SRgba& rStart, const grColor::SRgba& rEnd, const bool randomize )
 	{
 		LocalStart = rStart;
 		LocalEnd = rEnd;
 		Rand = randomize;
-		SetBase( LocalStart, LocalEnd );
+		SetBaseColor( LocalStart, LocalEnd );
 	}
 
 	inline void Generate( pU<grSParticle>& rParticle, const sizeT startIdx, const sizeT endIdx, const pU<grRandom>& rRand )
@@ -144,61 +142,96 @@ struct grSColorGenerator : public grSGeneratorBase
 			float midR = grMath::Abs( LocalStart.R - LocalEnd.R ) * 0.5f;
 			float midG = grMath::Abs( LocalStart.G - LocalEnd.G ) * 0.5f;
 			float midB = grMath::Abs( LocalStart.B - LocalEnd.B ) * 0.5f;
-			//float midA = grMath::Abs( LocalStart.A - LocalEnd.A ) * 0.5f;		// Don't think I like random alpha
+			//float midA = grMath::Abs( LocalStart.A - LocalEnd.A ) * 0.5f;		// Unsure if random alpha is desired
 
 			for ( sizeT i = startIdx; i < endIdx; ++i )
 			{
-				rParticle->puColorStart[ i ].R = LocalStart.R > midR ? rRand->Float( midR, LocalStart.R ) : rRand->Float( LocalStart.R, midR );
-				rParticle->puColorStart[ i ].G = LocalStart.G > midG ? rRand->Float( midG, LocalStart.G ) : rRand->Float( LocalStart.G, midG );
-				rParticle->puColorStart[ i ].B = LocalStart.B > midB ? rRand->Float( midB, LocalStart.B ) : rRand->Float( LocalStart.B, midB );
-				rParticle->puColorStart[ i ].A = LocalStart.A;
+				grColor::SRgba result( LocalStart.R > midR ? ( uint16_t )rRand->Float( midR, LocalStart.R ) : ( uint16_t )rRand->Float( LocalStart.R, midR ),
+									   LocalStart.G > midG ? ( uint16_t )rRand->Float( midG, LocalStart.G ) : ( uint16_t )rRand->Float( LocalStart.G, midG ),
+									   LocalStart.B > midB ? ( uint16_t )rRand->Float( midB, LocalStart.B ) : ( uint16_t )rRand->Float( LocalStart.B, midB ),
+									   ( uint16_t )LocalStart.A );
+
+				rParticle->puColorStart[ i ] = result;
 			}
 
 			for ( sizeT i = startIdx; i < endIdx; ++i )
 			{
-				rParticle->puColorEnd[ i ].R = LocalEnd.R > midR ? rRand->Float( midR, LocalEnd.R ) : rRand->Float( LocalEnd.R, midR );
-				rParticle->puColorEnd[ i ].G = LocalEnd.G > midG ? rRand->Float( midG, LocalEnd.G ) : rRand->Float( LocalEnd.G, midG );
-				rParticle->puColorEnd[ i ].B = LocalEnd.B > midB ? rRand->Float( midB, LocalEnd.B ) : rRand->Float( LocalEnd.B, midB );
-				rParticle->puColorEnd[ i ].A = LocalEnd.A;
+				grColor::SRgba result( LocalEnd.R > midR ? ( uint16_t )rRand->Float( midR, LocalEnd.R ) : ( uint16_t )rRand->Float( LocalEnd.R, midR ),
+									   LocalEnd.G > midG ? ( uint16_t )rRand->Float( midG, LocalEnd.G ) : ( uint16_t )rRand->Float( LocalEnd.G, midG ) ,
+									   LocalEnd.B > midB ? ( uint16_t )rRand->Float( midB, LocalEnd.B ) : ( uint16_t )rRand->Float( LocalEnd.B, midB ),
+									   ( uint16_t )LocalEnd.A );
+
+				rParticle->puColorEnd[ i ] = result;
 			}
 
 			return;
 		}
 		
 		for ( sizeT i = startIdx; i < endIdx; ++i )
-		{
-			rParticle->puColorStart[ i ].R = LocalStart.R;
-			rParticle->puColorStart[ i ].G = LocalStart.G;
-			rParticle->puColorStart[ i ].B = LocalStart.B;
-			rParticle->puColorStart[ i ].A = LocalStart.A;
+			rParticle->puColorStart[ i ] = LocalStart;
+
+		for ( sizeT i = startIdx; i < endIdx; ++i )
+			rParticle->puColorEnd[ i ] = LocalEnd;
+	}
+
+	SRgba LocalStart, LocalEnd;
+	bool Rand;
+};
+
+struct grSScaleGenerate : public grSBaseGenerate
+{
+	inline void Set( const grV2f& start, const grV2f& end )
+	{
+		LocalStart = start;
+		LocalEnd = end;
+		SetBaseStartEnd( LocalStart, LocalEnd );
+	}
+
+	inline void Generate( pU<grSParticle>& rParticle, const sizeT startIdx, const sizeT endIdx, const pU<grRandom>& rRand )
+	{
+		if ( Equal == EParticleEqual::NO )
+		{			
+			float midX = grMath::Abs( LocalStart.x - LocalEnd.x ) * 0.5f;
+			float midY = grMath::Abs( LocalStart.y - LocalEnd.y ) * 0.5f;
+
+			for ( sizeT i = startIdx; i < endIdx; ++i )
+			{
+				grV2f result( LocalStart.x > midX ? rRand->Float( midX, LocalStart.x ) : rRand->Float( LocalStart.x, midX ),
+							  LocalStart.y > midY ? rRand->Float( midY, LocalStart.y ) : rRand->Float( LocalStart.y, midY ) );
+
+				rParticle->puScaleStart[ i ] = result;
+			}
+
+			for ( sizeT i = startIdx; i < endIdx; ++i )
+			{
+				grV2f result( LocalEnd.x > midX ? rRand->Float( midX, LocalEnd.x ) : rRand->Float( LocalEnd.x, midX ),
+							  LocalEnd.y > midY ? rRand->Float( midY, LocalEnd.y ) : rRand->Float( LocalEnd.y, midY ) );
+
+				rParticle->puScaleEnd[ i ] = result;
+			}
+
+			return;
 		}
 
 		for ( sizeT i = startIdx; i < endIdx; ++i )
-		{
-			rParticle->puColorEnd[ i ].R = LocalEnd.R;
-			rParticle->puColorEnd[ i ].G = LocalEnd.G;
-			rParticle->puColorEnd[ i ].B = LocalEnd.B;
-			rParticle->puColorEnd[ i ].A = LocalEnd.A;
-		}
+			rParticle->puScaleStart[ i ] = LocalStart;
 	}
 
-	SRgba	LocalStart,
-			LocalEnd;
-	bool	Rand;
+	grV2f LocalStart, LocalEnd;
 };
 
-struct grSForceBasicGenerator : public grSGeneratorBase
+struct grSForceBasicGenerate : public grSBaseGenerate
 {
 	inline void Set( const grV2f& min, const grV2f& max )
 	{
 		LocalMin = min;
 		LocalMax = max;
-		SetBase( LocalMin, LocalMax );
+		SetBaseMinMaxX2( LocalMin, LocalMax );
 	}
 
 	inline void Generate( pU<grSParticle>& rParticle, const sizeT startIdx, const sizeT endIdx, const pU<grRandom>& rRand )
 	{
-		if ( Equal == grSGeneratorBase::EEqual::NO )
+		if ( Equal == EParticleEqual::NO )
 		{
 			for ( sizeT i = startIdx; i < endIdx; ++i )
 				rParticle->puAcceleration[ i ] += rRand->V2fx2( LocalMin, LocalMax );
@@ -210,22 +243,21 @@ struct grSForceBasicGenerator : public grSGeneratorBase
 			rParticle->puAcceleration[ i ] += LocalMin;
 	}
 
-	grV2f	LocalMin,
-			LocalMax;
+	grV2f LocalMin, LocalMax;
 };
 
-struct grSPositionGenerator : public grSGeneratorBase
+struct grSPositionGenerate : public grSBaseGenerate
 {
 	inline void Set( const grV2f& min, const grV2f& max )
 	{
 		LocalMin = min;
 		LocalMax = max;
-		SetBase( LocalMin, LocalMax );
+		SetBaseMinMaxX2( LocalMin, LocalMax );
 	}
 
 	inline void Generate( pU<grSParticle>& rParticle, const grV2f& positionSys, const sizeT startIdx, const sizeT endIdx, const pU<grRandom>& rRand )
 	{
-		if ( Equal == grSGeneratorBase::EEqual::NO )
+		if ( Equal == EParticleEqual::NO )
 		{
 			for ( sizeT i = startIdx; i < endIdx; ++i )
 				rParticle->puPosition[ i ] = grV2f( rRand->V2fx2( LocalMin, LocalMax ) ) + positionSys;
@@ -237,11 +269,10 @@ struct grSPositionGenerator : public grSGeneratorBase
 			rParticle->puPosition[ i ] = LocalMin + positionSys;
 	}
 
-	grV2f	LocalMin,
-			LocalMax;
+	grV2f LocalMin, LocalMax;
 };
 
-struct grSMassGenerator : public grSGeneratorBase
+struct grSMassGenerate : public grSBaseGenerate
 {
 	inline void Set( const grV2f& rMinMax )
 	{
@@ -249,12 +280,12 @@ struct grSMassGenerator : public grSGeneratorBase
 		if ( LocalMinMax.x < 1.0f )
 			LocalMinMax.x = 1.0f;
 
-		SetBase( LocalMinMax );
+		SetBaseMinMax( LocalMinMax );
 	}
 
 	inline void Generate( pU<grSParticle>& rParticle, const sizeT startIdx, const sizeT endIdx, const pU<grRandom>& rRand )
 	{
-		if ( Equal == grSGeneratorBase::EEqual::NO )
+		if ( Equal == EParticleEqual::NO )
 		{
 			for ( sizeT i = startIdx; i < endIdx; ++i )
 				rParticle->puMass[ i ] = rRand->Float( LocalMinMax.x, LocalMinMax.y );
@@ -269,7 +300,7 @@ struct grSMassGenerator : public grSGeneratorBase
 	grV2f LocalMinMax;
 };
 
-struct grSLifeGenerator : public grSGeneratorBase
+struct grSLifeGenerate : public grSBaseGenerate
 {
 	inline void Set( const grV2f& minMax )
 	{
@@ -277,12 +308,12 @@ struct grSLifeGenerator : public grSGeneratorBase
 		if ( LocalMinMax.x < 0.0f )
 			LocalMinMax.x = 0.0f;
 
-		SetBase( LocalMinMax );
+		SetBaseMinMax( LocalMinMax );
 	}
 
 	inline void Generate( pU<grSParticle>& rParticle, const sizeT startIdx, const sizeT endIdx, const pU<grRandom>& rRand )
 	{
-		if ( Equal == grSGeneratorBase::EEqual::NO )
+		if ( Equal == EParticleEqual::NO )
 		{
 			for ( sizeT i = startIdx; i < endIdx; ++i )
 				rParticle->puLife[ i ] = rRand->Float( LocalMinMax.x, LocalMinMax.y );
@@ -299,7 +330,7 @@ struct grSLifeGenerator : public grSGeneratorBase
 
 struct grSEmitter
 {
-	grSEmitter( const grV2f position, const float emitRate, const sizeT size )
+	grSEmitter( const sizeT size, const float emitRate, const grV2f& position )
 		: puRand		( std::make_unique<grRandom>() )
 		, PositionSys	( position )
 		, EmitRate		( emitRate )
@@ -309,6 +340,8 @@ struct grSEmitter
 	{}
 	grSEmitter( const grSEmitter& ) = delete;
 	grSEmitter& operator=( const grSEmitter& ) = delete;
+	grSEmitter( grSEmitter&& ) noexcept = delete;
+	grSEmitter& operator=( grSEmitter&& ) noexcept = delete;
 
 	inline void Emit( pU<grSParticle>& rParticle, const float deltaT ) noexcept
 	{
@@ -332,6 +365,7 @@ struct grSEmitter
 			rParticle->Alive += EmitAcc + 1;	// TODO: +1 should be needed so find bug
 
 			if ( puColor )		puColor->Generate( rParticle, startIdx, endIdx, puRand );
+			if ( puScale )		puScale->Generate( rParticle, startIdx, endIdx, puRand );
 			if ( puForceBasic )	puForceBasic->Generate( rParticle, startIdx, endIdx, puRand );
 			if ( puPosition )	puPosition->Generate( rParticle,  PositionSys, startIdx, endIdx, puRand );
 			if ( puMass )		puMass->Generate( rParticle, startIdx, endIdx, puRand );
@@ -344,26 +378,27 @@ struct grSEmitter
 	// All types of generators goes here
 	// No slow virtual stuff allowed so each generator has it's own place
 	// TODO: If multiple generators of the same type would be allowed and produce cool results perhaps change to arrays
-	pU<grSColorGenerator>		puColor;
-	pU<grSForceBasicGenerator>	puForceBasic;
-	pU<grSPositionGenerator>	puPosition;
-	pU<grSMassGenerator>		puMass;
-	pU<grSLifeGenerator>		puLife;
+	pU<grSColorGenerate> puColor;
+	pU<grSScaleGenerate> puScale;
+	pU<grSForceBasicGenerate> puForceBasic;
+	pU<grSPositionGenerate> puPosition;
+	pU<grSMassGenerate> puMass;
+	pU<grSLifeGenerate> puLife;
 
-	pU<grRandom>	puRand;	// Is slightly greater than 5mb so instead of each generator containing one it's passed
+	pU<grRandom> puRand;	// Is slightly greater than 5mb so instead of each generator containing one it's passed
 
-	grV2f	PositionSys;
-	float	EmitRate,
-			SpawnAccT;
-	sizeT	EmitAcc,
-			Size;
+	grV2f PositionSys;
+	float EmitRate, SpawnAccT;
+	sizeT EmitAcc, Size;
 };
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-struct grSColorUpdater
+struct grSColorUpdate
 {
-	grSColorUpdater( const bool hsv )
+	// TODO: Only create updater instance if colors are NOT equal
+
+	grSColorUpdate( const bool hsv )
 		: Hsv	( hsv )
 	{}
 
@@ -373,11 +408,11 @@ struct grSColorUpdater
 		{
 			for ( sizeT i = 0; i < rParticle->Alive; ++i )
 			{
-				float lerpValue = 1.0f / rParticle->puLife[ i ] * deltaT;
-
 				// RGB -> HSV lerp -> RGB
 				grColor::SHsva start = grColor::Rgba2Hsva( rParticle->puColorStart[ i ] );
 				grColor::SHsva end = grColor::Rgba2Hsva( rParticle->puColorEnd[ i ] );
+
+				float lerpValue = 1.0f / rParticle->puLife[ i ] * deltaT;
 
 				start.H = grMath::Lerp( start.H, end.H, lerpValue );
 				start.S = grMath::Lerp( start.S, end.S, lerpValue );
@@ -392,12 +427,11 @@ struct grSColorUpdater
 
 		for ( sizeT i = 0; i < rParticle->Alive; ++i )
 		{
-			float lerpValue = 1.0f / rParticle->puLife[ i ] * deltaT;
-
-			// Actually faster to store localy and passing to lerp then passing directly by indexing the array. Cache friendlier?
-			// Measured with grStruct::STimerOneShot t( grStruct::STimerOneShot::ETimer::MS );
+			// Actually faster to store in block and than lerp then passing to lerp by directly indexing the array // Measured with std::chronos
 			grColor::SRgba start = rParticle->puColorStart[ i ];
 			grColor::SRgba end = rParticle->puColorEnd[ i ];
+
+			float lerpValue = 1.0f / rParticle->puLife[ i ] * deltaT;
 
 			rParticle->puColorStart[ i ].R = grMath::Lerp( start.R, end.R, lerpValue );
 			rParticle->puColorStart[ i ].G = grMath::Lerp( start.G, end.G, lerpValue );
@@ -409,7 +443,23 @@ struct grSColorUpdater
 	bool Hsv;
 };
 
-struct grSForceBasicUpdater
+struct grSScaleUpdate
+{
+	inline void Update( pU<grSParticle>& rParticle, const float deltaT )
+	{
+		for ( sizeT i = 0; i < rParticle->Alive; ++i )
+		{
+			grV2f start = rParticle->puScaleStart[ i ];
+			grV2f end = rParticle->puScaleEnd[ i ];
+
+			float lerpValue = 1.0f / rParticle->puLife[ i ] * deltaT;
+
+			rParticle->puScaleStart[ i ] = grMath::Lerp( start, end, lerpValue );
+		}
+	}
+};
+
+struct grSForceBasicUpdate
 {
 	inline void Update( pU<grSParticle>& rParticle )
 	{
@@ -418,7 +468,7 @@ struct grSForceBasicUpdater
 	}
 };
 
-struct grSPositionUpdater
+struct grSPositionUpdate
 {
 	inline void Update( pU<grSParticle>& rParticle, const float deltaT )
 	{
@@ -427,7 +477,7 @@ struct grSPositionUpdater
 	}
 };
 
-struct grSLifeUpdater
+struct grSLifeUpdate
 {
 	inline void Update( pU<grSParticle>& rParticle, const float deltaT )
 	{
@@ -440,19 +490,22 @@ struct grSLifeUpdater
 	}
 };
 
-struct grSUpdater
+struct grSUpdate
 {
-	grSUpdater( void )
-	: puPosition	( std::make_unique<grSPositionUpdater>() )
+	grSUpdate( void )
+	: puPosition ( std::make_unique<grSPositionUpdate>() )
 	{}
-	grSUpdater( const grSUpdater& ) = delete;
-	grSUpdater& operator=( const grSUpdater& ) = delete;
+	grSUpdate( const grSUpdate& ) = delete;
+	grSUpdate& operator=( const grSUpdate& ) = delete;
+	grSUpdate( grSUpdate&& ) noexcept = delete;
+	grSUpdate& operator=( grSUpdate&& ) noexcept = delete;
 
 	inline void Update( pU<grSParticle>& rParticle, const float deltaT )
 	{
 		// TODO: Would be cool to not need the if's. Do not wan't the indirections from a virtual base so some type of eventlist might be an option
 		// Update all updaters
 		if ( puColor )		puColor->Update( rParticle, deltaT );
+		if ( puScale )		puScale->Update( rParticle, deltaT );
 		if ( puForceBasic )	puForceBasic->Update( rParticle );
 		if ( puPosition )	puPosition->Update( rParticle, deltaT );
 		if ( puLife )		puLife->Update( rParticle, deltaT );
@@ -460,28 +513,32 @@ struct grSUpdater
 
 	// No slow virtual stuff allowed so each updater has it's own place
 	// All types of updaters goes here
-	pU<grSColorUpdater>			puColor;
-	pU<grSForceBasicUpdater>	puForceBasic;
-	pU<grSPositionUpdater>		puPosition;
-	pU<grSLifeUpdater>			puLife;
+	pU<grSColorUpdate> puColor;
+	pU<grSScaleUpdate> puScale;
+	pU<grSForceBasicUpdate> puForceBasic;
+	pU<grSPositionUpdate> puPosition;
+	pU<grSLifeUpdate> puLife;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 class grCParticleSys
 {
 public:
-	grCParticleSys( const grV2f& position = grV2f( 320.0f, 180.0f ), const float emitRate = 1000.0f, const intU size = 5000 );
+	grCParticleSys( const intU size = 2000, const float emitRate = 1000.0f, const grV2f& position = grV2f( 320.0f, 180.0f ) );
 	grCParticleSys( const grCParticleSys& ) = delete;
 	grCParticleSys& operator=( const grCParticleSys& ) = delete;
+	grCParticleSys( grCParticleSys&& ) noexcept = delete;
+	grCParticleSys& operator=( grCParticleSys&& ) noexcept = delete;
 
 	void EmitRate( const float emitRate );
-	void PositionSys( const grV2f& position );
+	void PositionSystem( const grV2f& position );
 
 	// If min<->max are equal, the value will be that. If not equal, the value will be rand inbetween
 	// TODO: Could be better to use injection here as that would make it possible store behaviours externaly
 	void Color( const grColor::SRgba& start, const grColor::SRgba& end, const bool hsv = false, const bool randomize = false );
+	void Scale( const grV2f& start, const grV2f& end );
 	void ForceBasic( const grV2f& min, const grV2f& max );
-	void PositionOffset( const grV2f& min, const grV2f& max );
+	void Position( const grV2f& min, const grV2f& max );
 	void Mass( const grV2f& minMax );
 	void Life( const grV2f& minMax );
 
@@ -489,9 +546,9 @@ public:
 	void Update( const float deltaT );
 
 private:
-	pU<grSParticle>	m_puParticle;
-	pU<grSEmitter>	m_puEmitter;
-	pU<grSUpdater>	m_puUpdater;
+	pU<grSParticle> m_puParticle;
+	pU<grSEmitter> m_puEmit;
+	pU<grSUpdate> m_puUpdate;
 
 	// TODO: Needs activation choices for emission: start/stop/timer/infinite
 };
