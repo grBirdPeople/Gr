@@ -1,6 +1,10 @@
 #ifndef		_GRPARTICLETEST_H_
 #define		_GRPARTICLETEST_H_
 
+#include	<SFML/Graphics/RenderWindow.hpp>
+#include	<SFML/Graphics/VertexBuffer.hpp>
+#include	<SFML/Graphics/VertexArray.hpp>
+
 #include	"grCommon.h"
 #include	"grV2.h"
 #include	"grRandom.h"
@@ -544,11 +548,16 @@ public:
 
 	// TODO: Remeber to make this call once in the particle manager whenever that class exists
 	void Update( const float deltaT );
+	void Render( sf::RenderWindow& rRenderWin );
 
 private:
 	pU<grSParticle> m_puParticle;
 	pU<grSEmitter> m_puEmit;
 	pU<grSUpdate> m_puUpdate;
+
+	pU<sf::Vertex[]> m_puVerts;
+	pU<sf::VertexBuffer> m_puBuff;
+	int16_t m_NowSize = 0, m_LastSize = 0;
 
 	// TODO: Needs activation choices for emission: start/stop/timer/infinite
 };

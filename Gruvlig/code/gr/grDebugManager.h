@@ -2,6 +2,7 @@
 #define		_GRDEBUGMANAGER_H_
 
 #include	<SFML/Graphics/VertexArray.hpp>
+#include	<SFML/Graphics/VertexBuffer.hpp>
 #include	<SFML/Graphics/RenderWindow.hpp>
 #include	<SFML/System/Vector2.hpp>
 
@@ -28,7 +29,10 @@ public:
 	inline void AddBBox( grBBox& rBBox, const sf::Color color )
 	{
 		if ( m_Size >= m_MaxBBox )
+		{
 			std::cerr << "grDebugManager::AddBBox: Max BBoxes added\n" << std::endl;
+			return;
+		}
 
 		const grBBox::Corners& corners = rBBox.GetCorners();
 		sf::Vector2f topLeft( corners.TopLeft.x, corners.TopLeft.y );
@@ -52,6 +56,7 @@ public:
 
 		m_puVertices[ m_Size++ ] = vertexBox;
 	}
+
 	inline void Render( sf::RenderWindow& rRenderWin )
 	{
 		if ( m_Size > 0 )

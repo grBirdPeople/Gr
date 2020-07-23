@@ -29,7 +29,7 @@ grSandbox::grSandbox( void )
 	: m_rInputMan		( grInputManager::Instance() )
 	//, m_rPartMan		( grCParticleManager::Instance() )
 	//, m_Emitr1		( grCParticleManager::Instance().Create() )
-	, m_pPartSys1		( new grCParticleSys( 2000, 700.0f ) )
+	, m_pPartSys1		( new grCParticleSys( 10000, 3300.0f ) )
 	, m_PartSysIdOne	( -1 )
 	, m_PartSysIdTwo	( -1 )
 	, m_RendWin			( grCore::Instance().GetRenderWin() )
@@ -255,5 +255,5 @@ grSandbox::Update( const float deltaT )
 void
 grSandbox::Render( sf::RenderWindow& rRenderWin )
 {
-
+	m_pPartSys1->Render( rRenderWin );
 }
