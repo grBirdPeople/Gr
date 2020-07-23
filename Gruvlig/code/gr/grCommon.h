@@ -21,7 +21,7 @@ template<typename T, typename Y> using pR = std::pair<T, Y>;
 template<typename T> using vE = std::vector<T>;
 
 using str = std::string;
-using sizeT = std::size_t;
+using sizeT = uint64_t;	// std::size_t is a unknown unsigned integer so might not compile on everything
 using intS = int64_t;
 using intU = uint64_t;
 

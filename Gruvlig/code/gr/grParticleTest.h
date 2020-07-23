@@ -146,20 +146,20 @@ struct grSColorGenerate : public grSBaseGenerate
 
 			for ( sizeT i = startIdx; i < endIdx; ++i )
 			{
-				grColor::SRgba result( LocalStart.R > midR ? rRand->Float( midR, LocalStart.R ) : rRand->Float( LocalStart.R, midR ),
-									   LocalStart.G > midG ? rRand->Float( midG, LocalStart.G ) : rRand->Float( LocalStart.G, midG ),
-									   LocalStart.B > midB ? rRand->Float( midB, LocalStart.B ) : rRand->Float( LocalStart.B, midB ),
-									   LocalStart.A );
+				grColor::SRgba result( LocalStart.R > midR ? ( uint16_t )rRand->Float( midR, LocalStart.R ) : ( uint16_t )rRand->Float( LocalStart.R, midR ),
+									   LocalStart.G > midG ? ( uint16_t )rRand->Float( midG, LocalStart.G ) : ( uint16_t )rRand->Float( LocalStart.G, midG ),
+									   LocalStart.B > midB ? ( uint16_t )rRand->Float( midB, LocalStart.B ) : ( uint16_t )rRand->Float( LocalStart.B, midB ),
+									   ( uint16_t )LocalStart.A );
 
 				rParticle->puColorStart[ i ] = result;
 			}
 
 			for ( sizeT i = startIdx; i < endIdx; ++i )
 			{
-				grColor::SRgba result( LocalEnd.R > midR ? rRand->Float( midR, LocalEnd.R ) : rRand->Float( LocalEnd.R, midR ),
-									   LocalEnd.G > midG ? rRand->Float( midG, LocalEnd.G ) : rRand->Float( LocalEnd.G, midG ) ,
-									   LocalEnd.B > midB ? rRand->Float( midB, LocalEnd.B ) : rRand->Float( LocalEnd.B, midB ),
-									   LocalEnd.A );
+				grColor::SRgba result( LocalEnd.R > midR ? ( uint16_t )rRand->Float( midR, LocalEnd.R ) : ( uint16_t )rRand->Float( LocalEnd.R, midR ),
+									   LocalEnd.G > midG ? ( uint16_t )rRand->Float( midG, LocalEnd.G ) : ( uint16_t )rRand->Float( LocalEnd.G, midG ) ,
+									   LocalEnd.B > midB ? ( uint16_t )rRand->Float( midB, LocalEnd.B ) : ( uint16_t )rRand->Float( LocalEnd.B, midB ),
+									   ( uint16_t )LocalEnd.A );
 
 				rParticle->puColorEnd[ i ] = result;
 			}
@@ -243,8 +243,7 @@ struct grSForceBasicGenerate : public grSBaseGenerate
 			rParticle->puAcceleration[ i ] += LocalMin;
 	}
 
-	grV2f	LocalMin,
-			LocalMax;
+	grV2f LocalMin, LocalMax;
 };
 
 struct grSPositionGenerate : public grSBaseGenerate
@@ -270,8 +269,7 @@ struct grSPositionGenerate : public grSBaseGenerate
 			rParticle->puPosition[ i ] = LocalMin + positionSys;
 	}
 
-	grV2f	LocalMin,
-			LocalMax;
+	grV2f LocalMin, LocalMax;
 };
 
 struct grSMassGenerate : public grSBaseGenerate

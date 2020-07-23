@@ -19,7 +19,7 @@ class		grSandbox;
 class grCore : public grSingleton<grCore>
 {
 public:
-	grCore( const intU winWidth = 640, const intU winHeight = 360, const intU frameRate = 60, const str& rAppName = "grFramework" );
+	grCore( const intU winWidth = 640, const intU winHeight = 360, const intU frameRate = 120, const str& rAppName = "grFramework" );
 	//grCore( const intU winWidth = 1920, const intU winHeight = 1080, const intU frameRate = 60, const str& rAppName = "grFramework" );
 	~grCore();
 

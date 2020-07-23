@@ -168,6 +168,6 @@ grCore::InitRenderWin()
 	m_puCSettings->antialiasingLevel = ( unsigned int )m_Aa;
 	m_puRenderWin->create( sf::VideoMode( ( unsigned int )m_WinWidth, ( unsigned int )m_WinHeight ), m_AppName,sf::Style::None, *m_puCSettings );
 	//m_puRenderWin->setFramerateLimit( m_FramesPerSec );
-	m_puRenderWin->setVerticalSyncEnabled( true );
+	//m_puRenderWin->setVerticalSyncEnabled( true );
 }
 
