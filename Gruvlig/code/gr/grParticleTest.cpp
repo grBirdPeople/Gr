@@ -1,16 +1,14 @@
 #include	"grParticleTest.h"
 
+#include	"grCore.h"
+
 
 grCParticleSys::grCParticleSys( const intU size, const float emitRate, const grV2f& position )
 	: m_puParticle	( std::make_unique<grSParticle>( size ) )
 	, m_puEmit		( std::make_unique<grSEmitter>( size, 1.0f / grMath::Abs( emitRate ), position ) )
 	, m_puUpdate	( std::make_unique<grSUpdate>() )
-	, m_puVerts		( std::make_unique<sf::Vertex[]>( size ) )
-	, m_puBuff		( std::make_unique<sf::VertexBuffer>() )
 {
-	m_puBuff->setPrimitiveType( sf::PrimitiveType::Points );
-	m_puBuff->setUsage( sf::VertexBuffer::Usage::Stream );
-	m_puBuff->create( size );
+	grCore::Instance().SetVSync( true );
 }
 
 void
@@ -106,31 +104,10 @@ grCParticleSys::Update( const float deltaT )
 void
 grCParticleSys::Render( sf::RenderWindow& rRenderWin )
 {
-	for ( sizeT i = 0; i < m_puParticle->Alive; ++i )
-	{
-		m_puVerts.get()[ i ].color = sf::Color( m_puParticle->puColorStart[ i ].R,
-										 m_puParticle->puColorStart[ i ].G,
-										 m_puParticle->puColorStart[ i ].B,
-										 m_puParticle->puColorStart[ i ].A );
-	}
-
-	for ( sizeT i = 0; i < m_puParticle->Alive; ++i )
-		m_puVerts.get()[ i ].position = sf::Vector2f( m_puParticle->puPosition[ i ].x, m_puParticle->puPosition[ i ].y );
-
-	m_LastSize = m_NowSize;
-	m_NowSize = m_puParticle->Alive;
-	int16_t diff = m_LastSize - m_NowSize;
-	if ( diff > 0 )
-	{
-		sizeT size = m_NowSize + diff;
-		for ( sizeT i = m_NowSize; i < size; ++i )
-			m_puVerts.get()[ i ].position.x = -1.0f;
-	}
-
-	m_puBuff->update( m_puVerts.get() );
-	rRenderWin.draw( *m_puBuff );
+	rRenderWin.draw( &m_puParticle->puVerts.get()[ 0 ], m_puParticle->Alive, sf::PrimitiveType::Points );
 
 	printf( "Max: %d %2s Alive: %d \n", m_puEmit->Size, "", m_puParticle->Alive );
+
 
 
 

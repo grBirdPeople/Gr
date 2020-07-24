@@ -29,29 +29,35 @@ public:
 	{
 		return m_TotalElapsedT;
 	}
+
 	inline float GetDeltaT() const
 	{
 		return (float)m_Dt;
 	}
+
 	inline sf::RenderWindow& GetRenderWin() const
 	{
 		return *m_puRenderWin;
-	}								  
+	}	
+
 	inline void SetAA ( const intU aa )
 	{
 		m_Aa = aa;
 		m_puCSettings->antialiasingLevel = ( unsigned int )m_Aa;
-	}		 							  
+	}	
+
 	inline void SetFramerateLimit( const intU frameRateLimit )
 	{
 		m_FramesPerSec = frameRateLimit;
 		m_puRenderWin->setFramerateLimit( ( unsigned int )m_FramesPerSec );
 	}
+
 	inline void SetVSync( const bool vSync )
 	{
 		m_VSync = vSync;
 		m_puRenderWin->setVerticalSyncEnabled( m_VSync );
-	}			
+	}
+
 	void Init();
 	void Run();
 	

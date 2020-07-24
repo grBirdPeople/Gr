@@ -20,13 +20,13 @@ typedef grColor::SRgba SRgba;
 struct grSParticle
 {
 	grSParticle( const sizeT size )
-		: puColorStart		( std::make_unique<SRgba[]>( size ) )
+		: puVerts			( std::make_unique<sf::Vertex[]>( size ) )
+		, puColorStart		( std::make_unique<SRgba[]>( size ) )
 		, puColorEnd		( std::make_unique<SRgba[]>( size ) )
 		, puScaleStart		( std::make_unique<grV2f[]>( size ) )
 		, puScaleEnd		( std::make_unique<grV2f[]>( size ) )
 		, puAcceleration	( std::make_unique<grV2f[]>( size ) )
 		, puVelocity		( std::make_unique<grV2f[]>( size ) )
-		, puPosition		( std::make_unique<grV2f[]>( size ) )
 		, puMass			( std::make_unique<float[]>( size ) )
 		, puLife			( std::make_unique<float[]>( size ) )
 		, Alive				( 0 )
@@ -43,13 +43,13 @@ struct grSParticle
 		//for( sizeT i = 0; i < rParticle->Alive + 1; ++i )
 		//	printf( "%d %3s %g \n", i, "", rParticle->puLife[ i ] );
 
+		grAlgo::Swap( puVerts[ nowIdx ], puVerts[ last ] );
 		grAlgo::Swap( puColorStart[ nowIdx ], puColorStart[ last ] );
 		grAlgo::Swap( puColorEnd[ nowIdx ], puColorEnd[ last ] );
 		grAlgo::Swap( puScaleStart[ nowIdx ], puScaleStart[ last ] );
 		grAlgo::Swap( puScaleEnd[ nowIdx ], puScaleEnd[ last ] );
 		grAlgo::Swap( puAcceleration[ nowIdx ], puAcceleration[ last ] );
 		grAlgo::Swap( puVelocity[ nowIdx ], puVelocity[ last ] );
-		grAlgo::Swap( puPosition[ nowIdx ], puPosition[ last ] );
 		grAlgo::Swap( puMass[ nowIdx ], puMass[ last ] );
 		grAlgo::Swap( puLife[ nowIdx ], puLife[ last ] );
 
@@ -64,13 +64,13 @@ struct grSParticle
 		--Alive;
 	}
 
+	pU<sf::Vertex[]> puVerts;	// Hold position, color, texcoord
 	pU<SRgba[]> puColorStart;
 	pU<SRgba[]> puColorEnd;
 	pU<grV2f[]> puScaleStart;
 	pU<grV2f[]> puScaleEnd;
 	pU<grV2f[]> puAcceleration;
 	pU<grV2f[]> puVelocity;
-	pU<grV2f[]> puPosition;
 	pU<float[]> puMass;
 	pU<float[]> puLife;
 
@@ -264,13 +264,21 @@ struct grSPositionGenerate : public grSBaseGenerate
 		if ( Equal == EParticleEqual::NO )
 		{
 			for ( sizeT i = startIdx; i < endIdx; ++i )
-				rParticle->puPosition[ i ] = grV2f( rRand->V2fx2( LocalMin, LocalMax ) ) + positionSys;
+			{
+				grV2f p( rRand->V2fx2( LocalMin, LocalMax ) + positionSys );
+				rParticle->puVerts[ i ].position.x = p.x;
+				rParticle->puVerts[ i ].position.y = p.y;
+			}
 
 			return;
 		}
 
 		for ( sizeT i = startIdx; i < endIdx; ++i )
-			rParticle->puPosition[ i ] = LocalMin + positionSys;
+		{
+			grV2f p( LocalMin + positionSys );
+			rParticle->puVerts[ i ].position.x = p.x;
+			rParticle->puVerts[ i ].position.y = p.y;
+		}
 	}
 
 	grV2f LocalMin, LocalMax;
@@ -368,10 +376,10 @@ struct grSEmitter
 			// Increment particles alive
 			rParticle->Alive += EmitAcc + 1;	// TODO: +1 should be needed so find bug
 
+			if ( puPosition )	puPosition->Generate( rParticle,  PositionSys, startIdx, endIdx, puRand );
 			if ( puColor )		puColor->Generate( rParticle, startIdx, endIdx, puRand );
 			if ( puScale )		puScale->Generate( rParticle, startIdx, endIdx, puRand );
 			if ( puForceBasic )	puForceBasic->Generate( rParticle, startIdx, endIdx, puRand );
-			if ( puPosition )	puPosition->Generate( rParticle,  PositionSys, startIdx, endIdx, puRand );
 			if ( puMass )		puMass->Generate( rParticle, startIdx, endIdx, puRand );
 			if ( puLife )		puLife->Generate( rParticle, startIdx, endIdx, puRand );
 		}
@@ -426,6 +434,15 @@ struct grSColorUpdate
 				rParticle->puColorStart[ i ] = grColor::Hsva2Rgba( start );
 			}
 
+			for ( sizeT i = 0; i < rParticle->Alive; ++i )
+			{
+				SRgba c = rParticle->puColorStart[ i ];
+				rParticle->puVerts[ i ].color.r = ( uint8_t )c.R;
+				rParticle->puVerts[ i ].color.g = ( uint8_t )c.G;
+				rParticle->puVerts[ i ].color.b = ( uint8_t )c.B;
+				rParticle->puVerts[ i ].color.a = ( uint8_t )c.A;
+			}
+
 			return;
 		}
 
@@ -442,6 +459,15 @@ struct grSColorUpdate
 			rParticle->puColorStart[ i ].B = grMath::Lerp( start.B, end.B, lerpValue );
 			rParticle->puColorStart[ i ].A = grMath::Lerp( start.A, end.A, lerpValue );
 		}
+
+		for ( sizeT i = 0; i < rParticle->Alive; ++i )
+		{
+			SRgba c = rParticle->puColorStart[ i ];
+			rParticle->puVerts[ i ].color.r = ( uint8_t )c.R;
+			rParticle->puVerts[ i ].color.g = ( uint8_t )c.G;
+			rParticle->puVerts[ i ].color.b = ( uint8_t )c.B;
+			rParticle->puVerts[ i ].color.a = ( uint8_t )c.A;
+		}
 	}
 
 	bool Hsv;
@@ -453,11 +479,9 @@ struct grSScaleUpdate
 	{
 		for ( sizeT i = 0; i < rParticle->Alive; ++i )
 		{
-			grV2f start = rParticle->puScaleStart[ i ];
-			grV2f end = rParticle->puScaleEnd[ i ];
-
+			grV2f start( rParticle->puScaleStart[ i ] );
+			grV2f end( rParticle->puScaleEnd[ i ] );
 			float lerpValue = 1.0f / rParticle->puLife[ i ] * deltaT;
-
 			rParticle->puScaleStart[ i ] = grMath::Lerp( start, end, lerpValue );
 		}
 	}
@@ -477,7 +501,11 @@ struct grSPositionUpdate
 	inline void Update( pU<grSParticle>& rParticle, const float deltaT )
 	{
 		for ( sizeT i = 0; i < rParticle->Alive; ++i )
-			rParticle->puPosition[ i ] += rParticle->puVelocity[ i ] * deltaT;
+		{
+			grV2f p( rParticle->puVelocity[ i ] * deltaT );
+			rParticle->puVerts[ i ].position.x += p.x;
+			rParticle->puVerts[ i ].position.y += p.y;
+		}
 	}
 };
 
@@ -508,10 +536,10 @@ struct grSUpdate
 	{
 		// TODO: Would be cool to not need the if's. Do not wan't the indirections from a virtual base so some type of eventlist might be an option
 		// Update all updaters
+		if ( puPosition )	puPosition->Update( rParticle, deltaT );
 		if ( puColor )		puColor->Update( rParticle, deltaT );
 		if ( puScale )		puScale->Update( rParticle, deltaT );
 		if ( puForceBasic )	puForceBasic->Update( rParticle );
-		if ( puPosition )	puPosition->Update( rParticle, deltaT );
 		if ( puLife )		puLife->Update( rParticle, deltaT );
 	}
 
@@ -554,10 +582,6 @@ private:
 	pU<grSParticle> m_puParticle;
 	pU<grSEmitter> m_puEmit;
 	pU<grSUpdate> m_puUpdate;
-
-	pU<sf::Vertex[]> m_puVerts;
-	pU<sf::VertexBuffer> m_puBuff;
-	int16_t m_NowSize = 0, m_LastSize = 0;
 
 	// TODO: Needs activation choices for emission: start/stop/timer/infinite
 };

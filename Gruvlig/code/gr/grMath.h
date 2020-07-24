@@ -27,11 +27,13 @@ namespace grMath
 		intU value = ( a < b ) ? a : ( b < a ) ? b : a;
 		return value;
 	}
+
 	inline intS	Min( const intS a, const intS b )
 	{
 		intS value = ( a < b ) ? a : ( b < a ) ? b : a;
 		return value;
 	}
+
 	inline float Min( const float a, const float b )
 	{
 		float value = ( a < b ) ? a : ( b < a ) ? b : a;
@@ -45,11 +47,13 @@ namespace grMath
 		intU value = ( a > b ) ? a : ( b > a ) ? b : a;
 		return value;
 	}
+
 	inline intS	Max( const intS a, const intS b )
 	{
 		intS value = ( a > b ) ? a : ( b > a ) ? b : a;
 		return value;
 	}
+
 	inline float Max( const float a, const float b )
 	{
 		float value = ( a > b ) ? a : ( b > a ) ? b : a;
@@ -63,11 +67,13 @@ namespace grMath
 		if ( a > b )
 			b = a;
 	}
+
 	inline void RangeCheckV2f( grV2f& rV )
 	{
 		if ( rV.x > rV.y )
 			rV.y = rV.x;
 	}
+
 	inline void RangeCheckV2fx2( const grV2f& rMin, grV2f& rMax )
 	{
 		if ( rMin.x > rMax.x )
@@ -82,13 +88,15 @@ namespace grMath
 	{
 		return ( value < 0.0f ) ? -value : value;
 	}
-	inline intS	Abs( intS value )
-	{
-		return ( value < 0 ) ? -value : value;
-	}
+
 	inline grV2f Abs( grV2f& value )
 	{
 		return grV2f( Abs( value.x ), Abs( value.y ) );
+	}
+
+	inline intS	Abs( intS value )
+	{
+		return ( value < 0 ) ? -value : value;
 	}
 
 	// Sign
@@ -97,6 +105,7 @@ namespace grMath
 	{
 		return ( value < 0 ) ? -1 : ( value > 0 ) ? 1 : 0;
 	}
+
 	inline float Sign( float value )
 	{
 		return ( value < 0.0f ) ? -1.0f : ( value > 0.0f ) ? 1.0f : 0.0f;
@@ -138,6 +147,7 @@ namespace grMath
 	{
 		return ( value <= 0.0f ) ? start : ( value >= 1.0f ) ? end : ( end - start ) * value + start;
 	}
+
 	inline grV2f Lerp( grV2f& rStart, grV2f& rEnd, float value )
 	{
 		if ( value <= 0.0f )
@@ -181,11 +191,13 @@ namespace grMath
 	{
 		return ( value < min ) ? min : ( value > max ) ? max : value;
 	}
+
 	inline intS Clamp( intS value, intS min, intS max )
 	{
 		return ( value < min ) ? min : ( value > max ) ? max : value;
 	}
-	inline intS Clamp( intU value, intU min, intU max )
+
+	inline intU Clamp( intU value, intU min, intU max )
 	{
 		return ( value < min ) ? min : ( value > max ) ? max : value;
 	}
@@ -257,19 +269,21 @@ namespace grMath
 
 	// ZeroCmp
 	//////////////////////////////////////////////////
-	inline bool CmpIntU( const intU numOne, const intU numTwo )
-	{
-		return ( numOne == numTwo );
-	}
-	inline bool CmpFloat( const float numOne, const float numTwo )
-	{
-		return Abs( numOne - numTwo ) < Epsilon;
-	}
 	inline bool CmpV2f( const grV2f& rA, const grV2f& rB )
 	{
 		float x = Abs( rA.x - rB.x );
 		float y = Abs( rA.y - rB.y );
 		return ( x < Epsilon ) && ( y < Epsilon );
+	}
+
+	inline bool CmpFloat( const float numOne, const float numTwo )
+	{
+		return Abs( numOne - numTwo ) < Epsilon;
+	}
+
+	inline bool CmpIntU( const intU numOne, const intU numTwo )
+	{
+		return ( numOne == numTwo );
 	}
 
 	// Step
@@ -278,6 +292,7 @@ namespace grMath
 	{
 		return ( A >= B ) ? 0 : 1;
 	}
+
 	inline intU Step( const float A, const float B )
 	{
 		return ( A >= B ) ? 0 : 1;

@@ -32,7 +32,7 @@ namespace grColor
 	//////////////////////////////////////////////////
 	inline SHsva Rgba2Hsva( SRgba& rRgba )
 	{
-		SHsva	out( 0.0f, 0.0f, 0.0f, rRgba.A );
+		SHsva out( 0.0f, 0.0f, 0.0f, rRgba.A );
 
 		float min = rRgba.R < rRgba.G ? rRgba.R : rRgba.G;
 		min = min < rRgba.B ? min : rRgba.B;
@@ -48,7 +48,7 @@ namespace grColor
 			out.H = 0.0f; // undefined, maybe nan?
 			return out;
 		}
-		if ( max > 0.0 )
+		if ( max > 0.0f )
 		{ // NOTE: if Max is == 0, this divide would cause a crash
 			out.S = ( delta / max );                  // s
 		}
@@ -56,7 +56,7 @@ namespace grColor
 		{
 			// if max is 0, then r = g = b = 0              
 			// s = 0, h is undefined
-			out.S = 0.0;
+			out.S = 0.0f;
 			out.H = NAN;                            // its now undefined
 			return out;
 		}
@@ -68,7 +68,7 @@ namespace grColor
 			else
 				out.H = 4.0f + ( rRgba.R - rRgba.G ) / delta;  // between magenta & cyan
 
-		out.H *= 60.0;                              // degrees
+		out.H *= 60.0f;                              // degrees
 
 		if ( out.H < 0.0f )
 			out.H += 360.0f;
@@ -80,7 +80,7 @@ namespace grColor
 	//////////////////////////////////////////////////
 	inline SRgba Hsva2Rgba( SHsva& rHsva )
 	{
-		SRgba	out;
+		SRgba out;
 		out.A = rHsva.A;
 
 		if ( rHsva.S <= 0.0f )

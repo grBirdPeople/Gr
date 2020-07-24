@@ -8,7 +8,6 @@ Gruvlig/build/intermediates/
 *.ipdb
 *.idb
 *.obj
-*.png
 *.jpg
 
 *.vcxproj.filters

@@ -8,6 +8,7 @@
 //#include	"grParticleManagerPB.h"
 //#include	"grCParticleManager.h"
 #include	"grSandbox.h"
+#include	"grStruct.h"
 
 
 // cTor
@@ -39,6 +40,7 @@ grCore::grCore( const intU winWidth, const intU winHeight, const intU frameRate,
 
 #ifdef DEBUG
 	grDebugManager::Initialize();
+	grDebugManager::Instance().Enable( false );
 #endif // DEBUG
 }
 
@@ -79,6 +81,7 @@ grCore::Update()
 {
 #ifdef DEBUG
 	m_pSandbox->Update( GetDeltaT() );
+	grNavMeshManager::Instance().Debug();
 #endif // DEBUG
 
 	// Update entities
@@ -86,10 +89,6 @@ grCore::Update()
 	//grParticleManager::Instance().Update( GetDeltaT() );
 	//grCParticleManagerPB::Instance().Update( GetDeltaT() );
 	//grCParticleManager::Instance().Update( GetDeltaT() );
-
-#ifdef DEBUG
-	grNavMeshManager::Instance().Debug();
-#endif // DEBUG
 }
 
 
