@@ -162,7 +162,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="code\gr\grBBox.cpp" />
     <ClCompile Include="code\gr\grCore.cpp" />
     <ClCompile Include="code\gr\grCParticleManager.cpp" />
     <ClCompile Include="code\gr\grCtrlPlayer.cpp" />

@@ -187,7 +187,7 @@ namespace grStruct
 		sizeT m_Capacity, m_Size, m_StrtIdx;
 	};
 
-	// STimer // Simply create an instance at the start of a block
+	// STimer // Create an instance at the start of a block and get time when this destroy
 	//////////////////////////////////////////////////
 	struct STimer
 	{

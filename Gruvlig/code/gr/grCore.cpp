@@ -5,8 +5,6 @@
 #include	"grInputManager.h"
 #include	"grMapManager.h"
 #include	"grNavMeshManager.h"
-//#include	"grParticleManagerPB.h"
-//#include	"grCParticleManager.h"
 #include	"grSandbox.h"
 #include	"grStruct.h"
 
@@ -14,17 +12,17 @@
 // cTor
 //////////////////////////////////////////////////
 grCore::grCore()
-	: m_AppName( "grFramework" )
+	: m_puRenderWin( std::make_unique<sf::RenderWindow>() )
+	, m_puCSettings( std::make_unique<sf::ContextSettings>() )
+	, m_puEvent( std::make_unique<sf::Event>() )
+	, m_puClock( std::make_unique<sf::Clock>() )
+	, m_AppName( "grFramework" )
 	, m_WinSize( { 0, 0 } )
 	, m_TotalElapsedT( 0.0f )
 	, m_Dt( 0.0f )
 	, m_FramesPerSec( 120 )
 	, m_Aa( AA_MAX )
 	, m_VSync( false )
-	, m_puRenderWin( std::make_unique<sf::RenderWindow>() )
-	, m_puCSettings( std::make_unique<sf::ContextSettings>() )
-	, m_puEvent( std::make_unique<sf::Event>() )
-	, m_puClock( std::make_unique<sf::Clock>() )
 #ifdef DEBUG
 	, m_puSandbox( nullptr )
 #endif // DEBUG
@@ -44,8 +42,6 @@ grCore::~grCore()
 	grEntityManager::DeInitialize();
 	grInputManager::DeInitialize();
 
-	//////////////////////////////////////////////////
-
 	if ( m_puRenderWin != nullptr )
 	{
 		if ( m_puRenderWin->isOpen() == true )
@@ -56,10 +52,10 @@ grCore::~grCore()
 
 // Input
 //////////////////////////////////////////////////
-void
+inline void
 grCore::Input( grInputManager& rInputMan )
 {
-	rInputMan.Update();
+	rInputMan.Update(); // Resets some vars for mouse
 
 	while ( m_puRenderWin->pollEvent( *m_puEvent ) )
 	{
@@ -76,7 +72,7 @@ grCore::Input( grInputManager& rInputMan )
 	}
 
 #ifdef DEBUG
-	if ( rInputMan.GetKeyDown( sf::Keyboard::F1 ) )
+	if ( rInputMan.GetKeyDown( sf::Keyboard::F1 ) ) // Fullscreen toggle
 	{
 		if ( m_puRenderWin->getSize().x == m_WinSize.x &&
 			 m_puRenderWin->getSize().y == m_WinSize.y )
@@ -90,13 +86,16 @@ grCore::Input( grInputManager& rInputMan )
 		}
 	}
 
-	if ( rInputMan.GetKeyDown( sf::Keyboard::F2 ) )
+	if ( rInputMan.GetKeyDown( sf::Keyboard::F2 ) ) // Vsync toggle
+		SetVSync( !m_VSync );
+
+	if ( rInputMan.GetKeyDown( sf::Keyboard::F3 ) ) // Debugrender toggle
 	{
 		grDebugManager& d = grDebugManager::Instance();
 		d.Enable( !d.IsEnable() );
 	}
 
-	if ( rInputMan.GetKeyDown( sf::Keyboard::Escape ) )
+	if ( rInputMan.GetKeyDown( sf::Keyboard::Escape ) ) // Exit
 		Terminate();
 #endif // DEBUG
 }
@@ -104,7 +103,7 @@ grCore::Input( grInputManager& rInputMan )
 
 // Update
 //////////////////////////////////////////////////
-void
+inline void
 grCore::Update()
 {
 #ifdef DEBUG
@@ -118,21 +117,30 @@ grCore::Update()
 
 // Render
 //////////////////////////////////////////////////
-void
+inline void
 grCore::Render()	
 {
 	m_puRenderWin->clear();
-	
-	//////////////////////////////////////////////////
 	
 #ifdef	DEBUG
 	m_puSandbox->Render( *m_puRenderWin );
 	grDebugManager::Instance().Render( *m_puRenderWin );
 #endif	//DEBUG_MODE
-
-	//////////////////////////////////////////////////
 	
 	m_puRenderWin->display();
+}
+
+
+// Terminate
+//////////////////////////////////////////////////
+inline void
+grCore::Terminate()
+{
+	if ( m_puRenderWin != nullptr )
+	{
+		if ( m_puRenderWin->isOpen() == true )
+			m_puRenderWin->close();
+	}
 }
 
 
@@ -178,7 +186,7 @@ grCore::Run()
 
 // InitRWin
 //////////////////////////////////////////////////
-void
+inline void
 grCore::InitRenderWin()
 {
 	m_puCSettings->antialiasingLevel = ( unsigned int )m_Aa;
@@ -187,7 +195,10 @@ grCore::InitRenderWin()
 	m_puRenderWin->setVerticalSyncEnabled( m_VSync );
 }
 
-void
+
+// InitManager
+//////////////////////////////////////////////////
+inline void
 grCore::InitManager()
 {
 	grInputManager::Initialize();
@@ -200,4 +211,3 @@ grCore::InitManager()
 	grDebugManager::Instance().Enable( false );
 #endif // DEBUG
 }
-

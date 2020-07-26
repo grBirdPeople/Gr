@@ -14,10 +14,14 @@ public:
 		grV2f TopLeft, TopRight, BotRight, BotLeft;
 	};
 
-public:
-	grBBox( const grV2f& rDimension, const grV2f& rPos );
+	inline grBBox( const grV2f& rDimension, const grV2f& rPos )
+		: m_Dimensions( rDimension )
+		, m_MidPos( rPos )
+	{
+		UpdateCorners();
+	}
 
-	inline const grV2f& GetPosistion()
+	inline const grV2f& GetPosistion() const
 	{
 		return m_MidPos;
 	}
@@ -28,7 +32,7 @@ public:
 		UpdateCorners( );
 	}
 
-	inline const grV2f& GetDimensions()
+	inline const grV2f& GetDimensions() const
 	{
 		return m_Dimensions;
 	}
@@ -36,20 +40,20 @@ public:
 	inline void SetDimensions( const grV2f& rDimensions )
 	{
 		m_Dimensions = rDimensions;
-		UpdateCorners( );
+		UpdateCorners();
 	}
 
-	inline const Corners& GetCorners()
+	inline const Corners& GetCorners() const
 	{
 		return m_Corners;
 	}
 
 	const bool Intersects( const grBBox& rBBox )
 	{
-		grBBox otherBox = rBBox;
-		grV2f otherPos = otherBox.GetPosistion( );
-		grV2f otherDimensions = otherBox.GetDimensions( );
-		grV2f otherTopLeft = otherBox.GetCorners( ).TopLeft;
+		grBBox otherBox{ rBBox };
+		grV2f otherPos{ otherBox.GetPosistion( ) };
+		grV2f otherDimensions{ otherBox.GetDimensions( ) };
+		grV2f otherTopLeft{ otherBox.GetCorners( ).TopLeft };
 
 		return	m_Corners.TopLeft.x	< otherTopLeft.x		+ otherDimensions.x &&
 				otherTopLeft.x		< m_Corners.TopLeft.x	+ m_Dimensions.x &&
@@ -66,9 +70,23 @@ public:
 	}
 	
 private:
-	inline void UpdateCorners();
+	inline void UpdateCorners()
+	{
+		float halfDimensionX{ m_Dimensions.x * 0.5f };
+		float halfDimensionY{ m_Dimensions.y * 0.5f };
 
-	//////////////////////////////////////////////////
+		m_Corners.TopLeft.x = m_MidPos.x - halfDimensionX;
+		m_Corners.TopLeft.y = m_MidPos.y - halfDimensionY;
+
+		m_Corners.TopRight.x = m_MidPos.x + halfDimensionX;
+		m_Corners.TopRight.y = m_Corners.TopLeft.y;
+
+		m_Corners.BotRight.x = m_Corners.TopRight.x;
+		m_Corners.BotRight.y = m_MidPos.y + halfDimensionY;
+
+		m_Corners.BotLeft.x = m_Corners.TopLeft.x;
+		m_Corners.BotLeft.y = m_Corners.BotRight.y;
+	}
 	
 	Corners	m_Corners;
 	grV2f m_Dimensions, m_MidPos;	// m_MidPos = Origo

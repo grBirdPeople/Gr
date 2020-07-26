@@ -1,4 +1,3 @@
-#include	"grDefine.h"
 #include	"grCore.h"
 
 

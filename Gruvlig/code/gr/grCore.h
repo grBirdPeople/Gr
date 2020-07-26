@@ -16,22 +16,18 @@ class		grSandbox;
 class		grInputManager;
 
 
-// grCore
-//////////////////////////////////////////////////
 class grCore : public grSingleton<grCore>
 {
 public:
 	grCore();
 	~grCore();
-
-	//////////////////////////////////////////////////
 	
-	inline float GetGameTimeElapsed() const
+	inline const float GetGameTimeElapsed() const
 	{
 		return m_TotalElapsedT;
 	}
 
-	inline float GetDeltaT() const
+	inline const float GetDeltaT() const
 	{
 		return m_Dt;
 	}
@@ -78,35 +74,24 @@ public:
 	void Init( const str& rAppName = "grFramework", const intU winWidth = 960, const intU winHeight = 540, const intU frameRate = 120, const bool vsync = false );
 	void Run();
 	
-	//////////////////////////////////////////////////
-	
 private:
 
-	void InitRenderWin();
-	void InitManager();
-	void Input( grInputManager& rInputMan );
-	void Update();
-	void Render();
-	inline void	Terminate()
-	{
-		if ( m_puRenderWin != nullptr )
-		{
-			if ( m_puRenderWin->isOpen() == true )
-				m_puRenderWin->close();
-		}
-	}
+	inline void InitRenderWin();
+	inline void InitManager();
+	inline void Input( grInputManager& rInputMan );
+	inline void Update();
+	inline void Render();
+	inline void	Terminate();
 
-	//////////////////////////////////////////////////
-
+	pU<sf::RenderWindow> m_puRenderWin;
+	pU<sf::ContextSettings> m_puCSettings;
+	pU<sf::Event> m_puEvent;
+	pU<sf::Clock> m_puClock;
 	str m_AppName;
 	grV2u m_WinSize;
 	float m_TotalElapsedT, m_Dt;
 	intU m_FramesPerSec, m_Aa;
 	bool m_VSync;
-	pU<sf::RenderWindow> m_puRenderWin;
-	pU<sf::ContextSettings> m_puCSettings;
-	pU<sf::Event> m_puEvent;
-	pU<sf::Clock> m_puClock;
 
 #ifdef DEBUG
 	pU<grSandbox> m_puSandbox;
