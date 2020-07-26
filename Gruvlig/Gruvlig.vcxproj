@@ -170,7 +170,6 @@
     <ClCompile Include="code\gr\grEntityManager.cpp" />
     <ClCompile Include="code\gr\grEntityPlayer.cpp" />
     <ClCompile Include="code\gr\grIEntity.cpp" />
-    <ClCompile Include="code\gr\grInputManager.cpp" />
     <ClCompile Include="code\gr\grMap.cpp" />
     <ClCompile Include="code\gr\grMapManager.cpp" />
     <ClCompile Include="code\gr\grNavMesh.cpp" />

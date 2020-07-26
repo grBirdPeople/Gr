@@ -29,13 +29,13 @@ grSandbox::grSandbox( void )
 	: m_rInputMan		( grInputManager::Instance() )
 	//, m_rPartMan		( grCParticleManager::Instance() )
 	//, m_Emitr1		( grCParticleManager::Instance().Create() )
-	, m_pPartSys1		( new grCParticleSys( 10000, 4200.0f ) )
+	, m_pPartSys1		( new grCParticleSys( 10000, 4000.0f ) )
 	, m_PartSysIdOne	( -1 )
 	, m_PartSysIdTwo	( -1 )
 	, m_RendWin			( grCore::Instance().GetRenderWin() )
 {
 	// Hide mouse cursor
-	m_RendWin.setMouseCursorVisible( true );
+	m_RendWin.setMouseCursorVisible( false );
 
 	// Create maps and navmeshes
 	grMapManager::Instance().GetMap( "map_00" )->CreateNavMesh();	// TODO: Don't like this. Other way around ( navmeshmanager create navmesh ( map ))
@@ -163,7 +163,7 @@ grSandbox::grSandbox( void )
 	m_pPartSys1->PositionSystem( grV2f( 640.0f * 0.5f, 360.0f * 0.125f ) );
 	m_pPartSys1->Color( grColor::SRgba( 200, 255, 255, 255 ), grColor::SRgba( 0, 0, 255, 0 ), true, false );
 	m_pPartSys1->Scale( grV2f( 10.0f, 10.0f ), grV2f( 0.0f, 0.0f ) );
-	m_pPartSys1->Position( grV2f( -25.0f, -25.0f ), grV2f( 25.0f, 25.0f ) );
+	m_pPartSys1->Position( grV2f( -10.0f, -10.0f ), grV2f( 10.0f, 10.0f ) );
 	m_pPartSys1->ForceBasic( grV2f( 0.0f, 10.0f ), grV2f( 0.0f, 100.0f ) );
 	m_pPartSys1->Mass( grV2f( 1.0f, 2.0f ) );
 	m_pPartSys1->Life( grV2f( 0.5f, 3.5f ) );
@@ -212,7 +212,6 @@ grSandbox::Update( const float deltaT )
 	{
 		//m_Emitr1.SetSpawnRate( m_Emitr1.GetSpawnRate() - 50.0f );
 	}
-
 
 
 	// Scenegraph things

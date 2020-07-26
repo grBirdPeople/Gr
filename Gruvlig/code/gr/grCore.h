@@ -1,7 +1,7 @@
 #ifndef		_GRCORE_H_
 #define		_GRCORE_H_
 
-#define		AA_DEFAULT	8	// 8 is max for SFML
+#define		AA_MAX	8	// SFML max
 
 #include	<SFML/Graphics/RenderWindow.hpp>
 #include	<SFML/Window/ContextSettings.hpp>
@@ -10,8 +10,10 @@
 
 #include	"grCommon.h"
 #include	"grSingleton.h"
+#include	"grV2.h"
 
 class		grSandbox;
+class		grInputManager;
 
 
 // grCore
@@ -19,26 +21,41 @@ class		grSandbox;
 class grCore : public grSingleton<grCore>
 {
 public:
-	grCore( const intU winWidth = 640, const intU winHeight = 360, const intU frameRate = 120, const str& rAppName = "grFramework" );
-	//grCore( const intU winWidth = 1920, const intU winHeight = 1080, const intU frameRate = 60, const str& rAppName = "grFramework" );
+	grCore();
 	~grCore();
 
 	//////////////////////////////////////////////////
 	
-	inline double GetGameTimeElapsed() const
+	inline float GetGameTimeElapsed() const
 	{
 		return m_TotalElapsedT;
 	}
 
 	inline float GetDeltaT() const
 	{
-		return (float)m_Dt;
+		return m_Dt;
 	}
 
 	inline sf::RenderWindow& GetRenderWin() const
 	{
 		return *m_puRenderWin;
-	}	
+	}
+
+	inline void SetWindowSize( const intU width, const intU height )
+	{
+		if ( m_puRenderWin->getSize().x == ( unsigned int )width && m_puRenderWin->getSize().y == ( unsigned int )height )
+			return;
+
+		if( sf::VideoMode::getDesktopMode().width != ( unsigned int )width && sf::VideoMode::getDesktopMode().height != ( unsigned int )height )
+			m_WinSize = { width, height };
+
+		m_puRenderWin->create( sf::VideoMode( ( unsigned int )width, ( unsigned int )height ), m_AppName, sf::Style::None, *m_puCSettings );
+	}
+
+	inline const grV2u GetWindowSize() const
+	{
+		return m_WinSize;
+	}
 
 	inline void SetAA ( const intU aa )
 	{
@@ -58,7 +75,7 @@ public:
 		m_puRenderWin->setVerticalSyncEnabled( m_VSync );
 	}
 
-	void Init();
+	void Init( const str& rAppName = "grFramework", const intU winWidth = 960, const intU winHeight = 540, const intU frameRate = 120, const bool vsync = false );
 	void Run();
 	
 	//////////////////////////////////////////////////
@@ -66,6 +83,8 @@ public:
 private:
 
 	void InitRenderWin();
+	void InitManager();
+	void Input( grInputManager& rInputMan );
 	void Update();
 	void Render();
 	inline void	Terminate()
@@ -80,8 +99,9 @@ private:
 	//////////////////////////////////////////////////
 
 	str m_AppName;
-	double m_TotalElapsedT, m_Dt;
-	intU m_WinWidth, m_WinHeight, m_FramesPerSec, m_Aa;
+	grV2u m_WinSize;
+	float m_TotalElapsedT, m_Dt;
+	intU m_FramesPerSec, m_Aa;
 	bool m_VSync;
 	pU<sf::RenderWindow> m_puRenderWin;
 	pU<sf::ContextSettings> m_puCSettings;
@@ -89,7 +109,7 @@ private:
 	pU<sf::Clock> m_puClock;
 
 #ifdef DEBUG
-	grSandbox* m_pSandbox;
+	pU<grSandbox> m_puSandbox;
 #endif // DEBUG
 };
 

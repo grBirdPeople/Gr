@@ -7,8 +7,8 @@
 // cTor
 //////////////////////////////////////////////////
 grBBox::grBBox( const grV2f& rDimension, const grV2f& rPos )
-	: m_Dimensions		( rDimension )
-	, m_MidPos			( rPos )
+	: m_Dimensions( rDimension )
+	, m_MidPos( rPos )
 {
 	UpdateCorners();
 }
@@ -17,7 +17,7 @@ grBBox::grBBox( const grV2f& rDimension, const grV2f& rPos )
 // UpdateCorners
 //////////////////////////////////////////////////
 inline void
-grBBox::UpdateCorners( void )
+grBBox::UpdateCorners()
 {
 	float halfDimensionX = m_Dimensions.x * 0.5f;
 	float halfDimensionY = m_Dimensions.y * 0.5f;
