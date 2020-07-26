@@ -1,11 +1,15 @@
 #include	"grParticleTest.h"
 
+#include	"grCore.h"
+
 
 grCParticleSys::grCParticleSys( const intU size, const float emitRate, const grV2f& position )
 	: m_puParticle	( std::make_unique<grSParticle>( size ) )
 	, m_puEmit		( std::make_unique<grSEmitter>( size, 1.0f / grMath::Abs( emitRate ), position ) )
 	, m_puUpdate	( std::make_unique<grSUpdate>() )
-{}
+{
+	grCore::Instance().SetVSync( true );
+}
 
 void
 grCParticleSys::EmitRate( const float emitRate )
@@ -95,16 +99,28 @@ grCParticleSys::Update( const float deltaT )
 {
 	m_puEmit->Emit( m_puParticle, deltaT );
 	m_puUpdate->Update( m_puParticle, deltaT );
+}
 
-	// TEST DRAW
-	printf( "Max: %d %2s Alive: %d \n", m_puEmit->Size, "", m_puParticle->Alive );
-	for ( sizeT i = 0; i < m_puParticle->Alive; ++i )
-	{
-		grBBox box( m_puParticle->puScaleStart[ i ], m_puParticle->puPosition[ i ] );
-		grDebugManager::Instance().AddBBox( box, sf::Color( ( sf::Uint8 )m_puParticle->puColorStart[ i ].R,
-															( sf::Uint8 )m_puParticle->puColorStart[ i ].G,
-															( sf::Uint8 )m_puParticle->puColorStart[ i ].B,
-															( sf::Uint8 )m_puParticle->puColorStart[ i ].A ) );
-	}
-	// TEST DRAW
+void
+grCParticleSys::Render( sf::RenderWindow& rRenderWin )
+{
+	rRenderWin.draw( &m_puParticle->puVerts.get()[ 0 ], m_puParticle->Alive, sf::PrimitiveType::Points );
+
+	//printf( "Max: %d %2s Alive: %d \n", m_puEmit->Size, "", m_puParticle->Alive );
+
+
+
+
+
+	//// TEST DRAW
+	//printf( "Max: %d %2s Alive: %d \n", m_puEmit->Size, "", m_puParticle->Alive );
+	//for ( sizeT i = 0; i < m_puParticle->Alive; ++i )
+	//{
+	//	grBBox box( m_puParticle->puScaleStart[ i ], m_puParticle->puPosition[ i ] );
+	//	grDebugManager::Instance().AddBBox( box, sf::Color( ( sf::Uint8 )m_puParticle->puColorStart[ i ].R,
+	//														( sf::Uint8 )m_puParticle->puColorStart[ i ].G,
+	//														( sf::Uint8 )m_puParticle->puColorStart[ i ].B,
+	//														( sf::Uint8 )m_puParticle->puColorStart[ i ].A ) );
+	//}
+	//// TEST DRAW
 }

@@ -2,6 +2,7 @@
 #define		_GRDEBUGMANAGER_H_
 
 #include	<SFML/Graphics/VertexArray.hpp>
+#include	<SFML/Graphics/VertexBuffer.hpp>
 #include	<SFML/Graphics/RenderWindow.hpp>
 #include	<SFML/System/Vector2.hpp>
 
@@ -19,16 +20,30 @@ class grDebugManager : public grSingleton<grDebugManager>
 {
 public:
 	
-	grDebugManager( void )
+	grDebugManager()
 		: m_puVertices	( std::make_unique<sf::VertexArray[]>( 5000 ) )
-		, m_MaxBBox		( 5000 )
-		, m_Size		( 0 )
+		, m_MaxBBox( 5000 )
+		, m_Size( 0 )
+		, m_bEnable( true )
 	{}
+
+	inline const bool IsEnable() const
+	{
+		return m_bEnable;
+	}
+
+	inline void Enable( const bool enable )
+	{
+		m_bEnable = enable;
+	}
 
 	inline void AddBBox( grBBox& rBBox, const sf::Color color )
 	{
-		if ( m_Size >= m_MaxBBox )
-			std::cerr << "grDebugManager::AddBBox: Max BBoxes added\n" << std::endl;
+		if ( m_Size >= m_MaxBBox && m_bEnable == true )
+		{
+			std::cerr << "grDebugManager::AddBBox: Max BBoxes added or not enabled\n" << std::endl;
+			return;
+		}
 
 		const grBBox::Corners& corners = rBBox.GetCorners();
 		sf::Vector2f topLeft( corners.TopLeft.x, corners.TopLeft.y );
@@ -52,20 +67,22 @@ public:
 
 		m_puVertices[ m_Size++ ] = vertexBox;
 	}
+
 	inline void Render( sf::RenderWindow& rRenderWin )
 	{
-		if ( m_Size > 0 )
+		if ( m_Size > 0 && m_bEnable == true )
 		{
 			for( sizeT i = 0; i < m_Size; ++i )
 				rRenderWin.draw( m_puVertices[ i ] );
-
-			m_Size = 0;
 		}
+
+		m_Size = 0;
 	}
 
 private:
 	pU<sf::VertexArray[]> m_puVertices;
 	sizeT m_MaxBBox, m_Size;
+	bool m_bEnable;
 };
 
 #endif		//_GRDEBUGMANAGER_H_
