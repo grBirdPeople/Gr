@@ -10,8 +10,6 @@ class		grActor;
 class		grMap;
 class		grIEntity;
 class		grInputManager;
-//class		grCParticleManager;
-//class		grCParticleEmitter;
 class		grCParticleSys;
 
 namespace sf
@@ -25,46 +23,28 @@ namespace sf
 class grSandbox
 {
 public:
-
 	grSandbox	( void );
 
 	grSandbox( grSandbox const& ) = delete;
 	grSandbox& operator=( grSandbox const& ) = delete;
-
-	//////////////////////////////////////////////////
+	grSandbox( grSandbox&& ) noexcept = delete;
+	grSandbox operator=( grSandbox&& ) noexcept = delete;
 
 	void Update( const float deltaT );
 	void Render( sf::RenderWindow& rRenderWin );
 
-	//////////////////////////////////////////////////
-
 private:
-
-	sf::RenderWindow&		m_RendWin;
-
-	grInputManager&			m_rInputMan;
-	//grCParticleManager&		m_rPartMan;
-
-	//grCParticleEmitter&		m_Emitr1;
-
-	grCParticleSys*			m_pPartSys1;
-
-	grMap*					m_pMap;
-	grActor*				m_pActor;
-
-	grIEntity*				m_pPlayer;
-	grIEntity*				m_pEnemy;
-
-	bool					m_bFlipFlop = true;
-
-	grV2f					m_LastMousePos;
-
-	intS					m_PartSysIdOne,
-							m_PartSysIdTwo;
-
-	float					m_ParticleAnimT = 0.25f,
-							m_ParticleAnimCounter = 0.0f;
-
+	sf::RenderWindow& m_RendWin;
+	grInputManager& m_rInputMan;
+	grCParticleSys* m_pPartSys1;
+	grMap* m_pMap;
+	grActor* m_pActor;
+	grIEntity* m_pPlayer;
+	grIEntity* m_pEnemy;
+	bool m_bFlipFlop = true;
+	grV2f m_LastMousePos;
+	intS m_PartSysIdOne, m_PartSysIdTwo;
+	float m_ParticleAnimT = 0.25f, m_ParticleAnimCounter = 0.0f;
 };
 
 

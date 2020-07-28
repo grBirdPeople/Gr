@@ -15,12 +15,13 @@ grCore::grCore()
 	: m_puRenderWin( std::make_unique<sf::RenderWindow>() )
 	, m_puCSettings( std::make_unique<sf::ContextSettings>() )
 	, m_puEvent( std::make_unique<sf::Event>() )
+	, m_puVidMode( std::make_unique<sf::VideoMode>() )
 	, m_puClock( std::make_unique<sf::Clock>() )
 	, m_AppName( "grFramework" )
-	, m_WinSize( { 0, 0 } )
+	, m_WindowedSize( { 0, 0 } )
 	, m_TotalElapsedT( 0.0f )
 	, m_Dt( 0.0f )
-	, m_FramesPerSec( 120 )
+	, m_FramesPerSec( 0 )
 	, m_Aa( AA_MAX )
 	, m_VSync( false )
 #ifdef DEBUG
@@ -74,16 +75,10 @@ grCore::Input( grInputManager& rInputMan )
 #ifdef DEBUG
 	if ( rInputMan.GetKeyDown( sf::Keyboard::F1 ) ) // Fullscreen toggle
 	{
-		if ( m_puRenderWin->getSize().x == m_WinSize.x &&
-			 m_puRenderWin->getSize().y == m_WinSize.y )
-		{
-			SetWindowSize( ( intU )sf::VideoMode::getDesktopMode().width,
-						   ( intU )sf::VideoMode::getDesktopMode().height );
-		}
+		if ( m_puVidMode->width == m_WindowedSize.x && m_puVidMode->height == m_WindowedSize.y )
+			SetWindowSize( { ( intU )m_puVidMode->getDesktopMode().width, ( intU )m_puVidMode->getDesktopMode().height } );
 		else
-		{
-			SetWindowSize( m_WinSize.x, m_WinSize.y );
-		}
+			SetWindowSize( m_WindowedSize );
 	}
 
 	if ( rInputMan.GetKeyDown( sf::Keyboard::F2 ) ) // Vsync toggle
@@ -150,7 +145,7 @@ void
 grCore::Init( const str& rAppName, const intU winWidth, const intU winHeight, const intU frameRate, const bool vsync )
 {
 	m_AppName = rAppName;
-	m_WinSize = { winWidth, winHeight };
+	m_WindowedSize = { winWidth, winHeight };
 	m_FramesPerSec = frameRate;
 	m_VSync = vsync;
 
@@ -189,8 +184,13 @@ grCore::Run()
 inline void
 grCore::InitRenderWin()
 {
+	m_puVidMode->width = m_WindowedSize.x;
+	m_puVidMode->height = m_WindowedSize.y;
+	m_puVidMode->bitsPerPixel = 32;
+
 	m_puCSettings->antialiasingLevel = ( unsigned int )m_Aa;
-	m_puRenderWin->create( sf::VideoMode( ( unsigned int )m_WinSize.x, ( unsigned int )m_WinSize.y ), m_AppName, sf::Style::None, *m_puCSettings );
+
+	m_puRenderWin->create( *m_puVidMode, m_AppName, sf::Style::None, *m_puCSettings );
 	m_puRenderWin->setFramerateLimit( ( unsigned int )m_FramesPerSec );
 	m_puRenderWin->setVerticalSyncEnabled( m_VSync );
 }

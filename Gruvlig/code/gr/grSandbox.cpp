@@ -26,13 +26,11 @@
 // cTor
 //////////////////////////////////////////////////
 grSandbox::grSandbox( void )
-	: m_rInputMan		( grInputManager::Instance() )
-	//, m_rPartMan		( grCParticleManager::Instance() )
-	//, m_Emitr1		( grCParticleManager::Instance().Create() )
-	, m_pPartSys1		( new grCParticleSys( 10000, 4000.0f ) )
-	, m_PartSysIdOne	( -1 )
-	, m_PartSysIdTwo	( -1 )
-	, m_RendWin			( grCore::Instance().GetRenderWin() )
+	: m_rInputMan( grInputManager::Instance() )
+	, m_pPartSys1( new grCParticleSys( 10000, 4000.0f ) )
+	, m_PartSysIdOne( -1 )
+	, m_PartSysIdTwo( -1 )
+	, m_RendWin( grCore::Instance().GetRenderWin() )
 {
 	// Hide mouse cursor
 	m_RendWin.setMouseCursorVisible( false );
@@ -70,6 +68,8 @@ grSandbox::grSandbox( void )
 	//m_pPlayer->SetEnable( false );
 	//entityMan.DestroyEntity( pEnemy_1 );
 
+
+
 	//// Poor HashMap
 	//grHashMap<grIEntity*> map( 5 );
 	//map.Put( 3, m_pPlayer );
@@ -80,6 +80,8 @@ grSandbox::grSandbox( void )
 	//map.Del( 7 );
 	//map.Del( 3 );
 	//map.Put( 3, m_pPlayer );
+
+
 
 	//// Box2D test
 	//b2World* pWorld = new b2World( b2Vec2( 0.0f, -9.8f ) );
@@ -98,6 +100,8 @@ grSandbox::grSandbox( void )
 	//fixDef.density = 1.0f;
 	//fixDef.friction = 0.5f;
 	//b2Fixture* pFix = pBody->CreateFixture( &fixDef );
+
+
 
 	// Particles
 	//grParticleSystem& pPartSys = *m_rParticleMan.CreateParticleSystem();
