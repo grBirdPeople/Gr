@@ -37,7 +37,7 @@ public:
 		return *m_puRenderWin;
 	}
 
-	inline const grV2u& GetWindowSize() const
+	inline const grV2u GetWindowSize() const
 	{
 		return { ( intU )m_puVidMode->width, ( intU )m_puVidMode->height };
 	}
@@ -91,6 +91,7 @@ private:
 
 	inline void InitRenderWin();
 	inline void InitManager();
+	inline void DeInitManager();
 	inline void Input( grInputManager& rInputMan );
 	inline void Update();
 	inline void Render();

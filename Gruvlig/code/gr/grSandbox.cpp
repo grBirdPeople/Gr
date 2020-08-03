@@ -1,27 +1,28 @@
 #include "grSandbox.h"
 
-#include	<SFML/Window/Mouse.hpp>
-#include	<SFML/Graphics/Sprite.hpp>
+#include <SFML/Window/Mouse.hpp>
+#include <SFML/Graphics/Sprite.hpp>
 
-#include	"grCore.h"
-#include	"grBox2D.h"
-#include	"grDebugManager.h"
-#include	"grInputManager.h"
-#include	"grActor.h"
-#include	"grMap.h"
-#include	"grNavMesh.h"
-#include	"grNavMeshManager.h"
-#include	"grNavNode.h"
-#include	"grIEntity.h"
-#include	"grEntityPlayer.h"
-#include	"grEntityManager.h"
-#include	"grMapManager.h"
-#include	"grCParticleManager.h"
-#include	"grMath.h"
-#include	"grAlgo.h"
+#include "grCore.h"
+#include "grBox2D.h"
+#include "grDebugManager.h"
+#include "grInputManager.h"
+#include "grActor.h"
+#include "grMap.h"
+#include "grNavMesh.h"
+#include "grNavMeshManager.h"
+#include "grNavNode.h"
+#include "grIEntity.h"
+#include "grEntityPlayer.h"
+#include "grEntityManager.h"
+#include "grMapManager.h"
+#include "grCParticleManager.h"
+#include "grMath.h"
+#include "grAlgo.h"
+#include "grRandom.h"
 
-#include	"grParticleTest.h"
-#include	"grBoid.h"
+#include "grParticleTest.h"
+#include "grBoid.h"
 
 
 // cTor
@@ -29,9 +30,9 @@
 grSandbox::grSandbox( void )
 	: m_rInputMan( grInputManager::Instance() )
 	, m_pPartSys1( new grCParticleSys( 10000, 4000.0f ) )
-	, m_PartSysIdOne( -1 )
-	, m_PartSysIdTwo( -1 )
+	, m_pBoidSys( new grBoidSys() )
 	, m_RendWin( grCore::Instance().GetRenderWin() )
+	, m_Rand( new grRandom() )
 {
 	// Hide mouse cursor
 	m_RendWin.setMouseCursorVisible( false );
@@ -174,11 +175,8 @@ grSandbox::grSandbox( void )
 	m_pPartSys1->Life( grV2f( 0.5f, 3.5f ) );
 
 
-
-
-	grBoidSys b;
-	b.Init( 10 );
-	b.Update();
+	grDebugManager::Instance().Enable( true );
+	m_pBoidSys->Init( 100 );
 }
 
 
@@ -187,6 +185,13 @@ grSandbox::grSandbox( void )
 void
 grSandbox::Update( const float deltaT )
 {
+	// Boid things
+	m_pBoidSys->Update( deltaT );
+
+	if ( m_rInputMan.GetMouseScrollForwards() )
+		m_pBoidSys->Add( m_rInputMan.GetMousePos(), { m_Rand->Float( -1.0f, 1.0f ), m_Rand->Float( -1.0f, 1.0f ) } );
+
+
 	// Particle things
 	m_pPartSys1->Update( deltaT );
 

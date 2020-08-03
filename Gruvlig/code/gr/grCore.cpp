@@ -34,20 +34,7 @@ grCore::grCore()
 //////////////////////////////////////////////////
 grCore::~grCore()
 {
-#ifdef DEBUG
-	grDebugManager::DeInitialize();
-#endif // DEBUG
-
-	grNavMeshManager::DeInitialize();
-	grMapManager::DeInitialize();
-	grEntityManager::DeInitialize();
-	grInputManager::DeInitialize();
-
-	if ( m_puRenderWin != nullptr )
-	{
-		if ( m_puRenderWin->isOpen() == true )
-			m_puRenderWin->close();
-	}
+	DeInitManager();
 }
 
 
@@ -208,6 +195,25 @@ grCore::InitManager()
 
 #ifdef DEBUG
 	grDebugManager::Initialize();
-	grDebugManager::Instance().Enable( false );
 #endif // DEBUG
+}
+
+
+inline void
+grCore::DeInitManager()
+{
+#ifdef DEBUG
+	grDebugManager::DeInitialize();
+#endif // DEBUG
+
+	grNavMeshManager::DeInitialize();
+	grMapManager::DeInitialize();
+	grEntityManager::DeInitialize();
+	grInputManager::DeInitialize();
+
+	if ( m_puRenderWin != nullptr )
+	{
+		if ( m_puRenderWin->isOpen() == true )
+			m_puRenderWin->close();
+	}
 }

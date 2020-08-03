@@ -14,34 +14,34 @@ namespace grStruct
 	// grArrayDyn // Dynamic array // Basic thread safety
 	//////////////////////////////////////////////////
 	template <typename T>
-	class grArrayDyn
+	class grArrDyn
 	{
 	public:
-		grArrayDyn()
+		grArrDyn()
 			: m_upArr( std::make_unique<T[]>( 0 ) )
 			, m_Capacity( 0 )
 			, m_Size( 0 )
 		{}
 
-		grArrayDyn( const size_t capacity )
+		grArrDyn( const size_t capacity )
 			: m_upArr( std::make_unique<T[]>( capacity ) )
 			, m_Capacity( capacity )
 			, m_Size( 0 )
 		{}
 
-		grArrayDyn( const grArrayDyn<T>& rArr )
+		grArrDyn( const grArrDyn<T>& rArr )
 		{
 			Cpy( rArr );
 		}
 
-		grArrayDyn<T>& operator=( const grArrayDyn<T>& rArr )
+		grArrDyn<T>& operator=( const grArrDyn<T>& rArr )
 		{
 			Cpy( rArr );
 			return *this;
 		}
 
-		grArrayDyn( grArrayDyn<T>&& rArr ) noexcept = delete;
-		grArrayDyn<T>& operator=( grArrayDyn<T>&& rArr ) noexcept = delete;
+		grArrDyn( grArrDyn<T>&& rArr ) noexcept = delete;
+		grArrDyn<T>& operator=( grArrDyn<T>&& rArr ) noexcept = delete;
 
 		inline void Reset( const size_t capacity )
 		{
@@ -83,7 +83,7 @@ namespace grStruct
 		}
 
 	private:
-		inline void Cpy( const grArrayDyn<T>& rArr )
+		inline void Cpy( const grArrDyn<T>& rArr )
 		{
 			std::lock_guard<std::mutex> lock( m_Lock );
 
