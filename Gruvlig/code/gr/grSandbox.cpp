@@ -21,6 +21,7 @@
 #include	"grAlgo.h"
 
 #include	"grParticleTest.h"
+#include	"grBoid.h"
 
 
 // cTor
@@ -171,6 +172,13 @@ grSandbox::grSandbox( void )
 	m_pPartSys1->ForceBasic( grV2f( 0.0f, 10.0f ), grV2f( 0.0f, 100.0f ) );
 	m_pPartSys1->Mass( grV2f( 1.0f, 2.0f ) );
 	m_pPartSys1->Life( grV2f( 0.5f, 3.5f ) );
+
+
+
+
+	grBoidSys b;
+	b.Init( 10 );
+	b.Update();
 }
 
 

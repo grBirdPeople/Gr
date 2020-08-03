@@ -11,123 +11,139 @@
 
 namespace grStruct
 {
-	// Array // Dynamic array // Basic thread safety
+	// grArrayDyn // Dynamic array // Basic thread safety
 	//////////////////////////////////////////////////
 	template <typename T>
-	class Array
+	class grArrayDyn
 	{
 	public:
-		Array()
+		grArrayDyn()
 			: m_upArr( std::make_unique<T[]>( 0 ) )
+			, m_Capacity( 0 )
 			, m_Size( 0 )
-			, m_Count( 0 )
 		{}
-		Array( const size_t size )
-			: m_upArr( std::make_unique<T[]>( size ) )
-			, m_Size( size )
-			, m_Count( 0 )
+
+		grArrayDyn( const size_t capacity )
+			: m_upArr( std::make_unique<T[]>( capacity ) )
+			, m_Capacity( capacity )
+			, m_Size( 0 )
 		{}
-		Array( const Array<T>& rArr )
+
+		grArrayDyn( const grArrayDyn<T>& rArr )
 		{
 			Cpy( rArr );
 		}
-		Array<T>& operator=( const Array<T>& rArr )
+
+		grArrayDyn<T>& operator=( const grArrayDyn<T>& rArr )
 		{
 			Cpy( rArr );
 			return *this;
 		}
-		Array( Array<T>&& rArr ) noexcept = delete;
-		Array<T>& operator=( Array<T>&& rArr ) noexcept = delete;
 
-		inline void Reset( const size_t size )
+		grArrayDyn( grArrayDyn<T>&& rArr ) noexcept = delete;
+		grArrayDyn<T>& operator=( grArrayDyn<T>&& rArr ) noexcept = delete;
+
+		inline void Reset( const size_t capacity )
 		{
 			std::lock_guard<std::mutex> lock( m_Lock );
-			m_upArr.reset( new T[ size ] );
+			m_upArr.reset( new T[ capacity ] );
+			m_Capacity = capacity;
 			m_Size = 0;
-			m_Count = 0;
 		}
+
+		inline void Erase()
+		{
+			std::lock_guard<std::mutex> lock( m_Lock );
+			m_Size = 0;
+		}
+
 		inline void Push( const T& value )
 		{
-			assert( m_Size > m_Count && "grArr::Push: Array full" );
+			assert( m_Size < m_Capacity && "grArr::Push: Array full" );
 			std::lock_guard<std::mutex> lock( m_Lock );
-			m_upArr[ m_Count++ ] = value;
+			m_upArr[ m_Size++ ] = value;
 		}
+
+		inline T& Get( const size_t idx ) const
+		{
+			assert( idx < m_Size && "grArr::Get: Idx out of range" );
+			return m_upArr[ idx ];
+		}
+
 		inline void Set( const size_t idx, const T& value )
 		{
 			assert( idx < m_Size && "grArr::Set: Idx out of range" );
 			std::lock_guard<std::mutex> lock( m_Lock );
-			m_upArr[ m_Count++ ] = value;
+			m_upArr[ idx ] = value;
 		}
-		inline const T& Get( const size_t idx ) const
-		{
-			assert( idx < m_Count && "grArr::Get: Idx out of range" );
-			return m_upArr[ idx ];
-		}
-		inline const size_t Size() const
+
+		inline size_t Size() const
 		{
 			return m_Size;
 		}
-		inline const size_t Count() const
-		{
-			return m_Count;
-		}
 
 	private:
-		inline void Cpy( const Array<T>& rArr )
+		inline void Cpy( const grArrayDyn<T>& rArr )
 		{
 			std::lock_guard<std::mutex> lock( m_Lock );
 
-			m_upArr.reset( new T[ m_Size ] );
-			for ( size_t i = 0; i < rArr.m_Count; ++i )
+			m_upArr.reset( new T[ rArr.m_Capacity ] );
+			for ( size_t i = 0; i < rArr.m_Capacity; ++i )
 				m_upArr[ i ] = rArr.m_upArr[ i ];
 
+			m_Capacity = rArr.m_Capacity;
 			m_Size = rArr.m_Size;
-			m_Count = rArr.m_Count;
 		}
 
 		std::unique_ptr<T[]> m_upArr;
 		std::mutex m_Lock;
-		size_t m_Size, m_Count;
+		size_t m_Capacity, m_Size;
 	};
 
-	// LoopQue // FIFO // Basic thread safety
+	// grLoopQue // FIFO // Basic thread safety
 	//////////////////////////////////////////////////
 	template<typename T>
-	class LoopQue
+	class grLoopQue
 	{
 	public:
-		LoopQue()
+		grLoopQue()
 			: m_puArr		( std::make_unique<T[]>( 0 ) )
 			, m_Capacity	( 0 )
 			, m_Size		( 0 )
 			, m_StrtIdx		( 0 )
 		{}
-		LoopQue( const sizeT capacity )
+
+		grLoopQue( const sizeT capacity )
 			: m_puArr		( std::make_unique<T[]>( capacity ) )
 			, m_Capacity	( capacity )
 			, m_Size		( 0 )
 			, m_StrtIdx		( 0 )
 		{}
-		LoopQue( const LoopQue& que )
+
+		grLoopQue( const grLoopQue& que )
 		{
 			Cpy( que );
 		}
-		LoopQue& operator=( const LoopQue& que )
+
+		grLoopQue& operator=( const grLoopQue& que )
 		{
 			Cpy( que );
 			return *this;
 		}
-		LoopQue( LoopQue&& que ) noexcept = delete;
-		LoopQue& operator=( LoopQue&& que ) noexcept = delete;
+
+		grLoopQue( grLoopQue&& que ) noexcept = delete;
+		grLoopQue& operator=( grLoopQue&& que ) noexcept = delete;
 
 		inline const sizeT Capacity( void ) const
 		{
 			return m_Capacity;
 		}
+
 		inline const sizeT Size( void ) const
 		{
 			return m_Size;
 		}
+
 		inline bool Push( const T& rT )
 		{
 			std::lock_guard<std::mutex> lock( m_Lock );
@@ -143,6 +159,7 @@ namespace grStruct
 			m_puArr[ idx ] = rT;
 			return true;
 		}
+
 		inline bool Pop( T& rT )	// Last element
 		{
 			std::lock_guard<std::mutex> lock( m_Lock );
@@ -158,6 +175,7 @@ namespace grStruct
 			rT = m_puArr[ idx ];
 			return true;
 		}
+
 		inline void Reset( const sizeT size )
 		{
 			std::lock_guard<std::mutex> lock( m_Lock );
@@ -169,7 +187,7 @@ namespace grStruct
 		}
 
 	private:
-		inline void Cpy( const LoopQue<T>& que )
+		inline void Cpy( const grLoopQue<T>& que )
 		{
 			std::lock_guard<std::mutex> lock( m_Lock );
 
@@ -187,9 +205,9 @@ namespace grStruct
 		sizeT m_Capacity, m_Size, m_StrtIdx;
 	};
 
-	// STimer // Create an instance at the start of a block and get time when this destroy
+	// grSTimer // Create an instance at the start of a block and get time when this destroy
 	//////////////////////////////////////////////////
-	struct STimer
+	struct grSTimer
 	{
 		enum class ETimeType
 		{
@@ -198,13 +216,13 @@ namespace grStruct
 			S
 		};
 
-		STimer( const char* name = "Timer", ETimeType timeType = ETimeType::MS )
+		grSTimer( const char* name = "Timer", ETimeType timeType = ETimeType::MS )
 			: Start		( std::chrono::high_resolution_clock::now() )
 			, Name		( name )
 			, TimeType	( timeType )
 		{}
 
-		~STimer()
+		~grSTimer()
 		{
 			std::chrono::high_resolution_clock::duration delta = std::chrono::high_resolution_clock::now() - Start;
 			switch ( TimeType )
@@ -215,10 +233,10 @@ namespace grStruct
 			}
 		}
 
-		STimer( const STimer& ) = delete;
-		STimer( STimer&& ) noexcept = delete;
-		STimer& operator=( const STimer& ) = delete;
-		STimer& operator=( STimer&& ) noexcept = delete;
+		grSTimer( const grSTimer& ) = delete;
+		grSTimer( grSTimer&& ) noexcept = delete;
+		grSTimer& operator=( const grSTimer& ) = delete;
+		grSTimer& operator=( grSTimer&& ) noexcept = delete;
 
 	private:
 		std::chrono::steady_clock::time_point Start;
@@ -231,25 +249,25 @@ namespace grStruct
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-	// LinearActivity
+	// grLinearActivity
 	//////////////////////////////////////////////////
 	template<typename T>
-	class LinearActivity
+	class grLinearActivity
 	{
 	public:
 
-		LinearActivity( const intU capacity )
+		grLinearActivity( const intU capacity )
 			: Arr			( new T[ capacity ]() )
 			, m_Capacity	( capacity )
 			, m_Size		( 0 )
 			, m_Active		( 0 )
 		{}
-		~LinearActivity( void )
+		~grLinearActivity( void )
 		{
 			delete[] Arr.release();
 		}
-		LinearActivity( const LinearActivity & ) = delete;
-		LinearActivity& operator=( const LinearActivity& ) = delete;
+		grLinearActivity( const grLinearActivity & ) = delete;
+		grLinearActivity& operator=( const grLinearActivity& ) = delete;
 		T& operator[]( const sizeT idx )
 		{
 #ifdef DEBUG
@@ -319,12 +337,12 @@ namespace grStruct
 	};
 
 
-	// HashNode
+	// grHashNode
 	//////////////////////////////////////////////////
 	template<typename T>
-	struct HashNode
+	struct grHashNode
 	{
-		HashNode	( const intU key = -1, T value = nullptr )
+		grHashNode	( const intU key = -1, T value = nullptr )
 			: m_Key		( key )
 			, m_Value	( value )
 		{}
@@ -334,28 +352,28 @@ namespace grStruct
 	};
 
 
-	// HashMap // Experimental and not really tested
+	// grHashMap // Experimental and not really tested
 	// More like a hash set but eh // Uses buckets // Open-adress where only unique unsigned int's are allowed as keys
 	//////////////////////////////////////////////////
 	template<typename T>
-	class HashMap
+	class grHashMap
 	{
 	public:
 		// TODO: Linera probing is used for search (if non unique keys where allowed).
 		// Maybe add alts. dependent of map size like Plus 3 Rehash, Qaudratic Probing (failed)^2 or Double Hashing
-		HashMap( const intU maxSize )
+		grHashMap( const intU maxSize )
 			: m_MaxSize	( maxSize )
 			, m_NowSize	( 0 )
 		{
 			m_vecNode.reserve( m_MaxSize );
 			for ( intU i = 0; i < m_MaxSize; ++i )
-				m_vecNode.push_back( new HashNode<T>() );
+				m_vecNode.push_back( new grHashNode<T>() );
 
 			m_vecUsedKeys.reserve( m_MaxSize );
 			for ( intU i = 0; i < m_MaxSize; ++i )
 				m_vecUsedKeys.push_back( -1 );
 		}
-		~HashMap( void ) {}
+		~grHashMap( void ) {}
 
 		inline intU Size( void )
 		{
@@ -400,7 +418,7 @@ namespace grStruct
 				return;
 			}
 
-			HashNode<T>* pNode = m_vecNode[ hashIdx ];
+			grHashNode<T>* pNode = m_vecNode[ hashIdx ];
 			//while ( pNode->m_Key != -1 )
 			//{
 			//	++hashIdx;
@@ -416,14 +434,14 @@ namespace grStruct
 
 		inline T Get( const intU key )
 		{
-			HashNode<T>* pNode = Find( key );
+			grHashNode<T>* pNode = Find( key );
 			assert( pNode != nullptr && "grHashMap::Get(): Key does not exist" );
 			return pNode->m_Value;
 		}
 
 		inline void Del( const intU key )
 		{
-			HashNode<T>* pNode = Find( key );
+			grHashNode<T>* pNode = Find( key );
 			if ( pNode == nullptr )
 			{
 #ifdef DEBUG
@@ -444,11 +462,11 @@ namespace grStruct
 			return key % m_MaxSize;
 		}
 
-		inline HashNode<T>* Find( const intU key )
+		inline grHashNode<T>* Find( const intU key )
 		{
 			intU count = 0;
 			intU hashIdx = HashKey( key );
-			HashNode<T>* pNode = m_vecNode[ hashIdx ];
+			grHashNode<T>* pNode = m_vecNode[ hashIdx ];
 			while ( pNode->m_Key == -1 || pNode->m_Key != key )
 			{
 				++count;
@@ -465,7 +483,7 @@ namespace grStruct
 			return pNode;
 		}
 
-		std::vector<HashNode<T>*>	m_vecNode;
+		std::vector<grHashNode<T>*>	m_vecNode;
 		std::vector<intS>			m_vecUsedKeys;
 
 		intU	m_MaxSize,

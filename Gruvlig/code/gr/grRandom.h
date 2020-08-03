@@ -24,6 +24,8 @@ public:
 
 	grRandom( const grRandom& ) = delete;
 	grRandom& operator=( const grRandom& ) = delete;
+	grRandom( grRandom&& ) noexcept = delete;
+	grRandom& operator=( grRandom&& ) noexcept = delete;
 
 	inline void Seed( void )
 	{		
