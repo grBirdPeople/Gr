@@ -18,8 +18,8 @@ struct grSBoidArr
 	ArrV2f Alignment;
 	ArrV2f Cohesion;
 	ArrV2f Separation;
-	ArrV2f Position;
 	ArrV2f Velocity;
+	ArrV2f Position;
 
 	ArrSizeT NeighbourFlag;
 	ArrSizeT NeighbourCount;
@@ -62,20 +62,20 @@ public:
 		if( m_BoidData.Alive == m_BoidData.Size )
 			return;
 
-		++m_BoidData.Alive;
-
 		m_BoidArr.Alignment.Push( { 0.0f, 0.0f } );
 		m_BoidArr.Cohesion.Push( { 0.0f, 0.0f } );
 		m_BoidArr.Separation.Push( { 0.0f, 0.0f } );
-		m_BoidArr.Position.Push( { rPos } );
 		m_BoidArr.Velocity.Push( { rDir } );
+		m_BoidArr.Position.Push( { rPos } );
 
-		sizeT strtIdx = ( m_BoidData.Alive - 1 ) * ( m_BoidData.Size - 1 );
-		sizeT endIdx = strtIdx + ( m_BoidData.Size - 1 );
+		sizeT strtIdx = m_BoidData.Alive * ( m_BoidData.Size - 1 );
+		sizeT endIdx = ( m_BoidData.Size - 1 ) + strtIdx;
 		for ( sizeT i = strtIdx; i < endIdx; ++i )
 			m_BoidArr.NeighbourFlag.Push( 0 );
 
 		m_BoidArr.NeighbourCount.Push( 0 );
+
+		++m_BoidData.Alive;
 	}
 
 	void Update( const float dt )
@@ -98,7 +98,7 @@ private:
 		sizeT neighbourSize{ alive - 1 };
 		for ( sizeT i = 0; i < alive; ++i )
 		{
-			grV2f& nowPos{ m_BoidArr.Position.Get( i ) };
+			grV2f nowPos{ m_BoidArr.Position.Get( i ) };
 			sizeT neighbourAcc{ 0 };
 			for ( sizeT j = 0; j < alive; ++j )
 			{
@@ -174,7 +174,7 @@ private:
 			for ( sizeT j = 0; j < neighbourSize; ++j )
 			{
 				sizeT neighbourIdx{ m_BoidArr.NeighbourFlag.Get( i * neighbourSize + neighbourAcc ) };
-				m_BoidArr.Separation.Set( i, m_BoidArr.Separation.Get( i ) + ( m_BoidArr.Position.Get( neighbourIdx ) - nowPos ).Magnitude() );
+				m_BoidArr.Separation.Set( i, m_BoidArr.Separation.Get( i ) + ( nowPos - m_BoidArr.Position.Get( neighbourIdx ) ).Magnitude() );
 				++neighbourAcc;
 			}
 
@@ -183,7 +183,6 @@ private:
 
 			m_BoidArr.Separation.Set( i, ( m_BoidArr.Separation.Get( i ) / neighbourAcc ) * -1.0f );
 			m_BoidArr.Separation.Set( i, m_BoidArr.Separation.Get( i ).Normalized() );
-
 		}
 	}
 
@@ -240,13 +239,13 @@ private:
 				m_BoidArr.Position.Set( i, { p.x, 0.0f } );
 			}
 		}
-		// TEST
 
-		// TEST
 		for ( sizeT i = 0; i < alive; ++i )
 		{
+			//std::cout << m_BoidArr.Position.Get( i ) << std::endl;
+
 			grBBox box( { 10.0f, 10.0f }, { m_BoidArr.Position.Get( i ) } );
-			grDebugManager::Instance().AddBBox( box, sf::Color::Yellow );
+			grDebugManager::Instance().AddBBox( box, sf::Color::Yellow );			
 		}
 		// TEST
 	}
