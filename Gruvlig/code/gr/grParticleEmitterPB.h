@@ -18,7 +18,7 @@ public:
 	//////////////////////////////////////////////////
 
 	grCParticleEmitterPB( const intU id, const sizeT size )
-		: uPPartDeactivateQue		( new grStruct::LoopQue<intU>( size ) )		
+		: uPPartDeactivateQue		( new grStruct::grLoopQue<intU>( size ) )		
 		, uPArrPartDeactivateSortd	( new intU[ size ] )
 		, SpawnCounter				( 0.0f )
 		, SpawnInMilliSec			( 1.0f / 25.0f )	// Set to zero when particle API or their likes exists
@@ -78,7 +78,7 @@ private:
 
 	vecUpPart	vecUpParticles;
 
-	pU<grStruct::LoopQue<intU>>	uPPartDeactivateQue;
+	pU<grStruct::grLoopQue<intU>>	uPPartDeactivateQue;
 
 	pU<intU[]>	uPArrPartDeactivateSortd;
 

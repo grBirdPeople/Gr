@@ -21,7 +21,7 @@ class grDebugManager : public grSingleton<grDebugManager>
 public:
 	
 	grDebugManager()
-		: m_puVertices	( std::make_unique<sf::VertexArray[]>( 5000 ) )
+		: m_puVertices( std::make_unique<sf::VertexArray[]>( 5000 ) )
 		, m_MaxBBox( 5000 )
 		, m_Size( 0 )
 		, m_bEnable( true )
@@ -37,13 +37,15 @@ public:
 		m_bEnable = enable;
 	}
 
-	inline void AddBBox( grBBox& rBBox, const sf::Color color )
+	inline void AddBBox( const grBBox& rBBox, const sf::Color color )
 	{
+#ifdef DEBUG
 		if ( m_Size >= m_MaxBBox && m_bEnable == true )
 		{
-			std::cerr << "grDebugManager::AddBBox: Max BBoxes added or not enabled\n" << std::endl;
+			std::cerr << "grDebugManager::AddBBox: Max BBoxes added or this is not enabled\n" << std::endl;
 			return;
 		}
+#endif // DEBUG
 
 		const grBBox::Corners& corners = rBBox.GetCorners();
 		sf::Vector2f topLeft( corners.TopLeft.x, corners.TopLeft.y );

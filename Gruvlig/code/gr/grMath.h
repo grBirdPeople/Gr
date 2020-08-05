@@ -14,8 +14,8 @@ namespace grMath
 {
 	// Const
 	//////////////////////////////////////////////////
-	const float EpsilonColor = ( float )1e-10;
-	const float Epsilon = 0.001f;
+	const float EpsilonSml = ( float )1e-10;
+	const float EpsilonLrg = 0.001f;
 	const float Pi = 3.141592f;
 	const float DegToRad = Pi / 180.0f;
 	const float RadToDeg = 180.0f / Pi;
@@ -273,12 +273,12 @@ namespace grMath
 	{
 		float x = Abs( rA.x - rB.x );
 		float y = Abs( rA.y - rB.y );
-		return ( x < Epsilon ) && ( y < Epsilon );
+		return ( x < EpsilonLrg ) && ( y < EpsilonLrg );
 	}
 
 	inline bool CmpFloat( const float numOne, const float numTwo )
 	{
-		return Abs( numOne - numTwo ) < Epsilon;
+		return Abs( numOne - numTwo ) < EpsilonLrg;
 	}
 
 	inline bool CmpIntU( const intU numOne, const intU numTwo )

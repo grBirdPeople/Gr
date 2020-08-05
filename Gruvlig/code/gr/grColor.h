@@ -138,7 +138,7 @@ namespace grColor
 	}
 
 
-	// Attempt at traslating GLSL to C++ - Not working atm
+	// Attempt at traslating code below from GLSL to C++ - Not working atm
 
 	//// Hue2Rgb
 	////////////////////////////////////////////////////

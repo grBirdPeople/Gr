@@ -31,12 +31,6 @@ public:
 		ResetMouse();
 	}
 
-	~grInputManager()
-	{
-		ResetKeys();
-		ResetMouse();
-	}
-
 	inline const bool GetKey( const sf::Keyboard::Key key ) const
 	{
 		return m_puKey[ key ];

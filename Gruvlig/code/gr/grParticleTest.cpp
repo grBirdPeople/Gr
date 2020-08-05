@@ -7,9 +7,7 @@ grCParticleSys::grCParticleSys( const intU size, const float emitRate, const grV
 	: m_puParticle	( std::make_unique<grSParticle>( size ) )
 	, m_puEmit		( std::make_unique<grSEmitter>( size, 1.0f / grMath::Abs( emitRate ), position ) )
 	, m_puUpdate	( std::make_unique<grSUpdate>() )
-{
-	grCore::Instance().SetVSync( true );
-}
+{}
 
 void
 grCParticleSys::EmitRate( const float emitRate )

@@ -16,22 +16,18 @@ class		grSandbox;
 class		grInputManager;
 
 
-// grCore
-//////////////////////////////////////////////////
 class grCore : public grSingleton<grCore>
 {
 public:
 	grCore();
 	~grCore();
-
-	//////////////////////////////////////////////////
 	
-	inline float GetGameTimeElapsed() const
+	inline const float GetGameTimeElapsed() const
 	{
 		return m_TotalElapsedT;
 	}
 
-	inline float GetDeltaT() const
+	inline const float GetDeltaT() const
 	{
 		return m_Dt;
 	}
@@ -41,20 +37,33 @@ public:
 		return *m_puRenderWin;
 	}
 
-	inline void SetWindowSize( const intU width, const intU height )
-	{
-		if ( m_puRenderWin->getSize().x == ( unsigned int )width && m_puRenderWin->getSize().y == ( unsigned int )height )
-			return;
-
-		if( sf::VideoMode::getDesktopMode().width != ( unsigned int )width && sf::VideoMode::getDesktopMode().height != ( unsigned int )height )
-			m_WinSize = { width, height };
-
-		m_puRenderWin->create( sf::VideoMode( ( unsigned int )width, ( unsigned int )height ), m_AppName, sf::Style::None, *m_puCSettings );
-	}
-
 	inline const grV2u GetWindowSize() const
 	{
-		return m_WinSize;
+		return { ( intU )m_puVidMode->width, ( intU )m_puVidMode->height };
+	}
+
+	inline void SetWindowSize( const grV2u& widthHeight )
+	{
+		unsigned int w = ( unsigned int )widthHeight.x, h = ( unsigned int )widthHeight.y;
+
+		if ( w == m_puVidMode->width && h == m_puVidMode->height )
+			return;
+
+		// If not fullscreen set new windowed size
+		if ( w != m_puVidMode->getDesktopMode().width && h != m_puVidMode->getDesktopMode().height )
+			m_WindowedSize = { ( intU )w, ( intU )h };
+
+		if( w > m_puVidMode->getDesktopMode().width )
+			w = m_puVidMode->getDesktopMode().width;
+
+		if ( h > m_puVidMode->getDesktopMode().height )
+			h = m_puVidMode->getDesktopMode().height;
+
+		m_puVidMode->width = w;
+		m_puVidMode->height = h;
+
+		m_puRenderWin->create( *m_puVidMode, m_AppName, sf::Style::None, *m_puCSettings );
+		m_puRenderWin->setVerticalSyncEnabled( m_VSync );
 	}
 
 	inline void SetAA ( const intU aa )
@@ -78,35 +87,26 @@ public:
 	void Init( const str& rAppName = "grFramework", const intU winWidth = 960, const intU winHeight = 540, const intU frameRate = 120, const bool vsync = false );
 	void Run();
 	
-	//////////////////////////////////////////////////
-	
 private:
 
-	void InitRenderWin();
-	void InitManager();
-	void Input( grInputManager& rInputMan );
-	void Update();
-	void Render();
-	inline void	Terminate()
-	{
-		if ( m_puRenderWin != nullptr )
-		{
-			if ( m_puRenderWin->isOpen() == true )
-				m_puRenderWin->close();
-		}
-	}
+	inline void InitRenderWin();
+	inline void InitManager();
+	inline void DeInitManager();
+	inline void Input( grInputManager& rInputMan );
+	inline void Update();
+	inline void Render();
+	inline void	Terminate();
 
-	//////////////////////////////////////////////////
-
-	str m_AppName;
-	grV2u m_WinSize;
-	float m_TotalElapsedT, m_Dt;
-	intU m_FramesPerSec, m_Aa;
-	bool m_VSync;
 	pU<sf::RenderWindow> m_puRenderWin;
 	pU<sf::ContextSettings> m_puCSettings;
 	pU<sf::Event> m_puEvent;
+	pU<sf::VideoMode> m_puVidMode;
 	pU<sf::Clock> m_puClock;
+	str m_AppName;
+	grV2u m_WindowedSize;
+	float m_TotalElapsedT, m_Dt;
+	intU m_FramesPerSec, m_Aa;
+	bool m_VSync;
 
 #ifdef DEBUG
 	pU<grSandbox> m_puSandbox;
@@ -114,4 +114,3 @@ private:
 };
 
 #endif		//_GRCORE_H_
-

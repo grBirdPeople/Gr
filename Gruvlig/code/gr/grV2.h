@@ -22,63 +22,58 @@ struct grV2
 
 	//////////////////////////////////////////////////
 
-	inline	void		Set				( const T X, const T Y )	{ x = X; y = Y; }
-	inline	void		Set				( const grV2<T>& rV2 )		{ x = rV2.x; y = rV2.y; }
-	inline	T			Magnitude		( void )					{ return  std::sqrt( MagnitudeSqr() ); }
-	inline	float		MagnitudeSqr	( void )					{ return ( x * x ) + ( y * y ); }
-	inline	void		Normalize		( void )					{ *this = *this / Magnitude(); }
-	inline	grV2<T>		Normalized		( void )					{ return *this / Magnitude(); }
-	inline	float		Dot				( const grV2<T>& rV2 )		{ return ( x * rV2.x ) + ( y * rV2.y ); }
-	inline  grV2<T>		Cross			( void )					{ return grV2f( y, -x ); }
+	inline void Set ( const T X, const T Y ) { x = X; y = Y; }
+	inline void Set ( const grV2<T>& rV2 ) { x = rV2.x; y = rV2.y; }
+	inline T Magnitude ( void ) { return std::sqrt( MagnitudeSqr() ); }
+	inline float MagnitudeSqr ( void ) { return ( x * x ) + ( y * y ); }
+	inline void Normalize ( void ) { *this = *this / Magnitude(); }
+	inline grV2<T> Normalized ( void ) { return *this / Magnitude(); }
+	inline float Dot ( const grV2<T>& rV2 ) { return ( x * rV2.x ) + ( y * rV2.y ); }
+	inline grV2<T> Cross ( void ) { return { y, -x }; }
+	inline grV2<T> Between ( const grV2<T>& rV2 ) { return { rV2.x - x, rV2.y - y }; }
+	inline void LimitMin( const float min )
+	{
+		if ( this->Magnitude() < min )
+			*this = this->Normalized() * min;
+	}
+	inline void LimitMax( const float max )
+	{
+		if ( this->Magnitude() > max )
+			*this = this->Normalized() * max;
+	}
 
 	//////////////////////////////////////////////////
 
-	inline	grV2<T>		operator+	( const T& num )		{ return grV2<T>( x + num, y + num ); }
-	inline	grV2<T>		operator+	( const grV2<T>& rV2 )	{ return grV2<T>( x + rV2.x, y + rV2.y ); }
-	inline	grV2<T>		operator-	( const T& num )		{ return grV2<T>( x - num, y - num ); }
-	inline	grV2<T>		operator-	( const grV2<T>& rV2 )	{ return grV2<T>( x - rV2.x, y - rV2.y ); }
-	inline	grV2<T>		operator*	( const T& num )		{ return grV2<T>( x * num, y * num ); }
-	inline	grV2<T>		operator*	( const grV2<T>& rV2 )	{ return grV2<T>( x * rV2.x, y * rV2.y ); }
-	inline	grV2<T>		operator/	( const T& num )		{ return grV2<T>( x / num, y / num ); }
-	inline	grV2<T>		operator/	( const grV2<T>& rV2 )	{ return grV2<T>( x / rV2.x, y / rV2.y ); }
+	inline grV2<T> operator+ ( const T& num ) { return { x + num, y + num }; }
+	inline grV2<T> operator+ ( const grV2<T>& rV2 ) { return { x + rV2.x, y + rV2.y }; }
+	inline grV2<T> operator- ( const T& num ) { return { x - num, y - num }; }
+	inline grV2<T> operator- ( const grV2<T>& rV2 ) { return { x - rV2.x, y - rV2.y }; }
+	inline grV2<T> operator* ( const T& num ) { return { x * num, y * num }; }
+	inline grV2<T> operator* ( const grV2<T>& rV2 ) { return { x * rV2.x, y * rV2.y }; }
+	inline grV2<T> operator/ ( const T& num ) { return { x / num, y / num }; }
+	inline grV2<T> operator/ ( const grV2<T>& rV2 ) { return { x / rV2.x, y / rV2.y }; }
 			  
 	//////////////////////////////////////////////////
 
-	inline	grV2<T>&	operator=	( const T& num )		{ x = num; y = num; return *this; }
-	inline	grV2<T>&	operator=	( const grV2<T>& rV2 )
-			{
-				if ( this == &rV2 )		{ return *this; }
-				x = rV2.x; y = rV2.y;	{ return *this; }
-			}
-	inline	grV2<T>&	operator+=	( const T& num )		{ x += num; y += num; return *this; }
-	inline	grV2<T>&	operator+=	( const grV2<T>& rV2 )	{ x += rV2.x; y += rV2.y; return *this; }
-	inline	grV2<T>&	operator-=	( const T& num )		{ x -= num; y -= num; return *this; }
-	inline	grV2<T>&	operator-=	( const grV2<T>& rV2 )	{ x -= rV2.x; y -= rV2.y; return *this; }
-	inline	grV2<T>&	operator*=	( const T& num )		{ x *= num; y *= num; return *this; }
-	inline	grV2<T>&	operator*=	( const grV2<T>& rV2 )	{ x *= rV2.x; y *= rV2.y; return *this; }
-	inline	grV2<T>&	operator/=	( const T& num )		{ x /= num; y /= num; return *this; }
-	inline	grV2<T>&	operator/=	( const grV2<T>& rV2 )	{ x /= rV2.x; y /= rV2.y; return *this; }
-
-	//////////////////////////////////////////////////
-
-	inline	bool	operator==	( const grV2<T>& rV2 )	{ return ( x == rV2.x ) && ( y == rV2.y ) ? true : false; }
-	inline	bool	operator!=	( const grV2<T>& rV2 )	{ return ( x != rV2.x ) || ( y != rV2.y ) ? true : false; }
-
-	//////////////////////////////////////////////////
-
-	inline T& operator[]( const intU idx )
+	inline grV2<T>& operator= ( const T& num ) { x = num; y = num; return *this; }
+	inline grV2<T>& operator= ( const grV2<T>& rV2 )
 	{
-		if ( idx < 0 || idx > 1 )
-		{
-#ifdef DEBUG
-			std::puts("grV2::operator[]: Index was out of range");
-#endif // DEBUG
-			T t;
-			return t;
-		}
-
-		return ( idx == 0 ) ? x : y;
+		if ( this == &rV2 ) { return *this; }
+		x = rV2.x; y = rV2.y; { return *this; }
 	}
+	inline grV2<T>& operator+= ( const T& num ) { x += num; y += num; return *this; }
+	inline grV2<T>& operator+= ( const grV2<T>& rV2 ) { x += rV2.x; y += rV2.y; return *this; }
+	inline grV2<T>& operator-= ( const T& num ) { x -= num; y -= num; return *this; }
+	inline grV2<T>& operator-= ( const grV2<T>& rV2 ) { x -= rV2.x; y -= rV2.y; return *this; }
+	inline grV2<T>& operator*= ( const T& num ) { x *= num; y *= num; return *this; }
+	inline grV2<T>& operator*= ( const grV2<T>& rV2 ) { x *= rV2.x; y *= rV2.y; return *this; }
+	inline grV2<T>& operator/= ( const T& num ) { x /= num; y /= num; return *this; }
+	inline grV2<T>& operator/= ( const grV2<T>& rV2 ) { x /= rV2.x; y /= rV2.y; return *this; }
+
+	//////////////////////////////////////////////////
+
+	inline bool operator== ( const grV2<T>& rV2 ) { return ( x == rV2.x ) && ( y == rV2.y ) ? true : false; }
+	inline bool operator!= ( const grV2<T>& rV2 ) { return ( x != rV2.x ) || ( y != rV2.y ) ? true : false; }
 
 	//////////////////////////////////////////////////
 
