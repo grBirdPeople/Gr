@@ -75,7 +75,7 @@ public:
 		m_BoidVar.MaxAliCohDist = { 100.0f };
 
 		m_BoidVar.SepWeight = { 2.0f };
-		m_BoidVar.AliWeight = { 1.5f };
+		m_BoidVar.AliWeight = { 1.25f };
 		m_BoidVar.CohWeight = { 1.0f };
 
 		m_BoidVar.Alive = { 0 };
@@ -321,18 +321,46 @@ private:
 
 		for ( sizeT i = 0; i < alive; ++i )
 		{
-			if ( m_BoidArr.Position[ i ].x < -radius )
-				m_BoidArr.Position[ i ].x = winSize.x + radius;
+			if ( m_BoidArr.Position[ i ].x < radius )
+			{
+				m_BoidArr.Position[ i ].x = radius + 1.0f;
+				m_BoidArr.Velocity[ i ].x *= -1.0f;
+			}
 
-			if ( m_BoidArr.Position[ i ].x > winSize.x + radius )
-				m_BoidArr.Position[ i ].x = -radius;
+			if ( m_BoidArr.Position[ i ].x > winSize.x - radius )
+			{
+				m_BoidArr.Position[ i ].x = ( winSize.x - radius ) - 2.0f;
+				m_BoidArr.Velocity[ i ].x *= -1.0f;
+			}
 
-			if ( m_BoidArr.Position[ i ].y < -radius )
-				m_BoidArr.Position[ i ].y = winSize.y + radius;
+			if ( m_BoidArr.Position[ i ].y < radius )
+			{
+				m_BoidArr.Position[ i ].y = radius + 1.0f;
+				m_BoidArr.Velocity[ i ].y *= -1.0f;
+			}
 
-			if ( m_BoidArr.Position[ i ].y > winSize.y + radius )
-				m_BoidArr.Position[ i ].y = -radius;
+			if ( m_BoidArr.Position[ i ].y > winSize.y - radius )
+			{
+				m_BoidArr.Position[ i ].y = ( winSize.y - radius ) - 2.0f;
+				m_BoidArr.Velocity[ i ].y *= -1.0f;
+			}
 		}
+
+
+		//for ( sizeT i = 0; i < alive; ++i )
+		//{
+		//	if ( m_BoidArr.Position[ i ].x < -radius )
+		//		m_BoidArr.Position[ i ].x = winSize.x + radius;
+
+		//	if ( m_BoidArr.Position[ i ].x > winSize.x + radius )
+		//		m_BoidArr.Position[ i ].x = -radius;
+
+		//	if ( m_BoidArr.Position[ i ].y < -radius )
+		//		m_BoidArr.Position[ i ].y = winSize.y + radius;
+
+		//	if ( m_BoidArr.Position[ i ].y > winSize.y + radius )
+		//		m_BoidArr.Position[ i ].y = -radius;
+		//}
 	}
 
 	grSBoidArr m_BoidArr;
