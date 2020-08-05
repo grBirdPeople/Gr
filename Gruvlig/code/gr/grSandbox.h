@@ -12,7 +12,7 @@ class grIEntity;
 class grInputManager;
 class grRandom;
 class grCParticleSys;
-class grBoidSys;
+class grCBoidSys;
 
 namespace sf
 {
@@ -39,7 +39,7 @@ private:
 	sf::RenderWindow& m_RendWin;
 	grInputManager& m_rInputMan;
 	grCParticleSys* m_pPartSys1;
-	grBoidSys* m_pBoidSys;
+	grCBoidSys* m_pBoidSys;
 	grMap* m_pMap;
 	grActor* m_pActor;
 	grIEntity* m_pPlayer;
