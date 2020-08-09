@@ -231,7 +231,7 @@ struct grSScaleGenerate : public grSBaseGenerate
 	grV2f LocalStart, LocalEnd;
 };
 
-struct grSForceBasicGenerate : public grSBaseGenerate
+struct grSForceGenerate : public grSBaseGenerate
 {
 	inline void Set( const grV2f& min, const grV2f& max )
 	{
@@ -386,7 +386,7 @@ struct grSEmitter
 			if ( puPosition )	puPosition->Generate( rParticle,  PositionSys, startIdx, endIdx, puRand );
 			if ( puColor )		puColor->Generate( rParticle, startIdx, endIdx, puRand );
 			if ( puScale )		puScale->Generate( rParticle, startIdx, endIdx, puRand );
-			if ( puForceBasic )	puForceBasic->Generate( rParticle, startIdx, endIdx, puRand );
+			if ( puForce )	puForce->Generate( rParticle, startIdx, endIdx, puRand );
 			if ( puMass )		puMass->Generate( rParticle, startIdx, endIdx, puRand );
 			if ( puLife )		puLife->Generate( rParticle, startIdx, endIdx, puRand );
 		}
@@ -399,7 +399,7 @@ struct grSEmitter
 	// TODO: If multiple generators of the same type would be allowed and produce cool results perhaps change to arrays
 	pU<grSColorGenerate> puColor;
 	pU<grSScaleGenerate> puScale;
-	pU<grSForceBasicGenerate> puForceBasic;
+	pU<grSForceGenerate> puForce;
 	pU<grSPositionGenerate> puPosition;
 	pU<grSMassGenerate> puMass;
 	pU<grSLifeGenerate> puLife;
@@ -494,7 +494,7 @@ struct grSScaleUpdate
 	}
 };
 
-struct grSForceBasicUpdate
+struct grSForceUpdate
 {
 	inline void Update( pU<grSParticle>& rParticle )
 	{
@@ -546,7 +546,7 @@ struct grSUpdate
 		if ( puPosition )	puPosition->Update( rParticle, deltaT );
 		if ( puColor )		puColor->Update( rParticle, deltaT );
 		if ( puScale )		puScale->Update( rParticle, deltaT );
-		if ( puForceBasic )	puForceBasic->Update( rParticle );
+		if ( puForce )	puForce->Update( rParticle );
 		if ( puLife )		puLife->Update( rParticle, deltaT );
 	}
 
@@ -554,7 +554,7 @@ struct grSUpdate
 	// All types of updaters goes here
 	pU<grSColorUpdate> puColor;
 	pU<grSScaleUpdate> puScale;
-	pU<grSForceBasicUpdate> puForceBasic;
+	pU<grSForceUpdate> puForce;
 	pU<grSPositionUpdate> puPosition;
 	pU<grSLifeUpdate> puLife;
 };
@@ -576,7 +576,7 @@ public:
 	// TODO: Could be better to use injection here as that would make it possible store behaviours externaly
 	void Color( const grColor::SRgba& start, const grColor::SRgba& end, const bool hsv = false, const bool randomize = false );
 	void Scale( const grV2f& start, const grV2f& end );
-	void ForceBasic( const grV2f& min, const grV2f& max );
+	void Force( const grV2f& min, const grV2f& max );
 	void Position( const grV2f& min, const grV2f& max );
 	void Mass( const grV2f& minMax );
 	void Life( const grV2f& minMax );

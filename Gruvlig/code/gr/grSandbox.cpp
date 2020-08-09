@@ -173,7 +173,7 @@ grSandbox::grSandbox( void )
 	m_pPartSys1->Color( grColor::SRgba( 200, 255, 255, 255 ), grColor::SRgba( 0, 0, 255, 0 ), true, false );
 	m_pPartSys1->Scale( grV2f( 10.0f, 10.0f ), grV2f( 0.0f, 0.0f ) );
 	m_pPartSys1->Position( grV2f( -25.0f, -25.0f ), grV2f( 25.0f, 25.0f ) );
-	m_pPartSys1->ForceBasic( grV2f( 0.0f, 10.0f ), grV2f( 0.0f, 100.0f ) );
+	m_pPartSys1->Force( grV2f( 0.0f, 10.0f ), grV2f( 0.0f, 100.0f ) );
 	m_pPartSys1->Mass( grV2f( 1.0f, 2.0f ) );
 	m_pPartSys1->Life( grV2f( 0.5f, 3.5f ) );
 

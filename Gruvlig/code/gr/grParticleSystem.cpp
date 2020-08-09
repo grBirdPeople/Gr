@@ -56,7 +56,7 @@ grCParticleSystem::Copy( vE<intU>& rVeActvEmitr,
 							: rEmitrAtt.EmitrRotInDeg;
 
 						rEmitrAtt.EmitrDir.Set( 0.0f, -1.0f );
-						grMath::RotatePoint( &rEmitrAtt.EmitrDir, rEmitrAtt.EmitrRotInDeg * grMath::DegToRad );
+						grMath::RotatePoint( &rEmitrAtt.EmitrDir, rEmitrAtt.EmitrRotInDeg * grMath::DegRadConv );
 
 						rSysAtt.EmitrDir = rEmitrAtt.EmitrDir;
 						rSysAtt.EmitrRotInDeg = rEmitrAtt.EmitrRotInDeg;
@@ -293,7 +293,7 @@ grCParticleSystem::ActvPosition( grSParticleAttribute& rAtt, grSParticle& rPart 
 	if ( grMath::CmpFloat( rAtt.PartRadiusPosOffset, 0.0f ) != true )
 	{
 		grV2f dir = grV2f( m_uPRand->Float( -1.0f, 1.0f ), m_uPRand->Float( -1.0f, 1.0f ) );
-		float rad = m_uPRand->Float( 0.0f, 359.9f ) * grMath::DegToRad;
+		float rad = m_uPRand->Float( 0.0f, 359.9f ) * grMath::DegRadConv;
 		float dist = m_uPRand->Float( 0.0f, rAtt.PartRadiusPosOffset );
 
 		grMath::RotatePoint( &dir, rad );
@@ -328,7 +328,7 @@ grCParticleSystem::ActvVelocity( grSParticleAttribute& rAtt, grSParticle& rPart 
 	}
 
 	rPart.Dir = rAtt.EmitrDir;
-	grMath::RotatePoint( &rPart.Dir, deg * grMath::DegToRad );
+	grMath::RotatePoint( &rPart.Dir, deg * grMath::DegRadConv );
 
 	// Speed
 	if ( rAtt.PartSpdMinMax.x > rAtt.PartSpdMinMax.y )
