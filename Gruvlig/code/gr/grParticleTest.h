@@ -48,7 +48,7 @@ struct grSParticleArr
 	pU<float[]> puLife;
 };
 
-struct grSParticleData
+struct grSParticleVar
 {
 	grV2f SystemPosition;
 	grV2f GravityV;
@@ -343,14 +343,16 @@ struct grSEmitter
 	grSEmitter( grSEmitter&& ) noexcept = delete;
 	grSEmitter& operator=( grSEmitter&& ) noexcept = delete;
 
-	inline void Emit( pU<grSParticleData>& rParticleData, pU<grSParticleArr>& rParticleArr, const float deltaT )
+	inline void Emit( pU<grSParticleVar>& rParticleData, pU<grSParticleArr>& rParticleArr, const float deltaT )
 	{
 		// This could be done smoother ex; NewSpawns = dt * SpawnRate
 		// Problem is I haven't figured out how to make the spawnrate 'API' call non arbitrary in relation to real time, for example seconds
 
 		// Catch things
+		grV2f sysPos{ rParticleData->SystemPosition };
 		float spawnAccT{ rParticleData->SpawnAccT };
 		float emitRate{ rParticleData->EmitRate };
+		sizeT last{ rParticleData->Size - 1 };
 		sizeT alive{ rParticleData->Alive };
 		sizeT emitAcc{ 0 };
 
@@ -364,8 +366,7 @@ struct grSEmitter
 
 		if ( emitAcc > 0 )
 		{
-			grV2f sysPos{ rParticleData->SystemPosition };
-			sizeT endIdx{ grMath::Min( alive + emitAcc + 1, rParticleData->Size - 1 ) };
+			sizeT endIdx{ grMath::Min( alive + emitAcc + 1, last ) };
 
 			if ( puPosition ) puPosition->Generate( rParticleArr->puVerts, sysPos, alive, endIdx, puRand );
 			if ( puColor ) puColor->Generate( rParticleArr->puColorStart, rParticleArr->puColorEnd, alive, endIdx, puRand );
@@ -402,7 +403,7 @@ struct grSColorUpdate
 	// TODO: Only create updater instance if colors are NOT equal
 
 	grSColorUpdate( const bool hsv )
-		: Hsv	( hsv )
+		: Hsv( hsv )
 	{}
 
 	inline void Update( const sizeT alive, pU<SRgba[]>& rColorStart, const pU<SRgba[]>& rColorEnd, const pU<float[]>& rLife, pU<sf::Vertex[]>& rVerts, const float deltaT )
@@ -442,7 +443,6 @@ struct grSColorUpdate
 		{
 			grColor::SRgba start{ rColorStart[ i ] };
 			grColor::SRgba end{ rColorEnd[ i ] };
-
 			float lerpValue{ 1.0f / rLife[ i ] * deltaT };
 
 			rColorStart[ i ].R = grMath::Lerp( start.R, end.R, lerpValue );
@@ -567,7 +567,7 @@ struct grSUpdate
 	grSUpdate( grSUpdate&& ) noexcept = delete;
 	grSUpdate& operator=( grSUpdate&& ) noexcept = delete;
 
-	inline void Update( pU<grSParticleData>& rParticleVar, pU<grSParticleArr>& rParticleArr, const float deltaT )
+	inline void Update( pU<grSParticleVar>& rParticleVar, pU<grSParticleArr>& rParticleArr, const float deltaT )
 	{
 		grV2f gravity{ rParticleVar->GravityV };
 		sizeT alive{ rParticleVar->Alive };
@@ -624,8 +624,8 @@ public:
 	void Render( sf::RenderWindow& rRenderWin );
 
 private:
-	pU<grSParticleArr> m_puParticle;
-	pU<grSParticleData> m_puParticleData;
+	pU<grSParticleArr> m_puParticleArr;
+	pU<grSParticleVar> m_puParticleVar;
 	pU<grSEmitter> m_puEmit;
 	pU<grSUpdate> m_puUpdate;
 

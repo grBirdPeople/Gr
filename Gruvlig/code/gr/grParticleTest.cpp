@@ -4,8 +4,8 @@
 
 
 grCParticleSys::grCParticleSys( const intU size, const float emitRate, const grV2f& position )
-	: m_puParticle( std::make_unique<grSParticleArr>( size ) )
-	, m_puParticleData( std::make_unique<grSParticleData>() )
+	: m_puParticleArr( std::make_unique<grSParticleArr>( size ) )
+	, m_puParticleVar( std::make_unique<grSParticleVar>() )
 	, m_puEmit( std::make_unique<grSEmitter>() )
 	, m_puUpdate( std::make_unique<grSUpdate>() )
 {
@@ -13,17 +13,17 @@ grCParticleSys::grCParticleSys( const intU size, const float emitRate, const grV
 	if( e < 0.0f )
 		e = 0.0f;
 
-	m_puParticleData->SystemPosition = position;
-	m_puParticleData->EmitRateSec = e;
-	m_puParticleData->EmitRate = 1.0f / e;
-	m_puParticleData->SpawnAccT = 0.0f;
-	m_puParticleData->Size = size;
+	m_puParticleVar->SystemPosition = position;
+	m_puParticleVar->EmitRateSec = e;
+	m_puParticleVar->EmitRate = 1.0f / e;
+	m_puParticleVar->SpawnAccT = 0.0f;
+	m_puParticleVar->Size = size;
 }
 
 float
 grCParticleSys::GetEmitRate() const
 {
-	return m_puParticleData->EmitRateSec;
+	return m_puParticleVar->EmitRateSec;
 }
 
 void
@@ -33,22 +33,22 @@ grCParticleSys::SetEmitRate( const float emitRate )
 	if( e < 0.0f )
 		e = 0.0f;
 
-	m_puParticleData->EmitRateSec = e;
-	m_puParticleData->EmitRate = 1.0f / e;
+	m_puParticleVar->EmitRateSec = e;
+	m_puParticleVar->EmitRate = 1.0f / e;
 }
 
 void
 grCParticleSys::SetSystemPosition( const grV2f& position )
 {
-	m_puParticleData->SystemPosition = position;
+	m_puParticleVar->SystemPosition = position;
 }
 
 void
 grCParticleSys::SetGravity( const float force, const float direction )
 {
 	float d{ grMath::Clamp( direction, 0.0f, 360.0f ) };
-	m_puParticleData->GravityV = { grMath::DegToVec( d ) * force };
-	m_puParticleData->GravityF = force;
+	m_puParticleVar->GravityV = { grMath::DegToVec( d ) * force };
+	m_puParticleVar->GravityF = force;
 }
 
 void
@@ -127,16 +127,16 @@ grCParticleSys::SetLife( const grV2f& minMax )
 void
 grCParticleSys::Update( const float deltaT )
 {
-	m_puEmit->Emit( m_puParticleData, m_puParticle, deltaT );
-	m_puUpdate->Update( m_puParticleData, m_puParticle, deltaT );
+	m_puEmit->Emit( m_puParticleVar, m_puParticleArr, deltaT );
+	m_puUpdate->Update( m_puParticleVar, m_puParticleArr, deltaT );
 }
 
 void
 grCParticleSys::Render( sf::RenderWindow& rRenderWin )
 {
-	rRenderWin.draw( &m_puParticle->puVerts.get()[ 0 ], m_puParticleData->Alive, sf::PrimitiveType::Points );
+	rRenderWin.draw( &m_puParticleArr->puVerts.get()[ 0 ], m_puParticleVar->Alive, sf::PrimitiveType::Points );
 
-	printf( "Max: %d %2s Alive: %d \n", m_puParticleData->Size, "", m_puParticleData->Alive );
+	//printf( "Max: %d %2s Alive: %d \n", m_puParticleData->Size, "", m_puParticleData->Alive );
 	
 
 
