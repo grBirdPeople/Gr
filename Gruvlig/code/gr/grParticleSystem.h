@@ -5,7 +5,7 @@
 
 struct		grSParticleAttribute;
 class		grCParticleEmitter;
-struct		grSParticle;
+struct		grSParticleArr;
 class		grRandom;
 
 
@@ -32,25 +32,25 @@ public:
 	void Activate( vE<intU>& rVeActivateQue,
 				   pU<pU<grCParticleEmitter>[]>& rArEmitr,
 				   pU<pU<grSParticleAttribute>[]>& rArAtt,
-				   grSParticle** pArPart );
+				   grSParticleArr** pArPart );
 
 	void Update( vE<std::pair<intU, intU>>& rVeDeactivateQue,
 				 vE<intU>& rVeActiveEmitr,
 				 pU<pU<grCParticleEmitter>[]>& rArEmitr,
 				 pU<pU<grSParticleAttribute>[]>& rArAtt,
-				 grSParticle** pAr2DPart,
+				 grSParticleArr** pAr2DPart,
 				 const float deltaT );
 
 	void Deactivate( vE<std::pair<intU, intU>>& rVeDeactivateQue,
 					 pU<pU<grCParticleEmitter>[]>& rArEmitr,
-					 grSParticle** pAr2DPart );
+					 grSParticleArr** pAr2DPart );
 
 private:
 
-	void ActvPosition( grSParticleAttribute& rAtt, grSParticle& rPart );
-	void ActvVelocity( grSParticleAttribute& rAtt, grSParticle& rPart );
-	void ActvLife( grSParticleAttribute& rAtt, grSParticle& rPart );
-	void ActvColor( grSParticleAttribute& rAtt, grSParticle& rPart );	// Change over T is dependent of lifetime so allways do color after
+	void ActvPosition( grSParticleAttribute& rAtt, grSParticleArr& rPart );
+	void ActvVelocity( grSParticleAttribute& rAtt, grSParticleArr& rPart );
+	void ActvLife( grSParticleAttribute& rAtt, grSParticleArr& rPart );
+	void ActvColor( grSParticleAttribute& rAtt, grSParticleArr& rPart );	// Change over T is dependent of lifetime so allways do color after
 
 	pU<grRandom>	m_uPRand;
 

@@ -56,7 +56,7 @@ grCParticleSystem::Copy( vE<intU>& rVeActvEmitr,
 							: rEmitrAtt.EmitrRotInDeg;
 
 						rEmitrAtt.EmitrDir.Set( 0.0f, -1.0f );
-						grMath::RotatePoint( &rEmitrAtt.EmitrDir, rEmitrAtt.EmitrRotInDeg * grMath::DegRadConv );
+						grMath::RotatePoint( &rEmitrAtt.EmitrDir, rEmitrAtt.EmitrRotInDeg * grMath::Deg2RadConv );
 
 						rSysAtt.EmitrDir = rEmitrAtt.EmitrDir;
 						rSysAtt.EmitrRotInDeg = rEmitrAtt.EmitrRotInDeg;
@@ -146,7 +146,7 @@ void
 grCParticleSystem::Activate( vE<intU>& rVeActivateQue,
 							 pU<pU<grCParticleEmitter>[]>& rArEmitr,
 							 pU<pU<grSParticleAttribute>[]>& rArAtt,
-							 grSParticle** pAr2DPart )
+							 grSParticleArr** pAr2DPart )
 {
 	if ( rVeActivateQue.size() > 0 )
 	{
@@ -155,7 +155,7 @@ grCParticleSystem::Activate( vE<intU>& rVeActivateQue,
 		{
 			grCParticleEmitter& rEmitr = *rArEmitr[ rVeActivateQue[ i ] ].get();
 			grSParticleAttribute& rAtt = *rArAtt[ rEmitr.m_Id ].get();
-			grSParticle& rPart = pAr2DPart[ rEmitr.m_Id ][ rEmitr.m_PartActive ];
+			grSParticleArr& rPart = pAr2DPart[ rEmitr.m_Id ][ rEmitr.m_PartActive ];
 
 			++rEmitr.m_PartActive;
 
@@ -177,7 +177,7 @@ grCParticleSystem::Update( vE<std::pair<intU, intU>>& rVeDeactivateQue,
 						   vE<intU>& rVeActiveEmitr,
 						   pU<pU<grCParticleEmitter>[]>& rArEmitr,
 						   pU<pU<grSParticleAttribute>[]>& rArAtt,
-						   grSParticle** pAr2DPart,
+						   grSParticleArr** pAr2DPart,
 						   const float deltaT )
 {
 	sizeT actvEmitrSize = rVeActiveEmitr.size();
@@ -188,7 +188,7 @@ grCParticleSystem::Update( vE<std::pair<intU, intU>>& rVeDeactivateQue,
 		grSParticleAttribute& rAtt = *rArAtt[ emitrIdx ].get();
 		for ( sizeT partIdx = 0; partIdx < partSize; ++partIdx )
 		{
-			grSParticle& rPart = pAr2DPart[ emitrId ][ partIdx ];
+			grSParticleArr& rPart = pAr2DPart[ emitrId ][ partIdx ];
 
 			// Speed
 			if( rPart.bSpdOsc == true )
@@ -263,7 +263,7 @@ grCParticleSystem::Update( vE<std::pair<intU, intU>>& rVeDeactivateQue,
 
 void grCParticleSystem::Deactivate( vE<std::pair<intU, intU>>& rVeDeactivateQue,
 									pU<pU<grCParticleEmitter>[]>& rArEmitr,
-									grSParticle** pAr2DPart )
+									grSParticleArr** pAr2DPart )
 {
 	if ( rVeDeactivateQue.size() > 0 )
 	{
@@ -276,8 +276,8 @@ void grCParticleSystem::Deactivate( vE<std::pair<intU, intU>>& rVeDeactivateQue,
 
 			--rArEmitr[ emitrId ]->m_PartActive;
 
-			grSParticle& rTooPart = pAr2DPart[ emitrId ][ partIdx ];
-			grSParticle& rFromPart = pAr2DPart[ emitrId ][ partsActive - 1 ];
+			grSParticleArr& rTooPart = pAr2DPart[ emitrId ][ partIdx ];
+			grSParticleArr& rFromPart = pAr2DPart[ emitrId ][ partsActive - 1 ];
 			rTooPart = rFromPart;
 		}
 
@@ -287,13 +287,13 @@ void grCParticleSystem::Deactivate( vE<std::pair<intU, intU>>& rVeDeactivateQue,
 
 
 void
-grCParticleSystem::ActvPosition( grSParticleAttribute& rAtt, grSParticle& rPart )
+grCParticleSystem::ActvPosition( grSParticleAttribute& rAtt, grSParticleArr& rPart )
 {
 	rPart.Pos = rAtt.EmitrPos;
 	if ( grMath::CmpFloat( rAtt.PartRadiusPosOffset, 0.0f ) != true )
 	{
 		grV2f dir = grV2f( m_uPRand->Float( -1.0f, 1.0f ), m_uPRand->Float( -1.0f, 1.0f ) );
-		float rad = m_uPRand->Float( 0.0f, 359.9f ) * grMath::DegRadConv;
+		float rad = m_uPRand->Float( 0.0f, 359.9f ) * grMath::Deg2RadConv;
 		float dist = m_uPRand->Float( 0.0f, rAtt.PartRadiusPosOffset );
 
 		grMath::RotatePoint( &dir, rad );
@@ -303,7 +303,7 @@ grCParticleSystem::ActvPosition( grSParticleAttribute& rAtt, grSParticle& rPart 
 
 
 void
-grCParticleSystem::ActvVelocity( grSParticleAttribute& rAtt, grSParticle& rPart )
+grCParticleSystem::ActvVelocity( grSParticleAttribute& rAtt, grSParticleArr& rPart )
 {
 	// Direction
 	float deg = 0.0f;
@@ -328,7 +328,7 @@ grCParticleSystem::ActvVelocity( grSParticleAttribute& rAtt, grSParticle& rPart 
 	}
 
 	rPart.Dir = rAtt.EmitrDir;
-	grMath::RotatePoint( &rPart.Dir, deg * grMath::DegRadConv );
+	grMath::RotatePoint( &rPart.Dir, deg * grMath::Deg2RadConv );
 
 	// Speed
 	if ( rAtt.PartSpdMinMax.x > rAtt.PartSpdMinMax.y )
@@ -371,7 +371,7 @@ grCParticleSystem::ActvVelocity( grSParticleAttribute& rAtt, grSParticle& rPart 
 
 
 void
-grCParticleSystem::ActvLife( grSParticleAttribute& rAtt, grSParticle& rPart )
+grCParticleSystem::ActvLife( grSParticleAttribute& rAtt, grSParticleArr& rPart )
 {
 	rPart.Life = ( grMath::CmpFloat( rAtt.PartLifeMinMax.x, rAtt.PartLifeMinMax.y ) != true )
 		? m_uPRand->Float( rAtt.PartLifeMinMax.x, rAtt.PartLifeMinMax.y )
@@ -380,7 +380,7 @@ grCParticleSystem::ActvLife( grSParticleAttribute& rAtt, grSParticle& rPart )
 
 
 void
-grCParticleSystem::ActvColor( grSParticleAttribute& rAtt, grSParticle& rPart )
+grCParticleSystem::ActvColor( grSParticleAttribute& rAtt, grSParticleArr& rPart )
 {
 	rPart.Color.r = rAtt.PartColMinMax.From.R;
 	rPart.Color.g = rAtt.PartColMinMax.From.G;
