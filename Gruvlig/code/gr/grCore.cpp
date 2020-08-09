@@ -171,8 +171,8 @@ grCore::Run()
 inline void
 grCore::InitRenderWin()
 {
-	m_puVidMode->width = m_WindowedSize.x;
-	m_puVidMode->height = m_WindowedSize.y;
+	m_puVidMode->width = ( unsigned int )m_WindowedSize.x;
+	m_puVidMode->height = ( unsigned int )m_WindowedSize.y;
 	m_puVidMode->bitsPerPixel = 32;
 
 	m_puCSettings->antialiasingLevel = ( unsigned int )m_Aa;

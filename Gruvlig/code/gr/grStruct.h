@@ -20,13 +20,11 @@ namespace grStruct
 		grArrDyn()
 			: m_upArr( std::make_unique<T[]>( 0 ) )
 			, m_Capacity( 0 )
-			, m_Size( 0 )
 		{}
 
-		grArrDyn( const size_t capacity )
+		grArrDyn( const sizeT capacity )
 			: m_upArr( std::make_unique<T[]>( capacity ) )
 			, m_Capacity( capacity )
-			, m_Size( 0 )
 		{}
 
 		grArrDyn( const grArrDyn<T>& rArr )
@@ -43,43 +41,33 @@ namespace grStruct
 		grArrDyn( grArrDyn<T>&& rArr ) noexcept = delete;
 		grArrDyn<T>& operator=( grArrDyn<T>&& rArr ) noexcept = delete;
 
-		inline void Reset( const size_t capacity )
+		inline void Reset( const sizeT capacity )
 		{
 			std::lock_guard<std::mutex> lock( m_Lock );
 			m_upArr.reset( new T[ capacity ] );
 			m_Capacity = capacity;
-			m_Size = 0;
 		}
 
-		inline void Erase()
+		inline T& Read( const sizeT idx ) const
 		{
-			std::lock_guard<std::mutex> lock( m_Lock );
-			m_Size = 0;
-		}
-
-		inline void Push( const T& value )
-		{
-			assert( m_Size < m_Capacity && "grArr::Push: Array full" );
-			std::lock_guard<std::mutex> lock( m_Lock );
-			m_upArr[ m_Size++ ] = value;
-		}
-
-		inline T& Get( const size_t idx ) const
-		{
-			assert( idx < m_Size && "grArr::Get: Idx out of range" );
+#ifdef DEBUG			
+			assert( idx < m_Capacity && "grArr::Read: Idx out of range" );
+#endif // DEBUG
 			return m_upArr[ idx ];
 		}
 
-		inline void Set( const size_t idx, const T& value )
+		inline void Write( const sizeT idx, const T& value )
 		{
-			assert( idx < m_Size && "grArr::Set: Idx out of range" );
+#ifdef DEBUG						
+			assert( idx < m_Capacity && "grArr::Write: Idx out of range" );
+#endif // DEBUG
 			std::lock_guard<std::mutex> lock( m_Lock );
 			m_upArr[ idx ] = value;
 		}
 
-		inline size_t Size() const
+		inline sizeT Capacity() const
 		{
-			return m_Size;
+			return m_Capacity;
 		}
 
 	private:
@@ -88,16 +76,15 @@ namespace grStruct
 			std::lock_guard<std::mutex> lock( m_Lock );
 
 			m_upArr.reset( new T[ rArr.m_Capacity ] );
-			for ( size_t i = 0; i < rArr.m_Capacity; ++i )
+			for ( sizeT i = 0; i < rArr.m_Capacity; ++i )
 				m_upArr[ i ] = rArr.m_upArr[ i ];
 
 			m_Capacity = rArr.m_Capacity;
-			m_Size = rArr.m_Size;
 		}
 
 		std::unique_ptr<T[]> m_upArr;
 		std::mutex m_Lock;
-		size_t m_Capacity, m_Size;
+		sizeT m_Capacity;
 	};
 
 	// grLoopQue // FIFO // Basic thread safety

@@ -27,6 +27,7 @@ struct grSParticle
 		, puScaleEnd		( std::make_unique<grV2f[]>( size ) )
 		, puAcceleration	( std::make_unique<grV2f[]>( size ) )
 		, puVelocity		( std::make_unique<grV2f[]>( size ) )
+		, puForce			( std::make_unique<float[]>( size ) )
 		, puMass			( std::make_unique<float[]>( size ) )
 		, puLife			( std::make_unique<float[]>( size ) )
 		, Alive				( 0 )
@@ -50,6 +51,7 @@ struct grSParticle
 		grAlgo::Swap( puScaleEnd[ nowIdx ], puScaleEnd[ last ] );
 		grAlgo::Swap( puAcceleration[ nowIdx ], puAcceleration[ last ] );
 		grAlgo::Swap( puVelocity[ nowIdx ], puVelocity[ last ] );
+		grAlgo::Swap( puForce[ nowIdx ], puMass[ last ] );
 		grAlgo::Swap( puMass[ nowIdx ], puMass[ last ] );
 		grAlgo::Swap( puLife[ nowIdx ], puLife[ last ] );
 
@@ -71,6 +73,7 @@ struct grSParticle
 	pU<grV2f[]> puScaleEnd;
 	pU<grV2f[]> puAcceleration;
 	pU<grV2f[]> puVelocity;
+	pU<float[]> puForce;
 	pU<float[]> puMass;
 	pU<float[]> puLife;
 
