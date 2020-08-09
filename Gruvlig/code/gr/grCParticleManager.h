@@ -9,7 +9,7 @@
 #include	"grParticleEmitter.h"
 
 class		grCParticleSystem;
-struct		grSParticle;
+struct		grSParticleArr;
 struct		grSParticleAttribute;
 
 
@@ -35,7 +35,7 @@ private:
 	// The system should perhaps own some of the arrays because of practicality, or not because of straightforwardness... which definitely is a word
 	pU<pU<grCParticleEmitter>[]>	m_aREmitr;
 	pU<pU<grSParticleAttribute>[]>	m_aRAtt;
-	grSParticle**					m_aR2DPart;	// Can't figure out how to do this with unique ptr's so...
+	grSParticleArr**					m_aR2DPart;	// Can't figure out how to do this with unique ptr's so...
 
 	// Stores id's sorted from min to max so we always update linearly.
 	// The goal is to read/write/jump in memory as efficiently as possible as the arrays are passed to different system calls.

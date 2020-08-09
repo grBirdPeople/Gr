@@ -14,7 +14,7 @@
 grCParticleManager::grCParticleManager( void )
 	: m_aREmitr			( new pU<grCParticleEmitter>[ PART_EMITR_MAX ] )
 	, m_aRAtt			( new pU<grSParticleAttribute>[ PART_EMITR_MAX ] )
-	, m_aR2DPart		( new grSParticle*[ PART_EMITR_MAX ] )
+	, m_aR2DPart		( new grSParticleArr*[ PART_EMITR_MAX ] )
 
 	, m_uPSys			( new grCParticleSystem( 0, PART_PART_MAX ) )
 
@@ -61,7 +61,7 @@ grCParticleManager::Create( void )
 
 	m_aREmitr[ m_CreateCount ] = std::make_unique<grCParticleEmitter>( m_CreateCount );
 	m_aRAtt[ m_CreateCount ] = std::make_unique<grSParticleAttribute>();
-	m_aR2DPart[ m_CreateCount ] = new grSParticle[ m_cPartPerEmitr ];
+	m_aR2DPart[ m_CreateCount ] = new grSParticleArr[ m_cPartPerEmitr ];
 
 	++m_CreateCount;
 

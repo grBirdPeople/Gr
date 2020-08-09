@@ -27,7 +27,7 @@
 //};
 
 
-struct grSParticle
+struct grSParticleArr
 {
 	struct SCol { float R = 0.0f, G = 0.0f, B = 0.0f, A = 0.0f; };
 

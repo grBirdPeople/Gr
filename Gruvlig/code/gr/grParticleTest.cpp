@@ -4,25 +4,55 @@
 
 
 grCParticleSys::grCParticleSys( const intU size, const float emitRate, const grV2f& position )
-	: m_puParticle	( std::make_unique<grSParticle>( size ) )
-	, m_puEmit		( std::make_unique<grSEmitter>( size, 1.0f / grMath::Abs( emitRate ), position ) )
-	, m_puUpdate	( std::make_unique<grSUpdate>() )
-{}
-
-void
-grCParticleSys::EmitRate( const float emitRate )
+	: m_puParticle( std::make_unique<grSParticleArr>( size ) )
+	, m_puParticleData( std::make_unique<grSParticleData>() )
+	, m_puEmit( std::make_unique<grSEmitter>() )
+	, m_puUpdate( std::make_unique<grSUpdate>() )
 {
-	m_puEmit->EmitRate = 1.0f / grMath::Abs( emitRate );
+	float e{ emitRate };
+	if( e < 0.0f )
+		e = 0.0f;
+
+	m_puParticleData->SystemPosition = position;
+	m_puParticleData->EmitRateSec = e;
+	m_puParticleData->EmitRate = 1.0f / e;
+	m_puParticleData->SpawnAccT = 0.0f;
+	m_puParticleData->Size = size;
+}
+
+float
+grCParticleSys::GetEmitRate() const
+{
+	return m_puParticleData->EmitRateSec;
 }
 
 void
-grCParticleSys::PositionSystem( const grV2f& position )
+grCParticleSys::SetEmitRate( const float emitRate )
 {
-	m_puEmit->PositionSys = position;
+	float e{ emitRate };
+	if( e < 0.0f )
+		e = 0.0f;
+
+	m_puParticleData->EmitRateSec = e;
+	m_puParticleData->EmitRate = 1.0f / e;
 }
 
 void
-grCParticleSys::Color( const grColor::SRgba& start, const grColor::SRgba& end, const bool hsv, const bool randomize )
+grCParticleSys::SetSystemPosition( const grV2f& position )
+{
+	m_puParticleData->SystemPosition = position;
+}
+
+void
+grCParticleSys::SetGravity( const float force, const float direction )
+{
+	float d{ grMath::Clamp( direction, 0.0f, 360.0f ) };
+	m_puParticleData->GravityV = { grMath::DegToVec( d ) * force };
+	m_puParticleData->GravityF = force;
+}
+
+void
+grCParticleSys::SetColor( const grColor::SRgba& start, const grColor::SRgba& end, const bool hsv, const bool randomize )
 {
 	if ( m_puEmit->puColor == nullptr )
 		m_puEmit->puColor = std::make_unique<grSColorGenerate>();
@@ -34,33 +64,33 @@ grCParticleSys::Color( const grColor::SRgba& start, const grColor::SRgba& end, c
 }
 
 void
-grCParticleSys::Scale( const grV2f& start, const grV2f& end )
+grCParticleSys::SetScale( const grV2f& start, const grV2f& end )
 {
 	if ( m_puEmit->puScale == nullptr )
 		m_puEmit->puScale = std::make_unique<grSScaleGenerate>();
 
 	m_puEmit->puScale->Set( start, end );
 
-	if( m_puEmit->puScale->Equal == EParticleEqual::NO )
+	if( m_puEmit->puScale->Equal == EPartValueEqual::NO )
 		m_puUpdate->puScale = std::make_unique<grSScaleUpdate>();
 }
 
 void
-grCParticleSys::ForceBasic( const grV2f& min, const grV2f& max )
+grCParticleSys::SetForce( const grV2f& min, const grV2f& max )
 {
-	// const float dirMin, const float dirMax, const forceMin, const forceMax
+	// wind or something of the likes: const grV2f& dirMinMax, const grV2f& forceMinMax, const grV2f& timeMinMax
 
-	if ( m_puEmit->puForceBasic == nullptr )
-		m_puEmit->puForceBasic = std::make_unique<grSForceBasicGenerate>();
+	if ( m_puEmit->puForce == nullptr )
+		m_puEmit->puForce = std::make_unique<grSForceGenerate>();
 
-	m_puEmit->puForceBasic->Set( min, max );
+	m_puEmit->puForce->Set( min, max );
 
-	if ( m_puUpdate->puForceBasic == nullptr )
-		m_puUpdate->puForceBasic = std::make_unique<grSForceBasicUpdate>();
+	if ( m_puUpdate->puForce == nullptr )
+		m_puUpdate->puForce = std::make_unique<grSForceUpdate>();
 }
 
 void
-grCParticleSys::Position( const grV2f& min, const grV2f& max )
+grCParticleSys::SetPosition( const grV2f& min, const grV2f& max )
 {
 	if( m_puEmit->puPosition == nullptr )
 		m_puEmit->puPosition = std::make_unique<grSPositionGenerate>();
@@ -69,7 +99,7 @@ grCParticleSys::Position( const grV2f& min, const grV2f& max )
 }
 
 void
-grCParticleSys::Mass( const grV2f& minMax )
+grCParticleSys::SetMass( const grV2f& minMax )
 {
 	if ( m_puEmit->puMass == nullptr )
 		m_puEmit->puMass = std::make_unique<grSMassGenerate>();
@@ -78,7 +108,7 @@ grCParticleSys::Mass( const grV2f& minMax )
 }
 
 void
-grCParticleSys::Life( const grV2f& minMax )
+grCParticleSys::SetLife( const grV2f& minMax )
 {
 	if ( m_puEmit->puLife == nullptr )
 		m_puEmit->puLife = std::make_unique<grSLifeGenerate>();
@@ -97,17 +127,17 @@ grCParticleSys::Life( const grV2f& minMax )
 void
 grCParticleSys::Update( const float deltaT )
 {
-	m_puEmit->Emit( m_puParticle, deltaT );
-	m_puUpdate->Update( m_puParticle, deltaT );
+	m_puEmit->Emit( m_puParticleData, m_puParticle, deltaT );
+	m_puUpdate->Update( m_puParticleData, m_puParticle, deltaT );
 }
 
 void
 grCParticleSys::Render( sf::RenderWindow& rRenderWin )
 {
-	rRenderWin.draw( &m_puParticle->puVerts.get()[ 0 ], m_puParticle->Alive, sf::PrimitiveType::Points );
+	rRenderWin.draw( &m_puParticle->puVerts.get()[ 0 ], m_puParticleData->Alive, sf::PrimitiveType::Points );
 
-	//printf( "Max: %d %2s Alive: %d \n", m_puEmit->Size, "", m_puParticle->Alive );
-
+	printf( "Max: %d %2s Alive: %d \n", m_puParticleData->Size, "", m_puParticleData->Alive );
+	
 
 
 

@@ -17,8 +17,8 @@ namespace grMath
 	const float EpsilonSml = ( float )1e-10;
 	const float EpsilonLrg = 0.001f;
 	const float Pi = 3.141592f;
-	const float DegToRad = Pi / 180.0f;
-	const float RadToDeg = 180.0f / Pi;
+	const float Deg2RadConv = Pi / 180.0f;
+	const float Rad2DegConv = 180.0f / Pi;
 
 	// Min
 	//////////////////////////////////////////////////
@@ -60,9 +60,15 @@ namespace grMath
 		return value;
 	}
 
-	// RangeCheckV2f
+	// RangeChecks
 	//////////////////////////////////////////////////
 	inline void RangeCheckIntU( const intU a, intU& b )
+	{
+		if ( a > b )
+			b = a;
+	}
+
+	inline void RangeCheckFloat( const float a, float& b )
 	{
 		if ( a > b )
 			b = a;
@@ -214,57 +220,72 @@ namespace grMath
 		pPoint->y = x * sin + y * cos;
 	}
 
+	// Deg2Rad
+	//////////////////////////////////////////////////
+	inline float Deg2Rad( const float deg )
+	{
+		return deg * Deg2RadConv;
+	}
+
+	inline float Rad2Deg( const float rad )
+	{
+		return rad * Rad2DegConv;
+	}
+
 	// VecToRad
 	//////////////////////////////////////////////////
 	inline float VecToRad( const grV2f& rV )
 	{
-		grV2f v = rV;
-		return std::atan2f( v.y, v.x );
+		return std::atan2f( rV.y, rV.x );
 	}
 
 	// VecToDeg
 	//////////////////////////////////////////////////
 	inline float VecToDeg( const grV2f& rV )
 	{
-		grV2f v = rV;
-		return std::atan2f( v.y, v.x ) * RadToDeg;
+		return VecToRad( rV ) * Rad2DegConv;
 	}
 
 	// RadToVec
 	//////////////////////////////////////////////////
-	inline grV2f RadToVec( float rad, const bool counterClock = false )
+	inline grV2f RadToVec( float rad )
 	{
-		grV2f vec;
-		if ( counterClock == true )
-		{
-			vec.x = std::sin( rad );
-			vec.y = -std::cos( rad );
-		}
-		else
-		{
-			vec.x = std::cos( rad );
-			vec.y = std::sin( rad );
-		}
-		return vec;
+		return grV2f( std::sin( rad ), -std::cos( rad ) );
+
+		//grV2f vec;
+		//if ( counterClock == true )
+		//{
+		//	vec.x = std::sin( rad );
+		//	vec.y = -std::cos( rad );
+		//}
+		//else
+		//{
+		//	vec.x = std::cos( rad );
+		//	vec.y = std::sin( rad );
+		//}
+		//return vec;
 	}
 
 	// DegToVec
 	//////////////////////////////////////////////////
-	inline grV2f DegToVec( float deg, const bool counterClock = false )
+	inline grV2f DegToVec( float deg )
 	{
-		grV2f vec;
-		float rad = deg * DegToRad;
-		if ( counterClock == true )
-		{
-			vec.x = std::sin( rad );
-			vec.y = -std::cos( rad );
-		}
-		else
-		{
-			vec.x = std::cos( rad );
-			vec.y = std::sin( rad );
-		}
-		return vec;
+		float rad{ Deg2Rad( deg ) };
+		return RadToVec( rad );
+
+		//grV2f vec;
+		//float rad = deg * Deg2RadConv;
+		//if ( counterClock == true )
+		//{
+		//	vec.x = std::sin( rad );
+		//	vec.y = -std::cos( rad );
+		//}
+		//else
+		//{
+		//	vec.x = std::cos( rad );
+		//	vec.y = std::sin( rad );
+		//}
+		//return vec;
 	}
 
 	// ZeroCmp
