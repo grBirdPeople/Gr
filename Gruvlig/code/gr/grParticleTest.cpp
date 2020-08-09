@@ -48,6 +48,8 @@ grCParticleSys::Scale( const grV2f& start, const grV2f& end )
 void
 grCParticleSys::ForceBasic( const grV2f& min, const grV2f& max )
 {
+	// const float dirMin, const float dirMax, const forceMin, const forceMax
+
 	if ( m_puEmit->puForceBasic == nullptr )
 		m_puEmit->puForceBasic = std::make_unique<grSForceBasicGenerate>();
 

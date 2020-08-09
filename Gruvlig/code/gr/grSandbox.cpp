@@ -165,25 +165,30 @@ grSandbox::grSandbox( void )
 	//m_Emitr1.SetLifetime( grV2f( 1.0f, 1.0f ) );
 	//m_Emitr1.SetColor( sf::Color( 0, 255, 0, 255 ), sf::Color( 0, 0, 0, 255 ) );
 
-
 	
 
 
+	// Particles
+	m_pPartSys1->PositionSystem( grV2f( 640.0f * 0.5f, 360.0f * 0.125f ) );
+	m_pPartSys1->Color( grColor::SRgba( 200, 255, 255, 255 ), grColor::SRgba( 0, 0, 255, 0 ), true, false );
+	m_pPartSys1->Scale( grV2f( 10.0f, 10.0f ), grV2f( 0.0f, 0.0f ) );
+	m_pPartSys1->Position( grV2f( -25.0f, -25.0f ), grV2f( 25.0f, 25.0f ) );
+	m_pPartSys1->ForceBasic( grV2f( 0.0f, 10.0f ), grV2f( 0.0f, 100.0f ) );
+	m_pPartSys1->Mass( grV2f( 1.0f, 2.0f ) );
+	m_pPartSys1->Life( grV2f( 0.5f, 3.5f ) );
 
-	//m_pPartSys1->PositionSystem( grV2f( 640.0f * 0.5f, 360.0f * 0.125f ) );
-	//m_pPartSys1->Color( grColor::SRgba( 200, 255, 255, 255 ), grColor::SRgba( 0, 0, 255, 0 ), true, false );
-	//m_pPartSys1->Scale( grV2f( 10.0f, 10.0f ), grV2f( 0.0f, 0.0f ) );
-	//m_pPartSys1->Position( grV2f( -25.0f, -25.0f ), grV2f( 25.0f, 25.0f ) );
-	//m_pPartSys1->ForceBasic( grV2f( 0.0f, 10.0f ), grV2f( 0.0f, 100.0f ) );
-	//m_pPartSys1->Mass( grV2f( 1.0f, 2.0f ) );
-	//m_pPartSys1->Life( grV2f( 0.5f, 3.5f ) );
 
 
-	grDebugManager::Instance().Enable( true );
-	m_pBoidSys->Init( 1000 );
-	for( sizeT i = 0; i < 200; ++i )
-		m_pBoidSys->SpawnBoid( { ( float )grCore::Instance().GetWindowSize().x * 0.5f, ( float )grCore::Instance().GetWindowSize().y * 0.5f },
-							   { m_Rand->Float( -1.0f, 1.0f ), m_Rand->Float( -1.0f, 1.0f ) } );
+
+	//// Boids
+	//sizeT quantity{ 25 };
+	//m_pBoidSys->Init( quantity );
+	//for( sizeT i = 0; i < quantity; ++i )
+	//	m_pBoidSys->Spawn( { m_Rand->Float( 0.0f, ( float )grCore::Instance().GetWindowSize().x ), m_Rand->Float( 0.0f, ( float )grCore::Instance().GetWindowSize().y ) },
+	//					   { m_Rand->Float( -1.0f, 1.0f ), m_Rand->Float( -1.0f, 1.0f ) }, 5.0f );
+
+	////m_pBoidSys->Spawn( { ( float )grCore::Instance().GetWindowSize().x * 0.5f, ( float )grCore::Instance().GetWindowSize().y * 0.5f },
+	////				   { m_Rand->Float( -1.0f, 1.0f ), m_Rand->Float( -1.0f, 1.0f ) }, 5.0f );
 }
 
 
@@ -192,15 +197,12 @@ grSandbox::grSandbox( void )
 void
 grSandbox::Update( const float deltaT )
 {
-	// Boid things
-	m_pBoidSys->Update( deltaT );
-
-	if ( m_rInputMan.GetMouseScrollForwards() )
-		m_pBoidSys->SpawnBoid( m_rInputMan.GetMousePos(), { m_Rand->Float( -1.0f, 1.0f ), m_Rand->Float( -1.0f, 1.0f ) } );
+	//// Boids
+	//m_pBoidSys->Update( deltaT );
 
 
-	// Particle things
-	//m_pPartSys1->Update( deltaT );
+	// Particles
+	m_pPartSys1->Update( deltaT );
 
 	if ( m_rInputMan.GetMouseMoved() )
 	{
@@ -227,6 +229,8 @@ grSandbox::Update( const float deltaT )
 	//	m_Emitr1.DirectionParticle( grV2f( deg, deg ) );
 	//}
 	
+
+
 
 	if ( m_rInputMan.GetMouseScrollForwards() )
 	{
@@ -278,6 +282,8 @@ grSandbox::Update( const float deltaT )
 void
 grSandbox::Render( sf::RenderWindow& rRenderWin )
 {
-	//m_pPartSys1->Render( rRenderWin );
-	m_pBoidSys->Render( rRenderWin );
+	////Boids
+	//m_pBoidSys->Render( rRenderWin );
+	// Particles
+	m_pPartSys1->Render( rRenderWin );
 }

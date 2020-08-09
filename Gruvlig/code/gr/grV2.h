@@ -31,16 +31,8 @@ struct grV2
 	inline float Dot ( const grV2<T>& rV2 ) { return ( x * rV2.x ) + ( y * rV2.y ); }
 	inline grV2<T> Cross ( void ) { return { y, -x }; }
 	inline grV2<T> Between ( const grV2<T>& rV2 ) { return { rV2.x - x, rV2.y - y }; }
-	inline void LimitMin( const float min )
-	{
-		if ( this->Magnitude() < min )
-			*this = this->Normalized() * min;
-	}
-	inline void LimitMax( const float max )
-	{
-		if ( this->Magnitude() > max )
-			*this = this->Normalized() * max;
-	}
+	inline grV2<T> LimitMin( const float min ) { return ( this->Magnitude() < min ) ? this->Normalized() * min : *this; }
+	inline grV2<T> LimitMax( const float max ) { return ( this->Magnitude() > max ) ? this->Normalized() * max : *this; }
 
 	//////////////////////////////////////////////////
 
