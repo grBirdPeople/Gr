@@ -78,24 +78,10 @@ grCParticleSys::SetScale( const grV2f& start, const grV2f& end )
 void
 grCParticleSys::SetForce( const grV2f& min, const grV2f& max )
 {
-	// wind or something of the likes: const grV2f& dirMinMax, const grV2f& forceMinMax, const grV2f& timeMinMax
-
 	if ( m_puEmit->puForce == nullptr )
 		m_puEmit->puForce = std::make_unique<grSForceGenerate>();
 
 	m_puEmit->puForce->Set( min, max );
-
-	if ( m_puUpdate->puForce == nullptr )
-		m_puUpdate->puForce = std::make_unique<grSForceUpdate>();
-}
-
-void
-grCParticleSys::SetPosition( const grV2f& min, const grV2f& max )
-{
-	if( m_puEmit->puPosition == nullptr )
-		m_puEmit->puPosition = std::make_unique<grSPositionGenerate>();
-
-	m_puEmit->puPosition->Set( min, max );
 }
 
 void
@@ -118,6 +104,25 @@ grCParticleSys::SetLife( const grV2f& minMax )
 	if ( m_puUpdate->puLife == nullptr )
 		m_puUpdate->puLife = std::make_unique<grSLifeUpdate>();
 }
+
+void
+grCParticleSys::AddPositionGeneratorBox( const grV2f& min, const grV2f& max )
+{
+	if ( m_puEmit->puPosition == nullptr )
+		m_puEmit->puPosition = std::make_unique<grSPositionGenerate>();
+
+	m_puEmit->puPosition->Set( min, max );
+}
+
+void
+grCParticleSys::AddPositionGeneratorEllipse( const grV2f& min, const grV2f& max, const float step )
+{
+	if ( m_puEmit->puPosition == nullptr )
+		m_puEmit->puPosition = std::make_unique<grSPositionGenerate>();
+
+	m_puEmit->puPosition->Set( min, max, step );
+}
+
 
 // TEST DRAW
 #include	"grBBox.h"

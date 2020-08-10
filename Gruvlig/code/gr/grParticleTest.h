@@ -92,8 +92,6 @@ struct grSBaseGenerate
 
 	inline void SetBaseStartEnd( grV2f& rStart, grV2f& rEnd )
 	{
-		rStart = grMath::AbsV2f( rStart );
-		rEnd = grMath::AbsV2f( rEnd );
 		Equal = grMath::CmpV2f( rStart, rEnd ) ? EPartValueEqual::YES : EPartValueEqual::NO;
 	}
 
@@ -245,27 +243,69 @@ struct grSForceGenerate : public grSBaseGenerate
 
 struct grSPositionGenerate : public grSBaseGenerate
 {
+	enum class EPosGenType
+	{
+		BOX = 0,
+		ELLIPSE
+	};
+
 	inline void Set( const grV2f& min, const grV2f& max )
 	{
 		LocalMin = min;
 		LocalMax = max;
 		SetBaseMinMaxX2( LocalMin, LocalMax );
+		PosType = EPosGenType::BOX;
 	}
 
-	inline void Generate( pU<sf::Vertex[]>& rPosition, const grV2f& sysPos, const sizeT startIdx, const sizeT endIdx, const pU<grRandom>& rRand )
+	inline void Set( const grV2f& min, const grV2f& max, const float step )
+	{
+		LocalMin = min;
+		LocalMax = max;
+		SetBaseMinMaxX2( LocalMin, LocalMax );
+		PosType = EPosGenType::ELLIPSE;
+
+		EllipseStepX = step;
+		EllipseStepY = EllipseStepX;
+		EllipseFull = grMath::Pi * 2.0f; // grMath::Pi * 2.0f = 360 degrees
+		EllipseRad.x = LocalMin.x;
+		EllipseRad.y = LocalMin.y;
+	}
+
+	inline void Generate( pU<sf::Vertex[]>& rPosition, const grV2f& sysPos, const sizeT startIdx, const sizeT endIdx, const pU<grRandom>& rRand, const float deltaT )
 	{
 		if ( Equal == EPartValueEqual::NO )
 		{
-			for ( sizeT i = startIdx; i < endIdx; ++i )
+			if ( PosType == EPosGenType::BOX )
 			{
-				grV2f p{ rRand->V2fx2( LocalMin, LocalMax ) + sysPos };
-				rPosition[ i ].position.x = p.x;
-				rPosition[ i ].position.y = p.y;
+				BoxEqualNo( rPosition, sysPos, startIdx, endIdx, rRand );
+				return;
 			}
 
+			EllipseEqualNo( rPosition, sysPos, startIdx, endIdx, rRand, deltaT );
 			return;
 		}
 
+		if ( PosType == EPosGenType::BOX )
+		{
+			BoxEqualYes( rPosition, sysPos, startIdx, endIdx );
+			return;
+		}
+
+		EllipseEqualYes( rPosition, sysPos, startIdx, endIdx, rRand );
+	}
+
+	void BoxEqualNo( pU<sf::Vertex[]>& rPosition, const grV2f& sysPos, const sizeT startIdx, const sizeT endIdx, const pU<grRandom>& rRand )
+	{
+		for ( sizeT i = startIdx; i < endIdx; ++i )
+		{
+			grV2f p{ rRand->V2fx2( LocalMin, LocalMax ) + sysPos };
+			rPosition[ i ].position.x = p.x;
+			rPosition[ i ].position.y = p.y;
+		}
+	}
+
+	void BoxEqualYes( pU<sf::Vertex[]>& rPosition, const grV2f& sysPos, const sizeT startIdx, const sizeT endIdx )
+	{
 		for ( sizeT i = startIdx; i < endIdx; ++i )
 		{
 			grV2f p{ LocalMin + sysPos };
@@ -274,7 +314,32 @@ struct grSPositionGenerate : public grSBaseGenerate
 		}
 	}
 
+	void EllipseEqualNo( pU<sf::Vertex[]>& rPosition, const grV2f& sysPos, const sizeT startIdx, const sizeT endIdx, const pU<grRandom>& rRand, const float deltaT )
+	{
+		EllipseRad.x += EllipseStepX * deltaT;
+		EllipseRad.y += EllipseStepY * deltaT;
+
+		EllipseStepX *= ( EllipseRad.x < LocalMin.x ) ? -1.0f : ( EllipseRad.x > LocalMax.x ) ? -1.0f : 1.0f;
+		EllipseStepY *= ( EllipseRad.y < LocalMin.y ) ? -1.0f : ( EllipseRad.y > LocalMax.y ) ? -1.0f : 1.0f;
+
+		EllipseEqualYes( rPosition, sysPos, startIdx, endIdx, rRand );
+	}
+
+	void EllipseEqualYes( pU<sf::Vertex[]>& rPosition, const grV2f& sysPos, const sizeT startIdx, const sizeT endIdx, const pU<grRandom>& rRand )
+	{
+		for ( sizeT i = startIdx; i < endIdx; ++i )
+		{
+			float a{ rRand->Float( 0.0f, EllipseFull ) };
+			grV2f v{ EllipseRad.x * std::sin( a ), EllipseRad.y * std::cos( a ) };
+			rPosition[ i ].position.x = v.x + sysPos.x;
+			rPosition[ i ].position.y = v.y + sysPos.y;
+		}
+	}
+
 	grV2f LocalMin, LocalMax;
+	grV2f EllipseRad;
+	float EllipseStepX, EllipseStepY, EllipseFull;
+	EPosGenType PosType;
 };
 
 struct grSMassGenerate : public grSBaseGenerate
@@ -348,39 +413,37 @@ struct grSEmitter
 		// This could be done smoother ex; NewSpawns = dt * SpawnRate
 		// Problem is I haven't figured out how to make the spawnrate 'API' call non arbitrary in relation to real time, for example seconds
 
-		// Catch things
-		grV2f sysPos{ rParticleData->SystemPosition };
-		float spawnAccT{ rParticleData->SpawnAccT };
-		float emitRate{ rParticleData->EmitRate };
-		sizeT last{ rParticleData->Size - 1 };
-		sizeT startIdx{ rParticleData->Alive };
-		sizeT endIdx{ 0 };
-		sizeT emitAcc{ 0 };
-
 		// If spawns per frame are be greater than frame time
+		sizeT emitAcc{ 0 };
+		float emitRate{ rParticleData->EmitRate };
+		float spawnAccT{ rParticleData->SpawnAccT };
 		spawnAccT += deltaT;
 		while ( spawnAccT >= emitRate )
 		{
 			spawnAccT -= emitRate;
 			emitAcc += 1;
 		}
-
+		
 		if ( emitAcc > 0 )
 		{
-			endIdx = { grMath::Min<sizeT>( startIdx + emitAcc, last ) };
+			sizeT last{ rParticleData->Size - 1 };
+			sizeT startIdx{ rParticleData->Alive };
+			sizeT endIdx{ grMath::Min<sizeT>( startIdx + emitAcc, last ) };
 			if ( startIdx == endIdx )
 				return;
 
-			if ( puPosition ) puPosition->Generate( rParticleArr->puVerts, sysPos, startIdx, endIdx, puRand );
+			grV2f sysPos{ rParticleData->SystemPosition };
+
+			if ( puPosition ) puPosition->Generate( rParticleArr->puVerts, sysPos, startIdx, endIdx, puRand, deltaT );
 			if ( puColor ) puColor->Generate( rParticleArr->puColorStart, rParticleArr->puColorEnd, startIdx, endIdx, puRand );
 			if ( puScale ) puScale->Generate( rParticleArr->puScaleStart, rParticleArr->puScaleEnd, startIdx, endIdx, puRand );
 			if ( puForce ) puForce->Generate( rParticleArr->puAcceleration, startIdx, endIdx, puRand );
 			if ( puMass ) puMass->Generate( rParticleArr->puMass, startIdx, endIdx, puRand );
 			if ( puLife ) puLife->Generate( rParticleArr->puLife, startIdx, endIdx, puRand );
-		}
 
-		rParticleData->SpawnAccT = spawnAccT;
-		rParticleData->Alive += endIdx - startIdx;
+			rParticleData->SpawnAccT = spawnAccT;
+			rParticleData->Alive += endIdx - startIdx;
+		}
 	}
 
 	// All types of generators goes here
@@ -478,25 +541,18 @@ struct grSScaleUpdate
 	}
 };
 
-struct grSForceUpdate
-{
-	inline void Update( const sizeT alive, const grV2f& rGravity, pU<grV2f[]>& rAcceleration, const pU<float[]>& rMass )
-	{
-		grV2f g{ rGravity };
-		float m{ 0.0f };
-		float maxForce{ 10.0f }; // TODO: Implement and move this correctly
-		for ( sizeT i = 0; i < alive; ++i )
-		{
-			m = rMass[ i ];
-			rAcceleration[ i ] += grV2f( g / m ).LimitMax( maxForce );
-		}
-	}
-};
-
 struct grSVelocityUpdate
 {
-	inline void Update( const sizeT alive, pU<grV2f[]>& rVelocity, const pU<grV2f[]>& rAcceleration, const float deltaT )
+	inline void Update( const sizeT alive, const grV2f& rGravity, pU<grV2f[]>& rVelocity, const pU<grV2f[]>& rAcceleration, const pU<float[]>& rMass, const float deltaT )
 	{
+		grV2f g{ rGravity };
+		float maxForce{ 100.0f }; // TODO: Implement and move this correctly
+		for ( sizeT i = 0; i < alive; ++i )
+		{
+			float m{ rMass[ i ] };
+			rAcceleration[ i ] += grV2f( g / m ).LimitMax( maxForce );
+		}
+
 		float maxSpeed{ 100.0f };	// TODO: Implement and move this correctly
 		for ( sizeT i = 0; i < alive; ++i )
 			rVelocity[ i ] = grV2f( rAcceleration[ i ] ).LimitMax( maxSpeed );
@@ -575,8 +631,7 @@ struct grSUpdate
 		if ( puPosition ) puPosition->Update( alive, rParticleArr->puVerts, rParticleArr->puVelocity, deltaT );
 		if ( puColor ) puColor->Update( alive, rParticleArr->puColorStart, rParticleArr->puColorEnd, rParticleArr->puLife, rParticleArr->puVerts, deltaT );
 		if ( puScale ) puScale->Update( alive, rParticleArr->puScaleStart, rParticleArr->puScaleEnd, rParticleArr->puLife, deltaT );
-		if ( puForce ) puForce->Update( alive, gravity, rParticleArr->puAcceleration, rParticleArr->puMass );
-		if ( puVelocity ) puVelocity->Update( alive, rParticleArr->puVelocity, rParticleArr->puAcceleration, deltaT );
+		if ( puVelocity ) puVelocity->Update( alive, gravity, rParticleArr->puVelocity, rParticleArr->puAcceleration, rParticleArr->puMass, deltaT );
 		if ( puLife ) alive = puLife->Update( alive, rParticleArr, deltaT );
 
 		rParticleVar->Alive -= alive;
@@ -587,7 +642,6 @@ struct grSUpdate
 	pU<grSPositionUpdate> puPosition;
 	pU<grSColorUpdate> puColor;
 	pU<grSScaleUpdate> puScale;
-	pU<grSForceUpdate> puForce;
 	pU<grSVelocityUpdate> puVelocity;
 	pU<grSLifeUpdate> puLife;
 };
@@ -613,9 +667,11 @@ public:
 	void SetColor( const grColor::SRgba& start, const grColor::SRgba& end, const bool hsv = false, const bool randomize = false );
 	void SetScale( const grV2f& start, const grV2f& end );
 	void SetForce( const grV2f& min, const grV2f& max );
-	void SetPosition( const grV2f& min, const grV2f& max );
 	void SetMass( const grV2f& minMax );
 	void SetLife( const grV2f& minMax );
+
+	void AddPositionGeneratorBox( const grV2f& min, const grV2f& max );
+	void AddPositionGeneratorEllipse( const grV2f& min, const grV2f& max, const float step = 0.0f );
 
 	// TODO: Remeber to make this call once in the particle manager whenever that class exists
 	void Update( const float deltaT );

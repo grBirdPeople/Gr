@@ -172,13 +172,14 @@ grSandbox::grSandbox( void )
 	grV2f winSize{ ( float )grCore::Instance().GetWindowSize().x, ( float )grCore::Instance().GetWindowSize().y };
 
 	m_pPartSys1->SetSystemPosition( { winSize.x * 0.5f, winSize.y * 0.5f } );
-	m_pPartSys1->SetGravity( 45.0f, 2.0f );
-	m_pPartSys1->SetColor( { 200, 255, 255, 255 }, { 0, 0, 255, 255 }, true, false );
+	m_pPartSys1->SetGravity( 180.0f, 2.0f );
+	m_pPartSys1->SetColor( { 200, 255, 255, 255 }, { 0, 255, 0, 0 }, true, false );
 	//m_pPartSys1->SetScale( grV2f( 10.0f, 10.0f ), grV2f( 0.0f, 0.0f ) );
-	m_pPartSys1->SetPosition( { -15.0f, -15.0f }, { 15.0f, 15.0f } );
+	//m_pPartSys1->AddPositionGeneratorBox( { -15.0f, -15.0f }, { 15.0f, 15.0f } );
+	m_pPartSys1->AddPositionGeneratorEllipse( { -100.f, -200.0f }, { 200.0f, 100.f }, 75.0f );
 	m_pPartSys1->SetForce( { 0.0f, 0.0f }, { 0.0f, 0.0f } );
-	m_pPartSys1->SetMass( { 1.0f, 2.0f } );
-	m_pPartSys1->SetLife( { 1.5f, 3.5f } );
+	m_pPartSys1->SetMass( { 1.0f, 4.0f } );
+	m_pPartSys1->SetLife( { 1.0f, 2.5f } );
 
 
 
@@ -213,17 +214,17 @@ grSandbox::Update( const float deltaT )
 	}
 	m_LastMousePos = m_rInputMan.GetMousePos();
 
-	// Particles spiral test
-	m_ParticleAnimCountT -= deltaT;
-	if ( m_ParticleAnimCountT < 0.0f )
-	{
-		m_ParticleAnimCountT += m_ParticleAnimT;
-		m_ParticleDegAcc += 45.0f;
-		if( m_ParticleDegAcc >= 360.0f )
-			m_ParticleDegAcc = 0.0f;
+	//// Particles spiral test
+	//m_ParticleAnimCountT -= deltaT;
+	//if ( m_ParticleAnimCountT < 0.0f )
+	//{
+	//	m_ParticleAnimCountT += m_ParticleAnimT;
+	//	m_ParticleDegAcc += 45.0f;
+	//	if( m_ParticleDegAcc >= 360.0f )
+	//		m_ParticleDegAcc = 0.0f;
 
-		m_pPartSys1->SetGravity( m_ParticleDegAcc, 4.0f );
-	}
+	//	m_pPartSys1->SetGravity( m_ParticleDegAcc, 4.0f );
+	//}
 	
 
 
