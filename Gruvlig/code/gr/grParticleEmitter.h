@@ -31,7 +31,7 @@ public:
 	}
 	inline void SetSpawnRate( const float spawnPerSec )
 	{
-		m_SpawnPerSec = grMath::Abs( spawnPerSec );
+		m_SpawnPerSec = grMath::AbsF( spawnPerSec );
 		if ( m_SpawnPerSec > 0.0f )
 		{
 			m_SpawnRateMs = 1.0f / m_SpawnPerSec;

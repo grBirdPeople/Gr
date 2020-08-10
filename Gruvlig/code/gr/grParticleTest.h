@@ -48,7 +48,7 @@ struct grSParticleArr
 	pU<float[]> puLife;
 };
 
-struct grSParticleData
+struct grSParticleVar
 {
 	grV2f SystemPosition;
 	grV2f GravityV;
@@ -71,15 +71,15 @@ struct grSBaseGenerate
 {
 	inline void SetBaseColor( grColor::SRgba& rStart, grColor::SRgba& rEnd )
 	{
-		rStart.R = grMath::Clamp( rStart.R, 0, 255 );
-		rStart.G = grMath::Clamp( rStart.G, 0, 255 );
-		rStart.B = grMath::Clamp( rStart.B, 0, 255 );
-		rStart.A = grMath::Clamp( rStart.A, 0, 255 );
+		rStart.R = grMath::Clamp<float>( rStart.R, 0.0f, 255.0f );
+		rStart.G = grMath::Clamp<float>( rStart.G, 0.0f, 255.0f );
+		rStart.B = grMath::Clamp<float>( rStart.B, 0.0f, 255.0f );
+		rStart.A = grMath::Clamp<float>( rStart.A, 0.0f, 255.0f );
 
-		rEnd.R = grMath::Clamp( rEnd.R, 0, 255 );
-		rEnd.G = grMath::Clamp( rEnd.G, 0, 255 );
-		rEnd.B = grMath::Clamp( rEnd.B, 0, 255 );
-		rEnd.A = grMath::Clamp( rEnd.A, 0, 255 );
+		rEnd.R = grMath::Clamp<float>( rEnd.R, 0.0f, 255.0f );
+		rEnd.G = grMath::Clamp<float>( rEnd.G, 0.0f, 255.0f );
+		rEnd.B = grMath::Clamp<float>( rEnd.B, 0.0f, 255.0f );
+		rEnd.A = grMath::Clamp<float>( rEnd.A, 0.0f, 255.0f );
 
 		if ( grMath::CmpFloat( rStart.R, rEnd.R ) &&
 			 grMath::CmpFloat( rStart.G, rEnd.G ) &&
@@ -92,8 +92,6 @@ struct grSBaseGenerate
 
 	inline void SetBaseStartEnd( grV2f& rStart, grV2f& rEnd )
 	{
-		rStart = grMath::Abs( rStart );
-		rEnd = grMath::Abs( rEnd );
 		Equal = grMath::CmpV2f( rStart, rEnd ) ? EPartValueEqual::YES : EPartValueEqual::NO;
 	}
 
@@ -130,9 +128,9 @@ struct grSColorGenerate : public grSBaseGenerate
 	{
 		if ( Rand )
 		{
-			float midR{ grMath::Abs( LocalStart.R - LocalEnd.R ) * 0.5f };
-			float midG{ grMath::Abs( LocalStart.G - LocalEnd.G ) * 0.5f };
-			float midB{ grMath::Abs( LocalStart.B - LocalEnd.B ) * 0.5f };
+			float midR{ grMath::AbsF( LocalStart.R - LocalEnd.R ) * 0.5f };
+			float midG{ grMath::AbsF( LocalStart.G - LocalEnd.G ) * 0.5f };
+			float midB{ grMath::AbsF( LocalStart.B - LocalEnd.B ) * 0.5f };
 			//float midA = grMath::Abs( LocalStart.A - LocalEnd.A ) * 0.5f;		// Unsure if random alpha is desired
 
 			for ( sizeT i = startIdx; i < endIdx; ++i )
@@ -182,8 +180,8 @@ struct grSScaleGenerate : public grSBaseGenerate
 	{
 		if ( Equal == EPartValueEqual::NO )
 		{			
-			float midX{ grMath::Abs( LocalStart.x - LocalEnd.x ) * 0.5f };
-			float midY{ grMath::Abs( LocalStart.y - LocalEnd.y ) * 0.5f };
+			float midX{ grMath::AbsF( LocalStart.x - LocalEnd.x ) * 0.5f };
+			float midY{ grMath::AbsF( LocalStart.y - LocalEnd.y ) * 0.5f };
 
 			for ( sizeT i = startIdx; i < endIdx; ++i )
 			{
@@ -245,27 +243,69 @@ struct grSForceGenerate : public grSBaseGenerate
 
 struct grSPositionGenerate : public grSBaseGenerate
 {
+	enum class EPosGenType
+	{
+		BOX = 0,
+		ELLIPSE
+	};
+
 	inline void Set( const grV2f& min, const grV2f& max )
 	{
 		LocalMin = min;
 		LocalMax = max;
 		SetBaseMinMaxX2( LocalMin, LocalMax );
+		PosType = EPosGenType::BOX;
 	}
 
-	inline void Generate( pU<sf::Vertex[]>& rPosition, const grV2f& sysPos, const sizeT startIdx, const sizeT endIdx, const pU<grRandom>& rRand )
+	inline void Set( const grV2f& min, const grV2f& max, const float step )
+	{
+		LocalMin = min;
+		LocalMax = max;
+		SetBaseMinMaxX2( LocalMin, LocalMax );
+		PosType = EPosGenType::ELLIPSE;
+
+		EllipseStepX = step;
+		EllipseStepY = EllipseStepX;
+		EllipseFull = grMath::Pi * 2.0f; // grMath::Pi * 2.0f = 360 degrees
+		EllipseRad.x = LocalMin.x;
+		EllipseRad.y = LocalMin.y;
+	}
+
+	inline void Generate( pU<sf::Vertex[]>& rPosition, const grV2f& sysPos, const sizeT startIdx, const sizeT endIdx, const pU<grRandom>& rRand, const float deltaT )
 	{
 		if ( Equal == EPartValueEqual::NO )
 		{
-			for ( sizeT i = startIdx; i < endIdx; ++i )
+			if ( PosType == EPosGenType::BOX )
 			{
-				grV2f p{ rRand->V2fx2( LocalMin, LocalMax ) + sysPos };
-				rPosition[ i ].position.x = p.x;
-				rPosition[ i ].position.y = p.y;
+				BoxEqualNo( rPosition, sysPos, startIdx, endIdx, rRand );
+				return;
 			}
 
+			EllipseEqualNo( rPosition, sysPos, startIdx, endIdx, rRand, deltaT );
 			return;
 		}
 
+		if ( PosType == EPosGenType::BOX )
+		{
+			BoxEqualYes( rPosition, sysPos, startIdx, endIdx );
+			return;
+		}
+
+		EllipseEqualYes( rPosition, sysPos, startIdx, endIdx, rRand );
+	}
+
+	void BoxEqualNo( pU<sf::Vertex[]>& rPosition, const grV2f& sysPos, const sizeT startIdx, const sizeT endIdx, const pU<grRandom>& rRand )
+	{
+		for ( sizeT i = startIdx; i < endIdx; ++i )
+		{
+			grV2f p{ rRand->V2fx2( LocalMin, LocalMax ) + sysPos };
+			rPosition[ i ].position.x = p.x;
+			rPosition[ i ].position.y = p.y;
+		}
+	}
+
+	void BoxEqualYes( pU<sf::Vertex[]>& rPosition, const grV2f& sysPos, const sizeT startIdx, const sizeT endIdx )
+	{
 		for ( sizeT i = startIdx; i < endIdx; ++i )
 		{
 			grV2f p{ LocalMin + sysPos };
@@ -274,7 +314,32 @@ struct grSPositionGenerate : public grSBaseGenerate
 		}
 	}
 
+	void EllipseEqualNo( pU<sf::Vertex[]>& rPosition, const grV2f& sysPos, const sizeT startIdx, const sizeT endIdx, const pU<grRandom>& rRand, const float deltaT )
+	{
+		EllipseRad.x += EllipseStepX * deltaT;
+		EllipseRad.y += EllipseStepY * deltaT;
+
+		EllipseStepX *= ( EllipseRad.x < LocalMin.x ) ? -1.0f : ( EllipseRad.x > LocalMax.x ) ? -1.0f : 1.0f;
+		EllipseStepY *= ( EllipseRad.y < LocalMin.y ) ? -1.0f : ( EllipseRad.y > LocalMax.y ) ? -1.0f : 1.0f;
+
+		EllipseEqualYes( rPosition, sysPos, startIdx, endIdx, rRand );
+	}
+
+	void EllipseEqualYes( pU<sf::Vertex[]>& rPosition, const grV2f& sysPos, const sizeT startIdx, const sizeT endIdx, const pU<grRandom>& rRand )
+	{
+		for ( sizeT i = startIdx; i < endIdx; ++i )
+		{
+			float a{ rRand->Float( 0.0f, EllipseFull ) };
+			grV2f v{ EllipseRad.x * std::sin( a ), EllipseRad.y * std::cos( a ) };
+			rPosition[ i ].position.x = v.x + sysPos.x;
+			rPosition[ i ].position.y = v.y + sysPos.y;
+		}
+	}
+
 	grV2f LocalMin, LocalMax;
+	grV2f EllipseRad;
+	float EllipseStepX, EllipseStepY, EllipseFull;
+	EPosGenType PosType;
 };
 
 struct grSMassGenerate : public grSBaseGenerate
@@ -343,43 +408,42 @@ struct grSEmitter
 	grSEmitter( grSEmitter&& ) noexcept = delete;
 	grSEmitter& operator=( grSEmitter&& ) noexcept = delete;
 
-	inline void Emit( pU<grSParticleData>& rParticleData, pU<grSParticleArr>& rParticleArr, const float deltaT )
+	inline void Emit( pU<grSParticleVar>& rParticleData, pU<grSParticleArr>& rParticleArr, const float deltaT )
 	{
 		// This could be done smoother ex; NewSpawns = dt * SpawnRate
 		// Problem is I haven't figured out how to make the spawnrate 'API' call non arbitrary in relation to real time, for example seconds
 
-		// Catch things
-		float spawnAccT{ rParticleData->SpawnAccT };
-		float emitRate{ rParticleData->EmitRate };
-		sizeT alive{ rParticleData->Alive };
-		sizeT emitAcc{ 0 };
-
 		// If spawns per frame are be greater than frame time
+		sizeT emitAcc{ 0 };
+		float emitRate{ rParticleData->EmitRate };
+		float spawnAccT{ rParticleData->SpawnAccT };
 		spawnAccT += deltaT;
 		while ( spawnAccT >= emitRate )
 		{
 			spawnAccT -= emitRate;
 			emitAcc += 1;
 		}
-
+		
 		if ( emitAcc > 0 )
 		{
+			sizeT last{ rParticleData->Size - 1 };
+			sizeT startIdx{ rParticleData->Alive };
+			sizeT endIdx{ grMath::Min<sizeT>( startIdx + emitAcc, last ) };
+			if ( startIdx == endIdx )
+				return;
+
 			grV2f sysPos{ rParticleData->SystemPosition };
-			sizeT endIdx{ grMath::Min( alive + emitAcc + 1, rParticleData->Size - 1 ) };
 
-			if ( puPosition ) puPosition->Generate( rParticleArr->puVerts, sysPos, alive, endIdx, puRand );
-			if ( puColor ) puColor->Generate( rParticleArr->puColorStart, rParticleArr->puColorEnd, alive, endIdx, puRand );
-			if ( puScale ) puScale->Generate( rParticleArr->puScaleStart, rParticleArr->puScaleEnd, alive, endIdx, puRand );
-			if ( puForce ) puForce->Generate( rParticleArr->puAcceleration, alive, endIdx, puRand );
-			if ( puMass ) puMass->Generate( rParticleArr->puMass, alive, endIdx, puRand );
-			if ( puLife ) puLife->Generate( rParticleArr->puLife, alive, endIdx, puRand );
+			if ( puPosition ) puPosition->Generate( rParticleArr->puVerts, sysPos, startIdx, endIdx, puRand, deltaT );
+			if ( puColor ) puColor->Generate( rParticleArr->puColorStart, rParticleArr->puColorEnd, startIdx, endIdx, puRand );
+			if ( puScale ) puScale->Generate( rParticleArr->puScaleStart, rParticleArr->puScaleEnd, startIdx, endIdx, puRand );
+			if ( puForce ) puForce->Generate( rParticleArr->puAcceleration, startIdx, endIdx, puRand );
+			if ( puMass ) puMass->Generate( rParticleArr->puMass, startIdx, endIdx, puRand );
+			if ( puLife ) puLife->Generate( rParticleArr->puLife, startIdx, endIdx, puRand );
 
-			// Increment particles alive
-			alive += emitAcc + 1;	// TODO: +1 should be needed so find bug
+			rParticleData->SpawnAccT = spawnAccT;
+			rParticleData->Alive += endIdx - startIdx;
 		}
-
-		rParticleData->SpawnAccT = spawnAccT;
-		rParticleData->Alive = alive;
 	}
 
 	// All types of generators goes here
@@ -402,7 +466,7 @@ struct grSColorUpdate
 	// TODO: Only create updater instance if colors are NOT equal
 
 	grSColorUpdate( const bool hsv )
-		: Hsv	( hsv )
+		: Hsv( hsv )
 	{}
 
 	inline void Update( const sizeT alive, pU<SRgba[]>& rColorStart, const pU<SRgba[]>& rColorEnd, const pU<float[]>& rLife, pU<sf::Vertex[]>& rVerts, const float deltaT )
@@ -442,7 +506,6 @@ struct grSColorUpdate
 		{
 			grColor::SRgba start{ rColorStart[ i ] };
 			grColor::SRgba end{ rColorEnd[ i ] };
-
 			float lerpValue{ 1.0f / rLife[ i ] * deltaT };
 
 			rColorStart[ i ].R = grMath::Lerp( start.R, end.R, lerpValue );
@@ -473,26 +536,23 @@ struct grSScaleUpdate
 			grV2f start{ rScaleStart[ i ] };
 			grV2f end{ rScaleEnd[ i ] };
 			float lerpValue{ 1.0f / rLife[ i ] * deltaT };
-			rScaleStart[ i ] = grMath::Lerp( start, end, lerpValue );
+			rScaleStart[ i ] = grMath::LerpV2f( start, end, lerpValue );
 		}
-	}
-};
-
-struct grSForceUpdate
-{
-	inline void Update( const sizeT alive, const grV2f& rGravity, pU<grV2f[]>& rAcceleration, const pU<float[]>& rMass )
-	{
-		grV2f g{ rGravity };
-		float maxForce{ 10.0f }; // TODO: Implement and move this correctly
-		for ( sizeT i = 0; i < alive; ++i )
-			rAcceleration[ i ] += grV2f( g / rMass[ i ] ).LimitMax( maxForce );
 	}
 };
 
 struct grSVelocityUpdate
 {
-	inline void Update( const sizeT alive, pU<grV2f[]>& rVelocity, const pU<grV2f[]>& rAcceleration, const float deltaT )
+	inline void Update( const sizeT alive, const grV2f& rGravity, pU<grV2f[]>& rVelocity, const pU<grV2f[]>& rAcceleration, const pU<float[]>& rMass, const float deltaT )
 	{
+		grV2f g{ rGravity };
+		float maxForce{ 100.0f }; // TODO: Implement and move this correctly
+		for ( sizeT i = 0; i < alive; ++i )
+		{
+			float m{ rMass[ i ] };
+			rAcceleration[ i ] += grV2f( g / m ).LimitMax( maxForce );
+		}
+
 		float maxSpeed{ 100.0f };	// TODO: Implement and move this correctly
 		for ( sizeT i = 0; i < alive; ++i )
 			rVelocity[ i ] = grV2f( rAcceleration[ i ] ).LimitMax( maxSpeed );
@@ -522,8 +582,8 @@ struct grSLifeUpdate
 			rParticleArr->puLife[ i ] -= deltaT;
 			if ( rParticleArr->puLife[ i ] <= 0.0f )
 			{
-				--last;
 				++killCount;
+				--last;
 				Kill( i, last, rParticleArr );
 			}
 		}
@@ -533,9 +593,6 @@ struct grSLifeUpdate
 
 	inline void Kill( const sizeT nowIdx, const sizeT last, pU<grSParticleArr>& rParticleArr )
 	{
-		//for( sizeT i = 0; i < rParticle->Alive + 1; ++i )
-		//	printf( "%d %3s %g \n", i, "", rParticle->puLife[ i ] );
-
 		grAlgo::Swap( rParticleArr->puVerts[ nowIdx ], rParticleArr->puVerts[ last ] );
 		grAlgo::Swap( rParticleArr->puColorStart[ nowIdx ], rParticleArr->puColorStart[ last ] );
 		grAlgo::Swap( rParticleArr->puColorEnd[ nowIdx ], rParticleArr->puColorEnd[ last ] );
@@ -543,16 +600,13 @@ struct grSLifeUpdate
 		grAlgo::Swap( rParticleArr->puScaleEnd[ nowIdx ], rParticleArr->puScaleEnd[ last ] );
 		grAlgo::Swap( rParticleArr->puAcceleration[ nowIdx ], rParticleArr->puAcceleration[ last ] );
 		grAlgo::Swap( rParticleArr->puVelocity[ nowIdx ], rParticleArr->puVelocity[ last ] );
-		grAlgo::Swap( rParticleArr->puForce[ nowIdx ], rParticleArr->puMass[ last ] );
+		grAlgo::Swap( rParticleArr->puForce[ nowIdx ], rParticleArr->puForce[ last ] );
 		grAlgo::Swap( rParticleArr->puMass[ nowIdx ], rParticleArr->puMass[ last ] );
 		grAlgo::Swap( rParticleArr->puLife[ nowIdx ], rParticleArr->puLife[ last ] );
 
-		// Most values are generated by operator= and does not need zeroing
-		// Values that are generated with operator+= needs resetting obviously
+		// Most values are generated and set by operator= and does not need zeroing (all above)
+		// Values that are generated and set by operator+= needs resetting obviously (all below)
 		rParticleArr->puAcceleration[ last ] = { 0.0f, 0.0f };
-
-		//for ( sizeT i = 0; i < rParticle->Alive + 1; ++i )
-		//	printf( "%d %3s %g \n", i, "", rParticle->puLife[ i ] );
 	}
 };
 
@@ -567,7 +621,7 @@ struct grSUpdate
 	grSUpdate( grSUpdate&& ) noexcept = delete;
 	grSUpdate& operator=( grSUpdate&& ) noexcept = delete;
 
-	inline void Update( pU<grSParticleData>& rParticleVar, pU<grSParticleArr>& rParticleArr, const float deltaT )
+	inline void Update( pU<grSParticleVar>& rParticleVar, pU<grSParticleArr>& rParticleArr, const float deltaT )
 	{
 		grV2f gravity{ rParticleVar->GravityV };
 		sizeT alive{ rParticleVar->Alive };
@@ -577,8 +631,7 @@ struct grSUpdate
 		if ( puPosition ) puPosition->Update( alive, rParticleArr->puVerts, rParticleArr->puVelocity, deltaT );
 		if ( puColor ) puColor->Update( alive, rParticleArr->puColorStart, rParticleArr->puColorEnd, rParticleArr->puLife, rParticleArr->puVerts, deltaT );
 		if ( puScale ) puScale->Update( alive, rParticleArr->puScaleStart, rParticleArr->puScaleEnd, rParticleArr->puLife, deltaT );
-		if ( puForce ) puForce->Update( alive, gravity, rParticleArr->puAcceleration, rParticleArr->puMass );
-		if ( puVelocity ) puVelocity->Update( alive, rParticleArr->puVelocity, rParticleArr->puAcceleration, deltaT );
+		if ( puVelocity ) puVelocity->Update( alive, gravity, rParticleArr->puVelocity, rParticleArr->puAcceleration, rParticleArr->puMass, deltaT );
 		if ( puLife ) alive = puLife->Update( alive, rParticleArr, deltaT );
 
 		rParticleVar->Alive -= alive;
@@ -589,7 +642,6 @@ struct grSUpdate
 	pU<grSPositionUpdate> puPosition;
 	pU<grSColorUpdate> puColor;
 	pU<grSScaleUpdate> puScale;
-	pU<grSForceUpdate> puForce;
 	pU<grSVelocityUpdate> puVelocity;
 	pU<grSLifeUpdate> puLife;
 };
@@ -608,24 +660,26 @@ public:
 
 	void SetEmitRate( const float emitRate );
 	void SetSystemPosition( const grV2f& position );
-	void SetGravity( const float force, const float direction );
+	void SetGravity( const float dirInDeg, const float force );
 
 	// If min<->max are equal, the value will be that. If not equal, the value will be rand inbetween
 	// TODO: Could be better to use injection here as that would make it possible store behaviours externaly
 	void SetColor( const grColor::SRgba& start, const grColor::SRgba& end, const bool hsv = false, const bool randomize = false );
 	void SetScale( const grV2f& start, const grV2f& end );
 	void SetForce( const grV2f& min, const grV2f& max );
-	void SetPosition( const grV2f& min, const grV2f& max );
 	void SetMass( const grV2f& minMax );
 	void SetLife( const grV2f& minMax );
+
+	void AddPositionGeneratorBox( const grV2f& min, const grV2f& max );
+	void AddPositionGeneratorEllipse( const grV2f& min, const grV2f& max, const float step = 0.0f );
 
 	// TODO: Remeber to make this call once in the particle manager whenever that class exists
 	void Update( const float deltaT );
 	void Render( sf::RenderWindow& rRenderWin );
 
 private:
-	pU<grSParticleArr> m_puParticle;
-	pU<grSParticleData> m_puParticleData;
+	pU<grSParticleArr> m_puParticleArr;
+	pU<grSParticleVar> m_puParticleVar;
 	pU<grSEmitter> m_puEmit;
 	pU<grSUpdate> m_puUpdate;
 
