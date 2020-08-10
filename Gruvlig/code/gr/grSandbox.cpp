@@ -29,7 +29,7 @@
 //////////////////////////////////////////////////
 grSandbox::grSandbox( void )
 	: m_rInputMan( grInputManager::Instance() )
-	, m_pPartSys1( new grCParticleSys( 10000, 3500.0f ) )
+	, m_pPartSys1( new grCParticleSys( 10000, 6500.0f ) )
 	, m_pBoidSys( new grCBoidSys() )
 	, m_RendWin( grCore::Instance().GetRenderWin() )
 	, m_Rand( new grRandom() )

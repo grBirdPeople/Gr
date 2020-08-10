@@ -353,7 +353,8 @@ struct grSEmitter
 		float spawnAccT{ rParticleData->SpawnAccT };
 		float emitRate{ rParticleData->EmitRate };
 		sizeT last{ rParticleData->Size - 1 };
-		sizeT alive{ rParticleData->Alive };
+		sizeT startIdx{ rParticleData->Alive };
+		sizeT endIdx{ 0 };
 		sizeT emitAcc{ 0 };
 
 		// If spawns per frame are be greater than frame time
@@ -366,21 +367,20 @@ struct grSEmitter
 
 		if ( emitAcc > 0 )
 		{
-			sizeT endIdx{ grMath::Min( alive + emitAcc + 1, last ) };
+			endIdx = { grMath::Min( startIdx + emitAcc, last ) };
+			if ( startIdx == endIdx )
+				return;
 
-			if ( puPosition ) puPosition->Generate( rParticleArr->puVerts, sysPos, alive, endIdx, puRand );
-			if ( puColor ) puColor->Generate( rParticleArr->puColorStart, rParticleArr->puColorEnd, alive, endIdx, puRand );
-			if ( puScale ) puScale->Generate( rParticleArr->puScaleStart, rParticleArr->puScaleEnd, alive, endIdx, puRand );
-			if ( puForce ) puForce->Generate( rParticleArr->puAcceleration, alive, endIdx, puRand );
-			if ( puMass ) puMass->Generate( rParticleArr->puMass, alive, endIdx, puRand );
-			if ( puLife ) puLife->Generate( rParticleArr->puLife, alive, endIdx, puRand );
-
-			// Increment particles alive
-			alive += emitAcc + 1;	// TODO: +1 should be needed so find bug
+			if ( puPosition ) puPosition->Generate( rParticleArr->puVerts, sysPos, startIdx, endIdx, puRand );
+			if ( puColor ) puColor->Generate( rParticleArr->puColorStart, rParticleArr->puColorEnd, startIdx, endIdx, puRand );
+			if ( puScale ) puScale->Generate( rParticleArr->puScaleStart, rParticleArr->puScaleEnd, startIdx, endIdx, puRand );
+			if ( puForce ) puForce->Generate( rParticleArr->puAcceleration, startIdx, endIdx, puRand );
+			if ( puMass ) puMass->Generate( rParticleArr->puMass, startIdx, endIdx, puRand );
+			if ( puLife ) puLife->Generate( rParticleArr->puLife, startIdx, endIdx, puRand );
 		}
 
 		rParticleData->SpawnAccT = spawnAccT;
-		rParticleData->Alive = alive;
+		rParticleData->Alive += endIdx - startIdx;
 	}
 
 	// All types of generators goes here
