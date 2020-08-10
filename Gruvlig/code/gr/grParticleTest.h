@@ -71,15 +71,15 @@ struct grSBaseGenerate
 {
 	inline void SetBaseColor( grColor::SRgba& rStart, grColor::SRgba& rEnd )
 	{
-		rStart.R = grMath::Clamp( rStart.R, 0, 255 );
-		rStart.G = grMath::Clamp( rStart.G, 0, 255 );
-		rStart.B = grMath::Clamp( rStart.B, 0, 255 );
-		rStart.A = grMath::Clamp( rStart.A, 0, 255 );
+		rStart.R = grMath::Clamp<float>( rStart.R, 0.0f, 255.0f );
+		rStart.G = grMath::Clamp<float>( rStart.G, 0.0f, 255.0f );
+		rStart.B = grMath::Clamp<float>( rStart.B, 0.0f, 255.0f );
+		rStart.A = grMath::Clamp<float>( rStart.A, 0.0f, 255.0f );
 
-		rEnd.R = grMath::Clamp( rEnd.R, 0, 255 );
-		rEnd.G = grMath::Clamp( rEnd.G, 0, 255 );
-		rEnd.B = grMath::Clamp( rEnd.B, 0, 255 );
-		rEnd.A = grMath::Clamp( rEnd.A, 0, 255 );
+		rEnd.R = grMath::Clamp<float>( rEnd.R, 0.0f, 255.0f );
+		rEnd.G = grMath::Clamp<float>( rEnd.G, 0.0f, 255.0f );
+		rEnd.B = grMath::Clamp<float>( rEnd.B, 0.0f, 255.0f );
+		rEnd.A = grMath::Clamp<float>( rEnd.A, 0.0f, 255.0f );
 
 		if ( grMath::CmpFloat( rStart.R, rEnd.R ) &&
 			 grMath::CmpFloat( rStart.G, rEnd.G ) &&
@@ -92,8 +92,8 @@ struct grSBaseGenerate
 
 	inline void SetBaseStartEnd( grV2f& rStart, grV2f& rEnd )
 	{
-		rStart = grMath::Abs( rStart );
-		rEnd = grMath::Abs( rEnd );
+		rStart = grMath::AbsV2f( rStart );
+		rEnd = grMath::AbsV2f( rEnd );
 		Equal = grMath::CmpV2f( rStart, rEnd ) ? EPartValueEqual::YES : EPartValueEqual::NO;
 	}
 
@@ -130,9 +130,9 @@ struct grSColorGenerate : public grSBaseGenerate
 	{
 		if ( Rand )
 		{
-			float midR{ grMath::Abs( LocalStart.R - LocalEnd.R ) * 0.5f };
-			float midG{ grMath::Abs( LocalStart.G - LocalEnd.G ) * 0.5f };
-			float midB{ grMath::Abs( LocalStart.B - LocalEnd.B ) * 0.5f };
+			float midR{ grMath::AbsF( LocalStart.R - LocalEnd.R ) * 0.5f };
+			float midG{ grMath::AbsF( LocalStart.G - LocalEnd.G ) * 0.5f };
+			float midB{ grMath::AbsF( LocalStart.B - LocalEnd.B ) * 0.5f };
 			//float midA = grMath::Abs( LocalStart.A - LocalEnd.A ) * 0.5f;		// Unsure if random alpha is desired
 
 			for ( sizeT i = startIdx; i < endIdx; ++i )
@@ -182,8 +182,8 @@ struct grSScaleGenerate : public grSBaseGenerate
 	{
 		if ( Equal == EPartValueEqual::NO )
 		{			
-			float midX{ grMath::Abs( LocalStart.x - LocalEnd.x ) * 0.5f };
-			float midY{ grMath::Abs( LocalStart.y - LocalEnd.y ) * 0.5f };
+			float midX{ grMath::AbsF( LocalStart.x - LocalEnd.x ) * 0.5f };
+			float midY{ grMath::AbsF( LocalStart.y - LocalEnd.y ) * 0.5f };
 
 			for ( sizeT i = startIdx; i < endIdx; ++i )
 			{
@@ -367,7 +367,7 @@ struct grSEmitter
 
 		if ( emitAcc > 0 )
 		{
-			endIdx = { grMath::Min( startIdx + emitAcc, last ) };
+			endIdx = { grMath::Min<sizeT>( startIdx + emitAcc, last ) };
 			if ( startIdx == endIdx )
 				return;
 
@@ -473,7 +473,7 @@ struct grSScaleUpdate
 			grV2f start{ rScaleStart[ i ] };
 			grV2f end{ rScaleEnd[ i ] };
 			float lerpValue{ 1.0f / rLife[ i ] * deltaT };
-			rScaleStart[ i ] = grMath::Lerp( start, end, lerpValue );
+			rScaleStart[ i ] = grMath::LerpV2f( start, end, lerpValue );
 		}
 	}
 };
@@ -606,7 +606,7 @@ public:
 
 	void SetEmitRate( const float emitRate );
 	void SetSystemPosition( const grV2f& position );
-	void SetGravity( const float force, const float direction );
+	void SetGravity( const float dirInDeg, const float force );
 
 	// If min<->max are equal, the value will be that. If not equal, the value will be rand inbetween
 	// TODO: Could be better to use injection here as that would make it possible store behaviours externaly

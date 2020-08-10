@@ -46,7 +46,7 @@ grCParticleSystem::Copy( vE<intU>& rVeActvEmitr,
 					{
 						case ( sizeT )grCParticleEmitter::EUsrMods::POS:
 						rSysAtt.EmitrPos = rEmitrAtt.EmitrPos;
-						rSysAtt.PartRadiusPosOffset = grMath::Abs( rEmitrAtt.PartRadiusPosOffset );
+						rSysAtt.PartRadiusPosOffset = grMath::AbsF( rEmitrAtt.PartRadiusPosOffset );
 						break;
 
 						case ( sizeT )grCParticleEmitter::EUsrMods::DIR_EMITR:
@@ -92,15 +92,15 @@ grCParticleSystem::Copy( vE<intU>& rVeActvEmitr,
 						break;
 
 						case ( sizeT )grCParticleEmitter::EUsrMods::COL:
-						rSysAtt.PartColMinMax.From.R = grMath::Clamp( ( intU )rSysAtt.PartColMinMax.From.R, 0, 255 );
-						rSysAtt.PartColMinMax.From.G = grMath::Clamp( ( intU )rSysAtt.PartColMinMax.From.G, 0, 255 );
-						rSysAtt.PartColMinMax.From.B = grMath::Clamp( ( intU )rSysAtt.PartColMinMax.From.B, 0, 255 );
-						rSysAtt.PartColMinMax.From.A = grMath::Clamp( ( intU )rSysAtt.PartColMinMax.From.A, 0, 255 );
+						rSysAtt.PartColMinMax.From.R = grMath::Clamp<intU>( ( intU )rSysAtt.PartColMinMax.From.R, 0, 255 );
+						rSysAtt.PartColMinMax.From.G = grMath::Clamp<intU>( ( intU )rSysAtt.PartColMinMax.From.G, 0, 255 );
+						rSysAtt.PartColMinMax.From.B = grMath::Clamp<intU>( ( intU )rSysAtt.PartColMinMax.From.B, 0, 255 );
+						rSysAtt.PartColMinMax.From.A = grMath::Clamp<intU>( ( intU )rSysAtt.PartColMinMax.From.A, 0, 255 );
 
-						rSysAtt.PartColMinMax.Too.R = grMath::Clamp( ( intU )rSysAtt.PartColMinMax.Too.R, 0, 255 );
-						rSysAtt.PartColMinMax.Too.G = grMath::Clamp( ( intU )rSysAtt.PartColMinMax.Too.G, 0, 255 );
-						rSysAtt.PartColMinMax.Too.B = grMath::Clamp( ( intU )rSysAtt.PartColMinMax.Too.B, 0, 255 );
-						rSysAtt.PartColMinMax.Too.A = grMath::Clamp( ( intU )rSysAtt.PartColMinMax.Too.A, 0, 255 );
+						rSysAtt.PartColMinMax.Too.R = grMath::Clamp<intU>( ( intU )rSysAtt.PartColMinMax.Too.R, 0, 255 );
+						rSysAtt.PartColMinMax.Too.G = grMath::Clamp<intU>( ( intU )rSysAtt.PartColMinMax.Too.G, 0, 255 );
+						rSysAtt.PartColMinMax.Too.B = grMath::Clamp<intU>( ( intU )rSysAtt.PartColMinMax.Too.B, 0, 255 );
+						rSysAtt.PartColMinMax.Too.A = grMath::Clamp<intU>( ( intU )rSysAtt.PartColMinMax.Too.A, 0, 255 );
 						break;
 
 						default:

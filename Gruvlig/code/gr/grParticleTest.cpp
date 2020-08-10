@@ -44,9 +44,9 @@ grCParticleSys::SetSystemPosition( const grV2f& position )
 }
 
 void
-grCParticleSys::SetGravity( const float force, const float direction )
+grCParticleSys::SetGravity( const float dirInDeg, const float force )
 {
-	float d{ grMath::Clamp( direction, 0.0f, 360.0f ) };
+	float d{ grMath::Clamp( dirInDeg, 0.0f, 360.0f ) };
 	m_puParticleVar->GravityV = { grMath::DegToVec( d ) * force };
 	m_puParticleVar->GravityF = force;
 }
