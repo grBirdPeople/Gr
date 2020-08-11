@@ -67,6 +67,10 @@ enum class EPartValueEqual
 
 struct grSBaseGenerate
 {
+	grSBaseGenerate()
+		: IsEqual( EPartValueEqual::YES )
+	{}
+
 	inline void InitBaseColor( grColor::SRgba& rStart, grColor::SRgba& rEnd )
 	{
 		rStart.R = grMath::Clamp<float>( rStart.R, 0.0f, 255.0f );
@@ -109,7 +113,9 @@ struct grSBaseGenerate
 struct grSColorGenerate : public grSBaseGenerate
 {
 	grSColorGenerate()
-		: Rand( false )
+		: ColorStart( SRgba() )
+		, ColorEnd( SRgba() )
+		, Rand( false )
 	{}
 
 	inline void Init( const grColor::SRgba& rStart, const grColor::SRgba& rEnd, const bool randomize )
@@ -165,6 +171,11 @@ struct grSColorGenerate : public grSBaseGenerate
 
 struct grSScaleGenerate : public grSBaseGenerate
 {
+	grSScaleGenerate()
+		: ScaleStart( grV2f() )
+		, ScaleEnd( grV2f() )
+	{}
+
 	inline void Init( const grV2f& start, const grV2f& end )
 	{
 		ScaleStart = start;
@@ -207,6 +218,11 @@ struct grSScaleGenerate : public grSBaseGenerate
 
 struct grSForceGenerate : public grSBaseGenerate
 {
+	grSForceGenerate()
+		: DirMinMax( grV2f() )
+		, ForceMinMax( grV2f() )
+	{}
+
 	inline void Init( const grV2f& dirInDegMinMax, const grV2f& forceMinMax )
 	{
 		DirMinMax = grV2f( grMath::Clamp( dirInDegMinMax.x, 0.0f, 359.9f ), grMath::Clamp( dirInDegMinMax.y, 0.0f, 359.9f ) );
@@ -262,6 +278,16 @@ struct grSPositionGenerate : public grSBaseGenerate
 		BOX = 0,
 		ELLIPSE
 	};
+
+	grSPositionGenerate()
+		: PosMin( grV2f() )
+		, PosMax( grV2f() )
+		, EllipseRad( grV2f() )
+		, EllipseStepX( 0.0f )
+		, EllipseStepY( 0.0f )
+		, EllipseFull( 0.0f )
+		, PosType( EPosGenType::BOX )
+	{}
 
 	inline void Init( const grV2f& min, const grV2f& max )
 	{
@@ -356,6 +382,10 @@ struct grSPositionGenerate : public grSBaseGenerate
 
 struct grSMassGenerate : public grSBaseGenerate
 {
+	grSMassGenerate()
+		: MassMinMax( grV2f() )
+	{}
+
 	inline void Init( const grV2f& rMinMax )
 	{
 		MassMinMax = rMinMax;
@@ -384,6 +414,10 @@ struct grSMassGenerate : public grSBaseGenerate
 
 struct grSLifeGenerate : public grSBaseGenerate
 {
+	grSLifeGenerate()
+		: LifeMinMax( grV2f() )
+	{}
+
 	inline void Init( const grV2f& minMax )
 	{
 		LifeMinMax = minMax;
@@ -549,6 +583,10 @@ struct grSEmitter
 
 struct grSColorUpdate
 {
+	grSColorUpdate()
+		: Hsv( true )
+	{}
+
 	inline void SetHsv( const bool hsv)
 	{
 		Hsv = hsv;
