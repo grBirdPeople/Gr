@@ -52,6 +52,27 @@ grCParticleSys::SetGravity( const float dirInDeg, const float force )
 }
 
 void
+grCParticleSys::SetPositionBox( const grV2f& min, const grV2f& max )
+{
+	m_puEmit->AddGenerate( EParticleGenerateType::POSITION );
+	m_puEmit->puPosition->Init( min, max );
+}
+
+void
+grCParticleSys::SetPositionEllipse( const grV2f& min, const grV2f& max, const float step )
+{
+	m_puEmit->AddGenerate( EParticleGenerateType::POSITION );
+	m_puEmit->puPosition->Init( min, max, step );
+}
+
+void
+grCParticleSys::SetSpawnForce( const grV2f& dirInDegMinMax, const grV2f& forceMinMax )
+{
+	m_puEmit->AddGenerate( EParticleGenerateType::FORCE );
+	m_puEmit->puForce->Init( dirInDegMinMax, forceMinMax );
+}
+
+void
 grCParticleSys::SetColor( const grColor::SRgba& start, const grColor::SRgba& end, const bool hsv, const bool randomize )
 {
 	m_puEmit->AddGenerate( EParticleGenerateType::COLOR );
@@ -86,28 +107,6 @@ grCParticleSys::SetLife( const grV2f& minMax )
 
 	m_puUpdate->AddUpdate( EParticleUpdateType::LIFE );
 }
-
-void
-grCParticleSys::AddGeneratorPositionBox( const grV2f& min, const grV2f& max )
-{
-	m_puEmit->AddGenerate( EParticleGenerateType::POSITION );
-	m_puEmit->puPosition->Init( min, max );
-}
-
-void
-grCParticleSys::AddGeneratorPositionEllipse( const grV2f& min, const grV2f& max, const float step )
-{
-	m_puEmit->AddGenerate( EParticleGenerateType::POSITION );
-	m_puEmit->puPosition->Init( min, max, step );
-}
-
-void
-grCParticleSys::AddGeneratorDirectionForce( const grV2f& dirInDegMinMax, const grV2f& forceMinMax )
-{
-	m_puEmit->AddGenerate( EParticleGenerateType::FORCE );
-	m_puEmit->puForce->Init( dirInDegMinMax, forceMinMax );
-}
-
 
 // TEST DRAW
 #include	"grBBox.h"

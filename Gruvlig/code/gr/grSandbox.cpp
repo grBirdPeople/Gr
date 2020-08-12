@@ -32,7 +32,7 @@ grSandbox::grSandbox( void )
 	, m_pPartSys1( new grCParticleSys( 10000, 6500.0f ) )
 	, m_pBoidSys( new grCBoidSys() )
 	, m_RendWin( grCore::Instance().GetRenderWin() )
-	, m_Rand( new grRandom() )
+	, m_Rand( new grRandMT() )
 {
 	// Hide mouse cursor
 	m_RendWin.setMouseCursorVisible( false );
@@ -176,8 +176,8 @@ grSandbox::grSandbox( void )
 	m_pPartSys1->SetColor( { 200, 255, 255, 255 }, { 0, 255, 0, 0 }, true, false );
 	//m_pPartSys1->SetScale( grV2f( 10.0f, 10.0f ), grV2f( 0.0f, 0.0f ) );
 	//m_pPartSys1->AddGeneratorPositionBox( { -15.0f, -15.0f }, { 15.0f, 15.0f } );
-	m_pPartSys1->AddGeneratorPositionEllipse( { -100.f, 100.0f }, { 100.0f, 100.0f }, 50.0f );
-	m_pPartSys1->AddGeneratorDirectionForce( { 0.0f, 0.0f }, { 249.0f, 250.0f } );
+	m_pPartSys1->SetPositionEllipse( { -100.f, 100.0f }, { 100.0f, 100.0f }, 50.0f );
+	m_pPartSys1->SetSpawnForce( { 0.0f, 0.0f }, { 249.0f, 250.0f } );
 	m_pPartSys1->SetMass( { 2.0f, 8.0f } );
 	m_pPartSys1->SetLife( { 0.1f, 3.0f } );
 

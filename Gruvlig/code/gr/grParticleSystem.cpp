@@ -8,7 +8,7 @@
 
 
 grCParticleSystem::grCParticleSystem( const intU id, const sizeT partMax )
-	: m_uPRand	( new grRandom() )
+	: m_uPRand	( new grRandMT() )
 	, m_Id		( id )
 	, m_PartMax	( partMax )
 {}
