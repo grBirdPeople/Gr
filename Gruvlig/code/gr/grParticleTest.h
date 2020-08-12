@@ -326,44 +326,45 @@ struct grSPositionGenerate : public grSBaseGenerate
 		EllipseRad.y = PosMin.y;
 	}
 
-	inline void Generate( pU<sf::Vertex[]>& rPosition, const grV2f& sysPos, const sizeT startIdx, const sizeT endIdx, const pU<grRandXOR>& rRand, const float deltaT )
+	inline void Generate( pU<sf::Vertex[]>& rPosition, const grV2f& rSysPos, const sizeT startIdx, const sizeT endIdx, const pU<grRandXOR>& rRand, const float deltaT )
 	{
 		if ( IsEqual == EPartValueEqual::NO )
 		{
 			if ( PosType == EPosGenType::BOX )
 			{
-				BoxEqualNo( rPosition, sysPos, startIdx, endIdx, rRand );
+				BoxEqualNo( rPosition, rSysPos, startIdx, endIdx, rRand );
 				return;
 			}
-			EllipseEqualNo( rPosition, sysPos, startIdx, endIdx, rRand, deltaT );
+			EllipseEqualNo( rPosition, rSysPos, startIdx, endIdx, rRand, deltaT );
 			return;
 		}
 
 		if ( PosType == EPosGenType::BOX )
 		{
-			BoxEqualYes( rPosition, sysPos, startIdx, endIdx );
+			BoxEqualYes( rPosition, rSysPos, startIdx, endIdx );
 			return;
 		}
-		EllipseEqualYes( rPosition, sysPos, startIdx, endIdx, rRand );
+		EllipseEqualYes( rPosition, rSysPos, startIdx, endIdx, rRand );
 	}
 
-	void BoxEqualNo( pU<sf::Vertex[]>& rPosition, const grV2f& sysPos, const sizeT startIdx, const sizeT endIdx, const pU<grRandXOR>& rRand )
+	void BoxEqualNo( pU<sf::Vertex[]>& rPosition, const grV2f& rSysPos, const sizeT startIdx, const sizeT endIdx, const pU<grRandXOR>& rRand )
 	{
 		auto distX{ rRand->FloatDist( PosMin.x, PosMax.x ) };
 		auto distY{ rRand->FloatDist( PosMin.y, PosMax.y ) };
 		for ( sizeT i = startIdx; i < endIdx; ++i )
 		{
 			grV2f p{ rRand->Float( distX ), rRand->Float( distY ) };
+			p += rSysPos;
 			rPosition[ i ].position.x = p.x;
 			rPosition[ i ].position.y = p.y;
 		}
 	}
 
-	void BoxEqualYes( pU<sf::Vertex[]>& rPosition, const grV2f& sysPos, const sizeT startIdx, const sizeT endIdx )
+	void BoxEqualYes( pU<sf::Vertex[]>& rPosition, const grV2f& rSysPos, const sizeT startIdx, const sizeT endIdx )
 	{
 		for ( sizeT i = startIdx; i < endIdx; ++i )
 		{
-			grV2f p{ PosMin + sysPos };
+			grV2f p{ PosMin + rSysPos };
 			rPosition[ i ].position.x = p.x;
 			rPosition[ i ].position.y = p.y;
 		}

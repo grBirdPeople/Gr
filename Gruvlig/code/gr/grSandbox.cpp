@@ -172,12 +172,12 @@ grSandbox::grSandbox( void )
 	grV2f winSize{ ( float )grCore::Instance().GetWindowSize().x, ( float )grCore::Instance().GetWindowSize().y };
 
 	m_pPartSys1->SetSystemPosition( { winSize.x * 0.5f, winSize.y * 0.5f } );
-	m_pPartSys1->SetGravity( 180.0f, 6.0f );
+	m_pPartSys1->SetGravity( 180.0f, 0.0f );
 	m_pPartSys1->SetColor( { 200, 255, 255, 255 }, { 0, 255, 0, 0 }, true, false );
 	//m_pPartSys1->SetScale( grV2f( 10.0f, 10.0f ), grV2f( 0.0f, 0.0f ) );
-	//m_pPartSys1->AddGeneratorPositionBox( { -15.0f, -15.0f }, { 15.0f, 15.0f } );
-	m_pPartSys1->SetPositionEllipse( { -100.f, 100.0f }, { 100.0f, 100.0f }, 50.0f );
-	m_pPartSys1->SetSpawnForce( { 0.0f, 0.0f }, { 249.0f, 250.0f } );
+	m_pPartSys1->SetPositionBox( { -100.0f, 0.0f }, { 100.0f, 0.0f } );
+	//m_pPartSys1->SetPositionEllipse( { -50.f, 100.0f }, { 50.0f, 100.0f }, 25.0f );
+	m_pPartSys1->SetSpawnForce( { 45.0f, 45.0f }, { 49.0f, 100.0f } );
 	m_pPartSys1->SetMass( { 2.0f, 8.0f } );
 	m_pPartSys1->SetLife( { 0.1f, 3.0f } );
 
