@@ -31,19 +31,36 @@ public:
 		m_Eng.seed( std::random_device{}( ) );		
 	}
 
-	inline std::uniform_real_distribution<float> FloatDist( const float min, const float max )
+	inline std::uniform_real_distribution<float> DistF( const float min, const float max )
 	{
 		std::uniform_real_distribution<float> dist( min, max );
 		return dist;
 	}
 
-	inline std::uniform_real_distribution<float> FloatDist( const grV2f& rMinMax )
+	inline std::uniform_real_distribution<float> DistF( const grV2f& rMinMax )
 	{
 		std::uniform_real_distribution<float> dist( rMinMax.x, rMinMax.y );
 		return dist;
 	}
 
 	inline float Float( const std::uniform_real_distribution<float>& rDist )
+	{
+		return rDist( m_Eng );
+	}
+
+	inline std::uniform_int_distribution<signed int> DistS( const intS min, const intS max )
+	{
+		std::uniform_int_distribution<signed int> dist( ( signed int )min, ( signed int )max );
+		return dist;
+	}
+
+	inline std::uniform_int_distribution<signed int> DistS( const grV2s& rMinMax )
+	{
+		std::uniform_int_distribution<signed int> dist( ( signed int )rMinMax.x, ( signed int )rMinMax.y );
+		return dist;
+	}
+
+	inline intS IntS( const std::uniform_int_distribution<signed int>& rDist )
 	{
 		return rDist( m_Eng );
 	}
