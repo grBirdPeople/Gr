@@ -6,7 +6,7 @@
 struct		grSParticleAttribute;
 class		grCParticleEmitter;
 struct		grSParticleArr;
-class		grRandom;
+class		grRandMT;
 
 
 class grCParticleSystem
@@ -52,7 +52,7 @@ private:
 	void ActvLife( grSParticleAttribute& rAtt, grSParticleArr& rPart );
 	void ActvColor( grSParticleAttribute& rAtt, grSParticleArr& rPart );	// Change over T is dependent of lifetime so allways do color after
 
-	pU<grRandom>	m_uPRand;
+	pU<grRandMT>	m_uPRand;
 
 	intU	m_Id,
 			m_PartMax; // A little weird // Defined in part man and passed to this from part man create

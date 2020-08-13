@@ -25,7 +25,6 @@ struct grSParticleArr
 		, puColorEnd( std::make_unique<SRgba[]>( size ) )
 		, puScaleStart( std::make_unique<grV2f[]>( size ) )
 		, puScaleEnd( std::make_unique<grV2f[]>( size ) )
-		, puForce( std::make_unique<float[]>( size ) )
 		, puAcceleration( std::make_unique<grV2f[]>( size ) )
 		, puVelocity( std::make_unique<grV2f[]>( size ) )
 		, puMass( std::make_unique<float[]>( size ) )
@@ -41,7 +40,6 @@ struct grSParticleArr
 	pU<SRgba[]> puColorEnd;
 	pU<grV2f[]> puScaleStart;
 	pU<grV2f[]> puScaleEnd;
-	pU<float[]> puForce;
 	pU<grV2f[]> puAcceleration;
 	pU<grV2f[]> puVelocity;
 	pU<float[]> puMass;
@@ -69,7 +67,11 @@ enum class EPartValueEqual
 
 struct grSBaseGenerate
 {
-	inline void SetBaseColor( grColor::SRgba& rStart, grColor::SRgba& rEnd )
+	grSBaseGenerate()
+		: IsEqual( EPartValueEqual::YES )
+	{}
+
+	inline void InitBaseColor( grColor::SRgba& rStart, grColor::SRgba& rEnd )
 	{
 		rStart.R = grMath::Clamp<float>( rStart.R, 0.0f, 255.0f );
 		rStart.G = grMath::Clamp<float>( rStart.G, 0.0f, 255.0f );
@@ -80,75 +82,82 @@ struct grSBaseGenerate
 		rEnd.G = grMath::Clamp<float>( rEnd.G, 0.0f, 255.0f );
 		rEnd.B = grMath::Clamp<float>( rEnd.B, 0.0f, 255.0f );
 		rEnd.A = grMath::Clamp<float>( rEnd.A, 0.0f, 255.0f );
-
-		if ( grMath::CmpFloat( rStart.R, rEnd.R ) &&
-			 grMath::CmpFloat( rStart.G, rEnd.G ) &&
-			 grMath::CmpFloat( rStart.B, rEnd.B ) &&
-			 grMath::CmpFloat( rStart.A, rEnd.A ) )
-		{
-			Equal = EPartValueEqual::YES;
-		}
 	}
 
-	inline void SetBaseStartEnd( grV2f& rStart, grV2f& rEnd )
+	inline void InitBaseStartEnd( grV2f& rStart, grV2f& rEnd )
 	{
-		Equal = grMath::CmpV2f( rStart, rEnd ) ? EPartValueEqual::YES : EPartValueEqual::NO;
+		IsEqual = grMath::CmpV2f( rStart, rEnd ) ? EPartValueEqual::YES : EPartValueEqual::NO;
 	}
 
-	inline void SetBaseMinMaxX2( grV2f& rMin, grV2f& rMax )
+	inline void InitBaseMinMaxX2( grV2f& rMin, grV2f& rMax )
 	{
-		grMath::RangeCheckV2fx2( rMin, rMax );
-		Equal = grMath::CmpV2f( rMin, rMax ) ? EPartValueEqual::YES : EPartValueEqual::NO;
+		if ( rMin.x > rMax.x )
+			grAlgo::Swap( rMin.x, rMax.x );
+		if ( rMin.y > rMax.y )
+			grAlgo::Swap( rMin.y, rMax.y );
+
+		IsEqual = grMath::CmpV2f( rMin, rMax ) ? EPartValueEqual::YES : EPartValueEqual::NO;
 	}
 
-	inline void SetBaseMinMax( grV2f& rMinMax )
+	inline void InitBaseMinMax( grV2f& rMinMax )
 	{
-		grMath::RangeCheckV2f( rMinMax );
-		Equal = grMath::CmpFloat( rMinMax.x, rMinMax.y ) ? EPartValueEqual::YES : EPartValueEqual::NO;
+		if ( rMinMax.x > rMinMax.y )
+			grAlgo::Swap( rMinMax.x, rMinMax.y );
+
+		IsEqual = grMath::CmpFloat( rMinMax.x, rMinMax.y ) ? EPartValueEqual::YES : EPartValueEqual::NO;
 	}
 
-	EPartValueEqual Equal;
+	EPartValueEqual IsEqual;
 };
 
 struct grSColorGenerate : public grSBaseGenerate
 {
 	grSColorGenerate()
-		: Rand( false )
+		: ColorStart( SRgba() )
+		, ColorEnd( SRgba() )
+		, Rand( false )
 	{}
 
-	inline void Set( const grColor::SRgba& rStart, const grColor::SRgba& rEnd, const bool randomize )
+	inline void Init( const grColor::SRgba& rStart, const grColor::SRgba& rEnd, const bool randomize )
 	{
-		LocalStart = rStart;
-		LocalEnd = rEnd;
+		ColorStart = rStart;
+		ColorEnd = rEnd;
 		Rand = randomize;
-		SetBaseColor( LocalStart, LocalEnd );
+		InitBaseColor( ColorStart, ColorEnd );
 	}
 
-	inline void Generate( pU<SRgba[]>& rColorStart, pU<SRgba[]>& rColorEnd, const sizeT startIdx, const sizeT endIdx, const pU<grRandom>& rRand )
+	inline void Generate( pU<SRgba[]>& rColorStart, pU<SRgba[]>& rColorEnd, const sizeT startIdx, const sizeT endIdx, const pU<grRandXOR>& rRand )
 	{
 		if ( Rand )
 		{
-			float midR{ grMath::AbsF( LocalStart.R - LocalEnd.R ) * 0.5f };
-			float midG{ grMath::AbsF( LocalStart.G - LocalEnd.G ) * 0.5f };
-			float midB{ grMath::AbsF( LocalStart.B - LocalEnd.B ) * 0.5f };
+			float midR{ grMath::AbsF( ColorStart.R - ColorEnd.R ) * 0.5f };
+			float midG{ grMath::AbsF( ColorStart.G - ColorEnd.G ) * 0.5f };
+			float midB{ grMath::AbsF( ColorStart.B - ColorEnd.B ) * 0.5f };
 			//float midA = grMath::Abs( LocalStart.A - LocalEnd.A ) * 0.5f;		// Unsure if random alpha is desired
+
+			auto distB2{ rRand->DistF( ColorStart.B, midR ) };
+			auto distB1{ rRand->DistF( midR, ColorStart.B ) };
+			auto distG2{ rRand->DistF( ColorStart.G, midR ) };
+			auto distG1{ rRand->DistF( midR, ColorStart.G ) };
+			auto distR2{ rRand->DistF( ColorStart.R, midR ) };
+			auto distR1{ rRand->DistF( midR, ColorStart.R ) };
 
 			for ( sizeT i = startIdx; i < endIdx; ++i )
 			{
-				grColor::SRgba result{ LocalStart.R > midR ? ( uint16_t )rRand->Float( midR, LocalStart.R ) : ( uint16_t )rRand->Float( LocalStart.R, midR ),
-									   LocalStart.G > midG ? ( uint16_t )rRand->Float( midG, LocalStart.G ) : ( uint16_t )rRand->Float( LocalStart.G, midG ),
-									   LocalStart.B > midB ? ( uint16_t )rRand->Float( midB, LocalStart.B ) : ( uint16_t )rRand->Float( LocalStart.B, midB ),
-										( uint16_t )LocalStart.A };
+				grColor::SRgba result{ ColorStart.R > midR ? ( uint16_t )rRand->Float( distR1 ) : ( uint16_t )rRand->Float( distR2 ),
+					ColorStart.G > midG ? ( uint16_t )rRand->Float( distG1 ) : ( uint16_t )rRand->Float( distG2 ),
+					ColorStart.B > midB ? ( uint16_t )rRand->Float( distB1 ) : ( uint16_t )rRand->Float( distB2 ),
+					( uint16_t )ColorStart.A };
 
 				rColorStart[ i ] = result;
 			}
 
 			for ( sizeT i = startIdx; i < endIdx; ++i )
 			{
-				grColor::SRgba result{ LocalEnd.R > midR ? ( uint16_t )rRand->Float( midR, LocalEnd.R ) : ( uint16_t )rRand->Float( LocalEnd.R, midR ),
-									   LocalEnd.G > midG ? ( uint16_t )rRand->Float( midG, LocalEnd.G ) : ( uint16_t )rRand->Float( LocalEnd.G, midG ) ,
-									   LocalEnd.B > midB ? ( uint16_t )rRand->Float( midB, LocalEnd.B ) : ( uint16_t )rRand->Float( LocalEnd.B, midB ),
-										( uint16_t )LocalEnd.A };
+				grColor::SRgba result{ ColorEnd.R > midR ? ( uint16_t )rRand->Float( distR1 ) : ( uint16_t )rRand->Float( distR2 ),
+					ColorEnd.G > midG ? ( uint16_t )rRand->Float( distG1 ) : ( uint16_t )rRand->Float( distG2 ) ,
+					ColorEnd.B > midB ? ( uint16_t )rRand->Float( distB1 ) : ( uint16_t )rRand->Float( distB2 ),
+					( uint16_t )ColorEnd.A };
 
 				rColorEnd[ i ] = result;
 			}
@@ -157,44 +166,54 @@ struct grSColorGenerate : public grSBaseGenerate
 		}
 		
 		for ( sizeT i = startIdx; i < endIdx; ++i )
-			rColorStart[ i ] = LocalStart;
+			rColorStart[ i ] = ColorStart;
 
 		for ( sizeT i = startIdx; i < endIdx; ++i )
-			rColorEnd[ i ] = LocalEnd;
+			rColorEnd[ i ] = ColorEnd;
 	}
 
-	SRgba LocalStart, LocalEnd;
+	SRgba ColorStart, ColorEnd;
 	bool Rand;
 };
 
 struct grSScaleGenerate : public grSBaseGenerate
 {
-	inline void Set( const grV2f& start, const grV2f& end )
+	grSScaleGenerate()
+		: ScaleStart( grV2f() )
+		, ScaleEnd( grV2f() )
+	{}
+
+	inline void Init( const grV2f& start, const grV2f& end )
 	{
-		LocalStart = start;
-		LocalEnd = end;
-		SetBaseStartEnd( LocalStart, LocalEnd );
+		ScaleStart = start;
+		ScaleEnd = end;
+		InitBaseStartEnd( ScaleStart, ScaleEnd );
 	}
 
-	inline void Generate( pU<grV2f[]>& rScaleStart, pU<grV2f[]>& rScaleEnd, const sizeT startIdx, const sizeT endIdx, const pU<grRandom>& rRand )
+	inline void Generate( pU<grV2f[]>& rScaleStart, pU<grV2f[]>& rScaleEnd, const sizeT startIdx, const sizeT endIdx, const pU<grRandXOR>& rRand )
 	{
-		if ( Equal == EPartValueEqual::NO )
+		if ( IsEqual == EPartValueEqual::NO )
 		{			
-			float midX{ grMath::AbsF( LocalStart.x - LocalEnd.x ) * 0.5f };
-			float midY{ grMath::AbsF( LocalStart.y - LocalEnd.y ) * 0.5f };
+			float midX{ grMath::AbsF( ScaleStart.x - ScaleEnd.x ) * 0.5f };
+			float midY{ grMath::AbsF( ScaleStart.y - ScaleEnd.y ) * 0.5f };
+
+			auto distY2{ rRand->DistF( ScaleStart.y, midY ) };
+			auto distY1{ rRand->DistF( midY, ScaleStart.y ) };
+			auto distX2{ rRand->DistF( ScaleStart.x, midX ) };
+			auto distX1{ rRand->DistF( midX, ScaleStart.x ) };
 
 			for ( sizeT i = startIdx; i < endIdx; ++i )
 			{
-				grV2f result( LocalStart.x > midX ? rRand->Float( midX, LocalStart.x ) : rRand->Float( LocalStart.x, midX ),
-							  LocalStart.y > midY ? rRand->Float( midY, LocalStart.y ) : rRand->Float( LocalStart.y, midY ) );
+				grV2f result( ScaleStart.x > midX ? rRand->Float( distX1 ) : rRand->Float( distX2 ),
+							  ScaleStart.y > midY ? rRand->Float( distY1 ) : rRand->Float( distY2 ) );
 
 				rScaleStart[ i ] = result;
 			}
 
 			for ( sizeT i = startIdx; i < endIdx; ++i )
 			{
-				grV2f result( LocalEnd.x > midX ? rRand->Float( midX, LocalEnd.x ) : rRand->Float( LocalEnd.x, midX ),
-							  LocalEnd.y > midY ? rRand->Float( midY, LocalEnd.y ) : rRand->Float( LocalEnd.y, midY ) );
+				grV2f result( ScaleEnd.x > midX ? rRand->Float( distX1 ) : rRand->Float( distX2 ),
+							  ScaleEnd.y > midY ? rRand->Float( distY1 ) : rRand->Float( distY2 ) );
 
 				rScaleEnd[ i ] = result;
 			}
@@ -203,42 +222,68 @@ struct grSScaleGenerate : public grSBaseGenerate
 		}
 
 		for ( sizeT i = startIdx; i < endIdx; ++i )
-			rScaleStart[ i ] = LocalStart;
+			rScaleStart[ i ] = ScaleStart;
 	}
 
-	grV2f LocalStart, LocalEnd;
+	grV2f ScaleStart, ScaleEnd;
 };
 
 struct grSForceGenerate : public grSBaseGenerate
 {
-	enum class EForceType
-	{
-		GRAVITY = 0x1,
-		WIND = 0x2
-	};
+	grSForceGenerate()
+		: DirMinMax( grV2f() )
+		, ForceMinMax( grV2f() )
+	{}
 
-	inline void Set( const grV2f& min, const grV2f& max )
+	inline void Init( const grV2f& dirInDegMinMax, const grV2f& forceMinMax )
 	{
-		LocalMin = min;
-		LocalMax = max;
-		SetBaseMinMaxX2( LocalMin, LocalMax );
+		DirMinMax = grV2f( grMath::Clamp( dirInDegMinMax.x, 0.0f, 359.9f ), grMath::Clamp( dirInDegMinMax.y, 0.0f, 359.9f ) );
+		ForceMinMax = forceMinMax;
+		InitBaseMinMax ( ForceMinMax );
 	}
 
-	inline void Generate( pU<grV2f[]>& rAcceleration, const sizeT startIdx, const sizeT endIdx, const pU<grRandom>& rRand )
+	inline void Generate( pU<grV2f[]>& rAcceleration, pU<float[]>& rMass, const sizeT startIdx, const sizeT endIdx, const pU<grRandXOR>& rRand )
 	{
-		if ( Equal == EPartValueEqual::NO )
+		if ( IsEqual == EPartValueEqual::NO )
 		{
+			float d{ 0.0f };
+			if ( DirMinMax.x > DirMinMax.y )
+			{
+				float diff{ 359.9f - DirMinMax.x };
+				auto dist{ rRand->DistF( 0.0f, diff + DirMinMax.y ) };
+				d = rRand->Float( dist );
+				d -= diff;
+				if ( d < 0.0f )
+					d = 359.9f + d;
+			}
+			else
+			{
+				auto dist{ rRand->DistF( DirMinMax.x, DirMinMax.y ) };
+				d = rRand->Float( dist );
+			}
+
+			auto dist{ rRand->DistF( ForceMinMax.x, ForceMinMax.y ) };
+			float f{ rRand->Float( dist ) };
+			grV2f v{ grMath::DegToVec( d ) * f };
 			for ( sizeT i = startIdx; i < endIdx; ++i )
-				rAcceleration[ i ] += rRand->V2fx2( LocalMin, LocalMax );
+			{
+				float m{ rMass[ i ] };
+				rAcceleration[ i ] += { v / m };
+			}
 
 			return;
 		}
 
+		grV2f v{ grMath::DegToVec( DirMinMax.x ) * ForceMinMax.x };
 		for ( sizeT i = startIdx; i < endIdx; ++i )
-			rAcceleration[ i ] += LocalMin;
+		{
+			float m{ rMass[ i ] };
+			rAcceleration[ i ] += { v / m };
+		}
 	}
 
-	grV2f LocalMin, LocalMax;
+	grV2f DirMinMax;
+	grV2f ForceMinMax;
 };
 
 struct grSPositionGenerate : public grSBaseGenerate
@@ -249,94 +294,106 @@ struct grSPositionGenerate : public grSBaseGenerate
 		ELLIPSE
 	};
 
-	inline void Set( const grV2f& min, const grV2f& max )
+	grSPositionGenerate()
+		: PosMin( grV2f() )
+		, PosMax( grV2f() )
+		, EllipseRad( grV2f() )
+		, EllipseStepX( 0.0f )
+		, EllipseStepY( 0.0f )
+		, EllipseFull( 0.0f )
+		, PosType( EPosGenType::BOX )
+	{}
+
+	inline void Init( const grV2f& min, const grV2f& max )
 	{
-		LocalMin = min;
-		LocalMax = max;
-		SetBaseMinMaxX2( LocalMin, LocalMax );
+		PosMin = min;
+		PosMax = max;
+		InitBaseMinMaxX2( PosMin, PosMax );
 		PosType = EPosGenType::BOX;
 	}
 
-	inline void Set( const grV2f& min, const grV2f& max, const float step )
+	inline void Init( const grV2f& min, const grV2f& max, const float step )
 	{
-		LocalMin = min;
-		LocalMax = max;
-		SetBaseMinMaxX2( LocalMin, LocalMax );
+		PosMin = min;
+		PosMax = max;
+		InitBaseMinMaxX2( PosMin, PosMax );
 		PosType = EPosGenType::ELLIPSE;
 
 		EllipseStepX = step;
 		EllipseStepY = EllipseStepX;
 		EllipseFull = grMath::Pi * 2.0f; // grMath::Pi * 2.0f = 360 degrees
-		EllipseRad.x = LocalMin.x;
-		EllipseRad.y = LocalMin.y;
+		EllipseRad.x = PosMin.x;
+		EllipseRad.y = PosMin.y;
 	}
 
-	inline void Generate( pU<sf::Vertex[]>& rPosition, const grV2f& sysPos, const sizeT startIdx, const sizeT endIdx, const pU<grRandom>& rRand, const float deltaT )
+	inline void Generate( pU<sf::Vertex[]>& rPosition, const grV2f& rSysPos, const sizeT startIdx, const sizeT endIdx, const pU<grRandXOR>& rRand, const float deltaT )
 	{
-		if ( Equal == EPartValueEqual::NO )
+		if ( IsEqual == EPartValueEqual::NO )
 		{
 			if ( PosType == EPosGenType::BOX )
 			{
-				BoxEqualNo( rPosition, sysPos, startIdx, endIdx, rRand );
+				BoxEqualNo( rPosition, rSysPos, startIdx, endIdx, rRand );
 				return;
 			}
-
-			EllipseEqualNo( rPosition, sysPos, startIdx, endIdx, rRand, deltaT );
+			EllipseEqualNo( rPosition, rSysPos, startIdx, endIdx, rRand, deltaT );
 			return;
 		}
 
 		if ( PosType == EPosGenType::BOX )
 		{
-			BoxEqualYes( rPosition, sysPos, startIdx, endIdx );
+			BoxEqualYes( rPosition, rSysPos, startIdx, endIdx );
 			return;
 		}
-
-		EllipseEqualYes( rPosition, sysPos, startIdx, endIdx, rRand );
+		EllipseEqualYes( rPosition, rSysPos, startIdx, endIdx, rRand );
 	}
 
-	void BoxEqualNo( pU<sf::Vertex[]>& rPosition, const grV2f& sysPos, const sizeT startIdx, const sizeT endIdx, const pU<grRandom>& rRand )
+	void BoxEqualNo( pU<sf::Vertex[]>& rPosition, const grV2f& rSysPos, const sizeT startIdx, const sizeT endIdx, const pU<grRandXOR>& rRand )
 	{
+		auto distX{ rRand->DistF( PosMin.x, PosMax.x ) };
+		auto distY{ rRand->DistF( PosMin.y, PosMax.y ) };
 		for ( sizeT i = startIdx; i < endIdx; ++i )
 		{
-			grV2f p{ rRand->V2fx2( LocalMin, LocalMax ) + sysPos };
+			grV2f p{ rRand->Float( distX ), rRand->Float( distY ) };
+			p += rSysPos;
 			rPosition[ i ].position.x = p.x;
 			rPosition[ i ].position.y = p.y;
 		}
 	}
 
-	void BoxEqualYes( pU<sf::Vertex[]>& rPosition, const grV2f& sysPos, const sizeT startIdx, const sizeT endIdx )
+	void BoxEqualYes( pU<sf::Vertex[]>& rPosition, const grV2f& rSysPos, const sizeT startIdx, const sizeT endIdx )
 	{
 		for ( sizeT i = startIdx; i < endIdx; ++i )
 		{
-			grV2f p{ LocalMin + sysPos };
+			grV2f p{ PosMin + rSysPos };
 			rPosition[ i ].position.x = p.x;
 			rPosition[ i ].position.y = p.y;
 		}
 	}
 
-	void EllipseEqualNo( pU<sf::Vertex[]>& rPosition, const grV2f& sysPos, const sizeT startIdx, const sizeT endIdx, const pU<grRandom>& rRand, const float deltaT )
+	void EllipseEqualNo( pU<sf::Vertex[]>& rPosition, const grV2f& sysPos, const sizeT startIdx, const sizeT endIdx, const pU<grRandXOR>& rRand, const float deltaT )
 	{
 		EllipseRad.x += EllipseStepX * deltaT;
 		EllipseRad.y += EllipseStepY * deltaT;
 
-		EllipseStepX *= ( EllipseRad.x < LocalMin.x ) ? -1.0f : ( EllipseRad.x > LocalMax.x ) ? -1.0f : 1.0f;
-		EllipseStepY *= ( EllipseRad.y < LocalMin.y ) ? -1.0f : ( EllipseRad.y > LocalMax.y ) ? -1.0f : 1.0f;
+		EllipseStepX *= ( EllipseRad.x < PosMin.x ) ? -1.0f : ( EllipseRad.x > PosMax.x ) ? -1.0f : 1.0f;
+		EllipseStepY *= ( EllipseRad.y < PosMin.y ) ? -1.0f : ( EllipseRad.y > PosMax.y ) ? -1.0f : 1.0f;
 
 		EllipseEqualYes( rPosition, sysPos, startIdx, endIdx, rRand );
 	}
 
-	void EllipseEqualYes( pU<sf::Vertex[]>& rPosition, const grV2f& sysPos, const sizeT startIdx, const sizeT endIdx, const pU<grRandom>& rRand )
+	void EllipseEqualYes( pU<sf::Vertex[]>& rPosition, const grV2f& sysPos, const sizeT startIdx, const sizeT endIdx, const pU<grRandXOR>& rRand )
 	{
+		auto dist{ rRand->DistF( 0.0f, EllipseFull ) };
 		for ( sizeT i = startIdx; i < endIdx; ++i )
 		{
-			float a{ rRand->Float( 0.0f, EllipseFull ) };
+			float a{ rRand->Float( dist ) };
 			grV2f v{ EllipseRad.x * std::sin( a ), EllipseRad.y * std::cos( a ) };
 			rPosition[ i ].position.x = v.x + sysPos.x;
 			rPosition[ i ].position.y = v.y + sysPos.y;
 		}
 	}
 
-	grV2f LocalMin, LocalMax;
+	grV2f PosMin, PosMax;
 	grV2f EllipseRad;
 	float EllipseStepX, EllipseStepY, EllipseFull;
 	EPosGenType PosType;
@@ -344,64 +401,74 @@ struct grSPositionGenerate : public grSBaseGenerate
 
 struct grSMassGenerate : public grSBaseGenerate
 {
-	inline void Set( const grV2f& rMinMax )
-	{
-		LocalMinMax = rMinMax;
-		if ( LocalMinMax.x < 1.0f )
-			LocalMinMax.x = 1.0f;
+	grSMassGenerate()
+		: MassMinMax( grV2f() )
+	{}
 
-		SetBaseMinMax( LocalMinMax );
+	inline void Init( const grV2f& rMinMax )
+	{
+		MassMinMax = rMinMax;
+		if ( MassMinMax.x < 1.0f )
+			MassMinMax.x = 1.0f;
+
+		InitBaseMinMax( MassMinMax );
 	}
 
-	inline void Generate( pU<float[]>& rMass, const sizeT startIdx, const sizeT endIdx, const pU<grRandom>& rRand )
+	inline void Generate( pU<float[]>& rMass, const sizeT startIdx, const sizeT endIdx, const pU<grRandXOR>& rRand )
 	{
-		if ( Equal == EPartValueEqual::NO )
+		if ( IsEqual == EPartValueEqual::NO )
 		{
+			auto dist{ rRand->DistF( MassMinMax.x, MassMinMax.y ) };
 			for ( sizeT i = startIdx; i < endIdx; ++i )
-				rMass[ i ] = rRand->Float( LocalMinMax.x, LocalMinMax.y );
+				rMass[ i ] = rRand->Float( dist );
 
 			return;
 		}
 
 		for ( sizeT i = startIdx; i < endIdx; ++i )
-			rMass[ i ] = LocalMinMax.x;
+			rMass[ i ] = MassMinMax.x;
 	}
 
-	grV2f LocalMinMax;
+	grV2f MassMinMax;
 };
 
 struct grSLifeGenerate : public grSBaseGenerate
 {
-	inline void Set( const grV2f& minMax )
-	{
-		LocalMinMax = minMax;
-		if ( LocalMinMax.x < 0.0f )
-			LocalMinMax.x = 0.0f;
+	grSLifeGenerate()
+		: LifeMinMax( grV2f() )
+	{}
 
-		SetBaseMinMax( LocalMinMax );
+	inline void Init( const grV2f& minMax )
+	{
+		LifeMinMax = minMax;
+		if ( LifeMinMax.x < 0.0f )
+			LifeMinMax.x = 0.0f;
+
+		InitBaseMinMax( LifeMinMax );
 	}
 
-	inline void Generate( pU<float[]>& rLife, const sizeT startIdx, const sizeT endIdx, const pU<grRandom>& rRand )
+	inline void Generate( pU<float[]>& rLife, const sizeT startIdx, const sizeT endIdx, const pU<grRandXOR>& rRand )
 	{
-		if ( Equal == EPartValueEqual::NO )
+		if ( IsEqual == EPartValueEqual::NO )
 		{
+			auto dist{ rRand->DistF( LifeMinMax.x, LifeMinMax.y ) };
 			for ( sizeT i = startIdx; i < endIdx; ++i )
-				rLife[ i ] = rRand->Float( LocalMinMax.x, LocalMinMax.y );
+				rLife[ i ] = rRand->Float( dist );
 
 			return;
 		}
 
 		for ( sizeT i = startIdx; i < endIdx; ++i )
-			rLife[ i ] = LocalMinMax.x;
+			rLife[ i ] = LifeMinMax.x;
 	}
 
-	grV2f LocalMinMax;
+	grV2f LifeMinMax;
 };
 
 struct grSEmitter
 {
 	grSEmitter()
-		: puRand( std::make_unique<grRandom>() )
+		: puRand( std::make_unique<grRandXOR>() )
 	{}
 	grSEmitter( const grSEmitter& ) = delete;
 	grSEmitter& operator=( const grSEmitter& ) = delete;
@@ -434,11 +501,11 @@ struct grSEmitter
 
 			grV2f sysPos{ rParticleData->SystemPosition };
 
-			if ( puPosition ) puPosition->Generate( rParticleArr->puVerts, sysPos, startIdx, endIdx, puRand, deltaT );
 			if ( puColor ) puColor->Generate( rParticleArr->puColorStart, rParticleArr->puColorEnd, startIdx, endIdx, puRand );
 			if ( puScale ) puScale->Generate( rParticleArr->puScaleStart, rParticleArr->puScaleEnd, startIdx, endIdx, puRand );
-			if ( puForce ) puForce->Generate( rParticleArr->puAcceleration, startIdx, endIdx, puRand );
 			if ( puMass ) puMass->Generate( rParticleArr->puMass, startIdx, endIdx, puRand );
+			if ( puForce ) puForce->Generate( rParticleArr->puAcceleration, rParticleArr->puMass, startIdx, endIdx, puRand );
+			if ( puPosition ) puPosition->Generate( rParticleArr->puVerts, sysPos, startIdx, endIdx, puRand, deltaT );
 			if ( puLife ) puLife->Generate( rParticleArr->puLife, startIdx, endIdx, puRand );
 
 			rParticleData->SpawnAccT = spawnAccT;
@@ -448,26 +515,29 @@ struct grSEmitter
 
 	// All types of generators goes here
 	// No slow virtual stuff allowed so each generator has it's own place
-	// TODO: If multiple generators of the same type would be allowed and produce cool results perhaps change to arrays
-	pU<grSPositionGenerate> puPosition;
 	pU<grSColorGenerate> puColor;
 	pU<grSScaleGenerate> puScale;
-	pU<grSForceGenerate> puForce;
 	pU<grSMassGenerate> puMass;
+	pU<grSForceGenerate> puForce;
+	pU<grSPositionGenerate> puPosition;
 	pU<grSLifeGenerate> puLife;
 
-	pU<grRandom> puRand;	// Is slightly greater than 5mb so instead of each generator containing one it's passed. Is not thread safe so if that happens it needds to change
+	pU<grRandXOR> puRand;	// Is slightly greater than 5mb so instead of each generator containing one it's passed. Is not thread safe so if that happens it needds to change
 };
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+
 struct grSColorUpdate
 {
-	// TODO: Only create updater instance if colors are NOT equal
-
-	grSColorUpdate( const bool hsv )
-		: Hsv( hsv )
+	grSColorUpdate()
+		: Hsv( true )
 	{}
+
+	inline void SetHsv( const bool hsv)
+	{
+		Hsv = hsv;
+	}
 
 	inline void Update( const sizeT alive, pU<SRgba[]>& rColorStart, const pU<SRgba[]>& rColorEnd, const pU<float[]>& rLife, pU<sf::Vertex[]>& rVerts, const float deltaT )
 	{
@@ -541,27 +611,89 @@ struct grSScaleUpdate
 	}
 };
 
+struct WindTest
+{
+	WindTest()
+	{
+		grV2f timeMinMax{ 0.5f, 2.0f };
+		auto timeDist{ rand.DistF( timeMinMax ) };
+
+		timeValues = new float[ size ];
+		timers = new float[ size];
+		for ( sizeT i = 0; i < size; ++i )
+		{
+			timeValues[ i ] = rand.Float( timeDist );
+			timers[ i ] = timeValues[ i ];
+		}
+	}
+
+	inline void Update( const sizeT alive, pU<grV2f[]>& rAcceleration, pU<grV2f[]>& rVelocity, pU<sf::Vertex[]>& rVerts, const pU<float[]>& rMass, const float deltaT )
+	{
+		// TEST
+		auto distDeg{ rand.DistF( degMinMax ) };
+		auto distForce{ rand.DistF( forceMinMax ) };
+		auto forceDir{ rand.DistF( 0.0f, 100.0f ) };
+
+		for ( sizeT i = 0; i < alive; ++i )
+		{
+			timers[ i ] -= deltaT;
+			if ( timers[ i ] < 0.0f )
+			{
+				timers[ i ] = timeValues[ i ];
+
+				float deg{ rand.Float( distDeg ) };
+				float force{ rand.Float( distForce ) };
+				float dir{ rand.Float( forceDir ) };
+				if( dir < 50.0f )
+					force = force * 0.25f * -1.0f;
+
+				grV2f pos{ rVerts[ i ].position.x, rVerts[ i ].position.y };
+				grV2f dirVec{ grMath::DegToVec( deg ) };
+				grV2f nxtPos{ dirVec * 2.0f + pos };
+				grV2f desiredVel{ pos.Between( nxtPos ).Normalized() * force };
+				grV2f accel{ rVelocity[ i ].Between( desiredVel ) };
+
+				float m{ 0.0f };
+				if ( rMass[ i ] > 0.0f )
+					m = rMass[ i ];
+
+				rAcceleration[ i ] += accel / m;
+			}
+		}
+	}
+
+	float* timeValues;
+	float* timers;
+
+	grV2f degMinMax{ 0.0f, 90.0f };
+	grV2f forceMinMax{ 75.0f, 100.0f };
+
+	sizeT size{ 10000 };
+
+	grRandXOR rand;
+
+};
+
 struct grSVelocityUpdate
 {
-	inline void Update( const sizeT alive, const grV2f& rGravity, pU<grV2f[]>& rVelocity, const pU<grV2f[]>& rAcceleration, const pU<float[]>& rMass, const float deltaT )
+	inline void Update( const sizeT alive, const float gravityF, const grV2f& rGravityV, const pU<float[]>& rMass, pU<grV2f[]>& rAcceleration, pU<grV2f[]>& rVelocity )
 	{
-		grV2f g{ rGravity };
-		float maxForce{ 100.0f }; // TODO: Implement and move this correctly
+		grV2f g{ rGravityV };
 		for ( sizeT i = 0; i < alive; ++i )
 		{
 			float m{ rMass[ i ] };
-			rAcceleration[ i ] += grV2f( g / m ).LimitMax( maxForce );
+			rAcceleration[ i ] += ( g / m ).LimitMax( gravityF );
 		}
 
 		float maxSpeed{ 100.0f };	// TODO: Implement and move this correctly
 		for ( sizeT i = 0; i < alive; ++i )
-			rVelocity[ i ] = grV2f( rAcceleration[ i ] ).LimitMax( maxSpeed );
+			rVelocity[ i ] = ( rAcceleration[ i ] ).LimitMax( maxSpeed );
 	}
 };
 
 struct grSPositionUpdate
 {
-	inline void Update( const sizeT alive, pU<sf::Vertex[]>& rVerts, pU<grV2f[]>& rVelocity, const float deltaT )
+	inline void Update( const sizeT alive, pU<sf::Vertex[]>& rVerts, const pU<grV2f[]>& rVelocity, const float deltaT )
 	{
 		for ( sizeT i = 0; i < alive; ++i )
 		{
@@ -600,7 +732,6 @@ struct grSLifeUpdate
 		grAlgo::Swap( rParticleArr->puScaleEnd[ nowIdx ], rParticleArr->puScaleEnd[ last ] );
 		grAlgo::Swap( rParticleArr->puAcceleration[ nowIdx ], rParticleArr->puAcceleration[ last ] );
 		grAlgo::Swap( rParticleArr->puVelocity[ nowIdx ], rParticleArr->puVelocity[ last ] );
-		grAlgo::Swap( rParticleArr->puForce[ nowIdx ], rParticleArr->puForce[ last ] );
 		grAlgo::Swap( rParticleArr->puMass[ nowIdx ], rParticleArr->puMass[ last ] );
 		grAlgo::Swap( rParticleArr->puLife[ nowIdx ], rParticleArr->puLife[ last ] );
 
@@ -613,8 +744,8 @@ struct grSLifeUpdate
 struct grSUpdate
 {
 	grSUpdate( void )
-	: puPosition( std::make_unique<grSPositionUpdate>() ) // Updaters that dont have an API call in the system class gets created here
-	, puVelocity( std::make_unique<grSVelocityUpdate>() )
+		: puVelocity( std::make_unique<grSVelocityUpdate>() ) // Updaters that dont get created thru an API call in the system class gets created here
+		, puPosition( std::make_unique<grSPositionUpdate>() )
 	{}
 	grSUpdate( const grSUpdate& ) = delete;
 	grSUpdate& operator=( const grSUpdate& ) = delete;
@@ -623,27 +754,31 @@ struct grSUpdate
 
 	inline void Update( pU<grSParticleVar>& rParticleVar, pU<grSParticleArr>& rParticleArr, const float deltaT )
 	{
-		grV2f gravity{ rParticleVar->GravityV };
+		grV2f gravityV{ rParticleVar->GravityV };
+		float gravityF{ rParticleVar->GravityF };
 		sizeT alive{ rParticleVar->Alive };
 
-		// TODO: Would be cool to not need the if's. Do not wan't the indirections from a virtual base so some type of eventlist might be an option
-		// Update all updaters
-		if ( puPosition ) puPosition->Update( alive, rParticleArr->puVerts, rParticleArr->puVelocity, deltaT );
+		// TEST
+		windTest.Update( alive, rParticleArr->puAcceleration, rParticleArr->puVelocity, rParticleArr->puVerts, rParticleArr->puMass, deltaT );
+		// TEST
+
 		if ( puColor ) puColor->Update( alive, rParticleArr->puColorStart, rParticleArr->puColorEnd, rParticleArr->puLife, rParticleArr->puVerts, deltaT );
 		if ( puScale ) puScale->Update( alive, rParticleArr->puScaleStart, rParticleArr->puScaleEnd, rParticleArr->puLife, deltaT );
-		if ( puVelocity ) puVelocity->Update( alive, gravity, rParticleArr->puVelocity, rParticleArr->puAcceleration, rParticleArr->puMass, deltaT );
+		if ( puVelocity ) puVelocity->Update( alive, gravityF, gravityV, rParticleArr->puMass, rParticleArr->puAcceleration, rParticleArr->puVelocity );
+		if ( puPosition ) puPosition->Update( alive, rParticleArr->puVerts, rParticleArr->puVelocity, deltaT );
 		if ( puLife ) alive = puLife->Update( alive, rParticleArr, deltaT );
 
 		rParticleVar->Alive -= alive;
 	}
 
 	// No slow virtual stuff allowed so each updater has it's own place
-	// All types of updaters goes here
-	pU<grSPositionUpdate> puPosition;
 	pU<grSColorUpdate> puColor;
 	pU<grSScaleUpdate> puScale;
 	pU<grSVelocityUpdate> puVelocity;
+	pU<grSPositionUpdate> puPosition;
 	pU<grSLifeUpdate> puLife;
+
+	WindTest windTest;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -662,18 +797,18 @@ public:
 	void SetSystemPosition( const grV2f& position );
 	void SetGravity( const float dirInDeg, const float force );
 
+	void SetPositionBox( const grV2f& min, const grV2f& max ); // There can only be one type of position generator
+	void SetPositionEllipse( const grV2f& min, const grV2f& max, const float step = 0.0f );
+	void SetSpawnForce( const grV2f& dirInDegMinMax, const grV2f& forceMinMax );
+
 	// If min<->max are equal, the value will be that. If not equal, the value will be rand inbetween
-	// TODO: Could be better to use injection here as that would make it possible store behaviours externaly
+	// TODO: Could be better to use injection here as that would make it possible store/copy behaviours externaly
 	void SetColor( const grColor::SRgba& start, const grColor::SRgba& end, const bool hsv = false, const bool randomize = false );
 	void SetScale( const grV2f& start, const grV2f& end );
-	void SetForce( const grV2f& min, const grV2f& max );
 	void SetMass( const grV2f& minMax );
 	void SetLife( const grV2f& minMax );
 
-	void AddPositionGeneratorBox( const grV2f& min, const grV2f& max );
-	void AddPositionGeneratorEllipse( const grV2f& min, const grV2f& max, const float step = 0.0f );
-
-	// TODO: Remeber to make this call once in the particle manager whenever that class exists
+	// TODO: Make theese calls once in the particle manager whenever that class exists
 	void Update( const float deltaT );
 	void Render( sf::RenderWindow& rRenderWin );
 

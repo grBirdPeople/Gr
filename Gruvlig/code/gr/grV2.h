@@ -89,7 +89,7 @@ std::ostream& operator<< ( std::ostream& out, const grV2<T>& rV2 )
 //////////////////////////////////////////////////
 typedef	grV2<double>	grV2d;
 typedef	grV2<float>		grV2f;
-typedef	grV2<intS>		grV2i;
+typedef	grV2<intS>		grV2s;
 typedef	grV2<intU>		grV2u;
 
 #endif		//_GRV2_

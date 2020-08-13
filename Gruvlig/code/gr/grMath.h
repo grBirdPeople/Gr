@@ -36,29 +36,6 @@ namespace grMath
 		return ( a > b ) ? a : ( b > a ) ? b : a;
 	}
 
-	// RangeChecks
-	//////////////////////////////////////////////////
-	template<typename T>
-	inline void RangeCheck( const T a, T& b )
-	{
-		if ( a > b )
-			b = a;
-	}
-
-	inline void RangeCheckV2f( grV2f& rV )
-	{
-		if ( rV.x > rV.y )
-			rV.y = rV.x;
-	}
-
-	inline void RangeCheckV2fx2( const grV2f& rMin, grV2f& rMax )
-	{
-		if ( rMin.x > rMax.x )
-			rMax.x = rMin.x;
-		if ( rMin.y > rMax.y )
-			rMax.y = rMin.y;
-	}
-
 	// Abs
 	//////////////////////////////////////////////////
 	inline float AbsF( float value )

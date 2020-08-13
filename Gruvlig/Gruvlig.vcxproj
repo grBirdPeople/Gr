@@ -178,6 +178,7 @@
     <ClCompile Include="code\gr\grParticleTest.cpp" />
     <ClCompile Include="code\gr\grSandbox.cpp" />
     <ClCompile Include="code\gr\main.cpp" />
+    <ClCompile Include="code\xorshift\xorshift.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="code\Box2D\b2_block_allocator.h" />
@@ -352,6 +353,7 @@
     <ClInclude Include="code\SFML\Window\Window.hpp" />
     <ClInclude Include="code\SFML\Window\WindowHandle.hpp" />
     <ClInclude Include="code\SFML\Window\WindowStyle.hpp" />
+    <ClInclude Include="code\xorshift\xorshift.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="code\SFML\Audio\SoundFileFactory.inl" />
