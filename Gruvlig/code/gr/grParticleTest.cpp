@@ -157,7 +157,6 @@ grCParticleSys::Render( sf::RenderWindow& rRenderWin )
 	rRenderWin.draw( &m_puParticleArr->puVerts.get()[ 0 ], m_puParticleVar->Alive, sf::PrimitiveType::Points );
 
 	//printf( "Max: %d %2s Alive: %d \n", m_puParticleVar->Size, "", m_puParticleVar->Alive );
-	
 
 
 

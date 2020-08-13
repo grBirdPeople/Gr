@@ -62,7 +62,24 @@ public:
 
 	inline intS IntS( const std::uniform_int_distribution<signed int>& rDist )
 	{
-		return rDist( m_Eng );
+		return ( intS )rDist( m_Eng );
+	}
+
+	inline std::uniform_int_distribution<unsigned int> DistU( const intU min, const intU max )
+	{
+		std::uniform_int_distribution<unsigned int> dist( ( unsigned int )min, ( unsigned int )max );
+		return dist;
+	}
+
+	inline std::uniform_int_distribution<unsigned int> DistU( const grV2u& rMinMax )
+	{
+		std::uniform_int_distribution<unsigned int> dist( ( unsigned int )rMinMax.x, ( unsigned int )rMinMax.y );
+		return dist;
+	}
+
+	inline intU IntU( const std::uniform_int_distribution<unsigned int>& rDist )
+	{
+		return ( intU )rDist( m_Eng );
 	}
 
 private:

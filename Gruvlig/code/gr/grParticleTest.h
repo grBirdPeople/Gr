@@ -48,6 +48,21 @@ struct grSParticleArr
 
 struct grSParticleVar
 {
+	grSParticleVar()
+		: SystemPosition( grV2f() )
+		, GravityV( grV2f() )
+		, GravityF( 0.0f )
+		, EmitRateSec( 0.0f )
+		, EmitRate( 0.0f )
+		, SpawnAccT( 0.0f )
+		, Size( 0 )
+		, Alive( 0 )
+	{}
+	grSParticleVar( const grSParticleVar& ) = delete;
+	grSParticleVar& operator=( const grSParticleVar& ) = delete;
+	grSParticleVar( grSParticleVar&& ) noexcept = delete;
+	grSParticleVar& operator=( grSParticleVar&& ) noexcept = delete;
+
 	grV2f SystemPosition;
 	grV2f GravityV;
 	float GravityF;
@@ -183,10 +198,10 @@ struct grSScaleGenerate : public grSBaseGenerate
 		, ScaleEnd( grV2f() )
 	{}
 
-	inline void Init( const grV2f& start, const grV2f& end )
+	inline void Init( const grV2f& rStart, const grV2f& rEnd )
 	{
-		ScaleStart = start;
-		ScaleEnd = end;
+		ScaleStart = rStart;
+		ScaleEnd = rEnd;
 		InitBaseStartEnd( ScaleStart, ScaleEnd );
 	}
 
@@ -441,9 +456,6 @@ struct grSLifeGenerate : public grSBaseGenerate
 	inline void Init( const grV2f& minMax )
 	{
 		LifeMinMax = minMax;
-		if ( LifeMinMax.x < 0.0f )
-			LifeMinMax.x = 0.0f;
-
 		InitBaseMinMax( LifeMinMax );
 	}
 
@@ -513,8 +525,8 @@ struct grSEmitter
 		}
 	}
 
-	// All types of generators goes here
-	// No slow virtual stuff allowed so each generator has it's own place
+	// Didn't wan't indirections as it goes against the point of DOD so no virtual and no generic container
+	// Each generators gets a unique spot
 	pU<grSColorGenerate> puColor;
 	pU<grSScaleGenerate> puScale;
 	pU<grSMassGenerate> puMass;
@@ -522,7 +534,7 @@ struct grSEmitter
 	pU<grSPositionGenerate> puPosition;
 	pU<grSLifeGenerate> puLife;
 
-	pU<grRandXOR> puRand;	// Is slightly greater than 5mb so instead of each generator containing one it's passed. Is not thread safe so if that happens it needds to change
+	pU<grRandXOR> puRand; // Unsure where to place this so here it is
 };
 
 
@@ -625,37 +637,39 @@ struct WindTest
 			timeValues[ i ] = rand.Float( timeDist );
 			timers[ i ] = timeValues[ i ];
 		}
+
+		distDeg = { rand.DistF( degMinMax ) };
+		distForce = { rand.DistF( forceMinMax ) };
+		forceDir = { rand.DistU( 0, 100 ) };
 	}
 
 	inline void Update( const sizeT alive, pU<grV2f[]>& rAcceleration, pU<grV2f[]>& rVelocity, pU<sf::Vertex[]>& rVerts, const pU<float[]>& rMass, const float deltaT )
 	{
 		// TEST
-		auto distDeg{ rand.DistF( degMinMax ) };
-		auto distForce{ rand.DistF( forceMinMax ) };
-		auto forceDir{ rand.DistF( 0.0f, 100.0f ) };
-
 		for ( sizeT i = 0; i < alive; ++i )
 		{
 			timers[ i ] -= deltaT;
-			if ( timers[ i ] < 0.0f )
+			if ( timers[ i ] <= 0.0f )
 			{
 				timers[ i ] = timeValues[ i ];
 
-				float deg{ rand.Float( distDeg ) };
+				grV2f nowVel{ rVelocity[ i ] };
+				grV2f nowPos{ rVerts[ i ].position.x, rVerts[ i ].position.y };
 				float force{ rand.Float( distForce ) };
-				float dir{ rand.Float( forceDir ) };
-				if( dir < 50.0f )
+				float deg{ rand.Float( distDeg ) };
+				intU dir{ rand.IntU( forceDir ) };
+				float m{ 1.0f };
+
+				if ( rMass[ i ] > 1.0f )
+					m = rMass[ i ];
+
+				if( dir < 50 )
 					force = force * 0.25f * -1.0f;
 
-				grV2f pos{ rVerts[ i ].position.x, rVerts[ i ].position.y };
-				grV2f dirVec{ grMath::DegToVec( deg ) };
-				grV2f nxtPos{ dirVec * 2.0f + pos };
-				grV2f desiredVel{ pos.Between( nxtPos ).Normalized() * force };
-				grV2f accel{ rVelocity[ i ].Between( desiredVel ) };
-
-				float m{ 0.0f };
-				if ( rMass[ i ] > 0.0f )
-					m = rMass[ i ];
+				grV2f nxtVel{ grMath::DegToVec( deg ) };
+				grV2f nxtPos{ nxtVel + nowPos };
+				grV2f desiredVel{ nowPos.Between( nxtPos ).Normalized() * force };
+				grV2f accel{ nowVel.Between( desiredVel ) };
 
 				rAcceleration[ i ] += accel / m;
 			}
@@ -664,6 +678,10 @@ struct WindTest
 
 	float* timeValues;
 	float* timers;
+
+	std::uniform_real_distribution<float> distDeg;
+	std::uniform_real_distribution<float> distForce;
+	std::uniform_int_distribution<unsigned int> forceDir;
 
 	grV2f degMinMax{ 0.0f, 90.0f };
 	grV2f forceMinMax{ 75.0f, 100.0f };
@@ -682,7 +700,7 @@ struct grSVelocityUpdate
 		for ( sizeT i = 0; i < alive; ++i )
 		{
 			float m{ rMass[ i ] };
-			rAcceleration[ i ] += ( g / m ).LimitMax( gravityF );
+			rAcceleration[ i ] += g / m;
 		}
 
 		float maxSpeed{ 100.0f };	// TODO: Implement and move this correctly
@@ -744,7 +762,7 @@ struct grSLifeUpdate
 struct grSUpdate
 {
 	grSUpdate( void )
-		: puVelocity( std::make_unique<grSVelocityUpdate>() ) // Updaters that dont get created thru an API call in the system class gets created here
+		: puVelocity( std::make_unique<grSVelocityUpdate>() ) // Updaters which are not created thru an API call in the system class are instansiated here
 		, puPosition( std::make_unique<grSPositionUpdate>() )
 	{}
 	grSUpdate( const grSUpdate& ) = delete;
@@ -771,7 +789,8 @@ struct grSUpdate
 		rParticleVar->Alive -= alive;
 	}
 
-	// No slow virtual stuff allowed so each updater has it's own place
+	// Didn't wan't indirections as it goes against the point of DOD so no virtual and no generic container.
+	// Each updater gets a unique spot
 	pU<grSColorUpdate> puColor;
 	pU<grSScaleUpdate> puScale;
 	pU<grSVelocityUpdate> puVelocity;

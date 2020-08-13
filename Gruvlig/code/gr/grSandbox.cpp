@@ -16,7 +16,6 @@
 #include "grEntityPlayer.h"
 #include "grEntityManager.h"
 #include "grMapManager.h"
-#include "grCParticleManager.h"
 #include "grMath.h"
 #include "grAlgo.h"
 #include "grRandom.h"

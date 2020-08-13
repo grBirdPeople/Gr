@@ -1,0 +1,58 @@
+Particle API related
+
+Create particle system thru the manager and get a particle system API ref as return.
+Used for controlling various behaviours such as:
+particle, resolution, position, render depth
+
+Define a particle by calling create on the manager to get a particle attribute copy as return or just create.
+The attribute should have minimalistic/simplistic approach for it's set functions forr ease of use.
+The copy is then injected thru some API function call which hooks the rest up somehow. 
+
+Particle attribute calls that needs random range, done thru the emitter or whatever is used as a user interface:
+
+	// Size mod is grow/shrink
+	// Occilate is how fast something should bounce between min <-> max
+
+	Scale(min, max, sizeMod, oscillate)
+	Color(start, end, oscillate)
+	Alpha(start, end, oscillate)
+	Speed(min, max, sizeMod, oscillate)
+	Direction(min, max, sizeMod, oscillate) // In degrees
+	Gravity(amount, direction, oscillate)
+	Orientation(min, max, sizeMod, oscillate)
+	Lifetime(min, max)
+
+	Variable spawn rate
+	Radial (distance) & Tangential (curvature) accel
+
+
+Optimal emission rate:
+TotalParticleCount / AverageLifePerParticle
+
+Something to test:
+Vector2 tangent = B - A;
+float rotation = (float)Math.Atan2(tangent.Y, tangent.X);
+
+Color change per frame (ColorDelta):
+foreach rgb: ( end - start ) / Life
+
+Possible ring effect:
+cos((x^2 + y^2)^0.5)
+
+Possiblea cked struct/class syntax:
+struct/class __attribute__ ((__packed__)) Hej {}
+
+SFGUI:
+https://github.com/TankOs/SFGUI
+
+Some psudo for radial & tangential:
+RadialXY (normalized)
+TangentialXY
+
+TangentialX = RadialY * -1
+TangentialY = RadialX
+TangentialXY *= TangentialAccel
+RadialXY *= RadialAccel
+Force = ( Radial + Tangential + Grav ) * dt
+Vel += Force
+Pos += Vel * dt
