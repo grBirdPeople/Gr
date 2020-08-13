@@ -390,8 +390,8 @@ struct grSPositionGenerate : public grSBaseGenerate
 		EllipseRad.x += EllipseStepX * deltaT;
 		EllipseRad.y += EllipseStepY * deltaT;
 
-		EllipseStepX *= ( EllipseRad.x < PosMin.x ) ? -1.0f : ( EllipseRad.x > PosMax.x ) ? -1.0f : 1.0f;
-		EllipseStepY *= ( EllipseRad.y < PosMin.y ) ? -1.0f : ( EllipseRad.y > PosMax.y ) ? -1.0f : 1.0f;
+		EllipseRad.x *= ( EllipseRad.x < PosMin.x ) ? -1.0f : ( EllipseRad.x > PosMax.x ) ? -1.0f : 1.0f;
+		EllipseRad.y *= ( EllipseRad.y < PosMin.y ) ? -1.0f : ( EllipseRad.y > PosMax.y ) ? -1.0f : 1.0f;
 
 		EllipseEqualYes( rPosition, sysPos, startIdx, endIdx, rRand );
 	}

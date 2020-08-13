@@ -21,6 +21,8 @@
 #include "grRandom.h"
 
 #include "grParticleTest.h"
+#include "grParticle.h"
+
 #include "grBoidSys.h"
 
 
@@ -29,6 +31,7 @@
 grSandbox::grSandbox( void )
 	: m_rInputMan( grInputManager::Instance() )
 	, m_pPartSys1( new grCParticleSys( 10000, 2000.0f ) )
+	, m_pParticle( new grCParticle( grV2f(), 500.0f, 10000 ) )
 	, m_pBoidSys( new grCBoidSys() )
 	, m_RendWin( grCore::Instance().GetRenderWin() )
 	, m_Rand( new grRandMT() )
@@ -180,6 +183,9 @@ grSandbox::grSandbox( void )
 	m_pPartSys1->SetMass( { 4.0f, 12.0f } );
 	m_pPartSys1->SetLife( { 2.0f, 12.0f } );
 
+	// Other particles
+	m_pParticle->AddLife( { 2.0f, 12.0f } );
+
 
 
 
@@ -206,6 +212,7 @@ grSandbox::Update( const float deltaT )
 
 	// Particles
 	m_pPartSys1->Update( deltaT );
+	m_pParticle->Run( deltaT );
 
 	if ( m_rInputMan.GetMouseMoved() )
 	{
@@ -283,4 +290,5 @@ grSandbox::Render( sf::RenderWindow& rRenderWin )
 	//m_pBoidSys->Render( rRenderWin );
 	// Particles
 	m_pPartSys1->Render( rRenderWin );
+	m_pParticle->Render( rRenderWin );
 }

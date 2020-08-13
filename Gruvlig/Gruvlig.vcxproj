@@ -240,6 +240,10 @@
     <ClInclude Include="code\gr\grNavMesh.h" />
     <ClInclude Include="code\gr\grNavMeshManager.h" />
     <ClInclude Include="code\gr\grNavNode.h" />
+    <ClInclude Include="code\gr\grParticle.h" />
+    <ClInclude Include="code\gr\grParticleArray.h" />
+    <ClInclude Include="code\gr\grParticleComponent.h" />
+    <ClInclude Include="code\gr\grParticleSystem.h" />
     <ClInclude Include="code\gr\grParticleTest.h" />
     <ClInclude Include="code\gr\grSPartAttribute.h" />
     <ClInclude Include="code\gr\grRandom.h" />
