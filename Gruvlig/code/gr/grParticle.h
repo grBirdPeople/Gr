@@ -8,7 +8,9 @@
 class grCParticle
 {
 public:
-	grCParticle( const grV2f& systemPosition = grV2f( 320.0f, 180.0f ), const float emitRateSec = 500.0f, const intU size = 10000 )
+	grCParticle( const grV2f& systemPosition = grV2f( ( float )grCore::Instance().GetWindowSize().x * 0.5f, ( float )grCore::Instance().GetWindowSize().y * 0.5f ),
+				 const float emitRateSec = 800.0f,
+				 const intU size = 10000 )
 	{
 		m_Data.Init( systemPosition, emitRateSec, size );
 		m_System.Init( m_Data );
@@ -23,29 +25,24 @@ public:
 		m_Data.puEmit->SystemPosition = rPosition;
 	}
 
-	void AddSpawnVelocity()
+	void AddSpawnVelocity( const grV2f& rDegreesMinMax, const grV2f& rForceMinMax )
 	{
-
+		m_System.puVelocity->Init( rDegreesMinMax, rForceMinMax );
 	}
 
-	void AddPosition( const EPositionType type, const grV2f& rPositionOffsetMin = grV2f(), const grV2f& rPositionOffsetMax = grV2f() )
+	void AddPosition( const EPositionType type, const grV2f& rPositionOffsetMin, const grV2f& rPositionOffsetMax )
 	{
-		//if ( !m_System.Position )
-		//{
-		//	m_Data.Position = std::make_unique<grSPositionData>();
-		//	m_System.Position = std::make_unique<grSPositionSystem>( *m_Data.Emit, *m_Data.Position, *m_Data.Array );
-		//}
-		//m_System.Position->Init( type, rPositionOffsetMin, rPositionOffsetMax );
+		m_System.puPosition->Init( type, rPositionOffsetMin, rPositionOffsetMax ); // Only box now, ellipse later
 	}
 
-	void AddLife( const grV2f& rMinMax )
+	void AddMass( const grV2f& rMassMinMax )
 	{
-		//if ( !m_System.Life )
-		//{
-		//	m_Data.Life = std::make_unique<grSLifeData>();
-		//	m_System.Life = std::make_unique<grSLifeSystem>( *m_Data.Emit, *m_Data.Life, *m_Data.Array );
-		//}
-		//m_System.Life->Init( rMinMax ); // Only box for now, ellipse later
+		m_System.puMass->Init( rMassMinMax );
+	}
+
+	void AddLife( const grV2f& rLifeMinMax )
+	{
+		m_System.puLife->Init( rLifeMinMax );
 	}
 
 	void Run( const float dt )
@@ -83,6 +80,7 @@ private:
 			emit.Alive += emit.EndIdx - emit.StartIdx;
 
 			// All system generate calls
+			if ( m_System.puMass ) m_System.puMass->Generate();
 			if ( m_System.puVelocity ) m_System.puVelocity->Generate();
 			if( m_System.puPosition ) m_System.puPosition->Generate();
 			if ( m_System.puLife ) m_System.puLife->Generate();
@@ -99,7 +97,7 @@ private:
 			if ( m_System.puLife ) m_System.puLife->Update();
 		}
 
-		printf( "%d\n", m_Data.puEmit->Alive );
+		//printf( "%d\n", m_Data.puEmit->Alive );
 	}
 
 	grSParticleData m_Data;

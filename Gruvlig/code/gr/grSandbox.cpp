@@ -31,7 +31,7 @@
 grSandbox::grSandbox( void )
 	: m_rInputMan( grInputManager::Instance() )
 	, m_pPartSys1( new grCParticleSys( 10000, 2000.0f ) )
-	, m_pParticle( new grCParticle( grV2f(), 500.0f, 10000 ) )
+	, m_pParticle( new grCParticle() )
 	, m_pBoidSys( new grCBoidSys() )
 	, m_RendWin( grCore::Instance().GetRenderWin() )
 	, m_Rand( new grRandMT() )
@@ -187,9 +187,10 @@ grSandbox::grSandbox( void )
 
 
 	// Other particles
-	m_pParticle->SetSystemPosition( winSize * 0.5f );
-	//m_pParticle->AddPosition( EPositionType::BOX );
-	//m_pParticle->AddLife( { 2.0f, 2.0f } );
+	m_pParticle->AddPosition( EPositionType::BOX, { 0.0f, 0.0f }, { 0.0f, 0.0f } );
+	m_pParticle->AddSpawnVelocity( { 315.0f, 45.0f }, { 100.0f, 100.0f } );
+	m_pParticle->AddMass( { 1.0f, 10.0f } );
+	m_pParticle->AddLife( { 2.0f, 2.0f } );
 
 
 
@@ -214,14 +215,14 @@ grSandbox::Update( const float deltaT )
 	//// Boids
 	//m_pBoidSys->Update( deltaT );
 
-
 	// Particles
-	m_pPartSys1->Update( deltaT );
+	//m_pPartSys1->Update( deltaT );
 	m_pParticle->Run( deltaT );
 
 	if ( m_rInputMan.GetMouseMoved() )
 	{
-		m_pPartSys1->SetSystemPosition( m_rInputMan.GetMousePos() );
+		//m_pPartSys1->SetSystemPosition( m_rInputMan.GetMousePos() );
+		m_pParticle->SetSystemPosition( m_rInputMan.GetMousePos() );
 	}
 	m_LastMousePos = m_rInputMan.GetMousePos();
 
@@ -242,12 +243,11 @@ grSandbox::Update( const float deltaT )
 
 	if ( m_rInputMan.GetMouseScrollForwards() )
 	{
-		auto f{ m_pPartSys1->GetEmitRate() };
-		m_pPartSys1->SetEmitRate( m_pPartSys1->GetEmitRate() + 100.0f );
+		//m_pPartSys1->SetEmitRate( m_pPartSys1->GetEmitRate() + 100.0f );
 	}
 	if ( m_rInputMan.GetMouseScrollBackwards () )
 	{
-		m_pPartSys1->SetEmitRate( m_pPartSys1->GetEmitRate() - 100.0f );
+		//m_pPartSys1->SetEmitRate( m_pPartSys1->GetEmitRate() - 100.0f );
 	}
 
 
@@ -293,7 +293,8 @@ grSandbox::Render( sf::RenderWindow& rRenderWin )
 {
 	////Boids
 	//m_pBoidSys->Render( rRenderWin );
+
 	// Particles
-	m_pPartSys1->Render( rRenderWin );
+	//m_pPartSys1->Render( rRenderWin );
 	m_pParticle->Render( rRenderWin );
 }
