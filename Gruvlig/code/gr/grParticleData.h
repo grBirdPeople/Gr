@@ -24,17 +24,23 @@ struct grSEmitData
 	grV2f SystemPosition;
 	float EmitRateSec;
 	float EmitRateMs;
+	float Dt;
 	float SpawnTimeAcc;
 	sizeT Size;
 	sizeT Alive;
+	sizeT StartIdx;
+	sizeT EndIdx;
 
 	grSEmitData( const grV2f& systemPosition, const float emitRateSec, const sizeT size )
 		: SystemPosition( systemPosition )
 		, EmitRateSec( emitRateSec )
 		, EmitRateMs( 1.0f / emitRateSec )
+		, Dt( 0.0f )
 		, SpawnTimeAcc( 0.0f )
 		, Size( size )
 		, Alive( 0 )
+		, StartIdx( 0 )
+		, EndIdx( 0 )
 	{}
 	grSEmitData( const grSEmitData& ) = default;
 	grSEmitData& operator=( const grSEmitData& ) = default;
@@ -67,7 +73,7 @@ struct grSVelocityData
 
 	grSVelocityData()
 		: DegreesMinMax( grV2f() )
-		, ForceMinMax( grV2f() )
+		, ForceMinMax( grV2f( 100.0f, 100.0f ) )
 		, DegreesEqualValue( EEqualValue::YES )
 		, ForceEqualValue( EEqualValue::YES )
 	{}
@@ -79,15 +85,18 @@ struct grSVelocityData
 struct grSPositionData
 {
 	grRandXOR Rand;
-	grV2f RadiusMinMax, PositionMax, EllipseRadius;
+	grV2f PositionOffsetMin, PositionOffsetMax, RadiusMinMax, EllipseRadius;
 	float RotationSpeed, Ellipse360;
 	EEqualValue PositionEqualValue;
 	EPositionType PositionType;
 
 	grSPositionData()
-		: RadiusMinMax( grV2f() )
+		: PositionOffsetMin( grV2f() )
+		, PositionOffsetMax( grV2f() )
+		, RadiusMinMax( grV2f() )
+		, EllipseRadius( grV2f() )
 		, RotationSpeed( 0.0f )
-		, Ellipse360( 0.0f )
+		, Ellipse360( grMath::Pi * 2.0f )
 		, PositionEqualValue( EEqualValue::YES )
 		, PositionType( EPositionType::BOX )
 	{}
@@ -103,7 +112,7 @@ struct grSLifeData
 	EEqualValue LifeEqualValue;
 
 	grSLifeData()
-		: LifeMinMax( grV2f() )
+		: LifeMinMax( grV2f( 2.0f, 2.0f ) )
 		, LifeEqualValue( EEqualValue::YES )
 	{}
 	grSLifeData( const grSLifeData& ) = default;
@@ -137,21 +146,29 @@ struct grSArrayData
 
 struct grSParticleData
 {
-	pU<grSEmitData> Emit;
-	pU<grSScaleData> Scale;
-	pU<grSVelocityData> Velocity;
-	pU<grSPositionData> Position;
-	pU<grSLifeData> Life;
-	pU<grSArrayData> Array;
+	pU<grSEmitData> puEmit;
+	pU<grSScaleData> puScale;
+	pU<grSVelocityData> puVelocity;
+	pU<grSPositionData> puPosition;
+	pU<grSLifeData> puLife;
+	pU<grSArrayData> puArray;
 
-	grSParticleData( const grV2f& systemPosition, const float emitRateSec, const sizeT size )
-		: Emit( std::make_unique<grSEmitData>( systemPosition, emitRateSec, size ) )
-		, Array( std::make_unique<grSArrayData>( size ) )
-	{}
+	grSParticleData() = default;
 	grSParticleData( const grSParticleData& ) = delete;
 	grSParticleData& operator=( const grSParticleData& ) = delete;
 	grSParticleData( grSParticleData&& ) noexcept = delete;
 	grSParticleData& operator=( grSParticleData&& ) noexcept = delete;
+
+	void Init( const grV2f& systemPosition, const float emitRateSec, const sizeT size )
+	{
+		puEmit = std::make_unique<grSEmitData>( systemPosition, emitRateSec, size );
+
+		puVelocity = std::make_unique<grSVelocityData>();
+		puPosition = std::make_unique<grSPositionData>();
+		puLife = std::make_unique<grSLifeData>();
+
+		puArray = std::make_unique<grSArrayData>( size );
+	}
 };
 
 #endif // _H_GRPARTICLEDATA_

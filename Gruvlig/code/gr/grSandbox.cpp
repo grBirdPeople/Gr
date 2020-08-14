@@ -187,7 +187,9 @@ grSandbox::grSandbox( void )
 
 
 	// Other particles
-	m_pParticle->AddLife( { 2.0f, 12.0f } );
+	m_pParticle->SetSystemPosition( winSize * 0.5f );
+	//m_pParticle->AddPosition( EPositionType::BOX );
+	//m_pParticle->AddLife( { 2.0f, 2.0f } );
 
 
 
