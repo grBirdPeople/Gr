@@ -183,6 +183,9 @@ grSandbox::grSandbox( void )
 	m_pPartSys1->SetMass( { 4.0f, 12.0f } );
 	m_pPartSys1->SetLife( { 2.0f, 12.0f } );
 
+
+
+
 	// Other particles
 	m_pParticle->AddLife( { 2.0f, 12.0f } );
 
