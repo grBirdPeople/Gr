@@ -37,9 +37,9 @@ public:
 		m_System.puScale->Init( rStartMin, rStartMax, rEndMin, rEndMax );
 	}
 
-	void AddSpawnVelocity( const grV2f& rDegreesMinMax, const grV2f& rForceMinMax )
+	void AddVelocity( const grV2f& rDegreeMinMax, const grV2f& rForceMinMax )
 	{
-		m_System.puVelocity->Init( rDegreesMinMax, rForceMinMax );
+		m_System.puVelocity->Init( rDegreeMinMax, rForceMinMax );
 	}
 
 	void AddPosition( const EPositionType type, const grV2f& rPositionOffsetMin, const grV2f& rPositionOffsetMax )

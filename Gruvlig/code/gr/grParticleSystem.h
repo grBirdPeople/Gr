@@ -5,6 +5,8 @@
 #include "grColor.h"
 #include "grParticleData.h"
 
+typedef std::uniform_real_distribution<float> FloatDist;
+
 
 struct grSBaseSystem
 {
@@ -53,84 +55,101 @@ struct grSBaseSystem
 
 struct grSScaleSystem : public grSBaseSystem
 {
+	typedef void( grSScaleSystem::*ScaleOption )( const sizeT startIdx, const sizeT endIdx );
+
 	grSEmitData& rEmit;
 	grSScaleData& rScale;
 	grSArrayData& rArray;
+
+	FloatDist DistStartX;
+	FloatDist DistStartY;
+	FloatDist DistEndX;
+	FloatDist DistEndY;
+
+	ScaleOption Option;
 
 	grSScaleSystem( const grSParticleData& rData )
 		: rEmit( *rData.puEmit )
 		, rScale( *rData.puScale )
 		, rArray( *rData.puArray )
+		, Option( &grSScaleSystem::Option0 )
 	{}
 	grSScaleSystem( const grSScaleSystem& ) = default;
 	grSScaleSystem& operator=( const grSScaleSystem& ) = default;
 
 	void Init( const grV2f& rStartMin, const grV2f& rStartMax, const grV2f& rEndMin, const grV2f& rEndMax )
-	{
+	{		
 		rScale.ScaleStartMin = rStartMin;
 		rScale.ScaleStartMax = rStartMax;
 		rScale.ScaleEndMin = rEndMin;
 		rScale.ScaleEndMax = rEndMax;
 		SetStartEnd( rScale.ScaleStartMin, rScale.ScaleStartMax, rScale.ScaleEndMin, rScale.ScaleEndMax, rScale.EqualScaleStart, rScale.EqualScaleEnd );
+
+		Option = rScale.EqualScaleStart == EEqualValue::NO && rScale.EqualScaleEnd == EEqualValue::NO ?
+			&grSScaleSystem::Option0 :
+			rScale.EqualScaleStart == EEqualValue::NO && rScale.EqualScaleEnd == EEqualValue::YES ?
+			&grSScaleSystem::Option1 :
+			rScale.EqualScaleStart == EEqualValue::YES && rScale.EqualScaleEnd == EEqualValue::NO ?
+			&grSScaleSystem::Option2 :
+			&grSScaleSystem::Option3;
+
+		DistStartX = rScale.ScaleStartMin.x < rScale.ScaleStartMax.x ?
+			rScale.Rand.DistF( rScale.ScaleStartMin.x, rScale.ScaleStartMax.x ) :
+			rScale.Rand.DistF( rScale.ScaleStartMax.x, rScale.ScaleStartMin.x );
+
+		DistStartY = rScale.ScaleStartMin.y < rScale.ScaleStartMax.y ?
+			rScale.Rand.DistF( rScale.ScaleStartMin.y, rScale.ScaleStartMax.y ) :
+			rScale.Rand.DistF( rScale.ScaleStartMax.y, rScale.ScaleStartMin.y );
+
+		DistEndX = rScale.ScaleEndMin.x < rScale.ScaleEndMax.x ?
+			rScale.Rand.DistF( rScale.ScaleEndMin.x, rScale.ScaleEndMax.x ) :
+			rScale.Rand.DistF( rScale.ScaleEndMax.x, rScale.ScaleEndMin.x );
+
+		DistEndY = rScale.ScaleEndMin.y < rScale.ScaleEndMax.y ?
+			rScale.Rand.DistF( rScale.ScaleEndMin.y, rScale.ScaleEndMax.y ) :
+			rScale.Rand.DistF( rScale.ScaleEndMax.y, rScale.ScaleEndMin.y );
 	}
 
 	void Generate()
 	{
 		sizeT startIdx{ rEmit.StartIdx }, endIdx{ rEmit.EndIdx };
-		if ( rScale.EqualScaleStart == EEqualValue::NO )
-		{
-			for ( sizeT i = startIdx; i < endIdx; ++i )
-				rArray.ScaleStart[ i ] = UnequalScaleStart();
+		( this->*Option )( startIdx, endIdx );
+	}
 
-			if ( rScale.EqualScaleEnd == EEqualValue::NO )
-			{
-				for ( sizeT i = startIdx; i < endIdx; ++i )
-					rArray.ScaleEnd[ i ] = UnequalScaleEnd();
-
-				return;
-			}
-
-			for ( sizeT i = startIdx; i < endIdx; ++i )
-				rArray.ScaleEnd[ i ] = rScale.ScaleEndMin;
-
-			return;
-		}
+	void Option0( const sizeT startIdx, const sizeT endIdx )
+	{
+		for ( sizeT i = startIdx; i < endIdx; ++i )
+			rArray.ScaleStart[ i ] = { rScale.Rand.Float( DistStartX ), rScale.Rand.Float( DistStartY ) };
 
 		for ( sizeT i = startIdx; i < endIdx; ++i )
-			rArray.ScaleStart[ i ] = rScale.ScaleStartMin;
+			rArray.ScaleEnd[ i ] = { rScale.Rand.Float( DistEndX ), rScale.Rand.Float( DistEndY ) };
+	}
 
-		if ( rScale.EqualScaleEnd == EEqualValue::NO )
-		{
-			for ( sizeT i = startIdx; i < endIdx; ++i )
-				rArray.ScaleEnd[ i ] = UnequalScaleEnd();
-
-			return;
-		}
+	void Option1( const sizeT startIdx, const sizeT endIdx )
+	{
+		for ( sizeT i = startIdx; i < endIdx; ++i )
+			rArray.ScaleStart[ i ] = { rScale.Rand.Float( DistStartX ), rScale.Rand.Float( DistStartY ) };
 
 		for ( sizeT i = startIdx; i < endIdx; ++i )
 			rArray.ScaleEnd[ i ] = rScale.ScaleEndMin;
 	}
 
-	grV2f UnequalScaleStart()
+	void Option2( const sizeT startIdx, const sizeT endIdx )
 	{
-		return { rScale.ScaleStartMin.x < rScale.ScaleStartMax.x ?
-			rScale.Rand.Float( rScale.Rand.DistF( rScale.ScaleStartMin.x, rScale.ScaleStartMax.x ) ) :
-			rScale.Rand.Float( rScale.Rand.DistF( rScale.ScaleStartMax.x, rScale.ScaleStartMin.x ) ),
-			rScale.ScaleStartMin.y < rScale.ScaleStartMax.y ?
-			rScale.Rand.Float( rScale.Rand.DistF( rScale.ScaleStartMin.y, rScale.ScaleStartMax.y ) ) :
-			rScale.Rand.Float( rScale.Rand.DistF( rScale.ScaleStartMax.y, rScale.ScaleStartMin.y ) )
-		};
+		for ( sizeT i = startIdx; i < endIdx; ++i )
+			rArray.ScaleStart[ i ] = rScale.ScaleStartMin;
+
+		for ( sizeT i = startIdx; i < endIdx; ++i )
+			rArray.ScaleEnd[ i ] = { rScale.Rand.Float( DistEndX ), rScale.Rand.Float( DistEndY ) };
 	}
 
-	grV2f UnequalScaleEnd()
+	void Option3( const sizeT startIdx, const sizeT endIdx )
 	{
-		return { rScale.ScaleEndMin.x < rScale.ScaleEndMax.x ?
-			rScale.Rand.Float( rScale.Rand.DistF( rScale.ScaleEndMin.x, rScale.ScaleEndMax.x ) ) :
-			rScale.Rand.Float( rScale.Rand.DistF( rScale.ScaleEndMax.x, rScale.ScaleEndMin.x ) ),
-			rScale.ScaleEndMin.y < rScale.ScaleEndMax.y ?
-			rScale.Rand.Float( rScale.Rand.DistF( rScale.ScaleEndMin.y, rScale.ScaleEndMax.y ) ) :
-			rScale.Rand.Float( rScale.Rand.DistF( rScale.ScaleEndMax.y, rScale.ScaleEndMin.y ) )
-		};
+		for ( sizeT i = startIdx; i < endIdx; ++i )
+			rArray.ScaleStart[ i ] = rScale.ScaleStartMin;
+
+		for ( sizeT i = startIdx; i < endIdx; ++i )
+			rArray.ScaleEnd[ i ] = rScale.ScaleEndMin;
 	}
 
 	void Update()
@@ -148,9 +167,13 @@ struct grSScaleSystem : public grSBaseSystem
 
 struct grSMassSystem : public grSBaseSystem
 {
+	typedef std::uniform_real_distribution<float> MassDist;
+
 	grSEmitData& rEmit;
 	grSMassData& rMass;
 	grSArrayData& rArray;
+
+	FloatDist DistMass;
 
 	grSMassSystem( const grSParticleData& rData )
 		: rEmit( *rData.puEmit )
@@ -165,6 +188,7 @@ struct grSMassSystem : public grSBaseSystem
 		rMass.MassMinMax.x = grMath::Max( rMassMinMax.x, 1.0f );
 		rMass.MassMinMax.y = grMath::Max( rMassMinMax.y, 1.0f );
 		SetMinMax( rMass.MassMinMax, rMass.EqualMass );
+		DistMass = rMass.Rand.DistF( rMass.MassMinMax.x, rMass.MassMinMax.y );
 	}
 
 	void Generate()
@@ -172,9 +196,8 @@ struct grSMassSystem : public grSBaseSystem
 		sizeT startIdx{ rEmit.StartIdx }, endIdx{ rEmit.EndIdx };
 		if ( rMass.EqualMass == EEqualValue::NO )
 		{
-			auto dist{ rMass.Rand.DistF( rMass.MassMinMax.x, rMass.MassMinMax.y ) };
 			for ( sizeT i = startIdx; i < endIdx; ++i )
-				rArray.Mass[ i ] = rMass.Rand.Float( dist );
+				rArray.Mass[ i ] = rMass.Rand.Float( DistMass );
 
 			return;
 		}
@@ -191,6 +214,8 @@ struct grSVelocitySystem : public grSBaseSystem
 	grSVelocityData& rVelocity;
 	grSArrayData& rArray;
 
+	FloatDist VelDist;
+
 	grSVelocitySystem( const grSParticleData& rData )
 		: rEmit( *rData.puEmit )
 		, rVelocity( *rData.puVelocity )
@@ -199,11 +224,11 @@ struct grSVelocitySystem : public grSBaseSystem
 	grSVelocitySystem( const grSVelocitySystem& ) = default;
 	grSVelocitySystem& operator=( const grSVelocitySystem& ) = default;
 
-	void Init( const grV2f& rDegreesMinMax, const grV2f& rForceMinMax )
+	void Init( const grV2f& rDegreeMinMax, const grV2f& rForceMinMax )
 	{
-		rVelocity.DegreesMinMax = grV2f( grMath::Clamp<float>( rDegreesMinMax.x, 0.0f, 359.9f ), grMath::Clamp<float>( rDegreesMinMax.y, 0.0f, 359.9f ) );
+		rVelocity.DegreeMinMax = grV2f( grMath::Clamp<float>( rDegreeMinMax.x, 0.0f, 359.9f ), grMath::Clamp<float>( rDegreeMinMax.y, 0.0f, 359.9f ) );
 		rVelocity.ForceMinMax = rForceMinMax;
-		SetMinMax( rVelocity.DegreesMinMax, rVelocity.EqualDegrees, false );
+		SetMinMax( rVelocity.DegreeMinMax, rVelocity.EqualDegree, false );
 		SetMinMax( rVelocity.ForceMinMax, rVelocity.EqualForce );
 	}
 
@@ -224,25 +249,25 @@ struct grSVelocitySystem : public grSBaseSystem
 
 	float FindDegrees()
 	{
-		if ( rVelocity.EqualDegrees == EEqualValue::NO )
+		if ( rVelocity.EqualDegree == EEqualValue::NO )
 		{
-			if ( rVelocity.DegreesMinMax.x > rVelocity.DegreesMinMax.y )
+			if ( rVelocity.DegreeMinMax.x > rVelocity.DegreeMinMax.y )
 			{
 				float d{ 0.0f };
-				float diff{ 359.9f - rVelocity.DegreesMinMax.x };
-				auto distDeg{ rVelocity.Rand.DistF( 0.0f, diff + rVelocity.DegreesMinMax.y ) };
-				d = rVelocity.Rand.Float( distDeg ) - diff;
+				float diff{ 359.9f - rVelocity.DegreeMinMax.x };
+				VelDist = rVelocity.Rand.DistF( 0.0f, diff + rVelocity.DegreeMinMax.y );
+				d = rVelocity.Rand.Float( VelDist ) - diff;
 				if ( d < 0.0f )
 					d += 359.9f;
 
 				return d;
 			}
 
-			auto distDeg{ rVelocity.Rand.DistF( rVelocity.DegreesMinMax.x, rVelocity.DegreesMinMax.y ) };
+			auto distDeg{ rVelocity.Rand.DistF( rVelocity.DegreeMinMax.x, rVelocity.DegreeMinMax.y ) };
 			return rVelocity.Rand.Float( distDeg );
 		}
 
-		return rVelocity.DegreesMinMax.x;
+		return rVelocity.DegreeMinMax.x;
 	}
 
 	float FindForce()
@@ -270,6 +295,9 @@ struct grSPositionSystem : public grSBaseSystem
 	grSPositionData& rPosition;
 	grSArrayData& rArray;
 
+	FloatDist DistPosX;
+	FloatDist DistPosY;
+
 	grSPositionSystem( const grSParticleData& rData )
 		: rEmit( *rData.puEmit )
 		, rPosition( *rData.puPosition )
@@ -284,6 +312,9 @@ struct grSPositionSystem : public grSBaseSystem
 		rPosition.PositionOffsetMax = rPositionOffsetMax;
 		rPosition.TypePosition = positionType;
 		SetMinMax( rPosition.PositionOffsetMin, rPosition.PositionOffsetMax, rPosition.EqualPosition );
+
+		DistPosX = rPosition.Rand.DistF( rPosition.PositionOffsetMin.x, rPosition.PositionOffsetMax.x );
+		DistPosY = rPosition.Rand.DistF( rPosition.PositionOffsetMin.y, rPosition.PositionOffsetMax.y );
 	}
 
 	void Init( const EPositionType positionType, const grV2f& rRadiusMin, const grV2f& rRadiusMax, const grV2f& rStepMinMax, const grV2f& rTiltMinMax )
@@ -368,11 +399,9 @@ struct grSPositionSystem : public grSBaseSystem
 
 	void PositionNotEqualBox()
 	{
-		auto distX{ rPosition.Rand.DistF( rPosition.PositionOffsetMin.x, rPosition.PositionOffsetMax.x ) };
-		auto distY{ rPosition.Rand.DistF( rPosition.PositionOffsetMin.y, rPosition.PositionOffsetMax.y ) };
 		for ( sizeT i = rEmit.StartIdx; i < rEmit.EndIdx; ++i )
 		{
-			grV2f v{ rPosition.Rand.Float( distX ), rPosition.Rand.Float( distY ) };
+			grV2f v{ rPosition.Rand.Float( DistPosX ), rPosition.Rand.Float( DistPosY ) };
 			rArray.Position[ i ] = v + rEmit.SystemPosition;
 		}
 	}

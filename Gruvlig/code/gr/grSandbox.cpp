@@ -187,10 +187,10 @@ grSandbox::grSandbox( void )
 
 
 	// Other particles
-	m_pParticle->SetEmitRate( 1.0f );
-	m_pParticle->AddScale( { 1.0f, 1.0f } , { 1.0f, 1.0f }, { 10.0f, 10.0f }, { 100.0f, 100.0f } );
+	m_pParticle->SetEmitRate( 4.0f );
+	m_pParticle->AddScale( { 1.0f, 1.0f } , { 1.0f, 1.0f }, { 100.0f, 100.0f }, { 1.0f, 1.0f } );
 	m_pParticle->AddPosition( EPositionType::BOX, { 0.0f, 0.0f }, { 0.0f, 0.0f } );
-	m_pParticle->AddSpawnVelocity( { 0.0f, 0.0f }, { 50.0f, 50.0f } );
+	m_pParticle->AddVelocity( { 90.0f, 90.0f }, { 50.0f, 50.0f } );
 	m_pParticle->AddMass( { 1.0f, 1.0f } );
 	m_pParticle->AddLife( { 4.0f, 4.0f } );
 

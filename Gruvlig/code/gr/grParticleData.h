@@ -88,15 +88,15 @@ struct grSMassData
 struct grSVelocityData
 {
 	grRandXOR Rand;
-	grV2f DegreesMinMax;
+	grV2f DegreeMinMax;
 	grV2f ForceMinMax;
-	EEqualValue EqualDegrees;
+	EEqualValue EqualDegree;
 	EEqualValue EqualForce;
 
 	grSVelocityData()
-		: DegreesMinMax( grV2f( 0.0f, 0.0f ) )
+		: DegreeMinMax( grV2f( 0.0f, 0.0f ) )
 		, ForceMinMax( grV2f( 100.0f, 100.0f ) )
-		, EqualDegrees( EEqualValue::YES )
+		, EqualDegree( EEqualValue::YES )
 		, EqualForce( EEqualValue::YES )
 	{}
 	grSVelocityData( const grSVelocityData& ) = default;
