@@ -9,7 +9,7 @@ class grCParticle
 {
 public:
 	grCParticle( const grV2f& systemPosition = grV2f( ( float )grCore::Instance().GetWindowSize().x * 0.5f, ( float )grCore::Instance().GetWindowSize().y * 0.5f ),
-				 const float emitRateSec = 800.0f,
+				 const float emitRateSec = 1000.0f,
 				 const intU size = 10000 )
 	{
 		m_Data.Init( systemPosition, emitRateSec, size );
@@ -23,6 +23,17 @@ public:
 	void SetSystemPosition( const grV2f& rPosition )
 	{
 		m_Data.puEmit->SystemPosition = rPosition;
+	}
+
+	void SetEmitRate( const float emitRateSec )
+	{
+		m_Data.puEmit->EmitRateSec = emitRateSec;
+		m_Data.puEmit->EmitRateMs = 1.0f / emitRateSec;
+	}
+
+	void AddScale( const grV2f& rStartMinMAx, const grV2f& rEndMinMax )
+	{
+		m_System.puScale->Init( rStartMinMAx, rEndMinMax );
 	}
 
 	void AddSpawnVelocity( const grV2f& rDegreesMinMax, const grV2f& rForceMinMax )
@@ -80,10 +91,11 @@ private:
 			emit.Alive += emit.EndIdx - emit.StartIdx;
 
 			// All system generate calls
-			if ( m_System.puMass ) m_System.puMass->Generate();
-			if ( m_System.puVelocity ) m_System.puVelocity->Generate();
-			if( m_System.puPosition ) m_System.puPosition->Generate();
-			if ( m_System.puLife ) m_System.puLife->Generate();
+			m_System.puScale->Generate();
+			m_System.puMass->Generate();
+			m_System.puVelocity->Generate();
+			m_System.puPosition->Generate();
+			m_System.puLife->Generate();
 		}
 	}
 
@@ -92,9 +104,10 @@ private:
 		if ( m_Data.puEmit->Alive > 0 )
 		{
 			// All system update calls
-			if ( m_System.puVelocity ) m_System.puVelocity->Update();
-			if ( m_System.puPosition ) m_System.puPosition->Update();
-			if ( m_System.puLife ) m_System.puLife->Update();
+			m_System.puScale->Update();
+			m_System.puVelocity->Update();
+			m_System.puPosition->Update();
+			m_System.puLife->Update();
 		}
 
 		//printf( "%d\n", m_Data.puEmit->Alive );

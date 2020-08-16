@@ -50,12 +50,13 @@ struct grSEmitData
 struct grSScaleData
 {
 	grRandXOR Rand;
-	grV2f ScaleStart, ScaleEnd;
+	grV2f ScaleStartMinMax;
+	grV2f ScaleEndMinMax;
 	EEqualValue ScaleEqualValue;
 
 	grSScaleData()
-		: ScaleStart( grV2f( 1.0f, 1.0f ) )
-		, ScaleEnd( grV2f( 1.0f, 1.0f ) )
+		: ScaleStartMinMax( grV2f( 1.0f, 1.0f ) )
+		, ScaleEndMinMax( grV2f( 1.0f, 1.0f ) )
 		, ScaleEqualValue( EEqualValue::YES )
 	{}
 	grSScaleData( const grSScaleData& ) = default;
@@ -100,17 +101,27 @@ struct grSVelocityData
 struct grSPositionData
 {
 	grRandXOR Rand;
-	grV2f PositionOffsetMin, PositionOffsetMax, EllipseRadiusMinMax;
-	float RotationSpeed, Ellipse360;
+	grV2f PositionOffsetMin;
+	grV2f PositionOffsetMax;
+	grV2f EllipseRadiusMin;
+	grV2f EllipseRadiusMax;
+	grV2f EllipseStepMinMax;
+	grV2f EllipseTiltMinMax;
+	float Ellipse360;
+	float EllipseStepCount;
+	float EllipseTiltCount;
 	EEqualValue PositionEqualValue;
 	EPositionType PositionType;
 
 	grSPositionData()
 		: PositionOffsetMin( grV2f( 0.0f, 0.0f ) )
 		, PositionOffsetMax( grV2f( 0.0f, 0.0f ) )
-		, EllipseRadiusMinMax( grV2f( 5.0f, 5.0f ) )
+		, EllipseRadiusMin( grV2f( 5.0f, 5.0f ) )
+		, EllipseRadiusMax( grV2f( 5.0f, 5.0f ) )
+		, EllipseStepMinMax( grV2f( 5.0f, 5.0f ) )
 		, Ellipse360( grMath::Pi * 2.0f )
-		, RotationSpeed( 0.0f )
+		, EllipseStepCount( 0.0f )
+		, EllipseTiltCount( 0.0f )
 		, PositionEqualValue( EEqualValue::YES )
 		, PositionType( EPositionType::BOX )
 	{}
@@ -182,12 +193,13 @@ struct grSParticleData
 		puEmit = std::make_unique<grSEmitData>( systemPosition, emitRateSec, size );
 
 		// Specific data for spawning new particles
+		puScale = std::make_unique<grSScaleData>();
 		puMass = std::make_unique<grSMassData>();
 		puVelocity = std::make_unique<grSVelocityData>();
 		puPosition = std::make_unique<grSPositionData>();
 		puLife = std::make_unique<grSLifeData>();
 
-		// All data that repersents a particle
+		// All data that represents particles
 		puArray = std::make_unique<grSArrayData>( size );
 	}
 };

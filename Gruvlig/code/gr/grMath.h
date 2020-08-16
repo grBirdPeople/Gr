@@ -43,9 +43,9 @@ namespace grMath
 		return ( value < 0.0f ) ? -value : value;
 	}
 
-	inline grV2f AbsV2f( grV2f& value )
+	inline grV2f AbsV2f( const grV2f& rV )
 	{
-		return grV2f( AbsF( value.x ), AbsF( value.y ) );
+		return grV2f( AbsF( rV.x ), AbsF( rV.y ) );
 	}
 
 	// Sign

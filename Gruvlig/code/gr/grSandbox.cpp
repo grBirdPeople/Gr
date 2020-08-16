@@ -178,7 +178,7 @@ grSandbox::grSandbox( void )
 	m_pPartSys1->SetColor( { 255, 255, 0, 255 }, { 255, 0, 0, 0 }, true, false );
 	//m_pPartSys1->SetScale( grV2f( 10.0f, 10.0f ), grV2f( 0.0f, 0.0f ) );
 	//m_pPartSys1->SetPositionBox( { 0.0f, 0.0f }, { winSize.x, 0.0f } );
-	m_pPartSys1->SetPositionEllipse( { -50.f, 100.0f }, { 50.0f, 100.0f }, 25.0f );
+	//m_pPartSys1->SetPositionEllipse( { -50.f, 100.0f }, { 50.0f, 100.0f }, 25.0f );
 	//m_pPartSys1->SetSpawnForce( { 45.0f, 45.0f }, { 49.0f, 100.0f } );
 	m_pPartSys1->SetMass( { 4.0f, 12.0f } );
 	m_pPartSys1->SetLife( { 2.0f, 12.0f } );
@@ -187,10 +187,12 @@ grSandbox::grSandbox( void )
 
 
 	// Other particles
+	m_pParticle->SetEmitRate( 1.0f );
+	m_pParticle->AddScale( { 0.1f, 0.1f } ,{ 5.1f, 5.1f } );
 	m_pParticle->AddPosition( EPositionType::BOX, { 0.0f, 0.0f }, { 0.0f, 0.0f } );
-	m_pParticle->AddSpawnVelocity( { 315.0f, 45.0f }, { 100.0f, 100.0f } );
-	m_pParticle->AddMass( { 1.0f, 10.0f } );
-	m_pParticle->AddLife( { 2.0f, 2.0f } );
+	m_pParticle->AddSpawnVelocity( { 0.0f, 0.0f }, { 50.0f, 50.0f } );
+	m_pParticle->AddMass( { 1.0f, 1.0f } );
+	m_pParticle->AddLife( { 1.0f, 1.0f } );
 
 
 
