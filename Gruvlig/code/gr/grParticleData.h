@@ -24,8 +24,8 @@ struct grSEmitData
 	grV2f SystemPosition;
 	float EmitRateSec;
 	float EmitRateMs;
-	float Dt;
 	float SpawnTimeAcc;
+	float Dt;
 	sizeT Size;
 	sizeT Alive;
 	sizeT StartIdx;
@@ -35,8 +35,8 @@ struct grSEmitData
 		: SystemPosition( systemPosition )
 		, EmitRateSec( emitRateSec )
 		, EmitRateMs( 1.0f / emitRateSec )
+		, SpawnTimeAcc( EmitRateMs )
 		, Dt( 0.0f )
-		, SpawnTimeAcc( 0.0f )
 		, Size( size )
 		, Alive( 0 )
 		, StartIdx( 0 )
@@ -50,14 +50,20 @@ struct grSEmitData
 struct grSScaleData
 {
 	grRandXOR Rand;
-	grV2f ScaleStartMinMax;
-	grV2f ScaleEndMinMax;
-	EEqualValue ScaleEqualValue;
+	grV2f ScaleStartMin;
+	grV2f ScaleStartMax;
+	grV2f ScaleEndMin;
+	grV2f ScaleEndMax;
+	EEqualValue EqualScaleStart;
+	EEqualValue EqualScaleEnd;
 
 	grSScaleData()
-		: ScaleStartMinMax( grV2f( 1.0f, 1.0f ) )
-		, ScaleEndMinMax( grV2f( 1.0f, 1.0f ) )
-		, ScaleEqualValue( EEqualValue::YES )
+		: ScaleStartMin( grV2f( 1.0f, 1.0f ) )
+		, ScaleStartMax( grV2f( 1.0f, 1.0f ) )
+		, ScaleEndMin( grV2f( 1.0f, 1.0f ) )
+		, ScaleEndMax( grV2f( 1.0f, 1.0f ) )
+		, EqualScaleStart( EEqualValue::YES )
+		, EqualScaleEnd( EEqualValue::YES )
 	{}
 	grSScaleData( const grSScaleData& ) = default;
 	grSScaleData& operator=( const grSScaleData& ) = default;
@@ -68,11 +74,11 @@ struct grSMassData
 {
 	grRandXOR Rand;
 	grV2f MassMinMax;
-	EEqualValue MassEqualValue;
+	EEqualValue EqualMass;
 
 	grSMassData()
 		: MassMinMax( grV2f( 1.0f, 1.0f ) )
-		, MassEqualValue( EEqualValue::YES )
+		, EqualMass( EEqualValue::YES )
 	{}
 	grSMassData( const grSMassData& ) = default;
 	grSMassData& operator=( const grSMassData& ) = default;
@@ -84,14 +90,14 @@ struct grSVelocityData
 	grRandXOR Rand;
 	grV2f DegreesMinMax;
 	grV2f ForceMinMax;
-	EEqualValue DegreesEqualValue;
-	EEqualValue ForceEqualValue;
+	EEqualValue EqualDegrees;
+	EEqualValue EqualForce;
 
 	grSVelocityData()
 		: DegreesMinMax( grV2f( 0.0f, 0.0f ) )
 		, ForceMinMax( grV2f( 100.0f, 100.0f ) )
-		, DegreesEqualValue( EEqualValue::YES )
-		, ForceEqualValue( EEqualValue::YES )
+		, EqualDegrees( EEqualValue::YES )
+		, EqualForce( EEqualValue::YES )
 	{}
 	grSVelocityData( const grSVelocityData& ) = default;
 	grSVelocityData& operator=( const grSVelocityData& ) = default;
@@ -110,8 +116,8 @@ struct grSPositionData
 	float Ellipse360;
 	float EllipseStepCount;
 	float EllipseTiltCount;
-	EEqualValue PositionEqualValue;
-	EPositionType PositionType;
+	EEqualValue EqualPosition;
+	EPositionType TypePosition;
 
 	grSPositionData()
 		: PositionOffsetMin( grV2f( 0.0f, 0.0f ) )
@@ -122,8 +128,8 @@ struct grSPositionData
 		, Ellipse360( grMath::Pi * 2.0f )
 		, EllipseStepCount( 0.0f )
 		, EllipseTiltCount( 0.0f )
-		, PositionEqualValue( EEqualValue::YES )
-		, PositionType( EPositionType::BOX )
+		, EqualPosition( EEqualValue::YES )
+		, TypePosition( EPositionType::BOX )
 	{}
 	grSPositionData( const grSPositionData& ) = default;
 	grSPositionData& operator=( const grSPositionData& ) = default;
@@ -134,11 +140,11 @@ struct grSLifeData
 {
 	grRandXOR Rand;
 	grV2f LifeMinMax;
-	EEqualValue LifeEqualValue;
+	EEqualValue EqualLife;
 
 	grSLifeData()
 		: LifeMinMax( grV2f( 2.0f, 2.0f ) )
-		, LifeEqualValue( EEqualValue::YES )
+		, EqualLife( EEqualValue::YES )
 	{}
 	grSLifeData( const grSLifeData& ) = default;
 	grSLifeData& operator=( const grSLifeData& ) = default;

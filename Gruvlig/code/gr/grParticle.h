@@ -29,11 +29,12 @@ public:
 	{
 		m_Data.puEmit->EmitRateSec = emitRateSec;
 		m_Data.puEmit->EmitRateMs = 1.0f / emitRateSec;
+		m_Data.puEmit->SpawnTimeAcc = m_Data.puEmit->EmitRateMs;
 	}
 
-	void AddScale( const grV2f& rStartMinMAx, const grV2f& rEndMinMax )
+	void AddScale( const grV2f& rStartMin, const grV2f& rStartMax, const grV2f& rEndMin, const grV2f& rEndMax )
 	{
-		m_System.puScale->Init( rStartMinMAx, rEndMinMax );
+		m_System.puScale->Init( rStartMin, rStartMax, rEndMin, rEndMax );
 	}
 
 	void AddSpawnVelocity( const grV2f& rDegreesMinMax, const grV2f& rForceMinMax )
@@ -64,7 +65,15 @@ public:
 
 	void Render( sf::RenderWindow& rRenderWin )
 	{
-
+		// TEST DRAW
+		grSEmitData& rEmit{ *m_Data.puEmit };
+		grSArrayData& rArray{ *m_Data.puArray };
+		for ( sizeT i = 0; i < rEmit.Alive; ++i )
+		{
+			grBBox b{ rArray.ScaleStart[ i ], rArray.Position[ i ] };
+			grDebugManager::Instance().AddBBox( b, sf::Color::Green );
+		}
+		// TEST DRAW
 	}
 
 private:

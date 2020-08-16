@@ -119,7 +119,7 @@ struct grSBaseGenerate
 		if ( rMinMax.x > rMinMax.y )
 			grAlgo::Swap( rMinMax.x, rMinMax.y );
 
-		IsEqual = grMath::CmpFloat( rMinMax.x, rMinMax.y ) ? EPartValueEqual::YES : EPartValueEqual::NO;
+		IsEqual = grMath::CmpF( rMinMax.x, rMinMax.y ) ? EPartValueEqual::YES : EPartValueEqual::NO;
 	}
 
 	EPartValueEqual IsEqual;
