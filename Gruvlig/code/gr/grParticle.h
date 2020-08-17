@@ -75,8 +75,10 @@ public:
 		grSArrayData& rArray{ *m_Data.puArray };
 		for ( sizeT i = 0; i < rEmit.Alive; ++i )
 		{
+			grColor::Rgba& rgba = rArray.ColorStart[ i ];
+			sf::Color c{ rgba.R, rgba.G, rgba.B, rgba.A };
 			grBBox b{ rArray.ScaleStart[ i ], rArray.Position[ i ] };
-			grDebugManager::Instance().AddBBox( b, sf::Color::Green );
+			grDebugManager::Instance().AddBBox( b, c );
 		}
 		// TEST DRAW
 	}

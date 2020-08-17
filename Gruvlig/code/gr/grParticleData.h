@@ -58,8 +58,8 @@ struct grSColorData
 	grColor::Rgba ColorStartMax;
 	grColor::Rgba ColorEndMin;
 	grColor::Rgba ColorEndMax;
-	EEqualValue EqualColorStart;
-	EEqualValue EqualColorEnd;
+	EEqualValue ColorStartEqual;
+	EEqualValue ColorEndEqual;
 	bool bHsv;
 
 	grSColorData()
@@ -68,8 +68,8 @@ struct grSColorData
 		, ColorStartMax( grColor::Rgba() )
 		, ColorEndMin( grColor::Rgba() )
 		, ColorEndMax( grColor::Rgba() )
-		, EqualColorStart( EEqualValue::YES )
-		, EqualColorEnd( EEqualValue::YES )
+		, ColorStartEqual( EEqualValue::YES )
+		, ColorEndEqual( EEqualValue::YES )
 		, bHsv( true )
 	{}
 	grSColorData( const grSColorData& ) = default;
@@ -84,16 +84,16 @@ struct grSScaleData
 	grV2f ScaleStartMax;
 	grV2f ScaleEndMin;
 	grV2f ScaleEndMax;
-	EEqualValue EqualScaleStart;
-	EEqualValue EqualScaleEnd;
+	EEqualValue ScaleStartEqual;
+	EEqualValue ScaleEndEqual;
 
 	grSScaleData()
 		: ScaleStartMin( grV2f( 1.0f, 1.0f ) )
 		, ScaleStartMax( grV2f( 1.0f, 1.0f ) )
 		, ScaleEndMin( grV2f( 1.0f, 1.0f ) )
 		, ScaleEndMax( grV2f( 1.0f, 1.0f ) )
-		, EqualScaleStart( EEqualValue::YES )
-		, EqualScaleEnd( EEqualValue::YES )
+		, ScaleStartEqual( EEqualValue::YES )
+		, ScaleEndEqual( EEqualValue::YES )
 	{}
 	grSScaleData( const grSScaleData& ) = default;
 	grSScaleData& operator=( const grSScaleData& ) = default;
@@ -120,14 +120,14 @@ struct grSVelocityData
 	grRandXOR Rand;
 	grV2f DegreeMinMax;
 	grV2f ForceMinMax;
-	EEqualValue EqualDegree;
-	EEqualValue EqualForce;
+	EEqualValue DegreeEqual;
+	EEqualValue ForceEqual;
 
 	grSVelocityData()
 		: DegreeMinMax( grV2f( 0.0f, 0.0f ) )
 		, ForceMinMax( grV2f( 100.0f, 100.0f ) )
-		, EqualDegree( EEqualValue::YES )
-		, EqualForce( EEqualValue::YES )
+		, DegreeEqual( EEqualValue::YES )
+		, ForceEqual( EEqualValue::YES )
 	{}
 	grSVelocityData( const grSVelocityData& ) = default;
 	grSVelocityData& operator=( const grSVelocityData& ) = default;
@@ -146,8 +146,8 @@ struct grSPositionData
 	float Ellipse360;
 	float EllipseStepCount;
 	float EllipseTiltCount;
-	EEqualValue EqualPosition;
-	EPositionType TypePosition;
+	EEqualValue PositionEqual;
+	EPositionType PositionType;
 
 	grSPositionData()
 		: PositionOffsetMin( grV2f( 0.0f, 0.0f ) )
@@ -158,8 +158,8 @@ struct grSPositionData
 		, Ellipse360( grMath::Pi * 2.0f )
 		, EllipseStepCount( 0.0f )
 		, EllipseTiltCount( 0.0f )
-		, EqualPosition( EEqualValue::YES )
-		, TypePosition( EPositionType::BOX )
+		, PositionEqual( EEqualValue::YES )
+		, PositionType( EPositionType::BOX )
 	{}
 	grSPositionData( const grSPositionData& ) = default;
 	grSPositionData& operator=( const grSPositionData& ) = default;
@@ -170,11 +170,11 @@ struct grSLifeData
 {
 	grRandXOR Rand;
 	grV2f LifeMinMax;
-	EEqualValue EqualLife;
+	EEqualValue LifeEqual;
 
 	grSLifeData()
 		: LifeMinMax( grV2f( 2.0f, 2.0f ) )
-		, EqualLife( EEqualValue::YES )
+		, LifeEqual( EEqualValue::YES )
 	{}
 	grSLifeData( const grSLifeData& ) = default;
 	grSLifeData& operator=( const grSLifeData& ) = default;
