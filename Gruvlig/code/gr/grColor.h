@@ -10,11 +10,25 @@ namespace grColor
 	//////////////////////////////////////////////////
 	struct SRgba
 	{
-		SRgba( const uint16_t r = 255, const uint16_t g = 255, const uint16_t b = 255, const uint16_t a = 255 )
+		SRgba( const uint16_t r = 254, const uint16_t g = 254, const uint16_t b = 254, const uint16_t a = 254 )
 			: R( ( float )r ) , G( ( float )g ) , B( ( float )b ) , A( ( float )a )
 		{}
 
 		float R, G, B, A;
+	};
+
+	struct Rgba // Unsigned int 16 as that is what SFML is using
+	{
+		Rgba( const uint16_t r = 254, const uint16_t g = 254, const uint16_t b = 254, const uint16_t a = 254 )
+			: R( r ), G( g ), B( b ), A( a )
+		{}
+
+		bool Cmp( const Rgba& rOther )
+		{
+			return R == rOther.R && G == rOther.G && B == rOther.B && A == rOther.A ? true : false;
+		}
+
+		uint16_t R, G, B, A;
 	};
 
 	// SHsva

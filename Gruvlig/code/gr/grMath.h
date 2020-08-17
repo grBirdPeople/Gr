@@ -113,9 +113,9 @@ namespace grMath
 		return ( x < EpsilonLrg ) && ( y < EpsilonLrg );
 	}
 
-	inline bool CmpF( const float numOne, const float numTwo )
+	inline bool CmpF( const float a, const float b )
 	{
-		return AbsF( numOne - numTwo ) < EpsilonLrg;
+		return AbsF( a - b ) < EpsilonLrg;
 	}
 
 	// MoveTo

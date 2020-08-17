@@ -2,7 +2,6 @@
 #define _H_GRPARTICLESYSTEM_
 
 #include "grAlgo.h"
-#include "grColor.h"
 #include "grParticleData.h"
 
 typedef std::uniform_real_distribution<float> FloatDist;
@@ -10,17 +9,21 @@ typedef std::uniform_real_distribution<float> FloatDist;
 
 struct grSBaseSystem
 {
-	void InitColor( grColor::SRgba& rStart, grColor::SRgba& rEnd )
+	void SetStartEnd( grColor::Rgba& rStartMin, grColor::Rgba& rStartMax, grColor::Rgba& rEndMin, grColor::Rgba& rEndMax, EEqualValue& rStartEqual, EEqualValue& rEndEqual )
 	{
-		rStart.R = grMath::Clamp<float>( rStart.R, 0.0f, 255.0f );
-		rStart.G = grMath::Clamp<float>( rStart.G, 0.0f, 255.0f );
-		rStart.B = grMath::Clamp<float>( rStart.B, 0.0f, 255.0f );
-		rStart.A = grMath::Clamp<float>( rStart.A, 0.0f, 255.0f );
+		rStartMin = ClampColor( rStartMin );
+		rStartMax = ClampColor( rStartMax );
+		rEndMin = ClampColor( rEndMin );
+		rEndMax = ClampColor( rEndMax );
 
-		rEnd.R = grMath::Clamp<float>( rEnd.R, 0.0f, 255.0f );
-		rEnd.G = grMath::Clamp<float>( rEnd.G, 0.0f, 255.0f );
-		rEnd.B = grMath::Clamp<float>( rEnd.B, 0.0f, 255.0f );
-		rEnd.A = grMath::Clamp<float>( rEnd.A, 0.0f, 255.0f );
+		rStartEqual = rStartMin.Cmp( rStartMax ) ? EEqualValue::YES : EEqualValue::NO;
+		rEndEqual = rEndMin.Cmp( rEndMax ) ? EEqualValue::YES : EEqualValue::NO;
+	}
+
+	void SetStartEnd( const grV2f& rStartMin, const grV2f& rStartMax, const grV2f& rEndMin, const grV2f& rEndMax, EEqualValue& rStartEqual, EEqualValue& rEndEqual )
+	{
+		rStartEqual = grMath::CmpV2f( rStartMin, rStartMax ) ? EEqualValue::YES : EEqualValue::NO;
+		rEndEqual = grMath::CmpV2f( rEndMin, rEndMax ) ? EEqualValue::YES : EEqualValue::NO;
 	}
 
 	void SetMinMax( grV2f& rMinMax, EEqualValue& rEqual, const bool swap = true )
@@ -45,10 +48,127 @@ struct grSBaseSystem
 		rEqual = grMath::CmpV2f( rMin, rMax ) ? EEqualValue::YES : EEqualValue::NO;
 	}
 
-	void SetStartEnd( const grV2f& rStartMin, const grV2f& rStartMax, const grV2f& rEndMin, const grV2f& rEndMax, EEqualValue& rStartEqual, EEqualValue& rEndEqual )
+private:
+	grColor::Rgba ClampColor( const grColor::Rgba& rColor )
 	{
-		rStartEqual = grMath::CmpV2f( rStartMin, rStartMax ) ? EEqualValue::YES : EEqualValue::NO;
-		rEndEqual = grMath::CmpV2f( rEndMin, rEndMax ) ? EEqualValue::YES : EEqualValue::NO;
+		return {
+			grMath::Clamp<uint16_t>( rColor.R, 0, 254 ),
+			grMath::Clamp<uint16_t>( rColor.G, 0, 254 ),
+			grMath::Clamp<uint16_t>( rColor.B, 0, 254 ),
+			grMath::Clamp<uint16_t>( rColor.A, 0, 254 )
+		};
+	}
+};
+
+
+struct grSColorSystem : public grSBaseSystem
+{
+	typedef void( grSColorSystem::*ColorOption )( const sizeT startIdx, const sizeT endIdx );
+
+	grSEmitData& rEmit;
+	grSColorData& rColor;
+	grSArrayData& rArray;
+
+	ColorOption Option;
+
+	grSColorSystem( const grSParticleData& rData )
+		: rEmit( *rData.puEmit )
+		, rColor( *rData.puColor )
+		, rArray( *rData.puArray )
+		, Option( &grSColorSystem::Option0 )
+	{}
+	grSColorSystem( const grSColorSystem& ) = default;
+	grSColorSystem& operator=( const grSColorSystem& ) = default;
+
+	void Init( const grColor::Rgba& rStartMin, const grColor::Rgba& rStartMax, const grColor::Rgba& rEndMin, const grColor::Rgba& rEndMax, const bool hsv )
+	{
+		rColor.ColorStartMin = rStartMin;
+		rColor.ColorStartMax = rStartMax;
+		rColor.ColorEndMin = rEndMin;
+		rColor.ColorEndMax = rEndMax;
+		rColor.bHsv = hsv;
+		SetStartEnd( rColor.ColorStartMin, rColor.ColorStartMax, rColor.ColorEndMin, rColor.ColorEndMax, rColor.EqualColorStart, rColor.EqualColorEnd );
+
+		rColor.puDistArr[ 0 ] = DistSetup( rColor.ColorStartMin.R, rColor.ColorStartMax.R );
+		rColor.puDistArr[ 1 ] = DistSetup( rColor.ColorStartMin.G, rColor.ColorStartMax.G );
+		rColor.puDistArr[ 2 ] = DistSetup( rColor.ColorStartMin.B, rColor.ColorStartMax.B );
+		rColor.puDistArr[ 3 ] = DistSetup( rColor.ColorStartMin.A, rColor.ColorStartMax.A );
+
+		rColor.puDistArr[ 4 ] = DistSetup( rColor.ColorEndMin.R, rColor.ColorEndMax.R );
+		rColor.puDistArr[ 5 ] = DistSetup( rColor.ColorEndMin.G, rColor.ColorEndMax.G );
+		rColor.puDistArr[ 6 ] = DistSetup( rColor.ColorEndMin.B, rColor.ColorEndMax.B );
+		rColor.puDistArr[ 7 ] = DistSetup( rColor.ColorEndMin.A, rColor.ColorEndMax.A );
+
+		Option = rColor.EqualColorStart == EEqualValue::NO && rColor.EqualColorEnd == EEqualValue::NO ?
+			&grSColorSystem::Option0 :
+			rColor.EqualColorStart == EEqualValue::NO && rColor.EqualColorEnd == EEqualValue::YES ?
+			&grSColorSystem::Option1 :
+			rColor.EqualColorStart == EEqualValue::YES && rColor.EqualColorEnd == EEqualValue::NO ?
+			&grSColorSystem::Option2 :
+			&grSColorSystem::Option3;
+	}
+
+	void Generate()
+	{
+		sizeT startIdx{ rEmit.StartIdx }, endIdx{ rEmit.EndIdx };
+		( this->*Option )( startIdx, endIdx );
+	}
+
+	void Update()
+	{
+		if ( rColor.bHsv )
+		{
+
+		}
+	}
+
+	IntUDist DistSetup( const uint16_t rA, const uint16_t rB )
+	{
+		return rA < rB ? rColor.Rand.DistU( grV2u{ rA, rB } ) : rColor.Rand.DistU( grV2u{ rB, rA } );
+	}
+
+	void ColorFinal( pU<grColor::Rgba[]>& rArr, const sizeT arrIdx, const sizeT distIdx )
+	{
+		rArr[ arrIdx ].R = ( uint16_t )( rColor.Rand.IntU( rColor.puDistArr[ distIdx ] ) );
+		rArr[ arrIdx ].G = ( uint16_t )( rColor.Rand.IntU( rColor.puDistArr[ distIdx + 1 ] ) );
+		rArr[ arrIdx ].B = ( uint16_t )( rColor.Rand.IntU( rColor.puDistArr[ distIdx + 2 ] ) );
+		rArr[ arrIdx ].A = ( uint16_t )( rColor.Rand.IntU( rColor.puDistArr[ distIdx + 3 ] ) );
+	}
+
+	void Option0( const sizeT startIdx, const sizeT endIdx )
+	{
+		for ( sizeT i = startIdx; i < endIdx; ++i )
+			ColorFinal( rArray.ColorStart, i, 0 );
+
+		for ( sizeT i = startIdx; i < endIdx; ++i )
+			ColorFinal( rArray.ColorEnd, i, 4 );
+	}
+
+	void Option1( const sizeT startIdx, const sizeT endIdx )
+	{
+		for ( sizeT i = startIdx; i < endIdx; ++i )
+			ColorFinal( rArray.ColorStart, i, 0 );
+
+		for ( sizeT i = startIdx; i < endIdx; ++i )
+			rArray.ColorEnd[ i ] = rColor.ColorEndMin;
+	}
+
+	void Option2( const sizeT startIdx, const sizeT endIdx )
+	{
+		for ( sizeT i = startIdx; i < endIdx; ++i )
+			rArray.ColorStart[ i ] = rColor.ColorStartMin;
+
+		for ( sizeT i = startIdx; i < endIdx; ++i )
+			ColorFinal( rArray.ColorEnd, i, 4 );
+	}
+
+	void Option3( const sizeT startIdx, const sizeT endIdx )
+	{
+		for ( sizeT i = startIdx; i < endIdx; ++i )
+			rArray.ColorStart[ i ] = rColor.ColorStartMin;
+
+		for ( sizeT i = startIdx; i < endIdx; ++i )
+			rArray.ColorEnd[ i ] = rColor.ColorEndMin;
 	}
 };
 
@@ -61,7 +181,7 @@ struct grSScaleSystem : public grSBaseSystem
 	grSScaleData& rScale;
 	grSArrayData& rArray;
 
-	FloatDist DistStartX;
+	FloatDist DistStartX; // TODO: Move this to data object and do the same for all other systems
 	FloatDist DistStartY;
 	FloatDist DistEndX;
 	FloatDist DistEndY;
@@ -85,14 +205,6 @@ struct grSScaleSystem : public grSBaseSystem
 		rScale.ScaleEndMax = rEndMax;
 		SetStartEnd( rScale.ScaleStartMin, rScale.ScaleStartMax, rScale.ScaleEndMin, rScale.ScaleEndMax, rScale.EqualScaleStart, rScale.EqualScaleEnd );
 
-		Option = rScale.EqualScaleStart == EEqualValue::NO && rScale.EqualScaleEnd == EEqualValue::NO ?
-			&grSScaleSystem::Option0 :
-			rScale.EqualScaleStart == EEqualValue::NO && rScale.EqualScaleEnd == EEqualValue::YES ?
-			&grSScaleSystem::Option1 :
-			rScale.EqualScaleStart == EEqualValue::YES && rScale.EqualScaleEnd == EEqualValue::NO ?
-			&grSScaleSystem::Option2 :
-			&grSScaleSystem::Option3;
-
 		DistStartX = rScale.ScaleStartMin.x < rScale.ScaleStartMax.x ?
 			rScale.Rand.DistF( rScale.ScaleStartMin.x, rScale.ScaleStartMax.x ) :
 			rScale.Rand.DistF( rScale.ScaleStartMax.x, rScale.ScaleStartMin.x );
@@ -108,12 +220,31 @@ struct grSScaleSystem : public grSBaseSystem
 		DistEndY = rScale.ScaleEndMin.y < rScale.ScaleEndMax.y ?
 			rScale.Rand.DistF( rScale.ScaleEndMin.y, rScale.ScaleEndMax.y ) :
 			rScale.Rand.DistF( rScale.ScaleEndMax.y, rScale.ScaleEndMin.y );
+
+		Option = rScale.EqualScaleStart == EEqualValue::NO && rScale.EqualScaleEnd == EEqualValue::NO ?
+			&grSScaleSystem::Option0 :
+			rScale.EqualScaleStart == EEqualValue::NO && rScale.EqualScaleEnd == EEqualValue::YES ?
+			&grSScaleSystem::Option1 :
+			rScale.EqualScaleStart == EEqualValue::YES && rScale.EqualScaleEnd == EEqualValue::NO ?
+			&grSScaleSystem::Option2 :
+			&grSScaleSystem::Option3;
 	}
 
 	void Generate()
 	{
 		sizeT startIdx{ rEmit.StartIdx }, endIdx{ rEmit.EndIdx };
 		( this->*Option )( startIdx, endIdx );
+	}
+
+	void Update()
+	{
+		for ( sizeT i = 0; i < rEmit.Alive; ++i )
+		{
+			grV2f start{ rArray.ScaleStart[ i ] };
+			grV2f end{ rArray.ScaleEnd[ i ] };
+			float step{ ( 1.0f / rArray.Life[ i ] ) * rEmit.Dt };
+			rArray.ScaleStart[ i ] = grMath::LerpV2f( start, end, step );
+		}
 	}
 
 	void Option0( const sizeT startIdx, const sizeT endIdx )
@@ -151,17 +282,6 @@ struct grSScaleSystem : public grSBaseSystem
 		for ( sizeT i = startIdx; i < endIdx; ++i )
 			rArray.ScaleEnd[ i ] = rScale.ScaleEndMin;
 	}
-
-	void Update()
-	{
-		for ( sizeT i = 0; i < rEmit.Alive; ++i )
-		{
-			grV2f start{ rArray.ScaleStart[ i ] };
-			grV2f end{ rArray.ScaleEnd[ i ] };
-			float step{ ( 1.0f / rArray.Life[ i ] ) * rEmit.Dt };
-			rArray.ScaleStart[ i ] = grMath::LerpV2f( start, end, step );
-		}
-	}
 };
 
 
@@ -183,10 +303,10 @@ struct grSMassSystem : public grSBaseSystem
 	grSMassSystem( const grSMassSystem& ) = default;
 	grSMassSystem& operator=( const grSMassSystem& ) = default;
 
-	void Init( const grV2f& rMassMinMax )
+	void Init( const grV2f& rMinMax )
 	{
-		rMass.MassMinMax.x = grMath::Max( rMassMinMax.x, 1.0f );
-		rMass.MassMinMax.y = grMath::Max( rMassMinMax.y, 1.0f );
+		rMass.MassMinMax.x = grMath::Max( rMinMax.x, 1.0f );
+		rMass.MassMinMax.y = grMath::Max( rMinMax.y, 1.0f );
 		SetMinMax( rMass.MassMinMax, rMass.EqualMass );
 		DistMass = rMass.Rand.DistF( rMass.MassMinMax.x, rMass.MassMinMax.y );
 	}
@@ -306,10 +426,10 @@ struct grSPositionSystem : public grSBaseSystem
 	grSPositionSystem( const grSPositionSystem& ) = default;
 	grSPositionSystem& operator=( const grSPositionSystem& ) = default;
 
-	void Init( const EPositionType positionType, const grV2f& rPositionOffsetMin, const grV2f& rPositionOffsetMax )
+	void Init( const EPositionType positionType, const grV2f& rOffsetMin, const grV2f& rOffsetMax )
 	{
-		rPosition.PositionOffsetMin = rPositionOffsetMin;
-		rPosition.PositionOffsetMax = rPositionOffsetMax;
+		rPosition.PositionOffsetMin = rOffsetMin;
+		rPosition.PositionOffsetMax = rOffsetMax;
 		rPosition.TypePosition = positionType;
 		SetMinMax( rPosition.PositionOffsetMin, rPosition.PositionOffsetMax, rPosition.EqualPosition );
 
@@ -445,9 +565,9 @@ struct grSLifeSystem : public grSBaseSystem
 	grSLifeSystem( const grSLifeSystem& ) = default;
 	grSLifeSystem& operator=( const grSLifeSystem& ) = default;
 
-	void Init( const grV2f& rLifeMinMax )
+	void Init( const grV2f& rMinMax )
 	{
-		rLife.LifeMinMax = rLifeMinMax;
+		rLife.LifeMinMax = rMinMax;
 		SetMinMax( rLife.LifeMinMax, rLife.EqualLife );
 	}
 
@@ -480,8 +600,8 @@ struct grSLifeSystem : public grSBaseSystem
 	void Kill( const sizeT nowIdx, const sizeT last )
 	{
 		//grAlgo::Swap( Array.puVerts[ nowIdx ], Array.puVerts[ last ] );
-		//grAlgo::Swap( rParticleArr->puColorStart[ nowIdx ], rParticleArr->puColorStart[ last ] );
-		//grAlgo::Swap( rParticleArr->puColorEnd[ nowIdx ], rParticleArr->puColorEnd[ last ] );
+		grAlgo::Swap( rArray.ColorStart[ nowIdx ], rArray.ColorStart[ last ] );
+		grAlgo::Swap( rArray.ColorEnd[ nowIdx ], rArray.ColorEnd[ last ] );
 		grAlgo::Swap( rArray.ScaleStart[ nowIdx ], rArray.ScaleStart[ last ] );
 		grAlgo::Swap( rArray.ScaleEnd[ nowIdx ], rArray.ScaleEnd[ last ] );
 		grAlgo::Swap( rArray.Mass[ nowIdx ], rArray.Mass[ last ] );
@@ -499,6 +619,7 @@ struct grSLifeSystem : public grSBaseSystem
 
 struct grSParticleSystem
 {
+	pU<grSColorSystem> puColor;
 	pU<grSScaleSystem> puScale;
 	pU<grSMassSystem> puMass;
 	pU<grSVelocitySystem> puVelocity;
@@ -513,6 +634,7 @@ struct grSParticleSystem
 
 	void Init( const grSParticleData& rData )
 	{
+		puColor = std::make_unique<grSColorSystem>( rData );
 		puScale = std::make_unique<grSScaleSystem>( rData );
 		puMass = std::make_unique<grSMassSystem>( rData );
 		puVelocity = std::make_unique<grSVelocitySystem>( rData );

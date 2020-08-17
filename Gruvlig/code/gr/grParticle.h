@@ -32,6 +32,11 @@ public:
 		m_Data.puEmit->SpawnTimeAcc = m_Data.puEmit->EmitRateMs;
 	}
 
+	void AddColor( const grColor::Rgba& rStartMin, const grColor::Rgba& rStartMax, const grColor::Rgba& rEndMin, const grColor::Rgba& rEndMax, const bool hsv = true )
+	{
+		m_System.puColor->Init( rStartMin, rStartMax, rEndMin, rEndMax, hsv );
+	}
+
 	void AddScale( const grV2f& rStartMin, const grV2f& rStartMax, const grV2f& rEndMin, const grV2f& rEndMax )
 	{
 		m_System.puScale->Init( rStartMin, rStartMax, rEndMin, rEndMax );
@@ -42,19 +47,19 @@ public:
 		m_System.puVelocity->Init( rDegreeMinMax, rForceMinMax );
 	}
 
-	void AddPosition( const EPositionType type, const grV2f& rPositionOffsetMin, const grV2f& rPositionOffsetMax )
+	void AddPosition( const EPositionType type, const grV2f& rOffsetMin, const grV2f& rOffsetMax )
 	{
-		m_System.puPosition->Init( type, rPositionOffsetMin, rPositionOffsetMax ); // Only box now, ellipse later
+		m_System.puPosition->Init( type, rOffsetMin, rOffsetMax ); // Only box now, ellipse later
 	}
 
-	void AddMass( const grV2f& rMassMinMax )
+	void AddMass( const grV2f& rMinMax )
 	{
-		m_System.puMass->Init( rMassMinMax );
+		m_System.puMass->Init( rMinMax );
 	}
 
-	void AddLife( const grV2f& rLifeMinMax )
+	void AddLife( const grV2f& rMinMax )
 	{
-		m_System.puLife->Init( rLifeMinMax );
+		m_System.puLife->Init( rMinMax );
 	}
 
 	void Run( const float dt )
@@ -100,6 +105,7 @@ private:
 			emit.Alive += emit.EndIdx - emit.StartIdx;
 
 			// All system generate calls
+			m_System.puColor->Generate();
 			m_System.puScale->Generate();
 			m_System.puMass->Generate();
 			m_System.puVelocity->Generate();
@@ -113,6 +119,7 @@ private:
 		if ( m_Data.puEmit->Alive > 0 )
 		{
 			// All system update calls
+			m_System.puColor->Update();
 			m_System.puScale->Update();
 			m_System.puVelocity->Update();
 			m_System.puPosition->Update();

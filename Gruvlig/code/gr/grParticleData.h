@@ -1,8 +1,11 @@
 #ifndef _H_GRPARTICLEDATA_
 #define _H_GRPARTICLEDATA_
 
+#include "grColor.h"
 #include "grRandom.h"
 #include "grV2.h"
+
+typedef std::uniform_int_distribution<unsigned int> IntUDist;
 
 
 enum class EEqualValue
@@ -44,6 +47,33 @@ struct grSEmitData
 	{}
 	grSEmitData( const grSEmitData& ) = default;
 	grSEmitData& operator=( const grSEmitData& ) = default;
+};
+
+
+struct grSColorData
+{
+	pU<IntUDist[]> puDistArr; // Start R[ 0 ], G[ 1 ], B[ 2 ], A[ 3 ] // End R[ 4 ], G[ 5 ], B[ 6 ], A[ 7 ]
+	grRandXOR Rand;
+	grColor::Rgba ColorStartMin;
+	grColor::Rgba ColorStartMax;
+	grColor::Rgba ColorEndMin;
+	grColor::Rgba ColorEndMax;
+	EEqualValue EqualColorStart;
+	EEqualValue EqualColorEnd;
+	bool bHsv;
+
+	grSColorData()
+		: puDistArr( std::make_unique<IntUDist[]>( 8 ) )
+		, ColorStartMin( grColor::Rgba() )
+		, ColorStartMax( grColor::Rgba() )
+		, ColorEndMin( grColor::Rgba() )
+		, ColorEndMax( grColor::Rgba() )
+		, EqualColorStart( EEqualValue::YES )
+		, EqualColorEnd( EEqualValue::YES )
+		, bHsv( true )
+	{}
+	grSColorData( const grSColorData& ) = default;
+	grSColorData& operator=( const grSColorData& ) = default;
 };
 
 
@@ -153,6 +183,8 @@ struct grSLifeData
 
 struct grSArrayData
 {
+	pU<grColor::Rgba[]> ColorStart;
+	pU<grColor::Rgba[]> ColorEnd;
 	pU<grV2f[]> ScaleStart;
 	pU<grV2f[]> ScaleEnd;
 	pU<float[]> Mass;
@@ -162,7 +194,9 @@ struct grSArrayData
 	pU<float[]> Life;
 
 	grSArrayData( const sizeT size )
-		: ScaleStart( std::make_unique<grV2f[]>( size ) )
+		: ColorStart( std::make_unique<grColor::Rgba[]>( size ) )
+		, ColorEnd( std::make_unique<grColor::Rgba[]>( size ) )
+		, ScaleStart( std::make_unique<grV2f[]>( size ) )
 		, ScaleEnd( std::make_unique<grV2f[]>( size ) )
 		, Acceleration( std::make_unique<grV2f[]>( size ) )
 		, Velocity( std::make_unique<grV2f[]>( size ) )
@@ -180,6 +214,7 @@ struct grSArrayData
 struct grSParticleData
 {
 	pU<grSEmitData> puEmit;
+	pU<grSColorData> puColor;
 	pU<grSScaleData> puScale;
 	pU<grSMassData> puMass;
 	pU<grSVelocityData> puVelocity;
@@ -199,13 +234,14 @@ struct grSParticleData
 		puEmit = std::make_unique<grSEmitData>( systemPosition, emitRateSec, size );
 
 		// Specific data for spawning new particles
+		puColor = std::make_unique<grSColorData>();
 		puScale = std::make_unique<grSScaleData>();
 		puMass = std::make_unique<grSMassData>();
 		puVelocity = std::make_unique<grSVelocityData>();
 		puPosition = std::make_unique<grSPositionData>();
 		puLife = std::make_unique<grSLifeData>();
 
-		// All data that represents particles
+		// Unique data that represents particles
 		puArray = std::make_unique<grSArrayData>( size );
 	}
 };
