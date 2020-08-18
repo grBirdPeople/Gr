@@ -68,15 +68,17 @@ public:
 	void Render( sf::RenderWindow& rRenderWin )
 	{
 		// TEST DRAW
-		grSEmitData& rEmit{ *m_Data.puEmit };
 		grSArrayData& rArray{ *m_Data.puArray };
-		for ( sizeT i = 0; i < rEmit.Alive; ++i )
+		sizeT alive{ m_Data.puEmit->Alive };
+		for ( sizeT i = 0; i < alive; ++i )
 		{
 			grColor::Rgba& rgba = rArray.ColorStart[ i ];
 			sf::Color c{ rgba.R, rgba.G, rgba.B, rgba.A };
 			grBBox b{ rArray.ScaleStart[ i ], rArray.Position[ i ] };
 			grDebugManager::Instance().AddBBox( b, c );
 		}
+
+		printf( "%d\n", alive );
 		// TEST DRAW
 	}
 

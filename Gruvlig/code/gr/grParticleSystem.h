@@ -112,7 +112,7 @@ struct grSColorSystem : public grSBaseSystem
 		: rEmiData( *rData.puEmit )
 		, rColData( *rData.puColor )
 		, rArrData( *rData.puArray )
-		, GenerateOption( &grSColorSystem::GenerateOption0 )
+		, GenerateOption( &grSColorSystem::GenerateOption3 )
 	{}
 	grSColorSystem( const grSColorSystem& ) = default;
 	grSColorSystem& operator=( const grSColorSystem& ) = default;
@@ -165,7 +165,7 @@ struct grSColorSystem : public grSBaseSystem
 			rColData.bHsv ? LerpHsv() : LerpRgb();
 	}
 
-	IntUDist RangeDist( const uint16_t a, const uint16_t b )
+	DistUI RangeDist( const uint16_t a, const uint16_t b )
 	{
 		return a < b ? rColData.Rand.DistU( a, b ) : rColData.Rand.DistU( b, a );
 	}
@@ -277,7 +277,7 @@ struct grSScaleSystem : public grSBaseSystem
 		: rEmiData( *rData.puEmit )
 		, rScaData( *rData.puScale )
 		, rArrData( *rData.puArray )
-		, GnerateOption( &grSScaleSystem::GnerateOption0 )
+		, GnerateOption( &grSScaleSystem::GnerateOption3 )
 	{}
 	grSScaleSystem( const grSScaleSystem& ) = default;
 	grSScaleSystem& operator=( const grSScaleSystem& ) = default;
@@ -327,7 +327,7 @@ struct grSScaleSystem : public grSBaseSystem
 		}
 	}
 
-	FloatDist InitDist( const float a, const float b )
+	DistF InitDist( const float a, const float b )
 	{
 		return a < b ? rScaData.Rand.DistF( a, b ) : rScaData.Rand.DistF( b, a );
 	}
@@ -621,9 +621,9 @@ struct grSPositionSystem : public grSBaseSystem
 
 	void PositionEqualBox()
 	{
-		grV2f v{ rPosData.PositionOffsetMin };
+		grV2f v{ rPosData.PositionOffsetMin + rEmiData.SystemPosition };
 		for ( sizeT i = rEmiData.StartIdx; i < rEmiData.EndIdx; ++i )
-			rArrData.Position[ i ] = v + rEmiData.SystemPosition;
+			rArrData.Position[ i ] = v;
 	}
 
 	void PositionEqualEllipse()
@@ -693,7 +693,7 @@ struct grSLifeSystem : public grSBaseSystem
 		grAlgo::Swap( rArrdata.Life[ nowIdx ], rArrdata.Life[ last ] );
 
 		// Most values are generated and set by operator= and does not need zeroing (all above)
-		// Values that are generated and set by operator+= needs resetting obviously (all below)
+		// Values that are generated and set by operator+= needs resetting (all below) with the exception of position
 		rArrdata.Acceleration[ last ] = { 0.0f, 0.0f };
 	}
 };

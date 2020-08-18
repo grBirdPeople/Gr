@@ -5,8 +5,8 @@
 #include "grRandom.h"
 #include "grV2.h"
 
-typedef std::uniform_real_distribution<float> FloatDist;
-typedef std::uniform_int_distribution<unsigned int> IntUDist;
+typedef std::uniform_real_distribution<float> DistF;
+typedef std::uniform_int_distribution<unsigned int> DistUI;
 
 
 enum class EEqualValue
@@ -27,7 +27,7 @@ struct grSEmitData
 {
 	grV2f SystemPosition = grV2f( ( float )grCore::Instance().GetWindowSize().x * 0.5f, ( float )grCore::Instance().GetWindowSize().y * 0.5f );
 	float Dt = 0.0f;
-	float EmitRateSec = 100.0f;;
+	float EmitRateSec = 200.0f;;
 	float EmitRateMs = 1.0f / EmitRateSec;
 	float SpawnTimeAcc = 0.0f;
 	sizeT EmitAcc = 0;
@@ -48,8 +48,10 @@ struct grSEmitData
 
 struct grSColorData
 {
-	IntUDist ArrDist[ 8 ]; // Start R[ 0 ], G[ 1 ], B[ 2 ], A[ 3 ] // End R[ 4 ], G[ 5 ], B[ 6 ], A[ 7 ]
-	grColor::Rgba ArrMinMax[ 4 ]; // Start Min[ 0 ], Max[ 1 ] // End Min[ 2 ], Max[ 3 ]
+	// Start R[ 0 ], G[ 1 ], B[ 2 ], A[ 3 ] // End R[ 4 ], G[ 5 ], B[ 6 ], A[ 7 ]
+	DistUI ArrDist[ 8 ];
+	// Start Min[ 0 ], Max[ 1 ] // End Min[ 2 ], Max[ 3 ]
+	grColor::Rgba ArrMinMax[ 4 ] = { { 0, 0, 0, 0 }, { 255, 255, 255, 255 }, { 255, 255, 255, 255 } , { 0, 0, 0, 0 } };
 	grRandXOR Rand;
 	EEqualValue StartEqual = EEqualValue::YES;
 	EEqualValue EndEqual = EEqualValue::YES;
@@ -60,8 +62,10 @@ struct grSColorData
 
 struct grSScaleData
 {
-	FloatDist ArrDist[ 4 ]; // Start X[ 0 ], Y[ 1 ] // End X[ 2 ], Y[ 3 ]
-	grV2f ArrMinMax[ 4 ];
+	// Start X[ 0 ], Y[ 1 ] // End X[ 2 ], Y[ 3 ]
+	DistF ArrDist[ 4 ];
+	// Start Min[ 0 ], Max[ 1 ] // End Min[ 2 ], Max[ 3 ]
+	grV2f ArrMinMax[ 4 ] = { { 0.5f, 0.5f }, { 0.5f, 0.5f }, { 0.5f, 0.5f } , { 0.5f, 0.5f } };
 	grRandXOR Rand;
 	EEqualValue StartEqual = EEqualValue::YES;
 	EEqualValue EndEqual = EEqualValue::YES;
@@ -71,7 +75,7 @@ struct grSScaleData
 struct grSMassData
 {
 	grRandXOR Rand;
-	FloatDist Dist;
+	DistF Dist;
 	grV2f MinMax = grV2f( 1.0f, 1.0f );
 	EEqualValue Equal = EEqualValue::YES;
 };
@@ -80,7 +84,7 @@ struct grSMassData
 struct grSVelocityData
 {
 	grRandXOR Rand;
-	FloatDist Dist;
+	DistF Dist;
 	grV2f DegreeMinMax = grV2f( 315.0f, 45.0f );
 	grV2f ForceMinMax = grV2f( 25.0f, 75.0f );
 	EEqualValue DegreeEqual = EEqualValue::NO;
@@ -91,8 +95,8 @@ struct grSVelocityData
 struct grSPositionData
 {
 	grRandXOR Rand;
-	FloatDist DistX;
-	FloatDist DistY;
+	DistF DistX;
+	DistF DistY;
 	grV2f PositionOffsetMin = grV2f( 0.0f, 0.0f );
 	grV2f PositionOffsetMax = grV2f( 0.0f, 0.0f );
 	grV2f EllipseRadiusMin = grV2f( 5.0f, 5.0f );
@@ -110,7 +114,7 @@ struct grSPositionData
 struct grSLifeData
 {
 	grRandXOR Rand;
-	FloatDist Dist;
+	DistF Dist;
 	grV2f MinMax = grV2f( 1.0f, 1.0f );
 	EEqualValue Equal = EEqualValue::YES;
 };
