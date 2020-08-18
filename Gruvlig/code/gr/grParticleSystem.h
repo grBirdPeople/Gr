@@ -372,13 +372,9 @@ struct grSScaleSystem : public grSBaseSystem
 
 struct grSMassSystem : public grSBaseSystem
 {
-	typedef std::uniform_real_distribution<float> MassDist;
-
 	grSEmitData& rEmiData;
 	grSMassData& rMasData;
 	grSArrayData& rArrData;
-
-	
 
 	grSMassSystem( const grSParticleData& rData )
 		: rEmiData( *rData.puEmit )
