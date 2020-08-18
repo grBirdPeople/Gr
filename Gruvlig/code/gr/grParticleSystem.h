@@ -7,21 +7,23 @@
 
 struct grSBaseSystem
 {
-	void SetStartEnd( grColor::Rgba& rStartMin, grColor::Rgba& rStartMax, grColor::Rgba& rEndMin, grColor::Rgba& rEndMax, EEqualValue& rStartEqual, EEqualValue& rEndEqual )
+	void SetStartEnd( grColor::Rgba arrCol[], EEqualValue& rStartEqual, EEqualValue& rEndEqual, EEqualValue& rStartEndEqual )
 	{
-		rStartMin = ClampColor( rStartMin );
-		rStartMax = ClampColor( rStartMax );
-		rEndMin = ClampColor( rEndMin );
-		rEndMax = ClampColor( rEndMax );
+		for ( sizeT i = 0; i < 4; ++i )
+			arrCol[ i ] = ClampColor( arrCol[ i ] );
 
-		rStartEqual = rStartMin.Cmp( rStartMax ) ? EEqualValue::YES : EEqualValue::NO;
-		rEndEqual = rEndMin.Cmp( rEndMax ) ? EEqualValue::YES : EEqualValue::NO;
+		rStartEqual = arrCol[ 0 ].Cmp( arrCol[ 1 ] ) ? EEqualValue::YES : EEqualValue::NO;
+		rEndEqual = arrCol[ 2 ].Cmp( arrCol[ 3 ] ) ? EEqualValue::YES : EEqualValue::NO;
+
+		if ( rStartEqual == EEqualValue::YES && rEndEqual == EEqualValue::YES )
+			if ( arrCol[ 1 ].Cmp( arrCol[ 2 ] ) )
+				rStartEndEqual = EEqualValue::YES;
 	}
 
-	void SetStartEnd( const grV2f& rStartMin, const grV2f& rStartMax, const grV2f& rEndMin, const grV2f& rEndMax, EEqualValue& rStartEqual, EEqualValue& rEndEqual )
+	void SetStartEnd( const grV2f arrV2f[], EEqualValue& rStartEqual, EEqualValue& rEndEqual )
 	{
-		rStartEqual = grMath::CmpV2f( rStartMin, rStartMax ) ? EEqualValue::YES : EEqualValue::NO;
-		rEndEqual = grMath::CmpV2f( rEndMin, rEndMax ) ? EEqualValue::YES : EEqualValue::NO;
+		rStartEqual = grMath::CmpV2f( arrV2f[ 0 ], arrV2f[ 1 ] ) ? EEqualValue::YES : EEqualValue::NO;
+		rEndEqual = grMath::CmpV2f( arrV2f[ 2 ], arrV2f[ 3 ] ) ? EEqualValue::YES : EEqualValue::NO;
 	}
 
 	void SetMinMax( grV2f& rMinMax, EEqualValue& rEqual, const bool swap = true )
@@ -61,79 +63,92 @@ private:
 
 struct grSColorSystem : public grSBaseSystem
 {
-	typedef void( grSColorSystem::*ColorOption )( const sizeT startIdx, const sizeT endIdx );
+	typedef void( grSColorSystem::*OptionFunc )( const sizeT startIdx, const sizeT endIdx );
 
 	grSEmitData& rEmiData;
 	grSColorData& rColData;
 	grSArrayData& rArrData;
 
-	ColorOption Option;
+	OptionFunc GenerateOption;
 
 	grSColorSystem( const grSParticleData& rData )
 		: rEmiData( *rData.puEmit )
 		, rColData( *rData.puColor )
 		, rArrData( *rData.puArray )
-		, Option( &grSColorSystem::Option0 )
+		, GenerateOption( &grSColorSystem::GenerateOption0 )
 	{}
 	grSColorSystem( const grSColorSystem& ) = default;
 	grSColorSystem& operator=( const grSColorSystem& ) = default;
 
 	void Init( const grColor::Rgba& rStartMin, const grColor::Rgba& rStartMax, const grColor::Rgba& rEndMin, const grColor::Rgba& rEndMax, const bool hsv )
 	{
-		rColData.ColorStartMin = rStartMin;
-		rColData.ColorStartMax = rStartMax;
-		rColData.ColorEndMin = rEndMin;
-		rColData.ColorEndMax = rEndMax;
+		rColData.ArrMinMax[ 0 ] = rStartMin;
+		rColData.ArrMinMax[ 1 ] = rStartMax;
+		rColData.ArrMinMax[ 2 ] = rEndMin;
+		rColData.ArrMinMax[ 3 ] = rEndMax;
 		rColData.bHsv = hsv;
-		SetStartEnd( rColData.ColorStartMin, rColData.ColorStartMax, rColData.ColorEndMin, rColData.ColorEndMax, rColData.ColorStartEqual, rColData.ColorEndEqual );
+		SetStartEnd( rColData.ArrMinMax, rColData.ColorStartEqual, rColData.ColorEndEqual, rColData.ColorShouldLerp );
 
-		rColData.puDistArr[ 0 ] = InitDist( rColData.ColorStartMin.R, rColData.ColorStartMax.R );
-		rColData.puDistArr[ 1 ] = InitDist( rColData.ColorStartMin.G, rColData.ColorStartMax.G );
-		rColData.puDistArr[ 2 ] = InitDist( rColData.ColorStartMin.B, rColData.ColorStartMax.B );
-		rColData.puDistArr[ 3 ] = InitDist( rColData.ColorStartMin.A, rColData.ColorStartMax.A );
+		// Dislike this but I don't wan't to bloat with states or more weird looking functions so it will do for now
+		if ( rColData.ColorStartEqual == EEqualValue::NO && rColData.ColorEndEqual == EEqualValue::NO )
+		{
+			InitDist( 0, 0 );
+			InitDist( 4, 2 );
+			GenerateOption = &grSColorSystem::GenerateOption0;
+			return;
+		}
 
-		rColData.puDistArr[ 4 ] = InitDist( rColData.ColorEndMin.R, rColData.ColorEndMax.R );
-		rColData.puDistArr[ 5 ] = InitDist( rColData.ColorEndMin.G, rColData.ColorEndMax.G );
-		rColData.puDistArr[ 6 ] = InitDist( rColData.ColorEndMin.B, rColData.ColorEndMax.B );
-		rColData.puDistArr[ 7 ] = InitDist( rColData.ColorEndMin.A, rColData.ColorEndMax.A );
+		if ( rColData.ColorStartEqual == EEqualValue::NO && rColData.ColorEndEqual == EEqualValue::YES )
+		{
+			InitDist( 0, 0 );
+			GenerateOption = &grSColorSystem::GenerateOption1;
+			return;
+		}
 
-		Option = rColData.ColorStartEqual == EEqualValue::NO && rColData.ColorEndEqual == EEqualValue::NO ?
-			&grSColorSystem::Option0 :
-			rColData.ColorStartEqual == EEqualValue::NO && rColData.ColorEndEqual == EEqualValue::YES ?
-			&grSColorSystem::Option1 :
-			rColData.ColorStartEqual == EEqualValue::YES && rColData.ColorEndEqual == EEqualValue::NO ?
-			&grSColorSystem::Option2 :
-			&grSColorSystem::Option3;
+		if ( rColData.ColorStartEqual == EEqualValue::YES && rColData.ColorEndEqual == EEqualValue::NO )
+		{
+			InitDist( 4, 2 );
+			GenerateOption = &grSColorSystem::GenerateOption2;
+			return;
+		}
+
+		GenerateOption = &grSColorSystem::GenerateOption3;
 	}
 
 	void Generate()
 	{
 		sizeT startIdx{ rEmiData.StartIdx }, endIdx{ rEmiData.EndIdx };
-		( this->*Option )( startIdx, endIdx );
+		( this->*GenerateOption )( startIdx, endIdx );
 	}
 
 	void Update()
 	{
-		// Should be a conditional here if both start and end colors are the same or not
-
-		// RGB -> HSV lerp -> RGB
-		rColData.bHsv ? LerpHsv() : LerpRgb();
+		if ( rColData.ColorShouldLerp == EEqualValue::NO )
+			rColData.bHsv ? LerpHsv() : LerpRgb();
 	}
 
-	IntUDist InitDist( const uint16_t a, const uint16_t b )
+	IntUDist RangeDist( const uint16_t a, const uint16_t b )
 	{
 		return a < b ? rColData.Rand.DistU( a, b ) : rColData.Rand.DistU( b, a );
 	}
 
+	void InitDist( const sizeT arrStartIdx, const sizeT arrMinIdx )
+	{
+		rColData.ArrDist[ arrStartIdx ] = RangeDist( rColData.ArrMinMax[ arrMinIdx ].R, rColData.ArrMinMax[ arrMinIdx + 1 ].R );
+		rColData.ArrDist[ arrStartIdx + 1 ] = RangeDist( rColData.ArrMinMax[ arrMinIdx ].G, rColData.ArrMinMax[ arrMinIdx + 1 ].G );
+		rColData.ArrDist[ arrStartIdx + 2 ] = RangeDist( rColData.ArrMinMax[ arrMinIdx ].B, rColData.ArrMinMax[ arrMinIdx + 1 ].B );
+		rColData.ArrDist[ arrStartIdx + 3 ] = RangeDist( rColData.ArrMinMax[ arrMinIdx ].A, rColData.ArrMinMax[ arrMinIdx + 1 ].A );
+	}
+
 	void InitColor( pU<grColor::Rgba[]>& rArr, const sizeT arrIdx, const sizeT distIdx )
 	{
-		rArr[ arrIdx ].R = ( uint8_t )( rColData.Rand.IntU( rColData.puDistArr[ distIdx ] ) );
-		rArr[ arrIdx ].G = ( uint8_t )( rColData.Rand.IntU( rColData.puDistArr[ distIdx + 1 ] ) );
-		rArr[ arrIdx ].B = ( uint8_t )( rColData.Rand.IntU( rColData.puDistArr[ distIdx + 2 ] ) );
-		rArr[ arrIdx ].A = ( uint8_t )( rColData.Rand.IntU( rColData.puDistArr[ distIdx + 3 ] ) );
+		rArr[ arrIdx ].R = ( uint8_t )( rColData.Rand.IntU( rColData.ArrDist[ distIdx ] ) );
+		rArr[ arrIdx ].G = ( uint8_t )( rColData.Rand.IntU( rColData.ArrDist[ distIdx + 1 ] ) );
+		rArr[ arrIdx ].B = ( uint8_t )( rColData.Rand.IntU( rColData.ArrDist[ distIdx + 2 ] ) );
+		rArr[ arrIdx ].A = ( uint8_t )( rColData.Rand.IntU( rColData.ArrDist[ distIdx + 3 ] ) );
 	}
 
-	void Option0( const sizeT startIdx, const sizeT endIdx )
+	void GenerateOption0( const sizeT startIdx, const sizeT endIdx )
 	{
 		for ( sizeT i = startIdx; i < endIdx; ++i )
 			InitColor( rArrData.ColorStart, i, 0 );
@@ -142,35 +157,37 @@ struct grSColorSystem : public grSBaseSystem
 			InitColor( rArrData.ColorEnd, i, 4 );
 	}
 
-	void Option1( const sizeT startIdx, const sizeT endIdx )
+	void GenerateOption1( const sizeT startIdx, const sizeT endIdx )
 	{
 		for ( sizeT i = startIdx; i < endIdx; ++i )
 			InitColor( rArrData.ColorStart, i, 0 );
 
 		for ( sizeT i = startIdx; i < endIdx; ++i )
-			rArrData.ColorEnd[ i ] = rColData.ColorEndMin;
+			rArrData.ColorEnd[ i ] = rColData.ArrMinMax[ 2 ];
 	}
 
-	void Option2( const sizeT startIdx, const sizeT endIdx )
+	void GenerateOption2( const sizeT startIdx, const sizeT endIdx )
 	{
 		for ( sizeT i = startIdx; i < endIdx; ++i )
-			rArrData.ColorStart[ i ] = rColData.ColorStartMin;
+			rArrData.ColorStart[ i ] = rColData.ArrMinMax[ 0 ];
 
 		for ( sizeT i = startIdx; i < endIdx; ++i )
 			InitColor( rArrData.ColorEnd, i, 4 );
 	}
 
-	void Option3( const sizeT startIdx, const sizeT endIdx )
+	void GenerateOption3( const sizeT startIdx, const sizeT endIdx )
 	{
 		for ( sizeT i = startIdx; i < endIdx; ++i )
-			rArrData.ColorStart[ i ] = rColData.ColorStartMin;
+			rArrData.ColorStart[ i ] = rColData.ArrMinMax[ 1 ];
 
 		for ( sizeT i = startIdx; i < endIdx; ++i )
-			rArrData.ColorEnd[ i ] = rColData.ColorEndMin;
+			rArrData.ColorEnd[ i ] = rColData.ArrMinMax[ 2 ];
 	}
 
 	void LerpHsv()
 	{
+		// RGB -> HSV lerp -> RGB
+
 		float dt{ rEmiData.Dt };
 		sizeT alive{ rEmiData.Alive };
 		for ( sizeT i = 0; i < alive; ++i )
@@ -212,49 +229,49 @@ struct grSColorSystem : public grSBaseSystem
 
 struct grSScaleSystem : public grSBaseSystem
 {
-	typedef void( grSScaleSystem::*ScaleOption )( const sizeT startIdx, const sizeT endIdx );
+	typedef void( grSScaleSystem::*OptionFunc )( const sizeT startIdx, const sizeT endIdx );
 
 	grSEmitData& rEmiData;
 	grSScaleData& rScaData;
 	grSArrayData& rArrData;
 
-	ScaleOption Option;
+	OptionFunc GnerateOption;
 
 	grSScaleSystem( const grSParticleData& rData )
 		: rEmiData( *rData.puEmit )
 		, rScaData( *rData.puScale )
 		, rArrData( *rData.puArray )
-		, Option( &grSScaleSystem::Option0 )
+		, GnerateOption( &grSScaleSystem::GnerateOption0 )
 	{}
 	grSScaleSystem( const grSScaleSystem& ) = default;
 	grSScaleSystem& operator=( const grSScaleSystem& ) = default;
 
 	void Init( const grV2f& rStartMin, const grV2f& rStartMax, const grV2f& rEndMin, const grV2f& rEndMax )
-	{		
-		rScaData.ScaleStartMin = rStartMin;
-		rScaData.ScaleStartMax = rStartMax;
-		rScaData.ScaleEndMin = rEndMin;
-		rScaData.ScaleEndMax = rEndMax;
-		SetStartEnd( rScaData.ScaleStartMin, rScaData.ScaleStartMax, rScaData.ScaleEndMin, rScaData.ScaleEndMax, rScaData.ScaleStartEqual, rScaData.ScaleEndEqual );
+	{
+		rScaData.ArrMinMax[ 0 ] = rStartMin;
+		rScaData.ArrMinMax[ 1 ] = rStartMax;
+		rScaData.ArrMinMax[ 2 ] = rEndMin;
+		rScaData.ArrMinMax[ 3 ] = rEndMax;
+		SetStartEnd( rScaData.ArrMinMax, rScaData.ScaleStartEqual, rScaData.ScaleEndEqual );
 
-		rScaData.puDistArr[ 0 ] = InitDist( rScaData.ScaleStartMin.x, rScaData.ScaleStartMax.x );
-		rScaData.puDistArr[ 1 ] = InitDist( rScaData.ScaleStartMin.y, rScaData.ScaleStartMax.y );
-		rScaData.puDistArr[ 2 ] = InitDist( rScaData.ScaleEndMin.x, rScaData.ScaleEndMax.x );
-		rScaData.puDistArr[ 3 ] = InitDist( rScaData.ScaleEndMin.y, rScaData.ScaleEndMax.y );
+		rScaData.ArrDist[ 0 ] = InitDist( rScaData.ArrMinMax[ 0 ].x, rScaData.ArrMinMax[ 1 ].x );
+		rScaData.ArrDist[ 1 ] = InitDist( rScaData.ArrMinMax[ 0 ].y, rScaData.ArrMinMax[ 1 ].y );
+		rScaData.ArrDist[ 2 ] = InitDist( rScaData.ArrMinMax[ 2 ].x, rScaData.ArrMinMax[ 3 ].x );
+		rScaData.ArrDist[ 3 ] = InitDist( rScaData.ArrMinMax[ 2 ].y, rScaData.ArrMinMax[ 3 ].y );
 
-		Option = rScaData.ScaleStartEqual == EEqualValue::NO && rScaData.ScaleEndEqual == EEqualValue::NO ?
-			&grSScaleSystem::Option0 :
+		GnerateOption = rScaData.ScaleStartEqual == EEqualValue::NO && rScaData.ScaleEndEqual == EEqualValue::NO ?
+			&grSScaleSystem::GnerateOption0 :
 			rScaData.ScaleStartEqual == EEqualValue::NO && rScaData.ScaleEndEqual == EEqualValue::YES ?
-			&grSScaleSystem::Option1 :
+			&grSScaleSystem::GnerateOption1 :
 			rScaData.ScaleStartEqual == EEqualValue::YES && rScaData.ScaleEndEqual == EEqualValue::NO ?
-			&grSScaleSystem::Option2 :
-			&grSScaleSystem::Option3;
+			&grSScaleSystem::GnerateOption2 :
+			&grSScaleSystem::GnerateOption3;
 	}
 
 	void Generate()
 	{
 		sizeT startIdx{ rEmiData.StartIdx }, endIdx{ rEmiData.EndIdx };
-		( this->*Option )( startIdx, endIdx );
+		( this->*GnerateOption )( startIdx, endIdx );
 	}
 
 	void Update()
@@ -274,40 +291,40 @@ struct grSScaleSystem : public grSBaseSystem
 		return a < b ? rScaData.Rand.DistF( a, b ) : rScaData.Rand.DistF( b, a );
 	}
 
-	void Option0( const sizeT startIdx, const sizeT endIdx )
+	void GnerateOption0( const sizeT startIdx, const sizeT endIdx )
 	{
 		for ( sizeT i = startIdx; i < endIdx; ++i )
-			rArrData.ScaleStart[ i ] = { rScaData.Rand.Float( rScaData.puDistArr[ 0 ] ), rScaData.Rand.Float( rScaData.puDistArr[ 1 ] ) };
+			rArrData.ScaleStart[ i ] = { rScaData.Rand.Float( rScaData.ArrDist[ 0 ] ), rScaData.Rand.Float( rScaData.ArrDist[ 1 ] ) };
 
 		for ( sizeT i = startIdx; i < endIdx; ++i )
-			rArrData.ScaleEnd[ i ] = { rScaData.Rand.Float( rScaData.puDistArr[ 2 ] ), rScaData.Rand.Float( rScaData.puDistArr[ 3 ] ) };
+			rArrData.ScaleEnd[ i ] = { rScaData.Rand.Float( rScaData.ArrDist[ 2 ] ), rScaData.Rand.Float( rScaData.ArrDist[ 3 ] ) };
 	}
 
-	void Option1( const sizeT startIdx, const sizeT endIdx )
+	void GnerateOption1( const sizeT startIdx, const sizeT endIdx )
 	{
 		for ( sizeT i = startIdx; i < endIdx; ++i )
-			rArrData.ScaleStart[ i ] = { rScaData.Rand.Float( rScaData.puDistArr[ 0 ] ), rScaData.Rand.Float( rScaData.puDistArr[ 1 ] ) };
+			rArrData.ScaleStart[ i ] = { rScaData.Rand.Float( rScaData.ArrDist[ 0 ] ), rScaData.Rand.Float( rScaData.ArrDist[ 1 ] ) };
 
 		for ( sizeT i = startIdx; i < endIdx; ++i )
-			rArrData.ScaleEnd[ i ] = rScaData.ScaleEndMin;
+			rArrData.ScaleEnd[ i ] = rScaData.ArrMinMax[ 2 ];
 	}
 
-	void Option2( const sizeT startIdx, const sizeT endIdx )
+	void GnerateOption2( const sizeT startIdx, const sizeT endIdx )
 	{
 		for ( sizeT i = startIdx; i < endIdx; ++i )
-			rArrData.ScaleStart[ i ] = rScaData.ScaleStartMin;
+			rArrData.ScaleStart[ i ] = rScaData.ArrMinMax[ 1 ];
 
 		for ( sizeT i = startIdx; i < endIdx; ++i )
-			rArrData.ScaleEnd[ i ] = { rScaData.Rand.Float( rScaData.puDistArr[ 2 ] ), rScaData.Rand.Float( rScaData.puDistArr[ 3 ] ) };
+			rArrData.ScaleEnd[ i ] = { rScaData.Rand.Float( rScaData.ArrDist[ 2 ] ), rScaData.Rand.Float( rScaData.ArrDist[ 3 ] ) };
 	}
 
-	void Option3( const sizeT startIdx, const sizeT endIdx )
+	void GnerateOption3( const sizeT startIdx, const sizeT endIdx )
 	{
 		for ( sizeT i = startIdx; i < endIdx; ++i )
-			rArrData.ScaleStart[ i ] = rScaData.ScaleStartMin;
+			rArrData.ScaleStart[ i ] = rScaData.ArrMinMax[ 1 ];
 
 		for ( sizeT i = startIdx; i < endIdx; ++i )
-			rArrData.ScaleEnd[ i ] = rScaData.ScaleEndMin;
+			rArrData.ScaleEnd[ i ] = rScaData.ArrMinMax[ 2 ];
 	}
 };
 

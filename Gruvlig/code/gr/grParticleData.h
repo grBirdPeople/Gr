@@ -53,24 +53,18 @@ struct grSEmitData
 
 struct grSColorData
 {
-	pU<IntUDist[]> puDistArr; // Start R[ 0 ], G[ 1 ], B[ 2 ], A[ 3 ] // End R[ 4 ], G[ 5 ], B[ 6 ], A[ 7 ]
+	IntUDist ArrDist[ 8 ]; // Start R[ 0 ], G[ 1 ], B[ 2 ], A[ 3 ] // End R[ 4 ], G[ 5 ], B[ 6 ], A[ 7 ]
+	grColor::Rgba ArrMinMax[ 4 ]; // Start Min[ 0 ], Max[ 1 ] // End Min[ 2 ], Max[ 3 ]
 	grRandXOR Rand;
-	grColor::Rgba ColorStartMin;
-	grColor::Rgba ColorStartMax;
-	grColor::Rgba ColorEndMin;
-	grColor::Rgba ColorEndMax;
 	EEqualValue ColorStartEqual;
 	EEqualValue ColorEndEqual;
+	EEqualValue ColorShouldLerp;
 	bool bHsv;
 
 	grSColorData()
-		: puDistArr( std::make_unique<IntUDist[]>( 8 ) )
-		, ColorStartMin( grColor::Rgba() )
-		, ColorStartMax( grColor::Rgba() )
-		, ColorEndMin( grColor::Rgba() )
-		, ColorEndMax( grColor::Rgba() )
-		, ColorStartEqual( EEqualValue::YES )
-		, ColorEndEqual( EEqualValue::YES )
+		: ColorStartEqual( EEqualValue::NO )
+		, ColorEndEqual( EEqualValue::NO )
+		, ColorShouldLerp( EEqualValue::NO )
 		, bHsv( true )
 	{}
 	grSColorData( const grSColorData& ) = default;
@@ -80,23 +74,15 @@ struct grSColorData
 
 struct grSScaleData
 {
-	pU<FloatDist[]> puDistArr; // Start X[ 0 ], Y[ 1 ] // End X[ 4 ], Y[ 5 ]
+	FloatDist ArrDist[ 4 ]; // Start X[ 0 ], Y[ 1 ] // End X[ 2 ], Y[ 3 ]
+	grV2f ArrMinMax[ 4 ];
 	grRandXOR Rand;
-	grV2f ScaleStartMin;
-	grV2f ScaleStartMax;
-	grV2f ScaleEndMin;
-	grV2f ScaleEndMax;
 	EEqualValue ScaleStartEqual;
 	EEqualValue ScaleEndEqual;
 
 	grSScaleData()
-		: puDistArr( std::make_unique<FloatDist[]>( 4 ) )
-		, ScaleStartMin( grV2f( 1.0f, 1.0f ) )
-		, ScaleStartMax( grV2f( 1.0f, 1.0f ) )
-		, ScaleEndMin( grV2f( 1.0f, 1.0f ) )
-		, ScaleEndMax( grV2f( 1.0f, 1.0f ) )
-		, ScaleStartEqual( EEqualValue::YES )
-		, ScaleEndEqual( EEqualValue::YES )
+		: ScaleStartEqual( EEqualValue::NO )
+		, ScaleEndEqual( EEqualValue::NO )
 	{}
 	grSScaleData( const grSScaleData& ) = default;
 	grSScaleData& operator=( const grSScaleData& ) = default;
@@ -111,7 +97,7 @@ struct grSMassData
 
 	grSMassData()
 		: MassMinMax( grV2f( 1.0f, 1.0f ) )
-		, EqualMass( EEqualValue::YES )
+		, EqualMass( EEqualValue::NO )
 	{}
 	grSMassData( const grSMassData& ) = default;
 	grSMassData& operator=( const grSMassData& ) = default;
@@ -129,8 +115,8 @@ struct grSVelocityData
 	grSVelocityData()
 		: DegreeMinMax( grV2f( 0.0f, 0.0f ) )
 		, ForceMinMax( grV2f( 100.0f, 100.0f ) )
-		, DegreeEqual( EEqualValue::YES )
-		, ForceEqual( EEqualValue::YES )
+		, DegreeEqual( EEqualValue::NO )
+		, ForceEqual( EEqualValue::NO )
 	{}
 	grSVelocityData( const grSVelocityData& ) = default;
 	grSVelocityData& operator=( const grSVelocityData& ) = default;
@@ -161,7 +147,7 @@ struct grSPositionData
 		, Ellipse360( grMath::Pi * 2.0f )
 		, EllipseStepCount( 0.0f )
 		, EllipseTiltCount( 0.0f )
-		, PositionEqual( EEqualValue::YES )
+		, PositionEqual( EEqualValue::NO )
 		, PositionType( EPositionType::BOX )
 	{}
 	grSPositionData( const grSPositionData& ) = default;
@@ -177,7 +163,7 @@ struct grSLifeData
 
 	grSLifeData()
 		: LifeMinMax( grV2f( 2.0f, 2.0f ) )
-		, LifeEqual( EEqualValue::YES )
+		, LifeEqual( EEqualValue::NO )
 	{}
 	grSLifeData( const grSLifeData& ) = default;
 	grSLifeData& operator=( const grSLifeData& ) = default;
