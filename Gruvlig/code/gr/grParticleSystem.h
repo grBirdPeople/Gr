@@ -4,6 +4,11 @@
 #include "grAlgo.h"
 #include "grParticleData.h"
 
+class grSColorSystem;
+class grSScaleSystem;
+typedef void( grSColorSystem::* ColorFunc )( const sizeT startIdx, const sizeT endIdx );
+typedef void( grSScaleSystem::* ScaleFunc )( const sizeT startIdx, const sizeT endIdx );
+
 
 struct grSBaseSystem
 {
@@ -63,13 +68,11 @@ private:
 
 struct grSColorSystem : public grSBaseSystem
 {
-	typedef void( grSColorSystem::*OptionFunc )( const sizeT startIdx, const sizeT endIdx );
-
 	grSEmitData& rEmiData;
 	grSColorData& rColData;
 	grSArrayData& rArrData;
 
-	OptionFunc GenerateOption;
+	ColorFunc GenerateOption;
 
 	grSColorSystem( const grSParticleData& rData )
 		: rEmiData( *rData.puEmit )
@@ -229,13 +232,11 @@ struct grSColorSystem : public grSBaseSystem
 
 struct grSScaleSystem : public grSBaseSystem
 {
-	typedef void( grSScaleSystem::*OptionFunc )( const sizeT startIdx, const sizeT endIdx );
-
 	grSEmitData& rEmiData;
 	grSScaleData& rScaData;
 	grSArrayData& rArrData;
 
-	OptionFunc GnerateOption;
+	ScaleFunc GnerateOption;
 
 	grSScaleSystem( const grSParticleData& rData )
 		: rEmiData( *rData.puEmit )
