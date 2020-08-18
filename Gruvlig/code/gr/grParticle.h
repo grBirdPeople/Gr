@@ -1,49 +1,138 @@
-#ifndef		_H_GRPARTICLE_
-#define		_H_GRPARTICLE_
+#ifndef _H_GRPARTICLE_
+#define _H_GRPARTICLE_
 
-#include	<SFML/Graphics/Color.hpp>
-
-#include	"grV2.h"
-
-
-//struct grSColor
-//{
-//	grSColor( void )
-//	{
-//		R = 255;
-//		G = 255;
-//		B = 255;
-//		A = 255;
-//	}
-//	grSColor( const intU r, const intU g, const intU b, const intU a )
-//	{
-//		R = r;
-//		G = g;
-//		B = b;
-//		A = a;
-//	}
-//
-//	intU R, G, B, A;
-//};
+#include "grParticleData.h"
+#include "grParticleSystem.h"
 
 
-struct grSParticleArr
+class grCParticle
 {
-	struct SCol { float R = 0.0f, G = 0.0f, B = 0.0f, A = 0.0f; };
+public:
+	grCParticle( const grV2f& systemPosition = grV2f( ( float )grCore::Instance().GetWindowSize().x * 0.5f, ( float )grCore::Instance().GetWindowSize().y * 0.5f ),
+				 const float emitRateSec = 1000.0f,
+				 const intU size = 10000 )
+	{
+		m_Data.Init( systemPosition, emitRateSec, size );
+		m_System.Init( m_Data );
+	}
+	grCParticle( const grCParticle& ) = delete;
+	grCParticle& operator=( const grCParticle& ) = delete;
+	grCParticle( grCParticle&& ) noexcept = delete;
+	grCParticle& operator=( grCParticle&& ) noexcept = delete;
 
-	sf::Color	Color;
-	SCol		ColRate;
-	SCol		ColAccumulator;
+	void SetSystemPosition( const grV2f& rPosition )
+	{
+		m_Data.puEmit->SystemPosition = rPosition;
+	}
 
-	grV2f		Pos;
-	grV2f		Dir;
+	void SetEmitRate( const float emitRateSec )
+	{
+		m_Data.puEmit->EmitRateSec = emitRateSec;
+		m_Data.puEmit->EmitRateMs = 1.0f / emitRateSec;
+		m_Data.puEmit->SpawnTimeAcc = m_Data.puEmit->EmitRateMs;
+	}
 
-	float		Spd,
-				SpdMod;
+	void AddColor( const grColor::Rgba& rStartMin, const grColor::Rgba& rStartMax, const grColor::Rgba& rEndMin, const grColor::Rgba& rEndMax, const bool hsv = true )
+	{
+		m_System.puColor->Init( rStartMin, rStartMax, rEndMin, rEndMax, hsv );
+	}
 
-	float		Life;
+	void AddScale( const grV2f& rStartMin, const grV2f& rStartMax, const grV2f& rEndMin, const grV2f& rEndMax )
+	{
+		m_System.puScale->Init( rStartMin, rStartMax, rEndMin, rEndMax );
+	}
 
-	bool		bSpdOsc;
+	void AddVelocity( const grV2f& rDegreeMinMax, const grV2f& rForceMinMax )
+	{
+		m_System.puVelocity->Init( rDegreeMinMax, rForceMinMax );
+	}
+
+	void AddPosition( const EPositionType type, const grV2f& rOffsetMin, const grV2f& rOffsetMax )
+	{
+		m_System.puPosition->Init( type, rOffsetMin, rOffsetMax ); // Only box now, ellipse later
+	}
+
+	void AddMass( const grV2f& rMinMax )
+	{
+		m_System.puMass->Init( rMinMax );
+	}
+
+	void AddLife( const grV2f& rMinMax )
+	{
+		m_System.puLife->Init( rMinMax );
+	}
+
+	void Run( const float dt )
+	{
+		Emit( dt );
+		Update( dt );
+	}
+
+	void Render( sf::RenderWindow& rRenderWin )
+	{
+		// TEST DRAW
+		grSEmitData& rEmit{ *m_Data.puEmit };
+		grSArrayData& rArray{ *m_Data.puArray };
+		for ( sizeT i = 0; i < rEmit.Alive; ++i )
+		{
+			grColor::Rgba& rgba = rArray.ColorStart[ i ];
+			sf::Color c{ rgba.R, rgba.G, rgba.B, rgba.A };
+			grBBox b{ rArray.ScaleStart[ i ], rArray.Position[ i ] };
+			grDebugManager::Instance().AddBBox( b, c );
+		}
+		// TEST DRAW
+	}
+
+private:
+	void Emit( const float dt )
+	{
+		sizeT emitAcc{ 0 };
+		grSEmitData& emit{ *m_Data.puEmit };
+		emit.Dt = dt;
+		emit.SpawnTimeAcc += emit.Dt;
+		while ( emit.SpawnTimeAcc >= emit.EmitRateMs )
+		{
+			emit.SpawnTimeAcc -= emit.EmitRateMs;
+			emitAcc += 1;
+		}
+
+		if ( emitAcc > 0 )
+		{
+			sizeT last{ emit.Size - 1 };
+			emit.StartIdx = emit.Alive;
+			emit.EndIdx = grMath::Min<sizeT>( emit.StartIdx + emitAcc, last );
+			if ( emit.StartIdx == emit.EndIdx )
+				return;
+
+			emit.Alive += emit.EndIdx - emit.StartIdx;
+
+			// All system generate calls
+			m_System.puColor->Generate();
+			m_System.puScale->Generate();
+			m_System.puMass->Generate();
+			m_System.puVelocity->Generate();
+			m_System.puPosition->Generate();
+			m_System.puLife->Generate();
+		}
+	}
+
+	void Update( const float dt )
+	{
+		if ( m_Data.puEmit->Alive > 0 )
+		{
+			// All system update calls
+			m_System.puColor->Update();
+			m_System.puScale->Update();
+			m_System.puVelocity->Update();
+			m_System.puPosition->Update();
+			m_System.puLife->Update();
+		}
+
+		//printf( "%d\n", m_Data.puEmit->Alive );
+	}
+
+	grSParticleData m_Data;
+	grSParticleSystem m_System;
 };
 
-#endif	// _H_GRPARTICLE_
+#endif // _H_GRPARTICLE_

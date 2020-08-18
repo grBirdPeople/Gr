@@ -21,8 +21,8 @@ class grDebugManager : public grSingleton<grDebugManager>
 public:
 	
 	grDebugManager()
-		: m_puVertices( std::make_unique<sf::VertexArray[]>( 5000 ) )
-		, m_MaxBBox( 5000 )
+		: m_puVertices( std::make_unique<sf::VertexArray[]>( 10000 ) )
+		, m_MaxBBox( 10000 )
 		, m_Size( 0 )
 		, m_bEnable( true )
 	{}

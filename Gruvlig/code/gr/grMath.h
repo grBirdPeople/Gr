@@ -43,9 +43,9 @@ namespace grMath
 		return ( value < 0.0f ) ? -value : value;
 	}
 
-	inline grV2f AbsV2f( grV2f& value )
+	inline grV2f AbsV2f( const grV2f& rV )
 	{
-		return grV2f( AbsF( value.x ), AbsF( value.y ) );
+		return grV2f( AbsF( rV.x ), AbsF( rV.y ) );
 	}
 
 	// Sign
@@ -113,9 +113,9 @@ namespace grMath
 		return ( x < EpsilonLrg ) && ( y < EpsilonLrg );
 	}
 
-	inline bool CmpFloat( const float numOne, const float numTwo )
+	inline bool CmpF( const float a, const float b )
 	{
-		return AbsF( numOne - numTwo ) < EpsilonLrg;
+		return AbsF( a - b ) < EpsilonLrg;
 	}
 
 	// MoveTo
@@ -125,7 +125,7 @@ namespace grMath
 		float cpyFrom{ from };
 		float sign{ Sign( to - cpyFrom ) };
 		cpyFrom += sign * speed;
-		return ( CmpFloat( Sign( to - cpyFrom ), sign ) == false ) ? to : cpyFrom;
+		return ( CmpF( Sign( to - cpyFrom ), sign ) == false ) ? to : cpyFrom;
 	}
 
 	// MoveToZero
@@ -135,7 +135,7 @@ namespace grMath
 		float cpyFrom{ from };
 		float sign{ Sign( from ) };
 		cpyFrom -= sign * speed;
-		return ( CmpFloat( Sign( from ), sign ) == false ) ? 0.0f : cpyFrom;
+		return ( CmpF( Sign( from ), sign ) == false ) ? 0.0f : cpyFrom;
 	}
 
 	// Clamp

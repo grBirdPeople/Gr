@@ -8,9 +8,23 @@ namespace grColor
 {
 	// SRgba
 	//////////////////////////////////////////////////
-	struct SRgba
+	struct Rgba // Unsigned int 8 as that is what SFML is using
 	{
-		SRgba( const uint16_t r = 255, const uint16_t g = 255, const uint16_t b = 255, const uint16_t a = 255 )
+		Rgba( const uint8_t r = 255, const uint8_t g = 255, const uint8_t b = 255, const uint8_t a = 255 )
+			: R( r ), G( g ), B( b ), A( a )
+		{}
+
+		bool Cmp( const Rgba& rOther )
+		{
+			return R == rOther.R && G == rOther.G && B == rOther.B && A == rOther.A ? true : false;
+		}
+
+		uint8_t R, G, B, A;
+	};
+
+	struct SRgba // OLD
+	{
+		SRgba( const uint16_t r = 254, const uint16_t g = 254, const uint16_t b = 254, const uint16_t a = 254 )
 			: R( ( float )r ) , G( ( float )g ) , B( ( float )b ) , A( ( float )a )
 		{}
 
@@ -19,7 +33,16 @@ namespace grColor
 
 	// SHsva
 	//////////////////////////////////////////////////
-	struct SHsva
+	struct Hsva
+	{
+		Hsva( const float h = 0.0f, const float s = 0.0f, const float v = 0.0f, const float a = 0.0f )
+			: H( h ), S( s ), V( v ), A( a )
+		{}
+
+		float H, S, V, A;
+	};
+
+	struct SHsva // OLD
 	{
 		SHsva( const float h = 0.0f, const float s = 0.0f, const float v = 0.0f, const float a = 0.0f )
 			: H( h ) , S( s ) , V( v ) , A( a )
@@ -30,7 +53,58 @@ namespace grColor
 
 	// Rgba2Hsva // Taken from stackoverflow
 	//////////////////////////////////////////////////
-	inline SHsva Rgba2Hsva( SRgba& rRgba )
+	inline Hsva Rgba2Hsva( Rgba& rRgba )
+	{
+		float R{ ( float )rRgba.R };
+		float G{ ( float )rRgba.G };
+		float B{ ( float )rRgba.B };
+		float A{ ( float )rRgba.A };
+
+		Hsva out( 0.0f, 0.0f, 0.0f, rRgba.A );
+
+		float min = R < G ? R : G;
+		min = min < B ? min : B;
+
+		float max = R > G ? R : G;
+		max = max > B ? max : B;
+
+		out.V = max;                                // v
+		float delta = max - min;
+		if ( delta < 0.00001f )
+		{
+			out.S = 0.0f;
+			out.H = 0.0f; // undefined, maybe nan?
+			return out;
+		}
+		if ( max > 0.0f )
+		{ // NOTE: if Max is == 0, this divide would cause a crash
+			out.S = ( delta / max );                  // s
+		}
+		else
+		{
+			// if max is 0, then r = g = b = 0              
+			// s = 0, h is undefined
+			out.S = 0.0f;
+			out.H = NAN;                            // its now undefined
+			return out;
+		}
+		if ( R >= max )                           // > is bogus, just keeps compilor happy
+			out.H = ( G - B ) / delta;        // between yellow & magenta
+		else
+			if ( G >= max )
+				out.H = 2.0f + ( B - R ) / delta;  // between cyan & yellow
+			else
+				out.H = 4.0f + ( R - G ) / delta;  // between magenta & cyan
+
+		out.H *= 60.0f;                              // degrees
+
+		if ( out.H < 0.0f )
+			out.H += 360.0f;
+
+		return out;
+	}
+
+	inline SHsva Rgba2Hsva( SRgba& rRgba ) // OLD
 	{
 		SHsva out( 0.0f, 0.0f, 0.0f, rRgba.A );
 
@@ -78,7 +152,67 @@ namespace grColor
 
 	// Hsva2Rgba // Taken from stackoverflow
 	//////////////////////////////////////////////////
-	inline SRgba Hsva2Rgba( SHsva& rHsva )
+	inline Rgba Hsva2Rgba( Hsva& rHsva )
+	{
+		float R{ 0.0f };
+		float G{ 0.0f };
+		float B{ 0.0f };
+		float A{ rHsva.A };
+
+		if ( rHsva.S <= 0.0f )
+		{       // < is bogus, just shuts up warnings
+			R = rHsva.V;
+			G = rHsva.V;
+			B = rHsva.V;
+			return { ( uint8_t )R, ( uint8_t )G, ( uint8_t )B, ( uint8_t )A };
+		}
+		float hh = rHsva.H;
+		if ( hh >= 360.0f ) hh = 0.0f;
+		hh /= 60.0f;
+		sizeT i = ( sizeT )hh;
+		float ff = hh - ( float )i;
+		float p = rHsva.V * ( 1.0f - rHsva.S );
+		float q = rHsva.V * ( 1.0f - ( rHsva.S * ff ) );
+		float t = rHsva.V * ( 1.0f - ( rHsva.S * ( 1.0f - ff ) ) );
+
+		switch ( i )
+		{
+			case 0:
+			R = rHsva.V;
+			G = t;
+			B = p;
+			break;
+			case 1:
+			R = q;
+			G = rHsva.V;
+			B = p;
+			break;
+			case 2:
+			R = p;
+			G = rHsva.V;
+			B = t;
+			break;
+			case 3:
+			R = p;
+			G = q;
+			B = rHsva.V;
+			break;
+			case 4:
+			R = t;
+			G = p;
+			B = rHsva.V;
+			break;
+			case 5:
+			default:
+			R = rHsva.V;
+			G = p;
+			B = q;
+			break;
+		}
+		return { ( uint8_t )R, ( uint8_t )G, ( uint8_t )B, ( uint8_t )A };;
+	}
+
+	inline SRgba Hsva2Rgba( SHsva& rHsva ) // OLD
 	{
 		SRgba out;
 		out.A = rHsva.A;
