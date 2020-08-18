@@ -5,6 +5,7 @@
 #include "grRandom.h"
 #include "grV2.h"
 
+typedef std::uniform_real_distribution<float> FloatDist;
 typedef std::uniform_int_distribution<unsigned int> IntUDist;
 
 
@@ -79,6 +80,7 @@ struct grSColorData
 
 struct grSScaleData
 {
+	pU<FloatDist[]> puDistArr; // Start X[ 0 ], Y[ 1 ] // End X[ 4 ], Y[ 5 ]
 	grRandXOR Rand;
 	grV2f ScaleStartMin;
 	grV2f ScaleStartMax;
@@ -88,7 +90,8 @@ struct grSScaleData
 	EEqualValue ScaleEndEqual;
 
 	grSScaleData()
-		: ScaleStartMin( grV2f( 1.0f, 1.0f ) )
+		: puDistArr( std::make_unique<FloatDist[]>( 4 ) )
+		, ScaleStartMin( grV2f( 1.0f, 1.0f ) )
 		, ScaleStartMax( grV2f( 1.0f, 1.0f ) )
 		, ScaleEndMin( grV2f( 1.0f, 1.0f ) )
 		, ScaleEndMax( grV2f( 1.0f, 1.0f ) )
