@@ -4,8 +4,8 @@
 #include "grAlgo.h"
 #include "grParticleData.h"
 
-class grSColorSystem;
-class grSScaleSystem;
+struct grSColorSystem;
+struct grSScaleSystem;
 typedef void( grSColorSystem::* ColorFunc )( const sizeT startIdx, const sizeT endIdx );
 typedef void( grSScaleSystem::* ScaleFunc )( const sizeT startIdx, const sizeT endIdx );
 
