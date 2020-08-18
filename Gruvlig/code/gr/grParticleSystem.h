@@ -254,10 +254,15 @@ struct grSScaleSystem : public grSBaseSystem
 		rScaData.ArrMinMax[ 3 ] = rEndMax;
 		SetStartEnd( rScaData.ArrMinMax, rScaData.ScaleStartEqual, rScaData.ScaleEndEqual );
 
-		rScaData.ArrDist[ 0 ] = InitDist( rScaData.ArrMinMax[ 0 ].x, rScaData.ArrMinMax[ 1 ].x );
-		rScaData.ArrDist[ 1 ] = InitDist( rScaData.ArrMinMax[ 0 ].y, rScaData.ArrMinMax[ 1 ].y );
-		rScaData.ArrDist[ 2 ] = InitDist( rScaData.ArrMinMax[ 2 ].x, rScaData.ArrMinMax[ 3 ].x );
-		rScaData.ArrDist[ 3 ] = InitDist( rScaData.ArrMinMax[ 2 ].y, rScaData.ArrMinMax[ 3 ].y );
+		if ( rScaData.ScaleStartEqual == EEqualValue::NO && rScaData.ScaleEndEqual == EEqualValue::NO ||
+			 rScaData.ScaleStartEqual == EEqualValue::NO && rScaData.ScaleEndEqual == EEqualValue::YES ||
+			 rScaData.ScaleStartEqual == EEqualValue::YES && rScaData.ScaleEndEqual == EEqualValue::NO )
+		{
+			rScaData.ArrDist[ 0 ] = InitDist( rScaData.ArrMinMax[ 0 ].x, rScaData.ArrMinMax[ 1 ].x );
+			rScaData.ArrDist[ 1 ] = InitDist( rScaData.ArrMinMax[ 0 ].y, rScaData.ArrMinMax[ 1 ].y );
+			rScaData.ArrDist[ 2 ] = InitDist( rScaData.ArrMinMax[ 2 ].x, rScaData.ArrMinMax[ 3 ].x );
+			rScaData.ArrDist[ 3 ] = InitDist( rScaData.ArrMinMax[ 2 ].y, rScaData.ArrMinMax[ 3 ].y );
+		}
 
 		GnerateOption = rScaData.ScaleStartEqual == EEqualValue::NO && rScaData.ScaleEndEqual == EEqualValue::NO ?
 			&grSScaleSystem::GnerateOption0 :
