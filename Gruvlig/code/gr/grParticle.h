@@ -8,11 +8,9 @@
 class grCParticle
 {
 public:
-	grCParticle( const grV2f& systemPosition = grV2f( ( float )grCore::Instance().GetWindowSize().x * 0.5f, ( float )grCore::Instance().GetWindowSize().y * 0.5f ),
-				 const float emitRateSec = 1000.0f,
-				 const intU size = 10000 )
+	grCParticle( const intU size = 10000 )
 	{
-		m_Data.Init( systemPosition, emitRateSec, size );
+		m_Data.Init( size );
 		m_System.Init( m_Data );
 	}
 	grCParticle( const grCParticle& ) = delete;
@@ -62,75 +60,29 @@ public:
 		m_System.puLife->Init( rMinMax );
 	}
 
-	void Run( const float dt )
+	void Update( const float dt )
 	{
-		Emit( dt );
-		Update( dt );
+		m_System.Run( dt );
 	}
 
 	void Render( sf::RenderWindow& rRenderWin )
 	{
 		// TEST DRAW
-		grSEmitData& rEmit{ *m_Data.puEmit };
 		grSArrayData& rArray{ *m_Data.puArray };
-		for ( sizeT i = 0; i < rEmit.Alive; ++i )
+		sizeT alive{ m_Data.puEmit->Alive };
+		for ( sizeT i = 0; i < alive; ++i )
 		{
 			grColor::Rgba& rgba = rArray.ColorStart[ i ];
 			sf::Color c{ rgba.R, rgba.G, rgba.B, rgba.A };
 			grBBox b{ rArray.ScaleStart[ i ], rArray.Position[ i ] };
 			grDebugManager::Instance().AddBBox( b, c );
 		}
+
+		printf( "%d\n", alive );
 		// TEST DRAW
 	}
 
 private:
-	void Emit( const float dt )
-	{
-		sizeT emitAcc{ 0 };
-		grSEmitData& emit{ *m_Data.puEmit };
-		emit.Dt = dt;
-		emit.SpawnTimeAcc += emit.Dt;
-		while ( emit.SpawnTimeAcc >= emit.EmitRateMs )
-		{
-			emit.SpawnTimeAcc -= emit.EmitRateMs;
-			emitAcc += 1;
-		}
-
-		if ( emitAcc > 0 )
-		{
-			sizeT last{ emit.Size - 1 };
-			emit.StartIdx = emit.Alive;
-			emit.EndIdx = grMath::Min<sizeT>( emit.StartIdx + emitAcc, last );
-			if ( emit.StartIdx == emit.EndIdx )
-				return;
-
-			emit.Alive += emit.EndIdx - emit.StartIdx;
-
-			// All system generate calls
-			m_System.puColor->Generate();
-			m_System.puScale->Generate();
-			m_System.puMass->Generate();
-			m_System.puVelocity->Generate();
-			m_System.puPosition->Generate();
-			m_System.puLife->Generate();
-		}
-	}
-
-	void Update( const float dt )
-	{
-		if ( m_Data.puEmit->Alive > 0 )
-		{
-			// All system update calls
-			m_System.puColor->Update();
-			m_System.puScale->Update();
-			m_System.puVelocity->Update();
-			m_System.puPosition->Update();
-			m_System.puLife->Update();
-		}
-
-		//printf( "%d\n", m_Data.puEmit->Alive );
-	}
-
 	grSParticleData m_Data;
 	grSParticleSystem m_System;
 };

@@ -171,28 +171,30 @@ grSandbox::grSandbox( void )
 
 
 	// Particles
-	grV2f winSize{ ( float )grCore::Instance().GetWindowSize().x, ( float )grCore::Instance().GetWindowSize().y };
+	//grV2f winSize{ ( float )grCore::Instance().GetWindowSize().x, ( float )grCore::Instance().GetWindowSize().y };
 
-	m_pPartSys1->SetSystemPosition( { winSize.x * 0.5f, winSize.y * 0.5f } );
+	//m_pPartSys1->SetSystemPosition( { winSize.x * 0.5f, winSize.y * 0.5f } );
 	//m_pPartSys1->SetGravity( 45.0f, 1.0f );
-	m_pPartSys1->SetColor( { 255, 255, 0, 255 }, { 255, 0, 0, 0 }, true, false );
+	//m_pPartSys1->SetColor( { 255, 255, 0, 255 }, { 255, 0, 0, 0 }, true, false );
 	//m_pPartSys1->SetScale( grV2f( 10.0f, 10.0f ), grV2f( 0.0f, 0.0f ) );
 	//m_pPartSys1->SetPositionBox( { 0.0f, 0.0f }, { winSize.x, 0.0f } );
 	//m_pPartSys1->SetPositionEllipse( { -50.f, 100.0f }, { 50.0f, 100.0f }, 25.0f );
 	//m_pPartSys1->SetSpawnForce( { 45.0f, 45.0f }, { 49.0f, 100.0f } );
-	m_pPartSys1->SetMass( { 4.0f, 12.0f } );
-	m_pPartSys1->SetLife( { 2.0f, 12.0f } );
+	//m_pPartSys1->SetMass( { 4.0f, 12.0f } );
+	//m_pPartSys1->SetLife( { 2.0f, 12.0f } );
 
 
 
 
 	// Other particles
-	m_pParticle->SetEmitRate( 600.0f );
-	m_pParticle->AddColor( { 255, 0, 0, 255 }, { 255, 126, 0, 255 }, { 255, 255, 0, 0 }, { 255, 255, 255, 0 }, true );
-	m_pParticle->AddScale( { 1.0f, 1.0f } , { 10.0f, 10.0f }, { 10.0f, 10.0f }, { 20.0f, 20.0f } );
+	grV2f winOrigo{ ( float )grCore::Instance().GetWindowSize().x * 0.5f, ( float )grCore::Instance().GetWindowSize().y * 0.5f };
+
+	m_pParticle->SetEmitRate( 900.0f );
+	m_pParticle->AddColor( { 255, 0, 0, 63 }, { 255, 255, 0, 255 }, { 255, 255, 255, 0 }, { 255, 255, 255, 0 }, true );
+	m_pParticle->AddScale( { 0.1f, 0.1f } , { 0.1f, 0.1f }, { 5.0f, 5.0f }, { 10.0f, 10.0f } );
 	m_pParticle->AddPosition( EPositionType::BOX, { 0.0f, 0.0f }, { 0.0f, 0.0f } );
 	m_pParticle->AddVelocity( { 315.0f, 45.0f }, { 50.0f, 125.0f } );
-	m_pParticle->AddMass( { 1.0f, 4.0f } );
+	m_pParticle->AddMass( { 1.0f, 2.0f } );
 	m_pParticle->AddLife( { 1.0f, 4.0f } );
 
 
@@ -219,8 +221,7 @@ grSandbox::Update( const float deltaT )
 	//m_pBoidSys->Update( deltaT );
 
 	// Particles
-	//m_pPartSys1->Update( deltaT );
-	m_pParticle->Run( deltaT );
+	m_pParticle->Update( deltaT );
 
 	if ( m_rInputMan.GetMouseMoved() )
 	{

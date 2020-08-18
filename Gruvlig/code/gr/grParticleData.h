@@ -5,8 +5,8 @@
 #include "grRandom.h"
 #include "grV2.h"
 
-typedef std::uniform_real_distribution<float> FloatDist;
-typedef std::uniform_int_distribution<unsigned int> IntUDist;
+typedef std::uniform_real_distribution<float> DistF;
+typedef std::uniform_int_distribution<unsigned int> DistUI;
 
 
 enum class EEqualValue
@@ -25,148 +25,98 @@ enum class EPositionType
 
 struct grSEmitData
 {
-	grV2f SystemPosition;
-	float EmitRateSec;
-	float EmitRateMs;
-	float SpawnTimeAcc;
-	float Dt;
-	sizeT Size;
-	sizeT Alive;
-	sizeT StartIdx;
-	sizeT EndIdx;
+	grV2f SystemPosition = grV2f( ( float )grCore::Instance().GetWindowSize().x * 0.5f, ( float )grCore::Instance().GetWindowSize().y * 0.5f );
+	float Dt = 0.0f;
+	float EmitRateSec = 200.0f;;
+	float EmitRateMs = 1.0f / EmitRateSec;
+	float SpawnTimeAcc = 0.0f;
+	sizeT EmitAcc = 0;
+	sizeT Size = 0;
+	sizeT Alive = 0;
+	sizeT StartIdx = 0;
+	sizeT EndIdx = 0;
 
-	grSEmitData( const grV2f& systemPosition, const float emitRateSec, const sizeT size )
-		: SystemPosition( systemPosition )
-		, EmitRateSec( emitRateSec )
-		, EmitRateMs( 1.0f / emitRateSec )
-		, SpawnTimeAcc( EmitRateMs )
-		, Dt( 0.0f )
-		, Size( size )
-		, Alive( 0 )
-		, StartIdx( 0 )
-		, EndIdx( 0 )
+	grSEmitData( const sizeT size )
+		: Size( size )
 	{}
-	grSEmitData( const grSEmitData& ) = default;
-	grSEmitData& operator=( const grSEmitData& ) = default;
+	grSEmitData( const grSEmitData& ) = delete;
+	grSEmitData& operator=( const grSEmitData& ) = delete;
+	grSEmitData( grSEmitData&& ) noexcept = delete;
+	grSEmitData& operator=( grSEmitData&& ) noexcept = delete;
 };
 
 
 struct grSColorData
 {
-	IntUDist ArrDist[ 8 ]; // Start R[ 0 ], G[ 1 ], B[ 2 ], A[ 3 ] // End R[ 4 ], G[ 5 ], B[ 6 ], A[ 7 ]
-	grColor::Rgba ArrMinMax[ 4 ]; // Start Min[ 0 ], Max[ 1 ] // End Min[ 2 ], Max[ 3 ]
+	// Start R[ 0 ], G[ 1 ], B[ 2 ], A[ 3 ] // End R[ 4 ], G[ 5 ], B[ 6 ], A[ 7 ]
+	DistUI ArrDist[ 8 ];
+	// Start Min[ 0 ], Max[ 1 ] // End Min[ 2 ], Max[ 3 ]
+	grColor::Rgba ArrMinMax[ 4 ] = { { 0, 0, 0, 0 }, { 255, 255, 255, 255 }, { 255, 255, 255, 255 } , { 0, 0, 0, 0 } };
 	grRandXOR Rand;
-	EEqualValue StartEqual;
-	EEqualValue EndEqual;
-	EEqualValue LerpEqual;
-	bool bHsv;
-
-	grSColorData()
-		: StartEqual( EEqualValue::NO )
-		, EndEqual( EEqualValue::NO )
-		, LerpEqual( EEqualValue::NO )
-		, bHsv( true )
-	{}
-	grSColorData( const grSColorData& ) = default;
-	grSColorData& operator=( const grSColorData& ) = default;
+	EEqualValue StartEqual = EEqualValue::YES;
+	EEqualValue EndEqual = EEqualValue::YES;
+	EEqualValue LerpEqual = EEqualValue::YES;
+	bool bHsv = true;
 };
 
 
 struct grSScaleData
 {
-	FloatDist ArrDist[ 4 ]; // Start X[ 0 ], Y[ 1 ] // End X[ 2 ], Y[ 3 ]
-	grV2f ArrMinMax[ 4 ];
+	// Start X[ 0 ], Y[ 1 ] // End X[ 2 ], Y[ 3 ]
+	DistF ArrDist[ 4 ];
+	// Start Min[ 0 ], Max[ 1 ] // End Min[ 2 ], Max[ 3 ]
+	grV2f ArrMinMax[ 4 ] = { { 0.5f, 0.5f }, { 0.5f, 0.5f }, { 0.5f, 0.5f } , { 0.5f, 0.5f } };
 	grRandXOR Rand;
-	EEqualValue StartEqual;
-	EEqualValue EndEqual;
-
-	grSScaleData()
-		: StartEqual( EEqualValue::NO )
-		, EndEqual( EEqualValue::NO )
-	{}
-	grSScaleData( const grSScaleData& ) = default;
-	grSScaleData& operator=( const grSScaleData& ) = default;
+	EEqualValue StartEqual = EEqualValue::YES;
+	EEqualValue EndEqual = EEqualValue::YES;
 };
 
 
 struct grSMassData
 {
 	grRandXOR Rand;
-	grV2f MinMax;
-	EEqualValue Equal;
-
-	grSMassData()
-		: MinMax( grV2f( 1.0f, 1.0f ) )
-		, Equal( EEqualValue::NO )
-	{}
-	grSMassData( const grSMassData& ) = default;
-	grSMassData& operator=( const grSMassData& ) = default;
+	DistF Dist;
+	grV2f MinMax = grV2f( 1.0f, 1.0f );
+	EEqualValue Equal = EEqualValue::YES;
 };
 
 
 struct grSVelocityData
 {
 	grRandXOR Rand;
-	grV2f DegreeMinMax;
-	grV2f ForceMinMax;
-	EEqualValue DegreeEqual;
-	EEqualValue ForceEqual;
-
-	grSVelocityData()
-		: DegreeMinMax( grV2f( 0.0f, 0.0f ) )
-		, ForceMinMax( grV2f( 100.0f, 100.0f ) )
-		, DegreeEqual( EEqualValue::NO )
-		, ForceEqual( EEqualValue::NO )
-	{}
-	grSVelocityData( const grSVelocityData& ) = default;
-	grSVelocityData& operator=( const grSVelocityData& ) = default;
+	DistF Dist;
+	grV2f DegreeMinMax = grV2f( 315.0f, 45.0f );
+	grV2f ForceMinMax = grV2f( 25.0f, 75.0f );
+	EEqualValue DegreeEqual = EEqualValue::NO;
+	EEqualValue ForceEqual = EEqualValue::NO;
 };
 
 
 struct grSPositionData
 {
 	grRandXOR Rand;
-	grV2f PositionOffsetMin;
-	grV2f PositionOffsetMax;
-	grV2f EllipseRadiusMin;
-	grV2f EllipseRadiusMax;
-	grV2f EllipseStepMinMax;
-	grV2f EllipseTiltMinMax;
-	float Ellipse360;
-	float EllipseStepCount;
-	float EllipseTiltCount;
-	EEqualValue PositionEqual;
-	EPositionType PositionType;
-
-	grSPositionData()
-		: PositionOffsetMin( grV2f( 0.0f, 0.0f ) )
-		, PositionOffsetMax( grV2f( 0.0f, 0.0f ) )
-		, EllipseRadiusMin( grV2f( 5.0f, 5.0f ) )
-		, EllipseRadiusMax( grV2f( 5.0f, 5.0f ) )
-		, EllipseStepMinMax( grV2f( 5.0f, 5.0f ) )
-		, Ellipse360( grMath::Pi * 2.0f )
-		, EllipseStepCount( 0.0f )
-		, EllipseTiltCount( 0.0f )
-		, PositionEqual( EEqualValue::NO )
-		, PositionType( EPositionType::BOX )
-	{}
-	grSPositionData( const grSPositionData& ) = default;
-	grSPositionData& operator=( const grSPositionData& ) = default;
+	DistF DistX;
+	DistF DistY;
+	grV2f PositionOffsetMin = grV2f( 0.0f, 0.0f );
+	grV2f PositionOffsetMax = grV2f( 0.0f, 0.0f );
+	grV2f EllipseRadiusMin = grV2f( 5.0f, 5.0f );
+	grV2f EllipseRadiusMax = grV2f( 5.0f, 5.0f );
+	grV2f EllipseStepMinMax = grV2f( 5.0f, 5.0f );
+	grV2f EllipseTiltMinMax = grV2f( 0.0f, 0.0f );
+	float Ellipse360 = grMath::Pi * 2.0f;
+	float EllipseStepCount = 0.0f;
+	float EllipseTiltCount = 0.0f;
+	EEqualValue PositionEqual = EEqualValue::YES;
+	EPositionType PositionType = EPositionType::BOX;
 };
 
 
 struct grSLifeData
 {
 	grRandXOR Rand;
-	grV2f MinMax;
-	EEqualValue Equal;
-
-	grSLifeData()
-		: MinMax( grV2f( 2.0f, 2.0f ) )
-		, Equal( EEqualValue::NO )
-	{}
-	grSLifeData( const grSLifeData& ) = default;
-	grSLifeData& operator=( const grSLifeData& ) = default;
+	DistF Dist;
+	grV2f MinMax = grV2f( 1.0f, 1.0f );
+	EEqualValue Equal = EEqualValue::YES;
 };
 
 
@@ -211,16 +161,10 @@ struct grSParticleData
 	pU<grSLifeData> puLife;
 	pU<grSArrayData> puArray;
 
-	grSParticleData() = default;
-	grSParticleData( const grSParticleData& ) = delete;
-	grSParticleData& operator=( const grSParticleData& ) = delete;
-	grSParticleData( grSParticleData&& ) noexcept = delete;
-	grSParticleData& operator=( grSParticleData&& ) noexcept = delete;
-
-	void Init( const grV2f& systemPosition, const float emitRateSec, const sizeT size )
+	void Init( const sizeT size )
 	{
 		// General data for spawning new particles
-		puEmit = std::make_unique<grSEmitData>( systemPosition, emitRateSec, size );
+		puEmit = std::make_unique<grSEmitData>( size );
 
 		// Specific data for spawning new particles
 		puColor = std::make_unique<grSColorData>();
