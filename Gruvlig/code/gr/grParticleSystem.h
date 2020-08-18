@@ -10,9 +10,52 @@ typedef void( grSColorSystem::* ColorFunc )( const sizeT startIdx, const sizeT e
 typedef void( grSScaleSystem::* ScaleFunc )( const sizeT startIdx, const sizeT endIdx );
 
 
+struct grSEmitSystem
+{
+	grSEmitData& rEmiData;
+
+	grSEmitSystem( const grSParticleData& rData )
+		: rEmiData( *rData.puEmit )
+	{}
+	grSEmitSystem( const grSEmitSystem& ) = default;
+	grSEmitSystem& operator=( const grSEmitSystem& ) = default;
+
+	void Init( const grV2f& systemPosition, const float emitRateSec, const sizeT size )
+	{
+		rEmiData.SystemPosition = systemPosition;
+		rEmiData.EmitRateSec = emitRateSec;
+		rEmiData.EmitRateMs = 1.0f / emitRateSec;
+		rEmiData.Size = size;
+	}
+
+	void Generate( const float dt )
+	{
+		rEmiData.Dt = dt;
+		rEmiData.SpawnTimeAcc += rEmiData.Dt;
+		rEmiData.EmitAcc = 0;
+		while ( rEmiData.SpawnTimeAcc >= rEmiData.EmitRateMs )
+		{
+			rEmiData.SpawnTimeAcc -= rEmiData.EmitRateMs;
+			rEmiData.EmitAcc += 1;
+		}
+
+		if ( rEmiData.EmitAcc > 0 )
+		{
+			sizeT last{ rEmiData.Size - 1 };
+			rEmiData.StartIdx = rEmiData.Alive;
+			rEmiData.EndIdx = grMath::Min<sizeT>( rEmiData.StartIdx + rEmiData.EmitAcc, last );
+			if ( rEmiData.StartIdx == rEmiData.EndIdx )
+				return;
+
+			rEmiData.Alive += rEmiData.EndIdx - rEmiData.StartIdx;
+		}
+	}
+};
+
+
 struct grSBaseSystem
 {
-	void SetStartEnd( grColor::Rgba arrCol[], EEqualValue& rStartEqual, EEqualValue& rEndEqual, EEqualValue& rStartEndEqual )
+	void SetStartEnd( grColor::Rgba arrCol[], EEqualValue& rStartEqual, EEqualValue& rEndEqual, EEqualValue& rLerpEqual )
 	{
 		for ( sizeT i = 0; i < 4; ++i )
 			arrCol[ i ] = ClampColor( arrCol[ i ] );
@@ -21,8 +64,7 @@ struct grSBaseSystem
 		rEndEqual = arrCol[ 2 ].Cmp( arrCol[ 3 ] ) ? EEqualValue::YES : EEqualValue::NO;
 
 		if ( rStartEqual == EEqualValue::YES && rEndEqual == EEqualValue::YES )
-			if ( arrCol[ 1 ].Cmp( arrCol[ 2 ] ) )
-				rStartEndEqual = EEqualValue::YES;
+			rLerpEqual = arrCol[ 1 ].Cmp( arrCol[ 2 ] ) ? EEqualValue::YES : EEqualValue::NO;
 	}
 
 	void SetStartEnd( const grV2f arrV2f[], EEqualValue& rStartEqual, EEqualValue& rEndEqual )
@@ -90,9 +132,10 @@ struct grSColorSystem : public grSBaseSystem
 		rColData.ArrMinMax[ 2 ] = rEndMin;
 		rColData.ArrMinMax[ 3 ] = rEndMax;
 		rColData.bHsv = hsv;
+		rColData.LerpEqual = EEqualValue::NO; // A cheat if the default values set in the data struct would be used it doesn't trigger lerping
 		SetStartEnd( rColData.ArrMinMax, rColData.StartEqual, rColData.EndEqual, rColData.LerpEqual );
 
-		// Dislike this but I don't wan't to bloat with states or more weird looking functions so it will do for now
+		// Dislike all below code but I don't wan't to bloat with states or more weird looking functions so it will do for now
 		if ( rColData.StartEqual == EEqualValue::NO && rColData.EndEqual == EEqualValue::NO )
 		{
 			InitDist( 0, 0 );
@@ -343,7 +386,7 @@ struct grSMassSystem : public grSBaseSystem
 	grSMassData& rMasData;
 	grSArrayData& rArrData;
 
-	FloatDist DistMass;
+	
 
 	grSMassSystem( const grSParticleData& rData )
 		: rEmiData( *rData.puEmit )
@@ -358,7 +401,7 @@ struct grSMassSystem : public grSBaseSystem
 		rMasData.MinMax.x = grMath::Max( rMinMax.x, 1.0f );
 		rMasData.MinMax.y = grMath::Max( rMinMax.y, 1.0f );
 		SetMinMax( rMasData.MinMax, rMasData.Equal );
-		DistMass = rMasData.Rand.DistF( rMasData.MinMax.x, rMasData.MinMax.y );
+		rMasData.Dist = rMasData.Rand.DistF( rMasData.MinMax.x, rMasData.MinMax.y );
 	}
 
 	void Generate()
@@ -367,7 +410,7 @@ struct grSMassSystem : public grSBaseSystem
 		if ( rMasData.Equal == EEqualValue::NO )
 		{
 			for ( sizeT i = startIdx; i < endIdx; ++i )
-				rArrData.Mass[ i ] = rMasData.Rand.Float( DistMass );
+				rArrData.Mass[ i ] = rMasData.Rand.Float( rMasData.Dist );
 
 			return;
 		}
@@ -383,8 +426,6 @@ struct grSVelocitySystem : public grSBaseSystem
 	grSEmitData& rEmiData;
 	grSVelocityData& VelData;
 	grSArrayData& rArrData;
-
-	FloatDist VelDist;
 
 	grSVelocitySystem( const grSParticleData& rData )
 		: rEmiData( *rData.puEmit )
@@ -432,8 +473,8 @@ struct grSVelocitySystem : public grSBaseSystem
 			{
 				float d{ 0.0f };
 				float diff{ 359.9f - VelData.DegreeMinMax.x };
-				VelDist = VelData.Rand.DistF( 0.0f, diff + VelData.DegreeMinMax.y );
-				d = VelData.Rand.Float( VelDist ) - diff;
+				VelData.Dist = VelData.Rand.DistF( 0.0f, diff + VelData.DegreeMinMax.y );
+				d = VelData.Rand.Float( VelData.Dist ) - diff;
 				if ( d < 0.0f )
 					d += 359.9f;
 
@@ -466,9 +507,6 @@ struct grSPositionSystem : public grSBaseSystem
 	grSPositionData& rPosData;
 	grSArrayData& rArrData;
 
-	FloatDist DistPosX;
-	FloatDist DistPosY;
-
 	grSPositionSystem( const grSParticleData& rData )
 		: rEmiData( *rData.puEmit )
 		, rPosData( *rData.puPosition )
@@ -484,8 +522,8 @@ struct grSPositionSystem : public grSBaseSystem
 		rPosData.PositionType = positionType;
 		SetMinMax( rPosData.PositionOffsetMin, rPosData.PositionOffsetMax, rPosData.PositionEqual );
 
-		DistPosX = rPosData.Rand.DistF( rPosData.PositionOffsetMin.x, rPosData.PositionOffsetMax.x );
-		DistPosY = rPosData.Rand.DistF( rPosData.PositionOffsetMin.y, rPosData.PositionOffsetMax.y );
+		rPosData.DistX = rPosData.Rand.DistF( rPosData.PositionOffsetMin.x, rPosData.PositionOffsetMax.x );
+		rPosData.DistY = rPosData.Rand.DistF( rPosData.PositionOffsetMin.y, rPosData.PositionOffsetMax.y );
 	}
 
 	void Init( const EPositionType positionType, const grV2f& rRadiusMin, const grV2f& rRadiusMax, const grV2f& rStepMinMax, const grV2f& rTiltMinMax )
@@ -579,7 +617,7 @@ struct grSPositionSystem : public grSBaseSystem
 	{
 		for ( sizeT i = rEmiData.StartIdx; i < rEmiData.EndIdx; ++i )
 		{
-			grV2f v{ rPosData.Rand.Float( DistPosX ), rPosData.Rand.Float( DistPosY ) };
+			grV2f v{ rPosData.Rand.Float( rPosData.DistX ), rPosData.Rand.Float( rPosData.DistY ) };
 			rArrData.Position[ i ] = v + rEmiData.SystemPosition;
 		}
 	}
@@ -621,6 +659,7 @@ struct grSLifeSystem : public grSBaseSystem
 	{
 		rLifData.MinMax = rMinMax;
 		SetMinMax( rLifData.MinMax, rLifData.Equal );
+		rLifData.Dist = rLifData.Rand.DistF( rLifData.MinMax.x, rLifData.MinMax.y );
 	}
 
 	void Generate()
@@ -628,9 +667,8 @@ struct grSLifeSystem : public grSBaseSystem
 		sizeT startIdx{ rEmiData.StartIdx }, endIdx{ rEmiData.EndIdx };
 		if ( rLifData.Equal == EEqualValue::NO )
 		{
-			auto dist{ rLifData.Rand.DistF( rLifData.MinMax.x, rLifData.MinMax.y ) };
 			for ( sizeT i = startIdx; i < endIdx; ++i )
-				rArrdata.Life[ i ] = rLifData.Rand.Float( dist );
+				rArrdata.Life[ i ] = rLifData.Rand.Float( rLifData.Dist );
 
 			return;
 		}
@@ -671,6 +709,7 @@ struct grSLifeSystem : public grSBaseSystem
 
 struct grSParticleSystem
 {
+	pU<grSEmitSystem> puEmit;
 	pU<grSColorSystem> puColor;
 	pU<grSScaleSystem> puScale;
 	pU<grSMassSystem> puMass;
@@ -686,12 +725,39 @@ struct grSParticleSystem
 
 	void Init( const grSParticleData& rData )
 	{
+		puEmit = std::make_unique<grSEmitSystem>( rData );
 		puColor = std::make_unique<grSColorSystem>( rData );
 		puScale = std::make_unique<grSScaleSystem>( rData );
 		puMass = std::make_unique<grSMassSystem>( rData );
 		puVelocity = std::make_unique<grSVelocitySystem>( rData );
 		puPosition = std::make_unique<grSPositionSystem>( rData );
 		puLife = std::make_unique<grSLifeSystem>( rData );
+	}
+
+	void Generate( const float dt )
+	{
+		puEmit->Generate( dt );
+		if ( puEmit->rEmiData.EmitAcc > 0 )
+		{
+			puColor->Generate();
+			puScale->Generate();
+			puMass->Generate();
+			puVelocity->Generate();
+			puPosition->Generate();
+			puLife->Generate();
+		}
+	}
+
+	void Update()
+	{
+		if ( puEmit->rEmiData.Alive > 0 )
+		{
+			puColor->Update();
+			puScale->Update();
+			puVelocity->Update();
+			puPosition->Update();
+			puLife->Update();
+		}
 	}
 };
 
