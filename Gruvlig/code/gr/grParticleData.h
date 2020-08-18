@@ -56,15 +56,15 @@ struct grSColorData
 	IntUDist ArrDist[ 8 ]; // Start R[ 0 ], G[ 1 ], B[ 2 ], A[ 3 ] // End R[ 4 ], G[ 5 ], B[ 6 ], A[ 7 ]
 	grColor::Rgba ArrMinMax[ 4 ]; // Start Min[ 0 ], Max[ 1 ] // End Min[ 2 ], Max[ 3 ]
 	grRandXOR Rand;
-	EEqualValue ColorStartEqual;
-	EEqualValue ColorEndEqual;
-	EEqualValue ColorShouldLerp;
+	EEqualValue StartEqual;
+	EEqualValue EndEqual;
+	EEqualValue LerpEqual;
 	bool bHsv;
 
 	grSColorData()
-		: ColorStartEqual( EEqualValue::NO )
-		, ColorEndEqual( EEqualValue::NO )
-		, ColorShouldLerp( EEqualValue::NO )
+		: StartEqual( EEqualValue::NO )
+		, EndEqual( EEqualValue::NO )
+		, LerpEqual( EEqualValue::NO )
 		, bHsv( true )
 	{}
 	grSColorData( const grSColorData& ) = default;
@@ -77,12 +77,12 @@ struct grSScaleData
 	FloatDist ArrDist[ 4 ]; // Start X[ 0 ], Y[ 1 ] // End X[ 2 ], Y[ 3 ]
 	grV2f ArrMinMax[ 4 ];
 	grRandXOR Rand;
-	EEqualValue ScaleStartEqual;
-	EEqualValue ScaleEndEqual;
+	EEqualValue StartEqual;
+	EEqualValue EndEqual;
 
 	grSScaleData()
-		: ScaleStartEqual( EEqualValue::NO )
-		, ScaleEndEqual( EEqualValue::NO )
+		: StartEqual( EEqualValue::NO )
+		, EndEqual( EEqualValue::NO )
 	{}
 	grSScaleData( const grSScaleData& ) = default;
 	grSScaleData& operator=( const grSScaleData& ) = default;
@@ -92,12 +92,12 @@ struct grSScaleData
 struct grSMassData
 {
 	grRandXOR Rand;
-	grV2f MassMinMax;
-	EEqualValue EqualMass;
+	grV2f MinMax;
+	EEqualValue Equal;
 
 	grSMassData()
-		: MassMinMax( grV2f( 1.0f, 1.0f ) )
-		, EqualMass( EEqualValue::NO )
+		: MinMax( grV2f( 1.0f, 1.0f ) )
+		, Equal( EEqualValue::NO )
 	{}
 	grSMassData( const grSMassData& ) = default;
 	grSMassData& operator=( const grSMassData& ) = default;
@@ -158,12 +158,12 @@ struct grSPositionData
 struct grSLifeData
 {
 	grRandXOR Rand;
-	grV2f LifeMinMax;
-	EEqualValue LifeEqual;
+	grV2f MinMax;
+	EEqualValue Equal;
 
 	grSLifeData()
-		: LifeMinMax( grV2f( 2.0f, 2.0f ) )
-		, LifeEqual( EEqualValue::NO )
+		: MinMax( grV2f( 2.0f, 2.0f ) )
+		, Equal( EEqualValue::NO )
 	{}
 	grSLifeData( const grSLifeData& ) = default;
 	grSLifeData& operator=( const grSLifeData& ) = default;

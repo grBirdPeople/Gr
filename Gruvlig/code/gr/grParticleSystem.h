@@ -90,10 +90,10 @@ struct grSColorSystem : public grSBaseSystem
 		rColData.ArrMinMax[ 2 ] = rEndMin;
 		rColData.ArrMinMax[ 3 ] = rEndMax;
 		rColData.bHsv = hsv;
-		SetStartEnd( rColData.ArrMinMax, rColData.ColorStartEqual, rColData.ColorEndEqual, rColData.ColorShouldLerp );
+		SetStartEnd( rColData.ArrMinMax, rColData.StartEqual, rColData.EndEqual, rColData.LerpEqual );
 
 		// Dislike this but I don't wan't to bloat with states or more weird looking functions so it will do for now
-		if ( rColData.ColorStartEqual == EEqualValue::NO && rColData.ColorEndEqual == EEqualValue::NO )
+		if ( rColData.StartEqual == EEqualValue::NO && rColData.EndEqual == EEqualValue::NO )
 		{
 			InitDist( 0, 0 );
 			InitDist( 4, 2 );
@@ -101,14 +101,14 @@ struct grSColorSystem : public grSBaseSystem
 			return;
 		}
 
-		if ( rColData.ColorStartEqual == EEqualValue::NO && rColData.ColorEndEqual == EEqualValue::YES )
+		if ( rColData.StartEqual == EEqualValue::NO && rColData.EndEqual == EEqualValue::YES )
 		{
 			InitDist( 0, 0 );
 			GenerateOption = &grSColorSystem::GenerateOption1;
 			return;
 		}
 
-		if ( rColData.ColorStartEqual == EEqualValue::YES && rColData.ColorEndEqual == EEqualValue::NO )
+		if ( rColData.StartEqual == EEqualValue::YES && rColData.EndEqual == EEqualValue::NO )
 		{
 			InitDist( 4, 2 );
 			GenerateOption = &grSColorSystem::GenerateOption2;
@@ -126,7 +126,7 @@ struct grSColorSystem : public grSBaseSystem
 
 	void Update()
 	{
-		if ( rColData.ColorShouldLerp == EEqualValue::NO )
+		if ( rColData.LerpEqual == EEqualValue::NO )
 			rColData.bHsv ? LerpHsv() : LerpRgb();
 	}
 
@@ -253,11 +253,11 @@ struct grSScaleSystem : public grSBaseSystem
 		rScaData.ArrMinMax[ 1 ] = rStartMax;
 		rScaData.ArrMinMax[ 2 ] = rEndMin;
 		rScaData.ArrMinMax[ 3 ] = rEndMax;
-		SetStartEnd( rScaData.ArrMinMax, rScaData.ScaleStartEqual, rScaData.ScaleEndEqual );
+		SetStartEnd( rScaData.ArrMinMax, rScaData.StartEqual, rScaData.EndEqual );
 
-		if ( rScaData.ScaleStartEqual == EEqualValue::NO && rScaData.ScaleEndEqual == EEqualValue::NO ||
-			 rScaData.ScaleStartEqual == EEqualValue::NO && rScaData.ScaleEndEqual == EEqualValue::YES ||
-			 rScaData.ScaleStartEqual == EEqualValue::YES && rScaData.ScaleEndEqual == EEqualValue::NO )
+		if ( rScaData.StartEqual == EEqualValue::NO && rScaData.EndEqual == EEqualValue::NO ||
+			 rScaData.StartEqual == EEqualValue::NO && rScaData.EndEqual == EEqualValue::YES ||
+			 rScaData.StartEqual == EEqualValue::YES && rScaData.EndEqual == EEqualValue::NO )
 		{
 			rScaData.ArrDist[ 0 ] = InitDist( rScaData.ArrMinMax[ 0 ].x, rScaData.ArrMinMax[ 1 ].x );
 			rScaData.ArrDist[ 1 ] = InitDist( rScaData.ArrMinMax[ 0 ].y, rScaData.ArrMinMax[ 1 ].y );
@@ -265,11 +265,11 @@ struct grSScaleSystem : public grSBaseSystem
 			rScaData.ArrDist[ 3 ] = InitDist( rScaData.ArrMinMax[ 2 ].y, rScaData.ArrMinMax[ 3 ].y );
 		}
 
-		GnerateOption = rScaData.ScaleStartEqual == EEqualValue::NO && rScaData.ScaleEndEqual == EEqualValue::NO ?
+		GnerateOption = rScaData.StartEqual == EEqualValue::NO && rScaData.EndEqual == EEqualValue::NO ?
 			&grSScaleSystem::GnerateOption0 :
-			rScaData.ScaleStartEqual == EEqualValue::NO && rScaData.ScaleEndEqual == EEqualValue::YES ?
+			rScaData.StartEqual == EEqualValue::NO && rScaData.EndEqual == EEqualValue::YES ?
 			&grSScaleSystem::GnerateOption1 :
-			rScaData.ScaleStartEqual == EEqualValue::YES && rScaData.ScaleEndEqual == EEqualValue::NO ?
+			rScaData.StartEqual == EEqualValue::YES && rScaData.EndEqual == EEqualValue::NO ?
 			&grSScaleSystem::GnerateOption2 :
 			&grSScaleSystem::GnerateOption3;
 	}
@@ -355,16 +355,16 @@ struct grSMassSystem : public grSBaseSystem
 
 	void Init( const grV2f& rMinMax )
 	{
-		rMasData.MassMinMax.x = grMath::Max( rMinMax.x, 1.0f );
-		rMasData.MassMinMax.y = grMath::Max( rMinMax.y, 1.0f );
-		SetMinMax( rMasData.MassMinMax, rMasData.EqualMass );
-		DistMass = rMasData.Rand.DistF( rMasData.MassMinMax.x, rMasData.MassMinMax.y );
+		rMasData.MinMax.x = grMath::Max( rMinMax.x, 1.0f );
+		rMasData.MinMax.y = grMath::Max( rMinMax.y, 1.0f );
+		SetMinMax( rMasData.MinMax, rMasData.Equal );
+		DistMass = rMasData.Rand.DistF( rMasData.MinMax.x, rMasData.MinMax.y );
 	}
 
 	void Generate()
 	{
 		sizeT startIdx{ rEmiData.StartIdx }, endIdx{ rEmiData.EndIdx };
-		if ( rMasData.EqualMass == EEqualValue::NO )
+		if ( rMasData.Equal == EEqualValue::NO )
 		{
 			for ( sizeT i = startIdx; i < endIdx; ++i )
 				rArrData.Mass[ i ] = rMasData.Rand.Float( DistMass );
@@ -373,7 +373,7 @@ struct grSMassSystem : public grSBaseSystem
 		}
 
 		for ( sizeT i = startIdx; i < endIdx; ++i )
-			rArrData.Mass[ i ] = rMasData.MassMinMax.x;
+			rArrData.Mass[ i ] = rMasData.MinMax.x;
 	}
 };
 
@@ -619,16 +619,16 @@ struct grSLifeSystem : public grSBaseSystem
 
 	void Init( const grV2f& rMinMax )
 	{
-		rLifData.LifeMinMax = rMinMax;
-		SetMinMax( rLifData.LifeMinMax, rLifData.LifeEqual );
+		rLifData.MinMax = rMinMax;
+		SetMinMax( rLifData.MinMax, rLifData.Equal );
 	}
 
 	void Generate()
 	{
 		sizeT startIdx{ rEmiData.StartIdx }, endIdx{ rEmiData.EndIdx };
-		if ( rLifData.LifeEqual == EEqualValue::NO )
+		if ( rLifData.Equal == EEqualValue::NO )
 		{
-			auto dist{ rLifData.Rand.DistF( rLifData.LifeMinMax.x, rLifData.LifeMinMax.y ) };
+			auto dist{ rLifData.Rand.DistF( rLifData.MinMax.x, rLifData.MinMax.y ) };
 			for ( sizeT i = startIdx; i < endIdx; ++i )
 				rArrdata.Life[ i ] = rLifData.Rand.Float( dist );
 
@@ -636,7 +636,7 @@ struct grSLifeSystem : public grSBaseSystem
 		}
 
 		for ( sizeT i = startIdx; i < endIdx; ++i )
-			rArrdata.Life[ i ] = rLifData.LifeMinMax.x;
+			rArrdata.Life[ i ] = rLifData.MinMax.x;
 	}
 
 	void Update()
