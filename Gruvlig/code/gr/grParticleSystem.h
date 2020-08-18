@@ -20,14 +20,6 @@ struct grSEmitSystem
 	grSEmitSystem( const grSEmitSystem& ) = default;
 	grSEmitSystem& operator=( const grSEmitSystem& ) = default;
 
-	void Init( const grV2f& systemPosition, const float emitRateSec, const sizeT size )
-	{
-		rEmiData.SystemPosition = systemPosition;
-		rEmiData.EmitRateSec = emitRateSec;
-		rEmiData.EmitRateMs = 1.0f / emitRateSec;
-		rEmiData.Size = size;
-	}
-
 	void Generate( const float dt )
 	{
 		rEmiData.Dt = dt;
@@ -629,9 +621,9 @@ struct grSPositionSystem : public grSBaseSystem
 
 	void PositionEqualBox()
 	{
-		grV2f v{ rPosData.PositionOffsetMin + rEmiData.SystemPosition };
+		grV2f v{ rPosData.PositionOffsetMin };
 		for ( sizeT i = rEmiData.StartIdx; i < rEmiData.EndIdx; ++i )
-			rArrData.Position[ i ] = v;
+			rArrData.Position[ i ] = v + rEmiData.SystemPosition;
 	}
 
 	void PositionEqualEllipse()
@@ -758,6 +750,12 @@ struct grSParticleSystem
 			puPosition->Update();
 			puLife->Update();
 		}
+	}
+
+	void Run( const float dt )
+	{
+		Generate( dt );
+		Update();
 	}
 };
 

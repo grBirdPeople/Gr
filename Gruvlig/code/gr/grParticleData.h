@@ -25,9 +25,9 @@ enum class EPositionType
 
 struct grSEmitData
 {
-	grV2f SystemPosition = grV2f( 0.0f, 0.0f );
+	grV2f SystemPosition = grV2f( ( float )grCore::Instance().GetWindowSize().x * 0.5f, ( float )grCore::Instance().GetWindowSize().y * 0.5f );
 	float Dt = 0.0f;
-	float EmitRateSec = 500.0f;;
+	float EmitRateSec = 100.0f;;
 	float EmitRateMs = 1.0f / EmitRateSec;
 	float SpawnTimeAcc = 0.0f;
 	sizeT EmitAcc = 0;
@@ -35,6 +35,14 @@ struct grSEmitData
 	sizeT Alive = 0;
 	sizeT StartIdx = 0;
 	sizeT EndIdx = 0;
+
+	grSEmitData( const sizeT size )
+		: Size( size )
+	{}
+	grSEmitData( const grSEmitData& ) = delete;
+	grSEmitData& operator=( const grSEmitData& ) = delete;
+	grSEmitData( grSEmitData&& ) noexcept = delete;
+	grSEmitData& operator=( grSEmitData&& ) noexcept = delete;
 };
 
 
@@ -152,7 +160,7 @@ struct grSParticleData
 	void Init( const sizeT size )
 	{
 		// General data for spawning new particles
-		puEmit = std::make_unique<grSEmitData>();
+		puEmit = std::make_unique<grSEmitData>( size );
 
 		// Specific data for spawning new particles
 		puColor = std::make_unique<grSColorData>();

@@ -8,13 +8,10 @@
 class grCParticle
 {
 public:
-	grCParticle( const grV2f& systemPosition = grV2f( ( float )grCore::Instance().GetWindowSize().x * 0.5f, ( float )grCore::Instance().GetWindowSize().y * 0.5f ),
-				 const float emitRateSec = 1000.0f,
-				 const intU size = 10000 )
+	grCParticle( const intU size = 10000 )
 	{
 		m_Data.Init( size );
 		m_System.Init( m_Data );
-		m_System.puEmit->Init( systemPosition, emitRateSec, size );
 	}
 	grCParticle( const grCParticle& ) = delete;
 	grCParticle& operator=( const grCParticle& ) = delete;
@@ -63,10 +60,9 @@ public:
 		m_System.puLife->Init( rMinMax );
 	}
 
-	void Run( const float dt )
+	void Update( const float dt )
 	{
-		m_System.Generate( dt );
-		m_System.Update();
+		m_System.Run( dt );
 	}
 
 	void Render( sf::RenderWindow& rRenderWin )
