@@ -69,7 +69,7 @@ struct grSBaseSystem
 		rEndEqual = grMath::CmpV2f( arrV2f[ 2 ], arrV2f[ 3 ] ) ? EEqualValue::YES : EEqualValue::NO;
 	}
 
-	void EqualCheckPosition( const grV2f arrV2f[], EEqualValue& rEqualX, EEqualValue& rEqualY )
+	void EqualCheck( const grV2f arrV2f[], EEqualValue& rEqualX, EEqualValue& rEqualY )
 	{
 		rEqualX = grMath::CmpF( arrV2f[ 0 ].x, arrV2f[ 1 ].x ) ? EEqualValue::YES : EEqualValue::NO;
 		rEqualY = grMath::CmpF( arrV2f[ 0 ].y, arrV2f[ 1 ].y ) ? EEqualValue::YES : EEqualValue::NO;
@@ -494,55 +494,101 @@ struct grSVelocitySystem : public grSBaseSystem
 };
 
 
-// Position system doubles for spawn position and updating position
+// Position system doubles as spawn shape and position update
 struct grSPositionSystem : public grSBaseSystem
 {
 	grSEmitData& rEmiData;
 	grSPositionData& rPosData;
 	grSArrayData& rArrData;
 
-	PosGenOpt BoxGenOption;
+	PosGenOpt GenOption;
 
 	grSPositionSystem( const grSParticleData& rData )
 		: rEmiData( *rData.puEmit )
 		, rPosData( *rData.puPosition )
 		, rArrData( *rData.puArray )
-		, BoxGenOption( &grSPositionSystem::BoxGenOption3 )
+		, GenOption( &grSPositionSystem::BoxGenOption3 )
 	{}
 	grSPositionSystem( const grSPositionSystem& ) = default;
 	grSPositionSystem& operator=( const grSPositionSystem& ) = default;
 
-	void Init( const grV2f& rBoxOffsetMin, const grV2f& rBoxOffsetMax )
+	void InitBox( const grV2f& rBoxOffsetMin, const grV2f& rBoxOffsetMax )
 	{
-		rPosData.ArrBoxMinMax[ 0 ] = rBoxOffsetMin;
-		rPosData.ArrBoxMinMax[ 1 ] = rBoxOffsetMax;
-		EqualCheckPosition( rPosData.ArrBoxMinMax, rPosData.EqualX, rPosData.EqualY );
-		SwapCheck( rPosData.ArrBoxMinMax[ 0 ], rPosData.ArrBoxMinMax[ 1 ] );
+		rPosData.ArrMinMax[ 0 ] = rBoxOffsetMin;
+		rPosData.ArrMinMax[ 1 ] = rBoxOffsetMax;
+		EqualCheck( rPosData.ArrMinMax, rPosData.EqualBoxX, rPosData.EqualBoxY );
+		SwapCheck( rPosData.ArrMinMax[ 0 ], rPosData.ArrMinMax[ 1 ] );
 
-		if ( rPosData.EqualX == EEqualValue::NO && rPosData.EqualY == EEqualValue::NO )
+		if ( rPosData.EqualBoxX == EEqualValue::NO && rPosData.EqualBoxY == EEqualValue::NO )
 		{
-			rPosData.ArrDist[ 0 ] = rPosData.Rand.DistF( rPosData.ArrBoxMinMax[ 0 ].x, rPosData.ArrBoxMinMax[ 1 ].x );
-			rPosData.ArrDist[ 1 ] = rPosData.Rand.DistF( rPosData.ArrBoxMinMax[ 0 ].y, rPosData.ArrBoxMinMax[ 1 ].y );
-			BoxGenOption = &grSPositionSystem::BoxGenOption0;
+			rPosData.ArrDist[ 0 ] = rPosData.Rand.DistF( rPosData.ArrMinMax[ 0 ].x, rPosData.ArrMinMax[ 1 ].x );
+			rPosData.ArrDist[ 1 ] = rPosData.Rand.DistF( rPosData.ArrMinMax[ 0 ].y, rPosData.ArrMinMax[ 1 ].y );
+			GenOption = &grSPositionSystem::BoxGenOption0;
 			return;
 		}
 
-		if ( rPosData.EqualX == EEqualValue::NO && rPosData.EqualY == EEqualValue::YES )
+		if ( rPosData.EqualBoxX == EEqualValue::NO && rPosData.EqualBoxY == EEqualValue::YES )
 		{
-			rPosData.ArrDist[ 0 ] = rPosData.Rand.DistF( rPosData.ArrBoxMinMax[ 0 ].x, rPosData.ArrBoxMinMax[ 1 ].x );
-			BoxGenOption = &grSPositionSystem::BoxGenOption1;
+			rPosData.ArrDist[ 0 ] = rPosData.Rand.DistF( rPosData.ArrMinMax[ 0 ].x, rPosData.ArrMinMax[ 1 ].x );
+			GenOption = &grSPositionSystem::BoxGenOption1;
 			return;
 		}
 
-		if ( rPosData.EqualX == EEqualValue::YES && rPosData.EqualY == EEqualValue::NO )
+		if ( rPosData.EqualBoxX == EEqualValue::YES && rPosData.EqualBoxY == EEqualValue::NO )
 		{
-			rPosData.ArrDist[ 1 ] = rPosData.Rand.DistF( rPosData.ArrBoxMinMax[ 0 ].y, rPosData.ArrBoxMinMax[ 1 ].y );
-			BoxGenOption = &grSPositionSystem::BoxGenOption2;
+			rPosData.ArrDist[ 1 ] = rPosData.Rand.DistF( rPosData.ArrMinMax[ 0 ].y, rPosData.ArrMinMax[ 1 ].y );
+			GenOption = &grSPositionSystem::BoxGenOption2;
 			return;
 		}
 
-		BoxGenOption = &grSPositionSystem::BoxGenOption3;
+		GenOption = &grSPositionSystem::BoxGenOption3;
 	}
+
+	void InitCircle( const grV2f& rRadiusMinMax )
+	{
+		rPosData.ArrMinMax[ 0 ] = rRadiusMinMax;
+		EqualCheck( rPosData.ArrMinMax[ 0 ], rPosData.EqualCircle );
+		SwapCheck( rPosData.ArrMinMax[ 0 ] );
+
+		GenOption = rPosData.EqualCircle == EEqualValue::NO ? &grSPositionSystem::CircleGenOption0 : &grSPositionSystem::CircleGenOption1;
+	}
+
+	void CircleGenOption0( const sizeT startIdx, const sizeT endIdx )
+	{
+		grV2f sysPos{ rEmiData.SystemPosition };
+		auto distRad{ rPosData.Rand.DistF( rPosData.ArrMinMax[ 0 ] ) };
+		auto distDeg{ rPosData.Rand.DistF( 0.0f, 359.9f ) };
+		for ( sizeT i = startIdx; i < endIdx; ++i )
+		{
+			grV2f v{ grMath::DegToVec( rPosData.Rand.Float( distDeg ) ) };
+			v *= rPosData.Rand.Float( distRad );
+			rArrData.Position[ i ] = v + sysPos;
+		}
+	}
+
+	void CircleGenOption1( const sizeT startIdx, const sizeT endIdx )
+	{
+		grV2f sysPos{ rEmiData.SystemPosition };
+		auto distDeg{ rPosData.Rand.DistF( 0.0f, 359.9f ) };
+		for ( sizeT i = startIdx; i < endIdx; ++i )
+		{
+			grV2f v{ grMath::DegToVec( rPosData.Rand.Float( distDeg ) ) };
+			v *= rPosData.ArrMinMax[ 0 ].x;
+			rArrData.Position[ i ] = v + sysPos;
+		}
+	}
+
+// position = Vector2( centerPos.x + ( radX * Mathf.Sin( Mathf.Deg2Rad * alpha ) ),
+// 					   centerPos.y + ( radY * Mathf.Cos( Mathf.Deg2Rad * alpha ) ) );
+
+// alpha += 5f;//can be used as speed
+
+// position = Vector2( centerPos.x + ( radX * MCos( alpha ) * MCos( tilt ) ) - ( radY * MSin( alpha ) * MSin( tilt ) ),
+// 					   centerPos.y + ( radX * MCos( alpha ) * MSin( tilt ) ) + ( radY * MSin( alpha ) * MCos( tilt ) ) );
+// alpha += 5f;
+
+
+
 
 	void BoxGenOption0( const sizeT startIdx, const sizeT endIdx )
 	{
@@ -556,7 +602,7 @@ struct grSPositionSystem : public grSBaseSystem
 
 	void BoxGenOption1( const sizeT startIdx, const sizeT endIdx )
 	{
-		grV2f v{ grV2f( 0.0f, rPosData.ArrBoxMinMax[ 0 ].y ) + rEmiData.SystemPosition };
+		grV2f v{ grV2f( 0.0f, rPosData.ArrMinMax[ 0 ].y ) + rEmiData.SystemPosition };
 		for ( sizeT i = startIdx; i < endIdx; ++i )
 		{
 			v.x += rPosData.Rand.Float( rPosData.ArrDist[ 0 ] );
@@ -566,7 +612,7 @@ struct grSPositionSystem : public grSBaseSystem
 
 	void BoxGenOption2( const sizeT startIdx, const sizeT endIdx )
 	{
-		grV2f v{ grV2f( rPosData.ArrBoxMinMax[ 0 ].x, 0.0f ) + rEmiData.SystemPosition };
+		grV2f v{ grV2f( rPosData.ArrMinMax[ 0 ].x, 0.0f ) + rEmiData.SystemPosition };
 		for ( sizeT i = startIdx; i < endIdx; ++i )
 		{
 			v.y += rPosData.Rand.Float( rPosData.ArrDist[ 1 ] );
@@ -576,7 +622,7 @@ struct grSPositionSystem : public grSBaseSystem
 
 	void BoxGenOption3( const sizeT startIdx, const sizeT endIdx )
 	{
-		grV2f v{ grV2f( rPosData.ArrBoxMinMax[ 0 ] ) + rEmiData.SystemPosition };
+		grV2f v{ grV2f( rPosData.ArrMinMax[ 0 ] ) + rEmiData.SystemPosition };
 		for ( sizeT i = startIdx; i < endIdx; ++i )
 			rArrData.Position[ i ] = v;
 	}
@@ -584,7 +630,7 @@ struct grSPositionSystem : public grSBaseSystem
 	void Generate()
 	{
 		sizeT startIdx{ rEmiData.StartIdx }, endIdx{ rEmiData.EndIdx };
-		( this->*BoxGenOption )( startIdx, endIdx );
+		( this->*GenOption )( startIdx, endIdx );
 	}
 
 	void Update()
@@ -593,17 +639,6 @@ struct grSPositionSystem : public grSBaseSystem
 		for ( sizeT i = 0; i < rEmiData.Alive; ++i )
 			rArrData.Position[ i ] += rArrData.Velocity[ i ] * dt;
 	}
-
-
-
-	// position = Vector2( centerPos.x + ( radX * Mathf.Sin( Mathf.Deg2Rad * alpha ) ),
-	// 					   centerPos.y + ( radY * Mathf.Cos( Mathf.Deg2Rad * alpha ) ) );
-
-	// alpha += 5f;//can be used as speed
-
-	// position = Vector2( centerPos.x + ( radX * MCos( alpha ) * MCos( tilt ) ) - ( radY * MSin( alpha ) * MSin( tilt ) ),
-	// 					   centerPos.y + ( radX * MCos( alpha ) * MSin( tilt ) ) + ( radY * MSin( alpha ) * MCos( tilt ) ) );
-	// alpha += 5f;
 };
 
 

@@ -47,7 +47,9 @@ public:
 
 	void AddPosition( const grV2f& rOffsetMin, const grV2f& rOffsetMax )
 	{
-		m_System.puPosition->Init( rOffsetMin, rOffsetMax ); // Only box now, ellipse later
+		m_System.puPosition->InitBox( rOffsetMin, rOffsetMax ); // Only box now, ellipse later
+
+		//m_System.puPosition->InitCircle( grV2f( 49.0f, 50.0f ) );
 	}
 
 	void AddMass( const grV2f& rMinMax )

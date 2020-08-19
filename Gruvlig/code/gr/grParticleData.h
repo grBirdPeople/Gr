@@ -97,10 +97,14 @@ struct grSPositionData
 	// X[ 0 ], Y[ 1 ]
 	DistF ArrDist[ 2 ];
 	// Min[ 0 ], Max[ 1 ]
-	grV2f ArrBoxMinMax[ 2 ];
+	grV2f ArrMinMax[ 2 ] = { { 0.0f, 0.0f }, { 0.0f, 0.0f } };
 	grRandXOR Rand;
-	EEqualValue EqualX = EEqualValue::YES;
-	EEqualValue EqualY = EEqualValue::YES;
+	EEqualValue EqualBoxX = EEqualValue::YES;
+	EEqualValue EqualBoxY = EEqualValue::YES;
+
+	EEqualValue EqualCircle = EEqualValue::YES;
+
+
 
 	DistF DistX;
 	DistF DistY;
