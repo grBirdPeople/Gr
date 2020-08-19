@@ -162,7 +162,7 @@ struct grSColorSystem : public grSBaseSystem
 	void Update()
 	{
 		if ( rColData.LerpEqual == EEqualValue::NO )
-			rColData.bHsv ? LerpHsv() : LerpRgb();
+			rColData.bHsv ? HsvLerp() : RgbLerp();
 	}
 
 	DistUI RangeDist( const uint16_t a, const uint16_t b )
@@ -222,7 +222,7 @@ struct grSColorSystem : public grSBaseSystem
 			rArrData.ColorEnd[ i ] = rColData.ArrMinMax[ 2 ];
 	}
 
-	void LerpHsv()
+	void HsvLerp()
 	{
 		// RGB -> HSV lerp -> RGB
 
@@ -245,7 +245,7 @@ struct grSColorSystem : public grSBaseSystem
 		}
 	}
 
-	void LerpRgb()
+	void RgbLerp()
 	{
 		float dt{ rEmiData.Dt };
 		sizeT alive{ rEmiData.Alive };
@@ -678,15 +678,15 @@ struct grSLifeSystem : public grSBaseSystem
 	void Kill( const sizeT nowIdx, const sizeT last )
 	{
 		//grAlgo::Swap( Array.puVerts[ nowIdx ], Array.puVerts[ last ] );
-		grAlgo::Swap( rArrdata.ColorStart[ nowIdx ], rArrdata.ColorStart[ last ] );
-		grAlgo::Swap( rArrdata.ColorEnd[ nowIdx ], rArrdata.ColorEnd[ last ] );
-		grAlgo::Swap( rArrdata.ScaleStart[ nowIdx ], rArrdata.ScaleStart[ last ] );
-		grAlgo::Swap( rArrdata.ScaleEnd[ nowIdx ], rArrdata.ScaleEnd[ last ] );
-		grAlgo::Swap( rArrdata.Mass[ nowIdx ], rArrdata.Mass[ last ] );
-		grAlgo::Swap( rArrdata.Acceleration[ nowIdx ], rArrdata.Acceleration[ last ] );
-		grAlgo::Swap( rArrdata.Velocity[ nowIdx ], rArrdata.Velocity[ last ] );
-		grAlgo::Swap( rArrdata.Position[ nowIdx ], rArrdata.Position[ last ] );
-		grAlgo::Swap( rArrdata.Life[ nowIdx ], rArrdata.Life[ last ] );
+		grAlgo::Swap<grColor::Rgba>( rArrdata.ColorStart[ nowIdx ], rArrdata.ColorStart[ last ] );
+		grAlgo::Swap<grColor::Rgba>( rArrdata.ColorEnd[ nowIdx ], rArrdata.ColorEnd[ last ] );
+		grAlgo::Swap<grV2f>( rArrdata.ScaleStart[ nowIdx ], rArrdata.ScaleStart[ last ] );
+		grAlgo::Swap<grV2f>( rArrdata.ScaleEnd[ nowIdx ], rArrdata.ScaleEnd[ last ] );
+		grAlgo::Swap<float>( rArrdata.Mass[ nowIdx ], rArrdata.Mass[ last ] );
+		grAlgo::Swap<grV2f>( rArrdata.Acceleration[ nowIdx ], rArrdata.Acceleration[ last ] );
+		grAlgo::Swap<grV2f>( rArrdata.Velocity[ nowIdx ], rArrdata.Velocity[ last ] );
+		grAlgo::Swap<grV2f>( rArrdata.Position[ nowIdx ], rArrdata.Position[ last ] );
+		grAlgo::Swap<float>( rArrdata.Life[ nowIdx ], rArrdata.Life[ last ] );
 
 		// Most values are generated and set by operator= and does not need zeroing (all above)
 		// Values that are generated and set by operator+= needs resetting (all below) with the exception of position
