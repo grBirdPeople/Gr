@@ -192,7 +192,7 @@ grSandbox::grSandbox( void )
 	m_pParticle->SetEmitRate( 900.0f );
 	m_pParticle->AddColor( { 255, 0, 0, 63 }, { 255, 255, 0, 255 }, { 255, 255, 255, 0 }, { 255, 255, 255, 0 }, true );
 	m_pParticle->AddScale( { 0.1f, 0.1f } , { 0.1f, 0.1f }, { 5.0f, 5.0f }, { 10.0f, 10.0f } );
-	m_pParticle->AddPosition( EPositionType::BOX, { 0.0f, 0.0f }, { 0.0f, 0.0f } );
+	m_pParticle->AddPosition( { 0.0f, 0.0f }, { 0.0f, 0.0f } );
 	m_pParticle->AddVelocity( { 315.0f, 45.0f }, { 50.0f, 125.0f } );
 	m_pParticle->AddMass( { 1.0f, 2.0f } );
 	m_pParticle->AddLife( { 1.0f, 4.0f } );
