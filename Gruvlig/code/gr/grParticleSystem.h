@@ -446,14 +446,12 @@ struct grSVelocitySystem : public grSBaseSystem
 				float diff{ 359.9f - VelData.DegreeMinMax.x };
 				VelData.Dist = VelData.Rand.DistF( 0.0f, diff + VelData.DegreeMinMax.y );
 				d = VelData.Rand.Float( VelData.Dist ) - diff;
-				if ( d < 0.0f )
-					d += 359.9f;
-
+				d += d < 0.0f ? 359.9f : 0.0f;
 				return d;
 			}
 
-			auto distDeg{ VelData.Rand.DistF( VelData.DegreeMinMax.x, VelData.DegreeMinMax.y ) };
-			return VelData.Rand.Float( distDeg );
+			VelData.Dist = VelData.Rand.DistF( VelData.DegreeMinMax.x, VelData.DegreeMinMax.y );
+			return VelData.Rand.Float( VelData.Dist );
 		}
 
 		return VelData.DegreeMinMax.x;
@@ -512,10 +510,11 @@ struct grSPositionSystem : public grSBaseSystem
 	grSPositionSystem( const grSPositionSystem& ) = default;
 	grSPositionSystem& operator=( const grSPositionSystem& ) = default;
 
-	void InitBox( const grV2f& rBoxOffsetMin, const grV2f& rBoxOffsetMax )
+	void InitBox( const grV2f& rBoxOffsetMin, const grV2f& rBoxOffsetMax, const float radius ) // Radius 0.0f equals filled box // Radius !0.0f equals framed box
 	{
 		rPosData.ArrMinMax[ 0 ] = rBoxOffsetMin;
 		rPosData.ArrMinMax[ 1 ] = rBoxOffsetMax;
+		rPosData.BoxRadius = grMath::AbsF( radius );
 		EqualCheck( rPosData.ArrMinMax, rPosData.EqualBoxX, rPosData.EqualBoxY );
 		SwapCheck( rPosData.ArrMinMax[ 0 ], rPosData.ArrMinMax[ 1 ] );
 
@@ -556,8 +555,8 @@ struct grSPositionSystem : public grSBaseSystem
 	void CircleGenOption0( const sizeT startIdx, const sizeT endIdx )
 	{
 		grV2f sysPos{ rEmiData.SystemPosition };
-		auto distRad{ rPosData.Rand.DistF( rPosData.ArrMinMax[ 0 ] ) };
-		auto distDeg{ rPosData.Rand.DistF( 0.0f, 359.9f ) };
+		DistF distRad{ rPosData.Rand.DistF( rPosData.ArrMinMax[ 0 ] ) };
+		DistF distDeg{ rPosData.Rand.DistF( 0.0f, 359.9f ) };
 		for ( sizeT i = startIdx; i < endIdx; ++i )
 		{
 			grV2f v{ grMath::DegToVec( rPosData.Rand.Float( distDeg ) ) };
@@ -569,7 +568,7 @@ struct grSPositionSystem : public grSBaseSystem
 	void CircleGenOption1( const sizeT startIdx, const sizeT endIdx )
 	{
 		grV2f sysPos{ rEmiData.SystemPosition };
-		auto distDeg{ rPosData.Rand.DistF( 0.0f, 359.9f ) };
+		DistF distDeg{ rPosData.Rand.DistF( 0.0f, 359.9f ) };
 		for ( sizeT i = startIdx; i < endIdx; ++i )
 		{
 			grV2f v{ grMath::DegToVec( rPosData.Rand.Float( distDeg ) ) };
@@ -592,11 +591,54 @@ struct grSPositionSystem : public grSBaseSystem
 
 	void BoxGenOption0( const sizeT startIdx, const sizeT endIdx )
 	{
+		// Filled box
 		grV2f sysPos{ rEmiData.SystemPosition };
+		if ( rPosData.BoxRadius == 0.0f )
+		{
+			for ( sizeT i = startIdx; i < endIdx; ++i )
+			{
+				grV2f v{ rPosData.Rand.Float( rPosData.ArrDist[ 0 ] ), rPosData.Rand.Float( rPosData.ArrDist[ 1 ] ) };
+				rArrData.Position[ i ] = v + sysPos;
+			}
+			return;
+		}
+
+		// Framed box
+		float xRange = ( grMath::AbsF( rPosData.ArrMinMax[ 0 ].x ) + grMath::AbsF( rPosData.ArrMinMax[ 1 ].x ) ) * 0.5f;
+		float yRange = ( grMath::AbsF( rPosData.ArrMinMax[ 0 ].y ) + grMath::AbsF( rPosData.ArrMinMax[ 1 ].y ) ) * 0.5f;
+		DistF DistHori{ rPosData.Rand.DistF( -xRange, xRange ) };
+		DistF DistVert{ rPosData.Rand.DistF( -yRange, yRange ) };
+
+		grV2f vOrigoN = grMath::DegToVec( 0.0f );
+		grV2f vAdjecentN = grMath::DegToVec( 90.0f );
+
+		grV2f vOrigoE = grMath::DegToVec( 90.0f );
+		grV2f vAdjecentE = grMath::DegToVec( 180.0f );
+
+		grV2f vOrigoS = grMath::DegToVec( 180.0f );
+		grV2f vAdjecentS = grMath::DegToVec( 270.0f );
+
+		grV2f vOrigoW = grMath::DegToVec( 270.0f );
+		grV2f vAdjecentW = grMath::DegToVec( 0.0f );
+
+		float degAcc{ 360.0f };
+		float flipFlop{ -1.0f };
+
 		for ( sizeT i = startIdx; i < endIdx; ++i )
 		{
-			grV2f v{ rPosData.Rand.Float( rPosData.ArrDist[ 0 ] ), rPosData.Rand.Float( rPosData.ArrDist[ 1 ] ) };
-			rArrData.Position[ i ] = v + sysPos;
+			flipFlop *= -1.0f;
+			degAcc = degAcc > 359.9f ? 0.0f : degAcc + 90.0f;
+
+			grV2f v = 
+				( degAcc == 90.0f ) ?
+				grV2f( vOrigoE ) * grMath::AbsF( rPosData.ArrMinMax[ 1 ].x ) + grV2f( vAdjecentE ) * rPosData.Rand.Float( DistVert ) :
+				( degAcc == 180.0f ) ?
+				grV2f( vOrigoS ) * grMath::AbsF( rPosData.ArrMinMax[ 0 ].y ) + grV2f( vAdjecentS ) * rPosData.Rand.Float( DistHori ) :
+				( degAcc == 270.0f ) ?
+				grV2f( vOrigoW ) * grMath::AbsF( rPosData.ArrMinMax[ 0 ].x ) + grV2f( vAdjecentW ) * rPosData.Rand.Float( DistVert ) :
+				grV2f( vOrigoN ) * grMath::AbsF( rPosData.ArrMinMax[ 1 ].y ) + grV2f( vAdjecentN ) * rPosData.Rand.Float( DistHori );
+
+			rArrData.Position[ i ] = sysPos + v;
 		}
 	}
 

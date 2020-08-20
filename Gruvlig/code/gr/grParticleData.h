@@ -99,6 +99,7 @@ struct grSPositionData
 	// Min[ 0 ], Max[ 1 ]
 	grV2f ArrMinMax[ 2 ] = { { 0.0f, 0.0f }, { 0.0f, 0.0f } };
 	grRandXOR Rand;
+	float BoxRadius = true;
 	EEqualValue EqualBoxX = EEqualValue::YES;
 	EEqualValue EqualBoxY = EEqualValue::YES;
 
