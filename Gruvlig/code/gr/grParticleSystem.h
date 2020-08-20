@@ -634,23 +634,24 @@ struct grSPositionSystem : public grSBaseSystem
 			return;
 		}
 
-		// Framed box
-		//float xRange = ( grMath::AbsF( rPosData.ArrMinMax[ 0 ].x ) + grMath::AbsF( rPosData.ArrMinMax[ 1 ].x ) ) * 0.5f;
-		//float yRange = ( grMath::AbsF( rPosData.ArrMinMax[ 0 ].y ) + grMath::AbsF( rPosData.ArrMinMax[ 1 ].y ) ) * 0.5f;
+		// Framed box // This was a headscratcher so extra comments because I will forget how I did it
 
+		// Radius
 		float x{ rPosData.ArrMinMax[ 1 ].x * 0.5f };
 		float y{ rPosData.ArrMinMax[ 1 ].y * 0.5f };
 
+		// How long the frames for x and y should be
+		// Y is modded so the corners of x and y doesn't overlap
 		DistF DistHori{ rPosData.Rand.DistF( -x, x ) };
-		DistF DistVert{ rPosData.Rand.DistF( -y, y ) };
+		DistF DistVert{ rPosData.Rand.DistF( -y + rPosData.BoxFrameThickness, y - rPosData.BoxFrameThickness ) };
 
+		// How much the vector going out from origo should deviate in length based on frame thickness which results in the, uh, frames thickness
 		DistF DistThickX{ x - rPosData.BoxFrameThickness, x };
 		DistF DistThickY{ y - rPosData.BoxFrameThickness, y };
 
-		grV2f vOrigoN = grMath::DegToVec( 0.0f );
-		grV2f vOrigoE = grMath::DegToVec( 90.0f );
-		grV2f vOrigoS = grMath::DegToVec( 180.0f );
-		grV2f vOrigoW = grMath::DegToVec( 270.0f );
+		// South, north, east and west where north and west is flipped in the loop
+		grV2f vOrigoSN{ 0.0f, 1.0f };
+		grV2f vOrigoEW{ 1.0f, 0.0f };
 
 		float degAcc{ 360.0f };
 
@@ -659,13 +660,13 @@ struct grSPositionSystem : public grSBaseSystem
 			degAcc = degAcc > 359.9f ? 0.0f : degAcc + 90.0f;
 
 			grV2f v = 
-				( degAcc == 90.0f ) ?
-				grV2f( vOrigoE ) * rPosData.Rand.Float( DistThickX ) + grV2f( vOrigoS ) * rPosData.Rand.Float( DistVert ) :
-				( degAcc == 180.0f ) ?
-				grV2f( vOrigoS ) * rPosData.Rand.Float( DistThickY ) + grV2f( vOrigoE ) * rPosData.Rand.Float( DistHori ) :
-				( degAcc == 270.0f ) ?
-				grV2f( vOrigoW ) * rPosData.Rand.Float( DistThickX ) + grV2f( vOrigoS ) * rPosData.Rand.Float( DistVert ) :
-				grV2f( vOrigoN ) * rPosData.Rand.Float( DistThickY ) + grV2f( vOrigoE ) * rPosData.Rand.Float( DistHori );
+				degAcc == 90.0f ?
+				( vOrigoEW * rPosData.Rand.Float( DistThickX ) ) + ( vOrigoSN * rPosData.Rand.Float( DistVert ) ) :
+				degAcc == 180.0f ?
+				( vOrigoSN * rPosData.Rand.Float( DistThickY ) ) + ( vOrigoEW * rPosData.Rand.Float( DistHori ) ) :
+				degAcc == 270.0f ?
+				( vOrigoEW * -1.0f * rPosData.Rand.Float( DistThickX ) ) + ( vOrigoSN * rPosData.Rand.Float( DistVert ) ) :
+				( vOrigoSN * -1.0f * rPosData.Rand.Float( DistThickY ) ) + ( vOrigoEW * rPosData.Rand.Float( DistHori ) );
 
 			rArrData.Position[ i ] = sysPos + v;
 		}
