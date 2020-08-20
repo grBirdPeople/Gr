@@ -18,7 +18,8 @@ enum class EEqualValue
 
 enum class EPositionType
 {
-	BOX = 0,
+	BOX_FILLED = 0,
+	BOX_FRAMED,
 	ELLIPSE
 };
 
@@ -99,9 +100,10 @@ struct grSPositionData
 	// Min[ 0 ], Max[ 1 ]
 	grV2f ArrMinMax[ 2 ] = { { 0.0f, 0.0f }, { 0.0f, 0.0f } };
 	grRandXOR Rand;
-	float BoxRadius = true;
+	float BoxFrameThickness = 0.0f;
 	EEqualValue EqualBoxX = EEqualValue::YES;
 	EEqualValue EqualBoxY = EEqualValue::YES;
+	EPositionType PositionType = EPositionType::BOX_FILLED;
 
 	EEqualValue EqualCircle = EEqualValue::YES;
 
@@ -115,7 +117,6 @@ struct grSPositionData
 	float EllipseStepCount = 0.0f;
 	float EllipseTiltCount = 0.0f;
 
-	EPositionType PositionType = EPositionType::BOX;
 };
 
 

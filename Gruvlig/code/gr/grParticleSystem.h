@@ -130,8 +130,10 @@ struct grSColorSystem : public grSBaseSystem
 		rColData.ArrMinMax[ 2 ] = rEndMin;
 		rColData.ArrMinMax[ 3 ] = rEndMax;
 		rColData.bHsv = hsv;
+
 		SwapCheckColor( rColData.ArrMinMax, 0, 1 );
 		SwapCheckColor( rColData.ArrMinMax, 2, 3 );
+
 		rColData.LerpEqual = EEqualValue::NO; // A cheat if the default values set in the data struct would be used it doesn't trigger lerping
 		EqualCheckColor( rColData.ArrMinMax, rColData.StartEqual, rColData.EndEqual, rColData.LerpEqual );
 
@@ -158,6 +160,7 @@ struct grSColorSystem : public grSBaseSystem
 			return;
 		}
 
+		// rColData.StartEqual == EEqualValue::YES && rColData.EndEqual == EEqualValue::YES
 		GenOption = &grSColorSystem::GenOption3;
 	}
 
@@ -291,6 +294,7 @@ struct grSScaleSystem : public grSBaseSystem
 		rScaData.ArrMinMax[ 1 ] = rStartMax;
 		rScaData.ArrMinMax[ 2 ] = rEndMin;
 		rScaData.ArrMinMax[ 3 ] = rEndMax;
+
 		EqualCheckScale( rScaData.ArrMinMax, rScaData.StartEqual, rScaData.EndEqual );
 
 		if ( rScaData.StartEqual == EEqualValue::NO && rScaData.EndEqual == EEqualValue::NO ||
@@ -391,8 +395,10 @@ struct grSMassSystem : public grSBaseSystem
 	{
 		rMasData.MinMax.x = grMath::Max( rMinMax.x, 1.0f );
 		rMasData.MinMax.y = grMath::Max( rMinMax.y, 1.0f );
+
 		SwapCheck( rMasData.MinMax );
 		EqualCheck( rMasData.MinMax, rMasData.Equal );
+
 		rMasData.Dist = rMasData.Rand.DistF( rMasData.MinMax.x, rMasData.MinMax.y );
 	}
 
@@ -407,6 +413,7 @@ struct grSMassSystem : public grSBaseSystem
 			return;
 		}
 
+		// rMasData.Equal == EEqualValue::YES
 		for ( sizeT i = startIdx; i < endIdx; ++i )
 			rArrData.Mass[ i ] = rMasData.MinMax.x;
 	}
@@ -431,6 +438,7 @@ struct grSVelocitySystem : public grSBaseSystem
 	{
 		VelData.DegreeMinMax = grV2f( grMath::Clamp<float>( rDegreeMinMax.x, 0.0f, 359.9f ), grMath::Clamp<float>( rDegreeMinMax.y, 0.0f, 359.9f ) );
 		VelData.ForceMinMax = rForceMinMax;
+
 		SwapCheck( VelData.ForceMinMax );
 		EqualCheck( VelData.DegreeMinMax, VelData.DegreeEqual );
 		EqualCheck( VelData.ForceMinMax, VelData.ForceEqual );
@@ -454,6 +462,7 @@ struct grSVelocitySystem : public grSBaseSystem
 			return VelData.Rand.Float( VelData.Dist );
 		}
 
+		// VelData.DegreeEqual == EEqualValue::YES
 		return VelData.DegreeMinMax.x;
 	}
 
@@ -465,6 +474,7 @@ struct grSVelocitySystem : public grSBaseSystem
 			return VelData.Rand.Float( distForce );
 		}
 
+		// VelData.ForceEqual == EEqualValue::YES
 		return VelData.ForceMinMax.x;
 	}
 
@@ -510,36 +520,57 @@ struct grSPositionSystem : public grSBaseSystem
 	grSPositionSystem( const grSPositionSystem& ) = default;
 	grSPositionSystem& operator=( const grSPositionSystem& ) = default;
 
-	void InitBox( const grV2f& rBoxOffsetMin, const grV2f& rBoxOffsetMax, const float radius ) // Radius 0.0f equals filled box // Radius !0.0f equals framed box
+	void InitBox( const grV2f& rBoxOffsetMin, const grV2f& rBoxOffsetMax, const float frameThickness ) // Radius 0.0f equals filled box // Radius !0.0f equals framed box
 	{
 		rPosData.ArrMinMax[ 0 ] = rBoxOffsetMin;
 		rPosData.ArrMinMax[ 1 ] = rBoxOffsetMax;
-		rPosData.BoxRadius = grMath::AbsF( radius );
+		rPosData.BoxFrameThickness = grMath::AbsF( frameThickness );
+
 		EqualCheck( rPosData.ArrMinMax, rPosData.EqualBoxX, rPosData.EqualBoxY );
 		SwapCheck( rPosData.ArrMinMax[ 0 ], rPosData.ArrMinMax[ 1 ] );
 
+		rPosData.PositionType = rPosData.BoxFrameThickness == 0.0f ? EPositionType::BOX_FILLED : EPositionType::BOX_FRAMED;
+
 		if ( rPosData.EqualBoxX == EEqualValue::NO && rPosData.EqualBoxY == EEqualValue::NO )
 		{
-			rPosData.ArrDist[ 0 ] = rPosData.Rand.DistF( rPosData.ArrMinMax[ 0 ].x, rPosData.ArrMinMax[ 1 ].x );
-			rPosData.ArrDist[ 1 ] = rPosData.Rand.DistF( rPosData.ArrMinMax[ 0 ].y, rPosData.ArrMinMax[ 1 ].y );
 			GenOption = &grSPositionSystem::BoxGenOption0;
+
+			if ( rPosData.PositionType == EPositionType::BOX_FILLED )
+			{
+				rPosData.ArrDist[ 0 ] = rPosData.Rand.DistF( rPosData.ArrMinMax[ 0 ].x, rPosData.ArrMinMax[ 1 ].x );
+				rPosData.ArrDist[ 1 ] = rPosData.Rand.DistF( rPosData.ArrMinMax[ 0 ].y, rPosData.ArrMinMax[ 1 ].y );
+				return;
+			}
+			
+			// EPositionType:::BOX_FRAMED
+			rPosData.ArrMinMax[ 1 ].x = ( grMath::AbsF( rPosData.ArrMinMax[ 0 ].x ) + grMath::AbsF( rPosData.ArrMinMax[ 1 ].x ) );
+			rPosData.ArrMinMax[ 1 ].y = ( grMath::AbsF( rPosData.ArrMinMax[ 0 ].y ) + grMath::AbsF( rPosData.ArrMinMax[ 1 ].y ) );
+			rPosData.ArrMinMax[ 0 ].x = 0.0f;
+			rPosData.ArrMinMax[ 0 ].y = 0.0f;
 			return;
 		}
 
 		if ( rPosData.EqualBoxX == EEqualValue::NO && rPosData.EqualBoxY == EEqualValue::YES )
 		{
-			rPosData.ArrDist[ 0 ] = rPosData.Rand.DistF( rPosData.ArrMinMax[ 0 ].x, rPosData.ArrMinMax[ 1 ].x );
-			GenOption = &grSPositionSystem::BoxGenOption1;
-			return;
+			if ( rPosData.PositionType == EPositionType::BOX_FILLED )
+			{
+				rPosData.ArrDist[ 0 ] = rPosData.Rand.DistF( rPosData.ArrMinMax[ 0 ].x, rPosData.ArrMinMax[ 1 ].x );
+				GenOption = &grSPositionSystem::BoxGenOption1;
+				return;
+			}
 		}
 
 		if ( rPosData.EqualBoxX == EEqualValue::YES && rPosData.EqualBoxY == EEqualValue::NO )
 		{
-			rPosData.ArrDist[ 1 ] = rPosData.Rand.DistF( rPosData.ArrMinMax[ 0 ].y, rPosData.ArrMinMax[ 1 ].y );
-			GenOption = &grSPositionSystem::BoxGenOption2;
-			return;
+			if ( rPosData.PositionType == EPositionType::BOX_FILLED )
+			{
+				rPosData.ArrDist[ 1 ] = rPosData.Rand.DistF( rPosData.ArrMinMax[ 0 ].y, rPosData.ArrMinMax[ 1 ].y );
+				GenOption = &grSPositionSystem::BoxGenOption2;
+				return;
+			}
 		}
 
+		// rPosData.EqualBoxX == EEqualValue::YES && rPosData.EqualBoxY == EEqualValue::YES
 		GenOption = &grSPositionSystem::BoxGenOption3;
 	}
 
@@ -593,7 +624,7 @@ struct grSPositionSystem : public grSBaseSystem
 	{
 		// Filled box
 		grV2f sysPos{ rEmiData.SystemPosition };
-		if ( rPosData.BoxRadius == 0.0f )
+		if ( rPosData.BoxFrameThickness == 0.0f )
 		{
 			for ( sizeT i = startIdx; i < endIdx; ++i )
 			{
@@ -604,39 +635,37 @@ struct grSPositionSystem : public grSBaseSystem
 		}
 
 		// Framed box
-		float xRange = ( grMath::AbsF( rPosData.ArrMinMax[ 0 ].x ) + grMath::AbsF( rPosData.ArrMinMax[ 1 ].x ) ) * 0.5f;
-		float yRange = ( grMath::AbsF( rPosData.ArrMinMax[ 0 ].y ) + grMath::AbsF( rPosData.ArrMinMax[ 1 ].y ) ) * 0.5f;
-		DistF DistHori{ rPosData.Rand.DistF( -xRange, xRange ) };
-		DistF DistVert{ rPosData.Rand.DistF( -yRange, yRange ) };
+		//float xRange = ( grMath::AbsF( rPosData.ArrMinMax[ 0 ].x ) + grMath::AbsF( rPosData.ArrMinMax[ 1 ].x ) ) * 0.5f;
+		//float yRange = ( grMath::AbsF( rPosData.ArrMinMax[ 0 ].y ) + grMath::AbsF( rPosData.ArrMinMax[ 1 ].y ) ) * 0.5f;
+
+		float x{ rPosData.ArrMinMax[ 1 ].x * 0.5f };
+		float y{ rPosData.ArrMinMax[ 1 ].y * 0.5f };
+
+		DistF DistHori{ rPosData.Rand.DistF( -x, x ) };
+		DistF DistVert{ rPosData.Rand.DistF( -y, y ) };
+
+		DistF DistThickX{ x - rPosData.BoxFrameThickness, x };
+		DistF DistThickY{ y - rPosData.BoxFrameThickness, y };
 
 		grV2f vOrigoN = grMath::DegToVec( 0.0f );
-		grV2f vAdjecentN = grMath::DegToVec( 90.0f );
-
 		grV2f vOrigoE = grMath::DegToVec( 90.0f );
-		grV2f vAdjecentE = grMath::DegToVec( 180.0f );
-
 		grV2f vOrigoS = grMath::DegToVec( 180.0f );
-		grV2f vAdjecentS = grMath::DegToVec( 270.0f );
-
 		grV2f vOrigoW = grMath::DegToVec( 270.0f );
-		grV2f vAdjecentW = grMath::DegToVec( 0.0f );
 
 		float degAcc{ 360.0f };
-		float flipFlop{ -1.0f };
 
 		for ( sizeT i = startIdx; i < endIdx; ++i )
 		{
-			flipFlop *= -1.0f;
 			degAcc = degAcc > 359.9f ? 0.0f : degAcc + 90.0f;
 
 			grV2f v = 
 				( degAcc == 90.0f ) ?
-				grV2f( vOrigoE ) * grMath::AbsF( rPosData.ArrMinMax[ 1 ].x ) + grV2f( vAdjecentE ) * rPosData.Rand.Float( DistVert ) :
+				grV2f( vOrigoE ) * rPosData.Rand.Float( DistThickX ) + grV2f( vOrigoS ) * rPosData.Rand.Float( DistVert ) :
 				( degAcc == 180.0f ) ?
-				grV2f( vOrigoS ) * grMath::AbsF( rPosData.ArrMinMax[ 0 ].y ) + grV2f( vAdjecentS ) * rPosData.Rand.Float( DistHori ) :
+				grV2f( vOrigoS ) * rPosData.Rand.Float( DistThickY ) + grV2f( vOrigoE ) * rPosData.Rand.Float( DistHori ) :
 				( degAcc == 270.0f ) ?
-				grV2f( vOrigoW ) * grMath::AbsF( rPosData.ArrMinMax[ 0 ].x ) + grV2f( vAdjecentW ) * rPosData.Rand.Float( DistVert ) :
-				grV2f( vOrigoN ) * grMath::AbsF( rPosData.ArrMinMax[ 1 ].y ) + grV2f( vAdjecentN ) * rPosData.Rand.Float( DistHori );
+				grV2f( vOrigoW ) * rPosData.Rand.Float( DistThickX ) + grV2f( vOrigoS ) * rPosData.Rand.Float( DistVert ) :
+				grV2f( vOrigoN ) * rPosData.Rand.Float( DistThickY ) + grV2f( vOrigoE ) * rPosData.Rand.Float( DistHori );
 
 			rArrData.Position[ i ] = sysPos + v;
 		}
@@ -701,8 +730,10 @@ struct grSLifeSystem : public grSBaseSystem
 	void Init( const grV2f& rMinMax )
 	{
 		rLifData.MinMax = rMinMax;
+
 		SwapCheck( rLifData.MinMax );
 		EqualCheck( rLifData.MinMax, rLifData.Equal );
+
 		rLifData.Dist = rLifData.Rand.DistF( rLifData.MinMax.x, rLifData.MinMax.y );
 	}
 

@@ -45,9 +45,9 @@ public:
 		m_System.puVelocity->Init( rDegreeMinMax, rForceMinMax );
 	}
 
-	void AddPosition( const grV2f& rOffsetMin, const grV2f& rOffsetMax, const float radius = 0.0f )
+	void AddPosition( const grV2f& rOffsetMin, const grV2f& rOffsetMax, const float frameThickness = 0.0f )
 	{
-		m_System.puPosition->InitBox( rOffsetMin, rOffsetMax, radius ); // Only box now, ellipse later
+		m_System.puPosition->InitBox( rOffsetMin, rOffsetMax, frameThickness ); // Only box now, ellipse later
 
 		//m_System.puPosition->InitCircle( grV2f( 49.0f, 50.0f ) );
 	}
