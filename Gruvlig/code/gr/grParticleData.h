@@ -94,19 +94,27 @@ struct grSVelocityData
 
 struct grSPositionData
 {
+	// X[ 0 ], Y[ 1 ]
+	DistF ArrDist[ 2 ];
+	// Min[ 0 ], Max[ 1 ]
+	grV2f ArrMinMax[ 2 ] = { { 0.0f, 0.0f }, { 0.0f, 0.0f } };
 	grRandXOR Rand;
+	float BoxRadius = true;
+	EEqualValue EqualBoxX = EEqualValue::YES;
+	EEqualValue EqualBoxY = EEqualValue::YES;
+
+	EEqualValue EqualCircle = EEqualValue::YES;
+
+
+
 	DistF DistX;
 	DistF DistY;
 	grV2f PositionOffsetMin = grV2f( 0.0f, 0.0f );
 	grV2f PositionOffsetMax = grV2f( 0.0f, 0.0f );
-	grV2f EllipseRadiusMin = grV2f( 5.0f, 5.0f );
-	grV2f EllipseRadiusMax = grV2f( 5.0f, 5.0f );
-	grV2f EllipseStepMinMax = grV2f( 5.0f, 5.0f );
-	grV2f EllipseTiltMinMax = grV2f( 0.0f, 0.0f );
 	float Ellipse360 = grMath::Pi * 2.0f;
 	float EllipseStepCount = 0.0f;
 	float EllipseTiltCount = 0.0f;
-	EEqualValue PositionEqual = EEqualValue::YES;
+
 	EPositionType PositionType = EPositionType::BOX;
 };
 

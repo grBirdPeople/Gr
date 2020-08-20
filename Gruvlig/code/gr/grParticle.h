@@ -45,9 +45,11 @@ public:
 		m_System.puVelocity->Init( rDegreeMinMax, rForceMinMax );
 	}
 
-	void AddPosition( const EPositionType type, const grV2f& rOffsetMin, const grV2f& rOffsetMax )
+	void AddPosition( const grV2f& rOffsetMin, const grV2f& rOffsetMax, const float radius = 0.0f )
 	{
-		m_System.puPosition->Init( type, rOffsetMin, rOffsetMax ); // Only box now, ellipse later
+		m_System.puPosition->InitBox( rOffsetMin, rOffsetMax, radius ); // Only box now, ellipse later
+
+		//m_System.puPosition->InitCircle( grV2f( 49.0f, 50.0f ) );
 	}
 
 	void AddMass( const grV2f& rMinMax )

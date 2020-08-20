@@ -6,8 +6,10 @@
 
 struct grSColorSystem;
 struct grSScaleSystem;
-typedef void( grSColorSystem::* ColorFunc )( const sizeT startIdx, const sizeT endIdx );
-typedef void( grSScaleSystem::* ScaleFunc )( const sizeT startIdx, const sizeT endIdx );
+struct grSPositionSystem;
+typedef void( grSColorSystem::* ColGenOpt )( const sizeT startIdx, const sizeT endIdx );
+typedef void( grSScaleSystem::* ScaGenOpt )( const sizeT startIdx, const sizeT endIdx );
+typedef void( grSPositionSystem::* PosGenOpt )( const sizeT startIdx, const sizeT endIdx );
 
 
 struct grSEmitSystem
@@ -47,11 +49,13 @@ struct grSEmitSystem
 
 struct grSBaseSystem
 {
-	void SetStartEnd( grColor::Rgba arrCol[], EEqualValue& rStartEqual, EEqualValue& rEndEqual, EEqualValue& rLerpEqual )
+	void EqualCheck( grV2f& rMinMax, EEqualValue& rEqual )
 	{
-		for ( sizeT i = 0; i < 4; ++i )
-			arrCol[ i ] = ClampColor( arrCol[ i ] );
+		rEqual = grMath::CmpF( rMinMax.x, rMinMax.y ) ? EEqualValue::YES : EEqualValue::NO;
+	}
 
+	void EqualCheckColor( grColor::Rgba arrCol[], EEqualValue& rStartEqual, EEqualValue& rEndEqual, EEqualValue& rLerpEqual )
+	{
 		rStartEqual = arrCol[ 0 ].Cmp( arrCol[ 1 ] ) ? EEqualValue::YES : EEqualValue::NO;
 		rEndEqual = arrCol[ 2 ].Cmp( arrCol[ 3 ] ) ? EEqualValue::YES : EEqualValue::NO;
 
@@ -59,43 +63,45 @@ struct grSBaseSystem
 			rLerpEqual = arrCol[ 1 ].Cmp( arrCol[ 2 ] ) ? EEqualValue::YES : EEqualValue::NO;
 	}
 
-	void SetStartEnd( const grV2f arrV2f[], EEqualValue& rStartEqual, EEqualValue& rEndEqual )
+	void EqualCheckScale( const grV2f arrV2f[], EEqualValue& rStartEqual, EEqualValue& rEndEqual )
 	{
 		rStartEqual = grMath::CmpV2f( arrV2f[ 0 ], arrV2f[ 1 ] ) ? EEqualValue::YES : EEqualValue::NO;
 		rEndEqual = grMath::CmpV2f( arrV2f[ 2 ], arrV2f[ 3 ] ) ? EEqualValue::YES : EEqualValue::NO;
 	}
 
-	void SetMinMax( grV2f& rMinMax, EEqualValue& rEqual, const bool swap = true )
+	void EqualCheck( const grV2f arrV2f[], EEqualValue& rEqualX, EEqualValue& rEqualY )
 	{
-		if ( swap )
-		{
-			if ( rMinMax.x > rMinMax.y )
-				grAlgo::Swap( rMinMax.x, rMinMax.y );
-		}
-		rEqual = grMath::CmpF( rMinMax.x, rMinMax.y ) ? EEqualValue::YES : EEqualValue::NO;
+		rEqualX = grMath::CmpF( arrV2f[ 0 ].x, arrV2f[ 1 ].x ) ? EEqualValue::YES : EEqualValue::NO;
+		rEqualY = grMath::CmpF( arrV2f[ 0 ].y, arrV2f[ 1 ].y ) ? EEqualValue::YES : EEqualValue::NO;
 	}
 
-	void SetMinMax( grV2f& rMin, grV2f& rMax, EEqualValue& rEqual, const bool swap = true )
+	void SwapCheckColor( grColor::Rgba arr[], const sizeT arrIdx1, const sizeT arrIdx2 )
 	{
-		if ( swap )
-		{
-			if ( rMin.x > rMax.x )
-				grAlgo::Swap( rMin.x, rMax.x );
-			if ( rMin.y > rMax.y )
-				grAlgo::Swap( rMin.y, rMax.y );
-		}
-		rEqual = grMath::CmpV2f( rMin, rMax ) ? EEqualValue::YES : EEqualValue::NO;
+		if ( arr[ arrIdx1 ].R > arr[ arrIdx2 ].R )
+			grAlgo::Swap<uint8_t>( arr[ arrIdx1 ].R, arr[ arrIdx2 ].R );
+
+		if ( arr[ arrIdx1 ].G > arr[ arrIdx2 ].G )
+			grAlgo::Swap<uint8_t>( arr[ arrIdx1 ].G, arr[ arrIdx2 ].G );
+
+		if ( arr[ arrIdx1 ].B > arr[ arrIdx2 ].B )
+			grAlgo::Swap<uint8_t>( arr[ arrIdx1 ].B, arr[ arrIdx2 ].B );
+
+		if ( arr[ arrIdx1 ].A > arr[ arrIdx2 ].A )
+			grAlgo::Swap<uint8_t>( arr[ arrIdx1 ].A, arr[ arrIdx2 ].A );
 	}
 
-private:
-	grColor::Rgba ClampColor( const grColor::Rgba& rColor )
+	void SwapCheck( grV2f& rMinMax )
 	{
-		return {
-			grMath::Clamp<uint8_t>( rColor.R, 0, 255 ),
-			grMath::Clamp<uint8_t>( rColor.G, 0, 255 ),
-			grMath::Clamp<uint8_t>( rColor.B, 0, 255 ),
-			grMath::Clamp<uint8_t>( rColor.A, 0, 255 )
-		};
+		if ( rMinMax.x > rMinMax.y )
+			grAlgo::Swap( rMinMax.x, rMinMax.y );
+	}
+
+	void SwapCheck( grV2f& rMin, grV2f& rMax )
+	{
+		if ( rMin.x > rMax.x )
+			grAlgo::Swap( rMin.x, rMax.x );
+		if ( rMin.y > rMax.y )
+			grAlgo::Swap( rMin.y, rMax.y );
 	}
 };
 
@@ -106,13 +112,13 @@ struct grSColorSystem : public grSBaseSystem
 	grSColorData& rColData;
 	grSArrayData& rArrData;
 
-	ColorFunc GenerateOption;
+	ColGenOpt GenOption;
 
 	grSColorSystem( const grSParticleData& rData )
 		: rEmiData( *rData.puEmit )
 		, rColData( *rData.puColor )
 		, rArrData( *rData.puArray )
-		, GenerateOption( &grSColorSystem::GenerateOption3 )
+		, GenOption( &grSColorSystem::GenOption3 )
 	{}
 	grSColorSystem( const grSColorSystem& ) = default;
 	grSColorSystem& operator=( const grSColorSystem& ) = default;
@@ -124,58 +130,43 @@ struct grSColorSystem : public grSBaseSystem
 		rColData.ArrMinMax[ 2 ] = rEndMin;
 		rColData.ArrMinMax[ 3 ] = rEndMax;
 		rColData.bHsv = hsv;
+		SwapCheckColor( rColData.ArrMinMax, 0, 1 );
+		SwapCheckColor( rColData.ArrMinMax, 2, 3 );
 		rColData.LerpEqual = EEqualValue::NO; // A cheat if the default values set in the data struct would be used it doesn't trigger lerping
-		SetStartEnd( rColData.ArrMinMax, rColData.StartEqual, rColData.EndEqual, rColData.LerpEqual );
+		EqualCheckColor( rColData.ArrMinMax, rColData.StartEqual, rColData.EndEqual, rColData.LerpEqual );
 
 		// Dislike all below code but I don't wan't to bloat with states or more weird looking functions so it will do for now
 		if ( rColData.StartEqual == EEqualValue::NO && rColData.EndEqual == EEqualValue::NO )
 		{
-			InitDist( 0, 0 );
-			InitDist( 4, 2 );
-			GenerateOption = &grSColorSystem::GenerateOption0;
+			InitDist( 0, 0, 1 );
+			InitDist( 4, 2, 3 );
+			GenOption = &grSColorSystem::GenOption0;
 			return;
 		}
 
 		if ( rColData.StartEqual == EEqualValue::NO && rColData.EndEqual == EEqualValue::YES )
 		{
-			InitDist( 0, 0 );
-			GenerateOption = &grSColorSystem::GenerateOption1;
+			InitDist( 0, 0, 1 );
+			GenOption = &grSColorSystem::GenOption1;
 			return;
 		}
 
 		if ( rColData.StartEqual == EEqualValue::YES && rColData.EndEqual == EEqualValue::NO )
 		{
-			InitDist( 4, 2 );
-			GenerateOption = &grSColorSystem::GenerateOption2;
+			InitDist( 4, 2, 3 );
+			GenOption = &grSColorSystem::GenOption2;
 			return;
 		}
 
-		GenerateOption = &grSColorSystem::GenerateOption3;
+		GenOption = &grSColorSystem::GenOption3;
 	}
 
-	void Generate()
+	void InitDist( const sizeT arrDistIdx, const sizeT arrMinMaxIdx1, const sizeT arrMinMaxIdx2 )
 	{
-		sizeT startIdx{ rEmiData.StartIdx }, endIdx{ rEmiData.EndIdx };
-		( this->*GenerateOption )( startIdx, endIdx );
-	}
-
-	void Update()
-	{
-		if ( rColData.LerpEqual == EEqualValue::NO )
-			rColData.bHsv ? LerpHsv() : LerpRgb();
-	}
-
-	DistUI RangeDist( const uint16_t a, const uint16_t b )
-	{
-		return a < b ? rColData.Rand.DistU( a, b ) : rColData.Rand.DistU( b, a );
-	}
-
-	void InitDist( const sizeT arrStartIdx, const sizeT arrMinIdx )
-	{
-		rColData.ArrDist[ arrStartIdx ] = RangeDist( rColData.ArrMinMax[ arrMinIdx ].R, rColData.ArrMinMax[ arrMinIdx + 1 ].R );
-		rColData.ArrDist[ arrStartIdx + 1 ] = RangeDist( rColData.ArrMinMax[ arrMinIdx ].G, rColData.ArrMinMax[ arrMinIdx + 1 ].G );
-		rColData.ArrDist[ arrStartIdx + 2 ] = RangeDist( rColData.ArrMinMax[ arrMinIdx ].B, rColData.ArrMinMax[ arrMinIdx + 1 ].B );
-		rColData.ArrDist[ arrStartIdx + 3 ] = RangeDist( rColData.ArrMinMax[ arrMinIdx ].A, rColData.ArrMinMax[ arrMinIdx + 1 ].A );
+		rColData.ArrDist[ arrDistIdx ] = rColData.Rand.DistU( rColData.ArrMinMax[ arrMinMaxIdx1 ].R, rColData.ArrMinMax[ arrMinMaxIdx2 ].R );
+		rColData.ArrDist[ arrDistIdx + 1 ] = rColData.Rand.DistU( rColData.ArrMinMax[ arrMinMaxIdx1 ].G, rColData.ArrMinMax[ arrMinMaxIdx2 ].G );
+		rColData.ArrDist[ arrDistIdx + 2 ] = rColData.Rand.DistU( rColData.ArrMinMax[ arrMinMaxIdx1 ].B, rColData.ArrMinMax[ arrMinMaxIdx2 ].B );
+		rColData.ArrDist[ arrDistIdx + 3 ] = rColData.Rand.DistU( rColData.ArrMinMax[ arrMinMaxIdx1 ].A, rColData.ArrMinMax[ arrMinMaxIdx2 ].A );
 	}
 
 	void InitColor( pU<grColor::Rgba[]>& rArr, const sizeT arrIdx, const sizeT distIdx )
@@ -186,7 +177,7 @@ struct grSColorSystem : public grSBaseSystem
 		rArr[ arrIdx ].A = ( uint8_t )( rColData.Rand.IntU( rColData.ArrDist[ distIdx + 3 ] ) );
 	}
 
-	void GenerateOption0( const sizeT startIdx, const sizeT endIdx )
+	void GenOption0( const sizeT startIdx, const sizeT endIdx )
 	{
 		for ( sizeT i = startIdx; i < endIdx; ++i )
 			InitColor( rArrData.ColorStart, i, 0 );
@@ -195,7 +186,7 @@ struct grSColorSystem : public grSBaseSystem
 			InitColor( rArrData.ColorEnd, i, 4 );
 	}
 
-	void GenerateOption1( const sizeT startIdx, const sizeT endIdx )
+	void GenOption1( const sizeT startIdx, const sizeT endIdx )
 	{
 		for ( sizeT i = startIdx; i < endIdx; ++i )
 			InitColor( rArrData.ColorStart, i, 0 );
@@ -204,7 +195,7 @@ struct grSColorSystem : public grSBaseSystem
 			rArrData.ColorEnd[ i ] = rColData.ArrMinMax[ 2 ];
 	}
 
-	void GenerateOption2( const sizeT startIdx, const sizeT endIdx )
+	void GenOption2( const sizeT startIdx, const sizeT endIdx )
 	{
 		for ( sizeT i = startIdx; i < endIdx; ++i )
 			rArrData.ColorStart[ i ] = rColData.ArrMinMax[ 0 ];
@@ -213,7 +204,7 @@ struct grSColorSystem : public grSBaseSystem
 			InitColor( rArrData.ColorEnd, i, 4 );
 	}
 
-	void GenerateOption3( const sizeT startIdx, const sizeT endIdx )
+	void GenOption3( const sizeT startIdx, const sizeT endIdx )
 	{
 		for ( sizeT i = startIdx; i < endIdx; ++i )
 			rArrData.ColorStart[ i ] = rColData.ArrMinMax[ 1 ];
@@ -222,7 +213,7 @@ struct grSColorSystem : public grSBaseSystem
 			rArrData.ColorEnd[ i ] = rColData.ArrMinMax[ 2 ];
 	}
 
-	void LerpHsv()
+	void HsvLerp()
 	{
 		// RGB -> HSV lerp -> RGB
 
@@ -245,7 +236,7 @@ struct grSColorSystem : public grSBaseSystem
 		}
 	}
 
-	void LerpRgb()
+	void RgbLerp()
 	{
 		float dt{ rEmiData.Dt };
 		sizeT alive{ rEmiData.Alive };
@@ -262,6 +253,18 @@ struct grSColorSystem : public grSBaseSystem
 			rArrData.ColorStart[ i ].A = ( uint8_t )grMath::Lerp( ( float )start.A, ( float )end.A, lerpValue );
 		}
 	}
+
+	void Generate()
+	{
+		sizeT startIdx{ rEmiData.StartIdx }, endIdx{ rEmiData.EndIdx };
+		( this->*GenOption )( startIdx, endIdx );
+	}
+
+	void Update()
+	{
+		if ( rColData.LerpEqual == EEqualValue::NO )
+			rColData.bHsv ? HsvLerp() : RgbLerp();
+	}
 };
 
 
@@ -271,13 +274,13 @@ struct grSScaleSystem : public grSBaseSystem
 	grSScaleData& rScaData;
 	grSArrayData& rArrData;
 
-	ScaleFunc GnerateOption;
+	ScaGenOpt GenOption;
 
 	grSScaleSystem( const grSParticleData& rData )
 		: rEmiData( *rData.puEmit )
 		, rScaData( *rData.puScale )
 		, rArrData( *rData.puArray )
-		, GnerateOption( &grSScaleSystem::GnerateOption3 )
+		, GenOption( &grSScaleSystem::GenOption3 )
 	{}
 	grSScaleSystem( const grSScaleSystem& ) = default;
 	grSScaleSystem& operator=( const grSScaleSystem& ) = default;
@@ -288,7 +291,7 @@ struct grSScaleSystem : public grSBaseSystem
 		rScaData.ArrMinMax[ 1 ] = rStartMax;
 		rScaData.ArrMinMax[ 2 ] = rEndMin;
 		rScaData.ArrMinMax[ 3 ] = rEndMax;
-		SetStartEnd( rScaData.ArrMinMax, rScaData.StartEqual, rScaData.EndEqual );
+		EqualCheckScale( rScaData.ArrMinMax, rScaData.StartEqual, rScaData.EndEqual );
 
 		if ( rScaData.StartEqual == EEqualValue::NO && rScaData.EndEqual == EEqualValue::NO ||
 			 rScaData.StartEqual == EEqualValue::NO && rScaData.EndEqual == EEqualValue::YES ||
@@ -300,19 +303,60 @@ struct grSScaleSystem : public grSBaseSystem
 			rScaData.ArrDist[ 3 ] = InitDist( rScaData.ArrMinMax[ 2 ].y, rScaData.ArrMinMax[ 3 ].y );
 		}
 
-		GnerateOption = rScaData.StartEqual == EEqualValue::NO && rScaData.EndEqual == EEqualValue::NO ?
-			&grSScaleSystem::GnerateOption0 :
+		GenOption = rScaData.StartEqual == EEqualValue::NO && rScaData.EndEqual == EEqualValue::NO ?
+			&grSScaleSystem::GenOption0 :
 			rScaData.StartEqual == EEqualValue::NO && rScaData.EndEqual == EEqualValue::YES ?
-			&grSScaleSystem::GnerateOption1 :
+			&grSScaleSystem::GenOption1 :
 			rScaData.StartEqual == EEqualValue::YES && rScaData.EndEqual == EEqualValue::NO ?
-			&grSScaleSystem::GnerateOption2 :
-			&grSScaleSystem::GnerateOption3;
+			&grSScaleSystem::GenOption2 :
+			&grSScaleSystem::GenOption3;
+	}
+
+	DistF InitDist( const float a, const float b )
+	{
+		return a < b ? rScaData.Rand.DistF( a, b ) : rScaData.Rand.DistF( b, a );
+	}
+
+	void GenOption0( const sizeT startIdx, const sizeT endIdx )
+	{
+		for ( sizeT i = startIdx; i < endIdx; ++i )
+			rArrData.ScaleStart[ i ] = { rScaData.Rand.Float( rScaData.ArrDist[ 0 ] ), rScaData.Rand.Float( rScaData.ArrDist[ 1 ] ) };
+
+		for ( sizeT i = startIdx; i < endIdx; ++i )
+			rArrData.ScaleEnd[ i ] = { rScaData.Rand.Float( rScaData.ArrDist[ 2 ] ), rScaData.Rand.Float( rScaData.ArrDist[ 3 ] ) };
+	}
+
+	void GenOption1( const sizeT startIdx, const sizeT endIdx )
+	{
+		for ( sizeT i = startIdx; i < endIdx; ++i )
+			rArrData.ScaleStart[ i ] = { rScaData.Rand.Float( rScaData.ArrDist[ 0 ] ), rScaData.Rand.Float( rScaData.ArrDist[ 1 ] ) };
+
+		for ( sizeT i = startIdx; i < endIdx; ++i )
+			rArrData.ScaleEnd[ i ] = rScaData.ArrMinMax[ 2 ];
+	}
+
+	void GenOption2( const sizeT startIdx, const sizeT endIdx )
+	{
+		for ( sizeT i = startIdx; i < endIdx; ++i )
+			rArrData.ScaleStart[ i ] = rScaData.ArrMinMax[ 1 ];
+
+		for ( sizeT i = startIdx; i < endIdx; ++i )
+			rArrData.ScaleEnd[ i ] = { rScaData.Rand.Float( rScaData.ArrDist[ 2 ] ), rScaData.Rand.Float( rScaData.ArrDist[ 3 ] ) };
+	}
+
+	void GenOption3( const sizeT startIdx, const sizeT endIdx )
+	{
+		for ( sizeT i = startIdx; i < endIdx; ++i )
+			rArrData.ScaleStart[ i ] = rScaData.ArrMinMax[ 1 ];
+
+		for ( sizeT i = startIdx; i < endIdx; ++i )
+			rArrData.ScaleEnd[ i ] = rScaData.ArrMinMax[ 2 ];
 	}
 
 	void Generate()
 	{
 		sizeT startIdx{ rEmiData.StartIdx }, endIdx{ rEmiData.EndIdx };
-		( this->*GnerateOption )( startIdx, endIdx );
+		( this->*GenOption )( startIdx, endIdx );
 	}
 
 	void Update()
@@ -326,59 +370,14 @@ struct grSScaleSystem : public grSBaseSystem
 			rArrData.ScaleStart[ i ] = grMath::LerpV2f( start, end, step );
 		}
 	}
-
-	DistF InitDist( const float a, const float b )
-	{
-		return a < b ? rScaData.Rand.DistF( a, b ) : rScaData.Rand.DistF( b, a );
-	}
-
-	void GnerateOption0( const sizeT startIdx, const sizeT endIdx )
-	{
-		for ( sizeT i = startIdx; i < endIdx; ++i )
-			rArrData.ScaleStart[ i ] = { rScaData.Rand.Float( rScaData.ArrDist[ 0 ] ), rScaData.Rand.Float( rScaData.ArrDist[ 1 ] ) };
-
-		for ( sizeT i = startIdx; i < endIdx; ++i )
-			rArrData.ScaleEnd[ i ] = { rScaData.Rand.Float( rScaData.ArrDist[ 2 ] ), rScaData.Rand.Float( rScaData.ArrDist[ 3 ] ) };
-	}
-
-	void GnerateOption1( const sizeT startIdx, const sizeT endIdx )
-	{
-		for ( sizeT i = startIdx; i < endIdx; ++i )
-			rArrData.ScaleStart[ i ] = { rScaData.Rand.Float( rScaData.ArrDist[ 0 ] ), rScaData.Rand.Float( rScaData.ArrDist[ 1 ] ) };
-
-		for ( sizeT i = startIdx; i < endIdx; ++i )
-			rArrData.ScaleEnd[ i ] = rScaData.ArrMinMax[ 2 ];
-	}
-
-	void GnerateOption2( const sizeT startIdx, const sizeT endIdx )
-	{
-		for ( sizeT i = startIdx; i < endIdx; ++i )
-			rArrData.ScaleStart[ i ] = rScaData.ArrMinMax[ 1 ];
-
-		for ( sizeT i = startIdx; i < endIdx; ++i )
-			rArrData.ScaleEnd[ i ] = { rScaData.Rand.Float( rScaData.ArrDist[ 2 ] ), rScaData.Rand.Float( rScaData.ArrDist[ 3 ] ) };
-	}
-
-	void GnerateOption3( const sizeT startIdx, const sizeT endIdx )
-	{
-		for ( sizeT i = startIdx; i < endIdx; ++i )
-			rArrData.ScaleStart[ i ] = rScaData.ArrMinMax[ 1 ];
-
-		for ( sizeT i = startIdx; i < endIdx; ++i )
-			rArrData.ScaleEnd[ i ] = rScaData.ArrMinMax[ 2 ];
-	}
 };
 
 
 struct grSMassSystem : public grSBaseSystem
 {
-	typedef std::uniform_real_distribution<float> MassDist;
-
 	grSEmitData& rEmiData;
 	grSMassData& rMasData;
 	grSArrayData& rArrData;
-
-	
 
 	grSMassSystem( const grSParticleData& rData )
 		: rEmiData( *rData.puEmit )
@@ -392,7 +391,8 @@ struct grSMassSystem : public grSBaseSystem
 	{
 		rMasData.MinMax.x = grMath::Max( rMinMax.x, 1.0f );
 		rMasData.MinMax.y = grMath::Max( rMinMax.y, 1.0f );
-		SetMinMax( rMasData.MinMax, rMasData.Equal );
+		SwapCheck( rMasData.MinMax );
+		EqualCheck( rMasData.MinMax, rMasData.Equal );
 		rMasData.Dist = rMasData.Rand.DistF( rMasData.MinMax.x, rMasData.MinMax.y );
 	}
 
@@ -431,8 +431,41 @@ struct grSVelocitySystem : public grSBaseSystem
 	{
 		VelData.DegreeMinMax = grV2f( grMath::Clamp<float>( rDegreeMinMax.x, 0.0f, 359.9f ), grMath::Clamp<float>( rDegreeMinMax.y, 0.0f, 359.9f ) );
 		VelData.ForceMinMax = rForceMinMax;
-		SetMinMax( VelData.DegreeMinMax, VelData.DegreeEqual, false );
-		SetMinMax( VelData.ForceMinMax, VelData.ForceEqual );
+		SwapCheck( VelData.ForceMinMax );
+		EqualCheck( VelData.DegreeMinMax, VelData.DegreeEqual );
+		EqualCheck( VelData.ForceMinMax, VelData.ForceEqual );
+	}
+
+	float FindDegrees()
+	{
+		if ( VelData.DegreeEqual == EEqualValue::NO )
+		{
+			if ( VelData.DegreeMinMax.x > VelData.DegreeMinMax.y )
+			{
+				float d{ 0.0f };
+				float diff{ 359.9f - VelData.DegreeMinMax.x };
+				VelData.Dist = VelData.Rand.DistF( 0.0f, diff + VelData.DegreeMinMax.y );
+				d = VelData.Rand.Float( VelData.Dist ) - diff;
+				d += d < 0.0f ? 359.9f : 0.0f;
+				return d;
+			}
+
+			VelData.Dist = VelData.Rand.DistF( VelData.DegreeMinMax.x, VelData.DegreeMinMax.y );
+			return VelData.Rand.Float( VelData.Dist );
+		}
+
+		return VelData.DegreeMinMax.x;
+	}
+
+	float FindForce()
+	{
+		if ( VelData.ForceEqual == EEqualValue::NO )
+		{
+			auto distForce{ VelData.Rand.DistF( VelData.ForceMinMax.x, VelData.ForceMinMax.y ) };
+			return VelData.Rand.Float( distForce );
+		}
+
+		return VelData.ForceMinMax.x;
 	}
 
 	void Generate()
@@ -456,146 +489,190 @@ struct grSVelocitySystem : public grSBaseSystem
 		for ( sizeT i = 0; i < rEmiData.Alive; ++i )
 			rArrData.Velocity[ i ] += rArrData.Acceleration[ i ].x * dt;
 	}
-
-	float FindDegrees()
-	{
-		if ( VelData.DegreeEqual == EEqualValue::NO )
-		{
-			if ( VelData.DegreeMinMax.x > VelData.DegreeMinMax.y )
-			{
-				float d{ 0.0f };
-				float diff{ 359.9f - VelData.DegreeMinMax.x };
-				VelData.Dist = VelData.Rand.DistF( 0.0f, diff + VelData.DegreeMinMax.y );
-				d = VelData.Rand.Float( VelData.Dist ) - diff;
-				if ( d < 0.0f )
-					d += 359.9f;
-
-				return d;
-			}
-
-			auto distDeg{ VelData.Rand.DistF( VelData.DegreeMinMax.x, VelData.DegreeMinMax.y ) };
-			return VelData.Rand.Float( distDeg );
-		}
-
-		return VelData.DegreeMinMax.x;
-	}
-
-	float FindForce()
-	{
-		if ( VelData.ForceEqual == EEqualValue::NO )
-		{
-			auto distForce{ VelData.Rand.DistF( VelData.ForceMinMax.x, VelData.ForceMinMax.y ) };
-			return VelData.Rand.Float( distForce );
-		}
-
-		return VelData.ForceMinMax.x;
-	}
 };
 
 
+// Position system doubles as spawn shape and position update
 struct grSPositionSystem : public grSBaseSystem
 {
 	grSEmitData& rEmiData;
 	grSPositionData& rPosData;
 	grSArrayData& rArrData;
 
+	PosGenOpt GenOption;
+
 	grSPositionSystem( const grSParticleData& rData )
 		: rEmiData( *rData.puEmit )
 		, rPosData( *rData.puPosition )
 		, rArrData( *rData.puArray )
+		, GenOption( &grSPositionSystem::BoxGenOption3 )
 	{}
 	grSPositionSystem( const grSPositionSystem& ) = default;
 	grSPositionSystem& operator=( const grSPositionSystem& ) = default;
 
-	void Init( const EPositionType positionType, const grV2f& rOffsetMin, const grV2f& rOffsetMax )
+	void InitBox( const grV2f& rBoxOffsetMin, const grV2f& rBoxOffsetMax, const float radius ) // Radius 0.0f equals filled box // Radius !0.0f equals framed box
 	{
-		rPosData.PositionOffsetMin = rOffsetMin;
-		rPosData.PositionOffsetMax = rOffsetMax;
-		rPosData.PositionType = positionType;
-		SetMinMax( rPosData.PositionOffsetMin, rPosData.PositionOffsetMax, rPosData.PositionEqual );
+		rPosData.ArrMinMax[ 0 ] = rBoxOffsetMin;
+		rPosData.ArrMinMax[ 1 ] = rBoxOffsetMax;
+		rPosData.BoxRadius = grMath::AbsF( radius );
+		EqualCheck( rPosData.ArrMinMax, rPosData.EqualBoxX, rPosData.EqualBoxY );
+		SwapCheck( rPosData.ArrMinMax[ 0 ], rPosData.ArrMinMax[ 1 ] );
 
-		rPosData.DistX = rPosData.Rand.DistF( rPosData.PositionOffsetMin.x, rPosData.PositionOffsetMax.x );
-		rPosData.DistY = rPosData.Rand.DistF( rPosData.PositionOffsetMin.y, rPosData.PositionOffsetMax.y );
+		if ( rPosData.EqualBoxX == EEqualValue::NO && rPosData.EqualBoxY == EEqualValue::NO )
+		{
+			rPosData.ArrDist[ 0 ] = rPosData.Rand.DistF( rPosData.ArrMinMax[ 0 ].x, rPosData.ArrMinMax[ 1 ].x );
+			rPosData.ArrDist[ 1 ] = rPosData.Rand.DistF( rPosData.ArrMinMax[ 0 ].y, rPosData.ArrMinMax[ 1 ].y );
+			GenOption = &grSPositionSystem::BoxGenOption0;
+			return;
+		}
+
+		if ( rPosData.EqualBoxX == EEqualValue::NO && rPosData.EqualBoxY == EEqualValue::YES )
+		{
+			rPosData.ArrDist[ 0 ] = rPosData.Rand.DistF( rPosData.ArrMinMax[ 0 ].x, rPosData.ArrMinMax[ 1 ].x );
+			GenOption = &grSPositionSystem::BoxGenOption1;
+			return;
+		}
+
+		if ( rPosData.EqualBoxX == EEqualValue::YES && rPosData.EqualBoxY == EEqualValue::NO )
+		{
+			rPosData.ArrDist[ 1 ] = rPosData.Rand.DistF( rPosData.ArrMinMax[ 0 ].y, rPosData.ArrMinMax[ 1 ].y );
+			GenOption = &grSPositionSystem::BoxGenOption2;
+			return;
+		}
+
+		GenOption = &grSPositionSystem::BoxGenOption3;
 	}
 
-	void Init( const EPositionType positionType, const grV2f& rRadiusMin, const grV2f& rRadiusMax, const grV2f& rStepMinMax, const grV2f& rTiltMinMax )
+	void InitCircle( const grV2f& rRadiusMinMax )
 	{
-		rPosData.EllipseRadiusMin = rRadiusMin;
-		rPosData.EllipseRadiusMax = rRadiusMax;
-		rPosData.EllipseStepMinMax = rStepMinMax;
-		rPosData.EllipseTiltMinMax = rTiltMinMax;
-		rPosData.PositionType = positionType;
+		rPosData.ArrMinMax[ 0 ] = rRadiusMinMax;
+		EqualCheck( rPosData.ArrMinMax[ 0 ], rPosData.EqualCircle );
+		SwapCheck( rPosData.ArrMinMax[ 0 ] );
 
-		// position = Vector2( centerPos.x + ( radX * Mathf.Sin( Mathf.Deg2Rad * alpha ) ),
-		// 					   centerPos.y + ( radY * Mathf.Cos( Mathf.Deg2Rad * alpha ) ) );
-		   
-		// alpha += 5f;//can be used as speed
+		GenOption = rPosData.EqualCircle == EEqualValue::NO ? &grSPositionSystem::CircleGenOption0 : &grSPositionSystem::CircleGenOption1;
+	}
 
-		// position = Vector2( centerPos.x + ( radX * MCos( alpha ) * MCos( tilt ) ) - ( radY * MSin( alpha ) * MSin( tilt ) ),
-		// 					   centerPos.y + ( radX * MCos( alpha ) * MSin( tilt ) ) + ( radY * MSin( alpha ) * MCos( tilt ) ) );
-		// alpha += 5f;
+	void CircleGenOption0( const sizeT startIdx, const sizeT endIdx )
+	{
+		grV2f sysPos{ rEmiData.SystemPosition };
+		DistF distRad{ rPosData.Rand.DistF( rPosData.ArrMinMax[ 0 ] ) };
+		DistF distDeg{ rPosData.Rand.DistF( 0.0f, 359.9f ) };
+		for ( sizeT i = startIdx; i < endIdx; ++i )
+		{
+			grV2f v{ grMath::DegToVec( rPosData.Rand.Float( distDeg ) ) };
+			v *= rPosData.Rand.Float( distRad );
+			rArrData.Position[ i ] = v + sysPos;
+		}
+	}
+
+	void CircleGenOption1( const sizeT startIdx, const sizeT endIdx )
+	{
+		grV2f sysPos{ rEmiData.SystemPosition };
+		DistF distDeg{ rPosData.Rand.DistF( 0.0f, 359.9f ) };
+		for ( sizeT i = startIdx; i < endIdx; ++i )
+		{
+			grV2f v{ grMath::DegToVec( rPosData.Rand.Float( distDeg ) ) };
+			v *= rPosData.ArrMinMax[ 0 ].x;
+			rArrData.Position[ i ] = v + sysPos;
+		}
+	}
+
+// position = Vector2( centerPos.x + ( radX * Mathf.Sin( Mathf.Deg2Rad * alpha ) ),
+// 					   centerPos.y + ( radY * Mathf.Cos( Mathf.Deg2Rad * alpha ) ) );
+
+// alpha += 5f;//can be used as speed
+
+// position = Vector2( centerPos.x + ( radX * MCos( alpha ) * MCos( tilt ) ) - ( radY * MSin( alpha ) * MSin( tilt ) ),
+// 					   centerPos.y + ( radX * MCos( alpha ) * MSin( tilt ) ) + ( radY * MSin( alpha ) * MCos( tilt ) ) );
+// alpha += 5f;
+
+
+
+
+	void BoxGenOption0( const sizeT startIdx, const sizeT endIdx )
+	{
+		// Filled box
+		grV2f sysPos{ rEmiData.SystemPosition };
+		if ( rPosData.BoxRadius == 0.0f )
+		{
+			for ( sizeT i = startIdx; i < endIdx; ++i )
+			{
+				grV2f v{ rPosData.Rand.Float( rPosData.ArrDist[ 0 ] ), rPosData.Rand.Float( rPosData.ArrDist[ 1 ] ) };
+				rArrData.Position[ i ] = v + sysPos;
+			}
+			return;
+		}
+
+		// Framed box
+		float xRange = ( grMath::AbsF( rPosData.ArrMinMax[ 0 ].x ) + grMath::AbsF( rPosData.ArrMinMax[ 1 ].x ) ) * 0.5f;
+		float yRange = ( grMath::AbsF( rPosData.ArrMinMax[ 0 ].y ) + grMath::AbsF( rPosData.ArrMinMax[ 1 ].y ) ) * 0.5f;
+		DistF DistHori{ rPosData.Rand.DistF( -xRange, xRange ) };
+		DistF DistVert{ rPosData.Rand.DistF( -yRange, yRange ) };
+
+		grV2f vOrigoN = grMath::DegToVec( 0.0f );
+		grV2f vAdjecentN = grMath::DegToVec( 90.0f );
+
+		grV2f vOrigoE = grMath::DegToVec( 90.0f );
+		grV2f vAdjecentE = grMath::DegToVec( 180.0f );
+
+		grV2f vOrigoS = grMath::DegToVec( 180.0f );
+		grV2f vAdjecentS = grMath::DegToVec( 270.0f );
+
+		grV2f vOrigoW = grMath::DegToVec( 270.0f );
+		grV2f vAdjecentW = grMath::DegToVec( 0.0f );
+
+		float degAcc{ 360.0f };
+		float flipFlop{ -1.0f };
+
+		for ( sizeT i = startIdx; i < endIdx; ++i )
+		{
+			flipFlop *= -1.0f;
+			degAcc = degAcc > 359.9f ? 0.0f : degAcc + 90.0f;
+
+			grV2f v = 
+				( degAcc == 90.0f ) ?
+				grV2f( vOrigoE ) * grMath::AbsF( rPosData.ArrMinMax[ 1 ].x ) + grV2f( vAdjecentE ) * rPosData.Rand.Float( DistVert ) :
+				( degAcc == 180.0f ) ?
+				grV2f( vOrigoS ) * grMath::AbsF( rPosData.ArrMinMax[ 0 ].y ) + grV2f( vAdjecentS ) * rPosData.Rand.Float( DistHori ) :
+				( degAcc == 270.0f ) ?
+				grV2f( vOrigoW ) * grMath::AbsF( rPosData.ArrMinMax[ 0 ].x ) + grV2f( vAdjecentW ) * rPosData.Rand.Float( DistVert ) :
+				grV2f( vOrigoN ) * grMath::AbsF( rPosData.ArrMinMax[ 1 ].y ) + grV2f( vAdjecentN ) * rPosData.Rand.Float( DistHori );
+
+			rArrData.Position[ i ] = sysPos + v;
+		}
+	}
+
+	void BoxGenOption1( const sizeT startIdx, const sizeT endIdx )
+	{
+		grV2f v{ grV2f( 0.0f, rPosData.ArrMinMax[ 0 ].y ) + rEmiData.SystemPosition };
+		for ( sizeT i = startIdx; i < endIdx; ++i )
+		{
+			v.x += rPosData.Rand.Float( rPosData.ArrDist[ 0 ] );
+			rArrData.Position[ i ] = v;
+		}
+	}
+
+	void BoxGenOption2( const sizeT startIdx, const sizeT endIdx )
+	{
+		grV2f v{ grV2f( rPosData.ArrMinMax[ 0 ].x, 0.0f ) + rEmiData.SystemPosition };
+		for ( sizeT i = startIdx; i < endIdx; ++i )
+		{
+			v.y += rPosData.Rand.Float( rPosData.ArrDist[ 1 ] );
+			rArrData.Position[ i ] = v;
+		}
+	}
+
+	void BoxGenOption3( const sizeT startIdx, const sizeT endIdx )
+	{
+		grV2f v{ grV2f( rPosData.ArrMinMax[ 0 ] ) + rEmiData.SystemPosition };
+		for ( sizeT i = startIdx; i < endIdx; ++i )
+			rArrData.Position[ i ] = v;
 	}
 
 	void Generate()
 	{
-		//// Ellipse
-		//grV2f v;
-		//float radX{ 50.0f };
-		//float radY{ 25.0f };
-
-		//// Circular path pos
-		//rPosition.EllipseStepCount += 4.0f * rEmit.Dt;
-		//if( rPosition.EllipseStepCount > rPosition.Ellipse360 )
-		//	rPosition.EllipseStepCount = 0.0f;
-
-		//// Random circulr pos
-		////auto distAlpha{ rPosition.Rand.DistF( 0.0f, rPosition.Ellipse360 ) };
-		////rPosition.EllipseStepCount = rPosition.Rand.Float( distAlpha );
-
-		//// Tilt
-		//rPosition.EllipseTiltCount += grMath::DegToRad( 50.0f * rEmit.Dt );
-		//if( rPosition.EllipseTiltCount > 360.0f )
-		//	rPosition.EllipseTiltCount = 0.0f;
-		//if( rPosition.EllipseTiltCount < 0.0f )
-		//	rPosition.EllipseTiltCount = 360.0f;
-
-
-
-		//// Regular
-		//v.x = rEmit.SystemPosition.x + ( radX * std::sinf( rPosition.EllipseStepCount ) );
-		//v.y = rEmit.SystemPosition.y + ( radY * std::cosf( rPosition.EllipseStepCount ) );
-
-		//// Tilt
-		////v.x = rEmit.SystemPosition.x + ( radX * std::cosf( rPosition.EllipseStepCount ) * std::cosf( rPosition.EllipseTiltCount ) ) -
-		////	( radY * std::sinf( rPosition.EllipseStepCount ) * std::sinf( rPosition.EllipseTiltCount ) );
-
-		////v.y = rEmit.SystemPosition.y + ( radX * std::cosf( rPosition.EllipseStepCount ) * std::sinf( rPosition.EllipseTiltCount ) ) +
-		////	( radY * std::sinf( rPosition.EllipseStepCount ) * std::cosf( rPosition.EllipseTiltCount ) );
-
-		//for ( sizeT i = rEmit.StartIdx; i < rEmit.EndIdx; ++i )
-		//	rArray.Position[ i ] = v;
-
-
-
-		// Box
 		sizeT startIdx{ rEmiData.StartIdx }, endIdx{ rEmiData.EndIdx };
-		if ( rPosData.PositionEqual == EEqualValue::NO )
-		{
-			if ( rPosData.PositionType == EPositionType::BOX )
-			{
-				PositionNotEqualBox();
-				return;
-			}
-			//PositionNotEqualEllipse( rSystemPosition, startIdx, endIdx, dt );
-			return;
-		}
-
-		if ( rPosData.PositionType == EPositionType::BOX )
-		{
-			PositionEqualBox();
-			return;
-		}
-		//PositionEqualEllipse( rSystemPosition, startIdx, endIdx );
+		( this->*GenOption )( startIdx, endIdx );
 	}
 
 	void Update()
@@ -603,32 +680,6 @@ struct grSPositionSystem : public grSBaseSystem
 		float dt{ rEmiData.Dt };
 		for ( sizeT i = 0; i < rEmiData.Alive; ++i )
 			rArrData.Position[ i ] += rArrData.Velocity[ i ] * dt;
-	}
-
-	void PositionNotEqualBox()
-	{
-		for ( sizeT i = rEmiData.StartIdx; i < rEmiData.EndIdx; ++i )
-		{
-			grV2f v{ rPosData.Rand.Float( rPosData.DistX ), rPosData.Rand.Float( rPosData.DistY ) };
-			rArrData.Position[ i ] = v + rEmiData.SystemPosition;
-		}
-	}
-
-	void PositionNotEqualEllipse()
-	{
-
-	}
-
-	void PositionEqualBox()
-	{
-		grV2f v{ rPosData.PositionOffsetMin + rEmiData.SystemPosition };
-		for ( sizeT i = rEmiData.StartIdx; i < rEmiData.EndIdx; ++i )
-			rArrData.Position[ i ] = v;
-	}
-
-	void PositionEqualEllipse()
-	{
-
 	}
 };
 
@@ -650,8 +701,27 @@ struct grSLifeSystem : public grSBaseSystem
 	void Init( const grV2f& rMinMax )
 	{
 		rLifData.MinMax = rMinMax;
-		SetMinMax( rLifData.MinMax, rLifData.Equal );
+		SwapCheck( rLifData.MinMax );
+		EqualCheck( rLifData.MinMax, rLifData.Equal );
 		rLifData.Dist = rLifData.Rand.DistF( rLifData.MinMax.x, rLifData.MinMax.y );
+	}
+
+	void Kill( const sizeT nowIdx, const sizeT last )
+	{
+		//grAlgo::Swap( Array.puVerts[ nowIdx ], Array.puVerts[ last ] );
+		grAlgo::Swap<grColor::Rgba>( rArrdata.ColorStart[ nowIdx ], rArrdata.ColorStart[ last ] );
+		grAlgo::Swap<grColor::Rgba>( rArrdata.ColorEnd[ nowIdx ], rArrdata.ColorEnd[ last ] );
+		grAlgo::Swap<grV2f>( rArrdata.ScaleStart[ nowIdx ], rArrdata.ScaleStart[ last ] );
+		grAlgo::Swap<grV2f>( rArrdata.ScaleEnd[ nowIdx ], rArrdata.ScaleEnd[ last ] );
+		grAlgo::Swap<float>( rArrdata.Mass[ nowIdx ], rArrdata.Mass[ last ] );
+		grAlgo::Swap<grV2f>( rArrdata.Acceleration[ nowIdx ], rArrdata.Acceleration[ last ] );
+		grAlgo::Swap<grV2f>( rArrdata.Velocity[ nowIdx ], rArrdata.Velocity[ last ] );
+		grAlgo::Swap<grV2f>( rArrdata.Position[ nowIdx ], rArrdata.Position[ last ] );
+		grAlgo::Swap<float>( rArrdata.Life[ nowIdx ], rArrdata.Life[ last ] );
+
+		// Most values are generated and set by operator= and does not need zeroing (all above)
+		// Values that are generated and set by operator+= needs resetting (all below) with the exception of position
+		rArrdata.Acceleration[ last ] = { 0.0f, 0.0f };
 	}
 
 	void Generate()
@@ -677,24 +747,6 @@ struct grSLifeSystem : public grSBaseSystem
 			if ( rArrdata.Life[ i ] <= 0.0f )
 				Kill( i, --rEmiData.Alive );
 		}
-	}
-
-	void Kill( const sizeT nowIdx, const sizeT last )
-	{
-		//grAlgo::Swap( Array.puVerts[ nowIdx ], Array.puVerts[ last ] );
-		grAlgo::Swap( rArrdata.ColorStart[ nowIdx ], rArrdata.ColorStart[ last ] );
-		grAlgo::Swap( rArrdata.ColorEnd[ nowIdx ], rArrdata.ColorEnd[ last ] );
-		grAlgo::Swap( rArrdata.ScaleStart[ nowIdx ], rArrdata.ScaleStart[ last ] );
-		grAlgo::Swap( rArrdata.ScaleEnd[ nowIdx ], rArrdata.ScaleEnd[ last ] );
-		grAlgo::Swap( rArrdata.Mass[ nowIdx ], rArrdata.Mass[ last ] );
-		grAlgo::Swap( rArrdata.Acceleration[ nowIdx ], rArrdata.Acceleration[ last ] );
-		grAlgo::Swap( rArrdata.Velocity[ nowIdx ], rArrdata.Velocity[ last ] );
-		grAlgo::Swap( rArrdata.Position[ nowIdx ], rArrdata.Position[ last ] );
-		grAlgo::Swap( rArrdata.Life[ nowIdx ], rArrdata.Life[ last ] );
-
-		// Most values are generated and set by operator= and does not need zeroing (all above)
-		// Values that are generated and set by operator+= needs resetting (all below) with the exception of position
-		rArrdata.Acceleration[ last ] = { 0.0f, 0.0f };
 	}
 };
 

@@ -158,6 +158,13 @@ namespace grMath
 		pPoint->y = x * sin + y * cos;
 	}
 
+	inline grV2f RotatePoint( grV2f& rPoint, const float rotInRad ) // TODO: Change from ptr to ref when old particle code is gone
+	{
+		float sin{ std::sin( rotInRad ) };
+		float cos{ std::cos( rotInRad ) };
+		return { rPoint.x * cos - rPoint.y * sin, rPoint.x * sin + rPoint.y * cos };
+	}
+
 	// DegToRad
 	//////////////////////////////////////////////////
 	inline float DegToRad( const float deg )
