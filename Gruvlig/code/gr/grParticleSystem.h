@@ -520,7 +520,7 @@ struct grSPositionSystem : public grSBaseSystem
 	grSPositionSystem( const grSPositionSystem& ) = default;
 	grSPositionSystem& operator=( const grSPositionSystem& ) = default;
 
-	void InitBox( const grV2f& rBoxOffsetMin, const grV2f& rBoxOffsetMax, const float frameThickness ) // Radius 0.0f equals filled box // Radius !0.0f equals framed box
+	void InitBox( const grV2f& rBoxOffsetMin, const grV2f& rBoxOffsetMax, const float frameThickness ) // Radius == 0.0f equals filled box // Radius != 0.0f equals framed box
 	{
 		rPosData.ArrMinMax[ 0 ] = rBoxOffsetMin;
 		rPosData.ArrMinMax[ 1 ] = rBoxOffsetMax;
@@ -534,7 +534,6 @@ struct grSPositionSystem : public grSBaseSystem
 		if ( rPosData.EqualBoxX == EEqualValue::NO && rPosData.EqualBoxY == EEqualValue::NO )
 		{
 			GenOption = &grSPositionSystem::BoxGenOption0;
-
 			if ( rPosData.PositionType == EPositionType::BOX_FILLED )
 			{
 				rPosData.ArrDist[ 0 ] = rPosData.Rand.DistF( rPosData.ArrMinMax[ 0 ].x, rPosData.ArrMinMax[ 1 ].x );
@@ -543,8 +542,23 @@ struct grSPositionSystem : public grSBaseSystem
 			}
 			
 			// EPositionType:::BOX_FRAMED
-			rPosData.ArrMinMax[ 1 ].x = ( grMath::AbsF( rPosData.ArrMinMax[ 0 ].x ) + grMath::AbsF( rPosData.ArrMinMax[ 1 ].x ) );
-			rPosData.ArrMinMax[ 1 ].y = ( grMath::AbsF( rPosData.ArrMinMax[ 0 ].y ) + grMath::AbsF( rPosData.ArrMinMax[ 1 ].y ) );
+
+			// TODO: Needs some function
+			rPosData.ArrMinMax[ 1 ].x =
+				rPosData.ArrMinMax[ 0 ].x < 0.0f ?
+				grMath::AbsF( rPosData.ArrMinMax[ 0 ].x - rPosData.ArrMinMax[ 1 ].x ):
+				grMath::AbsF( rPosData.ArrMinMax[ 1 ].x - rPosData.ArrMinMax[ 0 ].x );
+
+			rPosData.ArrMinMax[ 1 ].y =
+				rPosData.ArrMinMax[ 0 ].y < 0.0f ?
+				grMath::AbsF( rPosData.ArrMinMax[ 0 ].y - rPosData.ArrMinMax[ 1 ].y ) :
+				grMath::AbsF( rPosData.ArrMinMax[ 1 ].y - rPosData.ArrMinMax[ 0 ].y );
+
+			// Needs clamp so the box frame doesn't overflow itself which will look wrong but also break rand in generator option funcs
+			rPosData.BoxFrameThickness = rPosData.ArrMinMax[ 1 ].x < rPosData.ArrMinMax[ 1 ].y ?
+				grMath::Clamp<float>( rPosData.BoxFrameThickness, 0.0f, rPosData.ArrMinMax[ 1 ].x * 0.5f ) :
+				grMath::Clamp<float>( rPosData.BoxFrameThickness, 0.0f, rPosData.ArrMinMax[ 1 ].y * 0.5f );
+
 			rPosData.ArrMinMax[ 0 ].x = 0.0f;
 			rPosData.ArrMinMax[ 0 ].y = 0.0f;
 			return;
@@ -552,22 +566,30 @@ struct grSPositionSystem : public grSBaseSystem
 
 		if ( rPosData.EqualBoxX == EEqualValue::NO && rPosData.EqualBoxY == EEqualValue::YES )
 		{
+			GenOption = &grSPositionSystem::BoxGenOption1;
 			if ( rPosData.PositionType == EPositionType::BOX_FILLED )
 			{
 				rPosData.ArrDist[ 0 ] = rPosData.Rand.DistF( rPosData.ArrMinMax[ 0 ].x, rPosData.ArrMinMax[ 1 ].x );
-				GenOption = &grSPositionSystem::BoxGenOption1;
 				return;
 			}
+
+			// EPositionType:::BOX_FRAMED
+			// TODO: Add code here
+			return;
 		}
 
 		if ( rPosData.EqualBoxX == EEqualValue::YES && rPosData.EqualBoxY == EEqualValue::NO )
 		{
+			GenOption = &grSPositionSystem::BoxGenOption2;
 			if ( rPosData.PositionType == EPositionType::BOX_FILLED )
 			{
 				rPosData.ArrDist[ 1 ] = rPosData.Rand.DistF( rPosData.ArrMinMax[ 0 ].y, rPosData.ArrMinMax[ 1 ].y );
-				GenOption = &grSPositionSystem::BoxGenOption2;
 				return;
 			}
+
+			// EPositionType:::BOX_FRAMED
+			// TODO: Add code here
+			return;
 		}
 
 		// rPosData.EqualBoxX == EEqualValue::YES && rPosData.EqualBoxY == EEqualValue::YES
@@ -634,7 +656,7 @@ struct grSPositionSystem : public grSBaseSystem
 			return;
 		}
 
-		// Framed box // This was a headscratcher so extra comments because I will forget how I did it
+		// Framed box // This was weird to do so extra comments
 
 		// Radius
 		float x{ rPosData.ArrMinMax[ 1 ].x * 0.5f };
