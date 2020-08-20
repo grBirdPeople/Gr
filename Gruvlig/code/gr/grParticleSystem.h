@@ -659,14 +659,14 @@ struct grSPositionSystem : public grSBaseSystem
 		{
 			degAcc = degAcc > 359.9f ? 0.0f : degAcc + 90.0f;
 
-			grV2f v = 
+			grV2f v =
+				degAcc == 0.0f ?
+				( vOrigoSN * -1.0f * rPosData.Rand.Float( DistThickY ) ) + ( vOrigoEW * rPosData.Rand.Float( DistHori ) ) :
 				degAcc == 90.0f ?
 				( vOrigoEW * rPosData.Rand.Float( DistThickX ) ) + ( vOrigoSN * rPosData.Rand.Float( DistVert ) ) :
 				degAcc == 180.0f ?
 				( vOrigoSN * rPosData.Rand.Float( DistThickY ) ) + ( vOrigoEW * rPosData.Rand.Float( DistHori ) ) :
-				degAcc == 270.0f ?
-				( vOrigoEW * -1.0f * rPosData.Rand.Float( DistThickX ) ) + ( vOrigoSN * rPosData.Rand.Float( DistVert ) ) :
-				( vOrigoSN * -1.0f * rPosData.Rand.Float( DistThickY ) ) + ( vOrigoEW * rPosData.Rand.Float( DistHori ) );
+				( vOrigoEW * -1.0f * rPosData.Rand.Float( DistThickX ) ) + ( vOrigoSN * rPosData.Rand.Float( DistVert ) );
 
 			rArrData.Position[ i ] = sysPos + v;
 		}

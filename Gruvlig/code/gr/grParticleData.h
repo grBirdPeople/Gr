@@ -109,6 +109,8 @@ struct grSPositionData
 
 
 
+
+
 	DistF DistX;
 	DistF DistY;
 	grV2f PositionOffsetMin = grV2f( 0.0f, 0.0f );
@@ -116,7 +118,6 @@ struct grSPositionData
 	float Ellipse360 = grMath::Pi * 2.0f;
 	float EllipseStepCount = 0.0f;
 	float EllipseTiltCount = 0.0f;
-
 };
 
 

@@ -49,7 +49,7 @@ public:
 	{
 		m_System.puPosition->InitBox( rOffsetMin, rOffsetMax, frameThickness ); // Only box now, ellipse later
 
-		//m_System.puPosition->InitCircle( grV2f( 49.0f, 50.0f ) );
+		//m_System.puPosition->InitCircle( grV2f( 0.0f, 75.0f ) );
 	}
 
 	void AddMass( const grV2f& rMinMax )
