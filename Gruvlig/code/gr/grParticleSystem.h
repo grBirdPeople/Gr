@@ -515,7 +515,7 @@ struct grSPositionSystem : public grSBaseSystem
 		: rEmiData( *rData.puEmit )
 		, rPosData( *rData.puPosition )
 		, rArrData( *rData.puArray )
-		, GenOption( &grSPositionSystem::BoxGenOption3 )
+		, GenOption( &grSPositionSystem::BoxFilledGenOption3 )
 	{}
 	grSPositionSystem( const grSPositionSystem& ) = default;
 	grSPositionSystem& operator=( const grSPositionSystem& ) = default;
@@ -531,69 +531,39 @@ struct grSPositionSystem : public grSBaseSystem
 
 		rPosData.PositionType = rPosData.BoxFrameThickness == 0.0f ? EPositionType::BOX_FILLED : EPositionType::BOX_FRAMED;
 
-		if ( rPosData.EqualBoxX == EEqualValue::NO && rPosData.EqualBoxY == EEqualValue::NO )
+		if ( rPosData.PositionType == EPositionType::BOX_FILLED )
 		{
-			GenOption = &grSPositionSystem::BoxGenOption0;
-			if ( rPosData.PositionType == EPositionType::BOX_FILLED )
+			if ( rPosData.EqualBoxX == EEqualValue::NO && rPosData.EqualBoxY == EEqualValue::NO )
 			{
-				rPosData.ArrDist[ 0 ] = rPosData.Rand.DistF( rPosData.ArrMinMax[ 0 ].x, rPosData.ArrMinMax[ 1 ].x );
-				rPosData.ArrDist[ 1 ] = rPosData.Rand.DistF( rPosData.ArrMinMax[ 0 ].y, rPosData.ArrMinMax[ 1 ].y );
-				return;
-			}
-			
-			// EPositionType:::BOX_FRAMED
-
-			// TODO: Needs some function
-			rPosData.ArrMinMax[ 1 ].x =
-				rPosData.ArrMinMax[ 0 ].x < 0.0f ?
-				grMath::AbsF( rPosData.ArrMinMax[ 0 ].x - rPosData.ArrMinMax[ 1 ].x ):
-				grMath::AbsF( rPosData.ArrMinMax[ 1 ].x - rPosData.ArrMinMax[ 0 ].x );
-
-			rPosData.ArrMinMax[ 1 ].y =
-				rPosData.ArrMinMax[ 0 ].y < 0.0f ?
-				grMath::AbsF( rPosData.ArrMinMax[ 0 ].y - rPosData.ArrMinMax[ 1 ].y ) :
-				grMath::AbsF( rPosData.ArrMinMax[ 1 ].y - rPosData.ArrMinMax[ 0 ].y );
-
-			// Needs clamp so the box frame doesn't overflow itself which will look wrong but also break rand in generator option funcs
-			rPosData.BoxFrameThickness = rPosData.ArrMinMax[ 1 ].x < rPosData.ArrMinMax[ 1 ].y ?
-				grMath::Clamp<float>( rPosData.BoxFrameThickness, 0.0f, rPosData.ArrMinMax[ 1 ].x * 0.5f ) :
-				grMath::Clamp<float>( rPosData.BoxFrameThickness, 0.0f, rPosData.ArrMinMax[ 1 ].y * 0.5f );
-
-			rPosData.ArrMinMax[ 0 ].x = 0.0f;
-			rPosData.ArrMinMax[ 0 ].y = 0.0f;
-			return;
-		}
-
-		if ( rPosData.EqualBoxX == EEqualValue::NO && rPosData.EqualBoxY == EEqualValue::YES )
-		{
-			GenOption = &grSPositionSystem::BoxGenOption1;
-			if ( rPosData.PositionType == EPositionType::BOX_FILLED )
-			{
-				rPosData.ArrDist[ 0 ] = rPosData.Rand.DistF( rPosData.ArrMinMax[ 0 ].x, rPosData.ArrMinMax[ 1 ].x );
+				GenOption = &grSPositionSystem::BoxFilledGenOption0;
+				rPosData.ArrDistBox[ 0 ] = rPosData.Rand.DistF( rPosData.ArrMinMax[ 0 ].x, rPosData.ArrMinMax[ 1 ].x );
+				rPosData.ArrDistBox[ 1 ] = rPosData.Rand.DistF( rPosData.ArrMinMax[ 0 ].y, rPosData.ArrMinMax[ 1 ].y );
 				return;
 			}
 
-			// EPositionType:::BOX_FRAMED
-			// TODO: Add code here
-			return;
-		}
-
-		if ( rPosData.EqualBoxX == EEqualValue::YES && rPosData.EqualBoxY == EEqualValue::NO )
-		{
-			GenOption = &grSPositionSystem::BoxGenOption2;
-			if ( rPosData.PositionType == EPositionType::BOX_FILLED )
+			if ( rPosData.EqualBoxX == EEqualValue::NO && rPosData.EqualBoxY == EEqualValue::YES )
 			{
-				rPosData.ArrDist[ 1 ] = rPosData.Rand.DistF( rPosData.ArrMinMax[ 0 ].y, rPosData.ArrMinMax[ 1 ].y );
+				GenOption = &grSPositionSystem::BoxFilledGenOption1;
+				rPosData.ArrDistBox[ 0 ] = rPosData.Rand.DistF( rPosData.ArrMinMax[ 0 ].x, rPosData.ArrMinMax[ 1 ].x );
 				return;
 			}
 
-			// EPositionType:::BOX_FRAMED
-			// TODO: Add code here
+			if ( rPosData.EqualBoxX == EEqualValue::YES && rPosData.EqualBoxY == EEqualValue::NO )
+			{
+				GenOption = &grSPositionSystem::BoxFilledGenOption2;
+				rPosData.ArrDistBox[ 1 ] = rPosData.Rand.DistF( rPosData.ArrMinMax[ 0 ].y, rPosData.ArrMinMax[ 1 ].y );
+				return;
+			}
+
+			// rPosData.EqualBoxX == EEqualValue::YES && rPosData.EqualBoxY == EEqualValue::YES
+			GenOption = &grSPositionSystem::BoxFilledGenOption3;
 			return;
 		}
 
-		// rPosData.EqualBoxX == EEqualValue::YES && rPosData.EqualBoxY == EEqualValue::YES
-		GenOption = &grSPositionSystem::BoxGenOption3;
+		// rPosData.PositionType == EPositionType::BOX_FRAMED
+		rPosData.ArrDistBox[ 0 ] = rPosData.Rand.DistF( rPosData.ArrMinMax[ 0 ].x, rPosData.ArrMinMax[ 1 ].x );
+		rPosData.ArrDistBox[ 1 ] = rPosData.Rand.DistF( rPosData.ArrMinMax[ 0 ].y, rPosData.ArrMinMax[ 1 ].y );
+		GenOption = &grSPositionSystem::BoxFramedGenOption;
 	}
 
 	void InitCircle( const grV2f& rRadiusMinMax )
@@ -642,40 +612,102 @@ struct grSPositionSystem : public grSBaseSystem
 
 
 
-	void BoxGenOption0( const sizeT startIdx, const sizeT endIdx )
+	void BoxFilledGenOption0( const sizeT startIdx, const sizeT endIdx )
 	{
-		// Filled box
 		grV2f sysPos{ rEmiData.SystemPosition };
-		if ( rPosData.BoxFrameThickness == 0.0f )
+		for ( sizeT i = startIdx; i < endIdx; ++i )
 		{
-			for ( sizeT i = startIdx; i < endIdx; ++i )
-			{
-				grV2f v{ rPosData.Rand.Float( rPosData.ArrDist[ 0 ] ), rPosData.Rand.Float( rPosData.ArrDist[ 1 ] ) };
-				rArrData.Position[ i ] = v + sysPos;
-			}
-			return;
+			grV2f v{ rPosData.Rand.Float( rPosData.ArrDistBox[ 0 ] ), rPosData.Rand.Float( rPosData.ArrDistBox[ 1 ] ) };
+			rArrData.Position[ i ] = v + sysPos;
 		}
+	}
 
-		// Framed box // This was weird to do so extra comments
+	void BoxFilledGenOption1( const sizeT startIdx, const sizeT endIdx )
+	{
+		grV2f v{ grV2f( 0.0f, rPosData.ArrMinMax[ 0 ].y ) + rEmiData.SystemPosition };
+		for ( sizeT i = startIdx; i < endIdx; ++i )
+		{
+			v.x += rPosData.Rand.Float( rPosData.ArrDistBox[ 0 ] );
+			rArrData.Position[ i ] = v;
+		}
+	}
 
-		// Radius
-		float x{ rPosData.ArrMinMax[ 1 ].x * 0.5f };
-		float y{ rPosData.ArrMinMax[ 1 ].y * 0.5f };
+	void BoxFilledGenOption2( const sizeT startIdx, const sizeT endIdx )
+	{
+		grV2f v{ grV2f( rPosData.ArrMinMax[ 0 ].x, 0.0f ) + rEmiData.SystemPosition };
+		for ( sizeT i = startIdx; i < endIdx; ++i )
+		{
+			v.y += rPosData.Rand.Float( rPosData.ArrDistBox[ 1 ] );
+			rArrData.Position[ i ] = v;
+		}
+	}
 
-		// How long the frames for x and y should be
+	void BoxFilledGenOption3( const sizeT startIdx, const sizeT endIdx )
+	{
+		grV2f v{ grV2f( rPosData.ArrMinMax[ 0 ] ) + rEmiData.SystemPosition };
+		for ( sizeT i = startIdx; i < endIdx; ++i )
+			rArrData.Position[ i ] = v;
+	}
+
+	void BoxFramedGenOption( const sizeT startIdx, const sizeT endIdx )
+	{
+		// This is stupid and I'm ashamed but it works // Commeneted to understand the depth of the stupidity
+
+		// Final position is dependent of the system position, the box dimension and the potential box offset from the system position
+
+		// Box frames(top, bottom, left, right) can either have a positive or a negative offset relative to the system position in either or both x and y dimensions
+		// a radius for x and y is used going from the box origo outwards
+		float radX =
+			rPosData.ArrMinMax[ 0 ].x < 0.0f ?
+			grMath::AbsF( rPosData.ArrMinMax[ 0 ].x - rPosData.ArrMinMax[ 1 ].x ) * 0.5f :
+			grMath::AbsF( rPosData.ArrMinMax[ 1 ].x - rPosData.ArrMinMax[ 0 ].x ) * 0.5f;
+
+		float radY =
+			rPosData.ArrMinMax[ 0 ].y < 0.0f ?
+			grMath::AbsF( rPosData.ArrMinMax[ 0 ].y - rPosData.ArrMinMax[ 1 ].y ) * 0.5f :
+			grMath::AbsF( rPosData.ArrMinMax[ 1 ].y - rPosData.ArrMinMax[ 0 ].y ) * 0.5f;
+
+		// Have to get the offset somehow so I came up with this beautiful elegancy!
+		grV2f offset;
+		offset.x =
+			rPosData.ArrMinMax[ 0 ].x <= 0.0f && rPosData.ArrMinMax[ 1 ].x <= 0.0f ?
+			rPosData.ArrMinMax[ 0 ].x - rPosData.ArrMinMax[ 1 ].x :
+			rPosData.ArrMinMax[ 0 ].x > 0.0f && rPosData.ArrMinMax[ 1 ].x > 0.0f ?
+			rPosData.ArrMinMax[ 1 ].x - rPosData.ArrMinMax[ 0 ].x :
+			rPosData.ArrMinMax[ 1 ].x - rPosData.ArrMinMax[ 0 ].x;
+
+		offset.y =
+			rPosData.ArrMinMax[ 0 ].y <= 0.0f && rPosData.ArrMinMax[ 1 ].y <= 0.0f ?
+			rPosData.ArrMinMax[ 0 ].y - rPosData.ArrMinMax[ 1 ].y :
+			rPosData.ArrMinMax[ 0 ].y > 0.0f && rPosData.ArrMinMax[ 1 ].y > 0.0f ?
+			rPosData.ArrMinMax[ 1 ].y - rPosData.ArrMinMax[ 0 ].y :
+			rPosData.ArrMinMax[ 1 ].y - rPosData.ArrMinMax[ 0 ].y;
+
+		offset *= 0.5f;
+
+		// Needs clamp so the box frames doesn't overflow themself x<->x and/or y<->y which will later break rand if thickness is greater then x<->x and/or y<->y
+		rPosData.BoxFrameThickness = radX < radY ?
+			grMath::Clamp<float>( rPosData.BoxFrameThickness, 0.0f, radX ) :
+			grMath::Clamp<float>( rPosData.BoxFrameThickness, 0.0f, radY );
+
+		// Length of the frames for x and y
 		// Y is modded so the corners of x and y doesn't overlap
-		DistF DistHori{ rPosData.Rand.DistF( -x, x ) };
-		DistF DistVert{ rPosData.Rand.DistF( -y + rPosData.BoxFrameThickness, y - rPosData.BoxFrameThickness ) };
+		DistF DistHori{ rPosData.Rand.DistF( -radX, radX ) };
+		DistF DistVert{ rPosData.Rand.DistF( -radY + rPosData.BoxFrameThickness, radY - rPosData.BoxFrameThickness ) };
 
 		// How much the vector going out from origo should deviate in length based on frame thickness which results in the, uh, frames thickness
-		DistF DistThickX{ x - rPosData.BoxFrameThickness, x };
-		DistF DistThickY{ y - rPosData.BoxFrameThickness, y };
+		// Thickness is calculated from x and y box didmensions and offsetted inwards dependent of thickness var
+		DistF DistThickX{ radX - rPosData.BoxFrameThickness, radX };
+		DistF DistThickY{ radY - rPosData.BoxFrameThickness, radY };
 
-		// South, north, east and west where north and west is flipped in the loop
+		// South, north, east and west vectors where north and west is flipped in the loop
 		grV2f vOrigoSN{ 0.0f, 1.0f };
 		grV2f vOrigoEW{ 1.0f, 0.0f };
 
+		// The 4 box frames are created by rotating the vectors 90 degrees each loop
 		float degAcc{ 360.0f };
+
+		grV2f sysPos{ rEmiData.SystemPosition };
 
 		for ( sizeT i = startIdx; i < endIdx; ++i )
 		{
@@ -690,35 +722,8 @@ struct grSPositionSystem : public grSBaseSystem
 				( vOrigoSN * rPosData.Rand.Float( DistThickY ) ) + ( vOrigoEW * rPosData.Rand.Float( DistHori ) ) :
 				( vOrigoEW * -1.0f * rPosData.Rand.Float( DistThickX ) ) + ( vOrigoSN * rPosData.Rand.Float( DistVert ) );
 
-			rArrData.Position[ i ] = sysPos + v;
+			rArrData.Position[ i ] = offset + sysPos + v;
 		}
-	}
-
-	void BoxGenOption1( const sizeT startIdx, const sizeT endIdx )
-	{
-		grV2f v{ grV2f( 0.0f, rPosData.ArrMinMax[ 0 ].y ) + rEmiData.SystemPosition };
-		for ( sizeT i = startIdx; i < endIdx; ++i )
-		{
-			v.x += rPosData.Rand.Float( rPosData.ArrDist[ 0 ] );
-			rArrData.Position[ i ] = v;
-		}
-	}
-
-	void BoxGenOption2( const sizeT startIdx, const sizeT endIdx )
-	{
-		grV2f v{ grV2f( rPosData.ArrMinMax[ 0 ].x, 0.0f ) + rEmiData.SystemPosition };
-		for ( sizeT i = startIdx; i < endIdx; ++i )
-		{
-			v.y += rPosData.Rand.Float( rPosData.ArrDist[ 1 ] );
-			rArrData.Position[ i ] = v;
-		}
-	}
-
-	void BoxGenOption3( const sizeT startIdx, const sizeT endIdx )
-	{
-		grV2f v{ grV2f( rPosData.ArrMinMax[ 0 ] ) + rEmiData.SystemPosition };
-		for ( sizeT i = startIdx; i < endIdx; ++i )
-			rArrData.Position[ i ] = v;
 	}
 
 	void Generate()

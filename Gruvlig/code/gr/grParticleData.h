@@ -96,7 +96,7 @@ struct grSVelocityData
 struct grSPositionData
 {
 	// X[ 0 ], Y[ 1 ]
-	DistF ArrDist[ 2 ];
+	DistF ArrDistBox[ 2 ];
 	// Min[ 0 ], Max[ 1 ]
 	grV2f ArrMinMax[ 2 ] = { { 0.0f, 0.0f }, { 0.0f, 0.0f } };
 	grRandXOR Rand;
