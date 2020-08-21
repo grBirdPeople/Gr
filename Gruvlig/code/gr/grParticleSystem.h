@@ -561,8 +561,53 @@ struct grSPositionSystem : public grSBaseSystem
 		}
 
 		// rPosData.PositionType == EPositionType::BOX_FRAMED
-		rPosData.ArrDistBox[ 0 ] = rPosData.Rand.DistF( rPosData.ArrMinMax[ 0 ].x, rPosData.ArrMinMax[ 1 ].x );
-		rPosData.ArrDistBox[ 1 ] = rPosData.Rand.DistF( rPosData.ArrMinMax[ 0 ].y, rPosData.ArrMinMax[ 1 ].y );
+
+		// This is really stupid but it works // Commeneted so I don't forget how stupid I am
+		// Final position is dependent of the system position, the box dimension and the potential box offset from the system position
+
+		// Have to get the offset somehow so I came up with this elegant beauty
+		rPosData.BoxFrameOffset.x =
+			rPosData.ArrMinMax[ 0 ].x <= 0.0f && rPosData.ArrMinMax[ 1 ].x <= 0.0f ?
+			rPosData.ArrMinMax[ 0 ].x - rPosData.ArrMinMax[ 1 ].x :
+			rPosData.ArrMinMax[ 0 ].x > 0.0f && rPosData.ArrMinMax[ 1 ].x > 0.0f ?
+			rPosData.ArrMinMax[ 1 ].x - rPosData.ArrMinMax[ 0 ].x :
+			rPosData.ArrMinMax[ 0 ].x + rPosData.ArrMinMax[ 1 ].x;
+
+		rPosData.BoxFrameOffset.y =
+			rPosData.ArrMinMax[ 0 ].y <= 0.0f && rPosData.ArrMinMax[ 1 ].y <= 0.0f ?
+			rPosData.ArrMinMax[ 0 ].y - rPosData.ArrMinMax[ 1 ].y :
+			rPosData.ArrMinMax[ 0 ].y > 0.0f && rPosData.ArrMinMax[ 1 ].y > 0.0f ?
+			rPosData.ArrMinMax[ 1 ].y - rPosData.ArrMinMax[ 0 ].y :
+			rPosData.ArrMinMax[ 0 ].y + rPosData.ArrMinMax[ 1 ].y;
+
+		rPosData.BoxFrameOffset *= 0.5f;
+
+		// Box frames(top, bottom, left, right) can either have a positive or a negative offset relative to the system position in either or both x and y dimensions
+		// a radius for x and y is used going from the box origo outwards
+		float radX =
+			rPosData.ArrMinMax[ 0 ].x < 0.0f ?
+			grMath::AbsF( rPosData.ArrMinMax[ 0 ].x - rPosData.ArrMinMax[ 1 ].x ) * 0.5f :
+			grMath::AbsF( rPosData.ArrMinMax[ 1 ].x - rPosData.ArrMinMax[ 0 ].x ) * 0.5f;
+
+		float radY =
+			rPosData.ArrMinMax[ 0 ].y < 0.0f ?
+			grMath::AbsF( rPosData.ArrMinMax[ 0 ].y - rPosData.ArrMinMax[ 1 ].y ) * 0.5f :
+			grMath::AbsF( rPosData.ArrMinMax[ 1 ].y - rPosData.ArrMinMax[ 0 ].y ) * 0.5f;
+
+		// Needs clamp so the box frames doesn't overflow themself x<->x and/or y<->y which will later break rand if thickness is greater then x<->x and/or y<->y
+		rPosData.BoxFrameThickness = radX < radY ?
+			grMath::Clamp<float>( rPosData.BoxFrameThickness, 0.0f, radX ) :
+			grMath::Clamp<float>( rPosData.BoxFrameThickness, 0.0f, radY );
+
+		// How much the vector going out from origo should deviate in length based on frame thickness which results in the, uh, frames thickness
+		// Thickness is calculated from x and y box didmensions and offsetted inwards dependent of thickness var
+		rPosData.ArrDistBox[ 0 ] = rPosData.Rand.DistF( radY - rPosData.BoxFrameThickness, radY );
+		rPosData.ArrDistBox[ 1 ] = rPosData.Rand.DistF( radX - rPosData.BoxFrameThickness, radX );
+
+		// Length of the frames for x and y
+		// Y is modded so the corners of x and y doesn't overlap
+		rPosData.ArrDistBox[ 2 ] = rPosData.Rand.DistF( -radX, radX );
+		rPosData.ArrDistBox[ 3 ] = rPosData.Rand.DistF( -radY + rPosData.BoxFrameThickness, radY - rPosData.BoxFrameThickness );
 		GenOption = &grSPositionSystem::BoxFramedGenOption;
 	}
 
@@ -572,7 +617,10 @@ struct grSPositionSystem : public grSBaseSystem
 		EqualCheck( rPosData.ArrMinMax[ 0 ], rPosData.EqualCircle );
 		SwapCheck( rPosData.ArrMinMax[ 0 ] );
 
-		GenOption = rPosData.EqualCircle == EEqualValue::NO ? &grSPositionSystem::CircleGenOption0 : &grSPositionSystem::CircleGenOption1;
+		GenOption =
+			rPosData.EqualCircle == EEqualValue::NO ?
+			&grSPositionSystem::CircleGenOption0 :
+			&grSPositionSystem::CircleGenOption1;
 	}
 
 	void CircleGenOption0( const sizeT startIdx, const sizeT endIdx )
@@ -651,74 +699,21 @@ struct grSPositionSystem : public grSBaseSystem
 
 	void BoxFramedGenOption( const sizeT startIdx, const sizeT endIdx )
 	{
-		// This is stupid and I'm ashamed but it works // Commeneted to understand the depth of the stupidity
-		// Final position is dependent of the system position, the box dimension and the potential box offset from the system position
-
-		// Save system position
 		grV2f sysPos{ rEmiData.SystemPosition };
-
-		// Have to get the offset somehow so I came up with this elegant beauty
-		grV2f offset;
-		offset.x =
-			rPosData.ArrMinMax[ 0 ].x <= 0.0f && rPosData.ArrMinMax[ 1 ].x <= 0.0f ?
-			rPosData.ArrMinMax[ 0 ].x - rPosData.ArrMinMax[ 1 ].x :
-			rPosData.ArrMinMax[ 0 ].x > 0.0f && rPosData.ArrMinMax[ 1 ].x > 0.0f ?
-			rPosData.ArrMinMax[ 1 ].x - rPosData.ArrMinMax[ 0 ].x :
-			rPosData.ArrMinMax[ 0 ].x + rPosData.ArrMinMax[ 1 ].x;
-
-		offset.y =
-			rPosData.ArrMinMax[ 0 ].y <= 0.0f && rPosData.ArrMinMax[ 1 ].y <= 0.0f ?
-			rPosData.ArrMinMax[ 0 ].y - rPosData.ArrMinMax[ 1 ].y :
-			rPosData.ArrMinMax[ 0 ].y > 0.0f && rPosData.ArrMinMax[ 1 ].y > 0.0f ?
-			rPosData.ArrMinMax[ 1 ].y - rPosData.ArrMinMax[ 0 ].y :
-			rPosData.ArrMinMax[ 0 ].y + rPosData.ArrMinMax[ 1 ].y;
-
-		offset *= 0.5f;
-
-		// Box frames(top, bottom, left, right) can either have a positive or a negative offset relative to the system position in either or both x and y dimensions
-		// a radius for x and y is used going from the box origo outwards
-		float radX =
-			rPosData.ArrMinMax[ 0 ].x < 0.0f ?
-			grMath::AbsF( rPosData.ArrMinMax[ 0 ].x - rPosData.ArrMinMax[ 1 ].x ) * 0.5f :
-			grMath::AbsF( rPosData.ArrMinMax[ 1 ].x - rPosData.ArrMinMax[ 0 ].x ) * 0.5f;
-
-		float radY =
-			rPosData.ArrMinMax[ 0 ].y < 0.0f ?
-			grMath::AbsF( rPosData.ArrMinMax[ 0 ].y - rPosData.ArrMinMax[ 1 ].y ) * 0.5f :
-			grMath::AbsF( rPosData.ArrMinMax[ 1 ].y - rPosData.ArrMinMax[ 0 ].y ) * 0.5f;
-
-		// Needs clamp so the box frames doesn't overflow themself x<->x and/or y<->y which will later break rand if thickness is greater then x<->x and/or y<->y
-		rPosData.BoxFrameThickness = radX < radY ?
-			grMath::Clamp<float>( rPosData.BoxFrameThickness, 0.0f, radX ) :
-			grMath::Clamp<float>( rPosData.BoxFrameThickness, 0.0f, radY );
-
-		// How much the vector going out from origo should deviate in length based on frame thickness which results in the, uh, frames thickness
-		// Thickness is calculated from x and y box didmensions and offsetted inwards dependent of thickness var
-		rPosData.ArrDistBox[ 0 ] = rPosData.Rand.DistF( radY - rPosData.BoxFrameThickness, radY );
-		rPosData.ArrDistBox[ 1 ] = rPosData.Rand.DistF( radX - rPosData.BoxFrameThickness, radX );
-
-		// Length of the frames for x and y
-		// Y is modded so the corners of x and y doesn't overlap
-		rPosData.ArrDistBox[ 2 ] = rPosData.Rand.DistF( -radX, radX );
-		rPosData.ArrDistBox[ 3 ] = rPosData.Rand.DistF( -radY + rPosData.BoxFrameThickness, radY - rPosData.BoxFrameThickness );
-
-		// The 4 box frames are created by rotating the vectors 90 degrees each loop
-		float degAcc{ 360.0f };
-
 		for ( sizeT i = startIdx; i < endIdx; ++i )
 		{
-			degAcc = degAcc > 359.9f ? 0.0f : degAcc + 90.0f;
+			rPosData.BoxFrameDegAcc = rPosData.BoxFrameDegAcc >= 270.0f ? 0.0f : rPosData.BoxFrameDegAcc + 90.0f;
 
 			grV2f frame =
-				degAcc == 0.0f ?
+				rPosData.BoxFrameDegAcc == 0.0f ?
 				( rPosData.BoxOrigoSN * -1.0f * rPosData.Rand.Float( rPosData.ArrDistBox[ 0 ] ) ) + ( rPosData.BoxOrigoEW * rPosData.Rand.Float( rPosData.ArrDistBox[ 2 ] ) ) :
-				degAcc == 90.0f ?
+				rPosData.BoxFrameDegAcc == 90.0f ?
 				( rPosData.BoxOrigoEW * rPosData.Rand.Float( rPosData.ArrDistBox[ 1 ] ) ) + ( rPosData.BoxOrigoSN * rPosData.Rand.Float( rPosData.ArrDistBox[ 3 ] ) ) :
-				degAcc == 180.0f ?
+				rPosData.BoxFrameDegAcc == 180.0f ?
 				( rPosData.BoxOrigoSN * rPosData.Rand.Float( rPosData.ArrDistBox[ 0 ] ) ) + ( rPosData.BoxOrigoEW * rPosData.Rand.Float( rPosData.ArrDistBox[ 2 ] ) ) :
 				( rPosData.BoxOrigoEW * -1.0f * rPosData.Rand.Float( rPosData.ArrDistBox[ 1 ] ) ) + ( rPosData.BoxOrigoSN * rPosData.Rand.Float( rPosData.ArrDistBox[ 3 ] ) );
 
-			rArrData.Position[ i ] =  sysPos + offset + frame;
+			rArrData.Position[ i ] = rPosData.BoxFrameOffset + sysPos + frame;
 		}
 	}
 
