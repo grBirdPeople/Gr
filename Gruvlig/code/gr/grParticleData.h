@@ -95,15 +95,18 @@ struct grSVelocityData
 
 struct grSPositionData
 {
-	// X[ 0 ], Y[ 1 ]
-	DistF ArrDistBox[ 2 ];
+	// For filled box: X[ 0 ], Y[ 1 ] // For framedbox: Hori[ 0 ], Vert[ 1 ], ThicknessX[ 2 ], ThicknessY[ 3 ]
+	DistF ArrDistBox[ 4 ];
 	// Min[ 0 ], Max[ 1 ]
 	grV2f ArrMinMax[ 2 ] = { { 0.0f, 0.0f }, { 0.0f, 0.0f } };
+	grV2f BoxOrigoSN = { 0.0f, 1.0f };
+	grV2f BoxOrigoEW = { 1.0f, 0.0f };
 	grRandXOR Rand;
 	float BoxFrameThickness = 0.0f;
 	EEqualValue EqualBoxX = EEqualValue::YES;
 	EEqualValue EqualBoxY = EEqualValue::YES;
 	EPositionType PositionType = EPositionType::BOX_FILLED;
+
 
 	EEqualValue EqualCircle = EEqualValue::YES;
 
