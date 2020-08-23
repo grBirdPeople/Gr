@@ -8,7 +8,7 @@
 class grCParticle
 {
 public:
-	grCParticle( const intU size = 10000 )
+	grCParticle( const intU size = 20000 )
 	{
 		m_puData = std::make_unique<grCParticleData>( size );
 		m_puSystem = std::make_unique<grCParticleSystem>( *m_puData );
@@ -67,30 +67,36 @@ public:
 
 	void Update( const float dt )
 	{
+		//grStruct::grSTimer t( "Run", grStruct::grSTimer::ETimeType::MS );
+		sizeT alive{ m_puData->EmitData.Alive };
+		printf( "%d\n", alive );
+
+
 		m_puData->EmitData.Dt = dt;
 		m_puSystem->Run();
 	}
 
 	void Render( sf::RenderWindow& rRenderWin )
 	{
-		// TEST DRAW
-		grSArrayData& rArray{ m_puData->ArrayData };
-		sizeT alive{ m_puData->EmitData.Alive };
-		for ( sizeT i = 0; i < alive; ++i )
-		{
-			grColor::Rgba& rgba = rArray.ColorStart[ i ];
-			sf::Color c{ rgba.R, rgba.G, rgba.B, rgba.A };
-			grBBox b{ rArray.ScaleStart[ i ], rArray.Position[ i ] };
-			grDebugManager::Instance().AddBBox( b, c );
-		}
+		m_puSystem->Render( rRenderWin );
 
-		//printf( "%d\n", alive );
-		// TEST DRAW
+		//// SCALE TEST
+		//grSArrayData& rArray{ m_puData->ArrayData };
+		//sizeT alive{ m_puData->EmitData.Alive };
+		//for ( sizeT i = 0; i < alive; ++i )
+		//{
+		//	grColor::Rgba& rgba = rArray.ColorStart[ i ];
+		//	sf::Color c{ rgba.R, rgba.G, rgba.B, rgba.A };
+		//	grBBox b{ rArray.ScaleStart[ i ], rArray.Position[ i ] };
+		//	grDebugManager::Instance().AddBBox( b, c );
+		//}
+		////printf( "%d\n", alive );
+		////
 	}
 
 private:
 	pU<grCParticleData> m_puData;
-	pU<grCParticleSystem> m_puSystem;
+	pU<grCParticleSystem> m_puSystem;	
 };
 
 #endif // _H_GRPARTICLE_

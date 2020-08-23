@@ -44,7 +44,7 @@ struct grSEmitSystem
 };
 
 
-struct grSBaseSystem // Some helper functions and as some are shared between systems this struct is inherited
+struct grSBaseSystem // Some helper functions
 {
 	void EqualCheck( grV2f& rMinMax, EEqualValue& rEqual )
 	{
@@ -106,13 +106,13 @@ struct grSBaseSystem // Some helper functions and as some are shared between sys
 struct grSColorSystem : public grSBaseSystem
 {
 	grCParticleData& rData;
-	GenOpt<grSColorSystem> GenOption;
-	UpdOpt<grSColorSystem> UpdOption; // Lerp HSV or RGB
+	GenOpt<grSColorSystem> GenerateOpt;
+	UpdOpt<grSColorSystem> UpdateOpt; // Lerp HSV or RGB
 
 	grSColorSystem( grCParticleData& rParticleData )
 		: rData( rParticleData )
-		, GenOption( &grSColorSystem::GenOpt3 )
-		, UpdOption( &grSColorSystem::UpdOpt1 )
+		, GenerateOpt( &grSColorSystem::GenOpt3 )
+		, UpdateOpt( &grSColorSystem::UpdOpt1 )
 	{}
 	grSColorSystem( const grSColorSystem& ) = default;
 	grSColorSystem& operator=( const grSColorSystem& ) = default;
@@ -131,33 +131,33 @@ struct grSColorSystem : public grSBaseSystem
 		rData.ColorData.LerpEqual = EEqualValue::NO; // A cheat if the default values set in the data struct would be used it doesn't trigger lerping
 		EqualCheckColor( rData.ColorData.ArrMinMax, rData.ColorData.StartEqual, rData.ColorData.EndEqual, rData.ColorData.LerpEqual );
 
-		UpdOption = rData.ColorData.bHsv ? &grSColorSystem::UpdOpt0 : &grSColorSystem::UpdOpt1;
+		UpdateOpt = rData.ColorData.bHsv ? &grSColorSystem::UpdOpt0 : &grSColorSystem::UpdOpt1;
 
 		// Dislike all below code but I don't wan't to bloat with states or more weird looking functions so it will do for now/ever
 		if ( rData.ColorData.StartEqual == EEqualValue::NO && rData.ColorData.EndEqual == EEqualValue::NO )
 		{
 			InitDist( 0, 0, 1 );
 			InitDist( 4, 2, 3 );
-			GenOption = &grSColorSystem::GenOpt0;
+			GenerateOpt = &grSColorSystem::GenOpt0;
 			return;
 		}
 
 		if ( rData.ColorData.StartEqual == EEqualValue::NO && rData.ColorData.EndEqual == EEqualValue::YES )
 		{
 			InitDist( 0, 0, 1 );
-			GenOption = &grSColorSystem::GenOpt1;
+			GenerateOpt = &grSColorSystem::GenOpt1;
 			return;
 		}
 
 		if ( rData.ColorData.StartEqual == EEqualValue::YES && rData.ColorData.EndEqual == EEqualValue::NO )
 		{
 			InitDist( 4, 2, 3 );
-			GenOption = &grSColorSystem::GenOpt2;
+			GenerateOpt = &grSColorSystem::GenOpt2;
 			return;
 		}
 
 		// rColData.StartEqual == EEqualValue::YES && rColData.EndEqual == EEqualValue::YES
-		GenOption = &grSColorSystem::GenOpt3;
+		GenerateOpt = &grSColorSystem::GenOpt3;
 	}
 
 	void InitDist( const sizeT arrDistIdx, const sizeT arrMinMaxIdx1, const sizeT arrMinMaxIdx2 )
@@ -250,7 +250,7 @@ struct grSColorSystem : public grSBaseSystem
 	void Generate()
 	{
 		sizeT startIdx{ rData.EmitData.StartIdx }, endIdx{ rData.EmitData.EndIdx };
-		( this->*GenOption )( startIdx, endIdx );
+		( this->*GenerateOpt )( startIdx, endIdx );
 	}
 
 	void Update()
@@ -260,7 +260,7 @@ struct grSColorSystem : public grSBaseSystem
 
 		float dt{ rData.EmitData.Dt };
 		sizeT alive{ rData.EmitData.Alive };
-		( this->*UpdOption )( alive, dt );
+		( this->*UpdateOpt )( alive, dt );
 	}
 };
 
@@ -268,13 +268,13 @@ struct grSColorSystem : public grSBaseSystem
 struct grSScaleSystem : public grSBaseSystem
 {
 	grCParticleData& rData;
-	GenOpt<grSScaleSystem> GenOption;
-	UpdOpt<grSScaleSystem> UpdOption; // Lerp or not
+	GenOpt<grSScaleSystem> GenerateOpt;
+	UpdOpt<grSScaleSystem> UpdateOpt; // Lerp or not
 
 	grSScaleSystem( grCParticleData& rParticleData )
 		: rData( rParticleData )
-		, GenOption( &grSScaleSystem::GenOpt3 )
-		, UpdOption( &grSScaleSystem::UpdOpt1 )
+		, GenerateOpt( &grSScaleSystem::GenOpt3 )
+		, UpdateOpt( &grSScaleSystem::UpdOpt1 )
 	{}
 	grSScaleSystem( const grSScaleSystem& ) = default;
 	grSScaleSystem& operator=( const grSScaleSystem& ) = default;
@@ -298,7 +298,7 @@ struct grSScaleSystem : public grSBaseSystem
 			rData.ScaleData.ArrDist[ 3 ] = InitDist( rData.ScaleData.ArrMinMax[ 2 ].y, rData.ScaleData.ArrMinMax[ 3 ].y );
 		}
 
-		GenOption =
+		GenerateOpt =
 			rData.ScaleData.StartEqual == EEqualValue::NO && rData.ScaleData.EndEqual == EEqualValue::NO ?
 			&grSScaleSystem::GenOpt0 :
 			rData.ScaleData.StartEqual == EEqualValue::NO && rData.ScaleData.EndEqual == EEqualValue::YES ?
@@ -307,7 +307,7 @@ struct grSScaleSystem : public grSBaseSystem
 			&grSScaleSystem::GenOpt2 :
 			&grSScaleSystem::GenOpt3;
 
-		UpdOption =
+		UpdateOpt =
 			rData.ScaleData.StartEqual == EEqualValue::NO || rData.ScaleData.EndEqual == EEqualValue::NO ?
 			&grSScaleSystem::UpdOpt0 :
 			&grSScaleSystem::UpdOpt1;
@@ -374,14 +374,14 @@ struct grSScaleSystem : public grSBaseSystem
 	void Generate()
 	{
 		sizeT startIdx{ rData.EmitData.StartIdx }, endIdx{ rData.EmitData.EndIdx };
-		( this->*GenOption )( startIdx, endIdx );
+		( this->*GenerateOpt )( startIdx, endIdx );
 	}
 
 	void Update()
 	{
 		float dt{ rData.EmitData.Dt };
 		sizeT alive{ rData.EmitData.Alive };
-		( this->*UpdOption )( alive, dt );
+		( this->*UpdateOpt )( alive, dt );
 	}
 };
 
@@ -389,11 +389,11 @@ struct grSScaleSystem : public grSBaseSystem
 struct grSMassSystem : public grSBaseSystem
 {
 	grCParticleData& rData;
-	GenOpt<grSMassSystem> GenOption;
+	GenOpt<grSMassSystem> GenerateOpt;
 
 	grSMassSystem( grCParticleData& rParticleData )
 		: rData( rParticleData )
-		, GenOption( &grSMassSystem::GenOpt1 )
+		, GenerateOpt( &grSMassSystem::GenOpt1 )
 	{}
 	grSMassSystem( const grSMassSystem& ) = default;
 	grSMassSystem& operator=( const grSMassSystem& ) = default;
@@ -408,7 +408,7 @@ struct grSMassSystem : public grSBaseSystem
 
 		rData.MassData.Dist = rData.MassData.Rand.DistF( rData.MassData.MinMax.x, rData.MassData.MinMax.y );
 
-		GenOption =
+		GenerateOpt =
 			rData.MassData.Equal == EEqualValue::NO ?
 			&grSMassSystem::GenOpt0 :
 			&grSMassSystem::GenOpt1;
@@ -429,7 +429,7 @@ struct grSMassSystem : public grSBaseSystem
 	void Generate()
 	{
 		sizeT startIdx{ rData.EmitData.StartIdx }, endIdx{ rData.EmitData.EndIdx };
-		( this->*GenOption )( startIdx, endIdx );
+		( this->*GenerateOpt )( startIdx, endIdx );
 	}
 };
 
@@ -516,11 +516,11 @@ struct grSVelocitySystem : public grSBaseSystem
 struct grSPositionSystem : public grSBaseSystem // Position system doubles as spawn shape and position update
 {
 	grCParticleData& rData;
-	GenOpt<grSPositionSystem> GenOption;
+	GenOpt<grSPositionSystem> GenerateOpt;
 
 	grSPositionSystem( grCParticleData& rParticleData )
 		: rData( rParticleData )
-		, GenOption( &grSPositionSystem::BoxFilledGenOpt3 )
+		, GenerateOpt( &grSPositionSystem::BoxFilledGenOpt3 )
 	{}
 	grSPositionSystem( const grSPositionSystem& ) = default;
 	grSPositionSystem& operator=( const grSPositionSystem& ) = default;
@@ -540,7 +540,7 @@ struct grSPositionSystem : public grSBaseSystem // Position system doubles as sp
 		{
 			if ( rData.PositionData.EqualBoxX == EEqualValue::NO && rData.PositionData.EqualBoxY == EEqualValue::NO )
 			{
-				GenOption = &grSPositionSystem::BoxFilledGenOpt0;
+				GenerateOpt = &grSPositionSystem::BoxFilledGenOpt0;
 				rData.PositionData.ArrDistBox[ 0 ] = rData.PositionData.Rand.DistF( rData.PositionData.ArrMinMax[ 0 ].x, rData.PositionData.ArrMinMax[ 1 ].x );
 				rData.PositionData.ArrDistBox[ 1 ] = rData.PositionData.Rand.DistF( rData.PositionData.ArrMinMax[ 0 ].y, rData.PositionData.ArrMinMax[ 1 ].y );
 				return;
@@ -548,20 +548,20 @@ struct grSPositionSystem : public grSBaseSystem // Position system doubles as sp
 
 			if ( rData.PositionData.EqualBoxX == EEqualValue::NO && rData.PositionData.EqualBoxY == EEqualValue::YES )
 			{
-				GenOption = &grSPositionSystem::BoxFilledGenOpt1;
+				GenerateOpt = &grSPositionSystem::BoxFilledGenOpt1;
 				rData.PositionData.ArrDistBox[ 0 ] = rData.PositionData.Rand.DistF( rData.PositionData.ArrMinMax[ 0 ].x, rData.PositionData.ArrMinMax[ 1 ].x );
 				return;
 			}
 
 			if ( rData.PositionData.EqualBoxX == EEqualValue::YES && rData.PositionData.EqualBoxY == EEqualValue::NO )
 			{
-				GenOption = &grSPositionSystem::BoxFilledGenOpt2;
+				GenerateOpt = &grSPositionSystem::BoxFilledGenOpt2;
 				rData.PositionData.ArrDistBox[ 1 ] = rData.PositionData.Rand.DistF( rData.PositionData.ArrMinMax[ 0 ].y, rData.PositionData.ArrMinMax[ 1 ].y );
 				return;
 			}
 
 			// rPosData.EqualBoxX == EEqualValue::YES && rPosData.EqualBoxY == EEqualValue::YES
-			GenOption = &grSPositionSystem::BoxFilledGenOpt3;
+			GenerateOpt = &grSPositionSystem::BoxFilledGenOpt3;
 			return;
 		}
 
@@ -613,7 +613,7 @@ struct grSPositionSystem : public grSBaseSystem // Position system doubles as sp
 		// Y is modded so the corners of x and y frames doesn't overlap
 		rData.PositionData.ArrDistBox[ 2 ] = rData.PositionData.Rand.DistF( -radX, radX );
 		rData.PositionData.ArrDistBox[ 3 ] = rData.PositionData.Rand.DistF( -radY + rData.PositionData.BoxFrameThickness, radY - rData.PositionData.BoxFrameThickness );
-		GenOption = &grSPositionSystem::BoxFramedGenOpt;
+		GenerateOpt = &grSPositionSystem::BoxFramedGenOpt;
 	}
 
 	void InitCircle( const grV2f& rRadiusMinMax )
@@ -622,7 +622,7 @@ struct grSPositionSystem : public grSBaseSystem // Position system doubles as sp
 		EqualCheck( rData.PositionData.ArrMinMax[ 0 ], rData.PositionData.EqualCircle );
 		SwapCheck( rData.PositionData.ArrMinMax[ 0 ] );
 
-		GenOption =
+		GenerateOpt =
 			rData.PositionData.EqualCircle == EEqualValue::NO ?
 			&grSPositionSystem::CircleGenOption0 :
 			&grSPositionSystem::CircleGenOption1;
@@ -728,7 +728,7 @@ struct grSPositionSystem : public grSBaseSystem // Position system doubles as sp
 	void Generate()
 	{
 		sizeT startIdx{ rData.EmitData.StartIdx }, endIdx{ rData.EmitData.EndIdx };
-		( this->*GenOption )( startIdx, endIdx );
+		( this->*GenerateOpt )( startIdx, endIdx );
 	}
 
 	void Update()
@@ -744,11 +744,11 @@ struct grSPositionSystem : public grSBaseSystem // Position system doubles as sp
 struct grSLifeSystem : public grSBaseSystem
 {
 	grCParticleData& rData;
-	GenOpt<grSLifeSystem> GenOption;
+	GenOpt<grSLifeSystem> GenerateOpt;
 
 	grSLifeSystem( grCParticleData& rParticleData )
 		: rData( rParticleData )
-		, GenOption( &grSLifeSystem::GenOpt1 )
+		, GenerateOpt( &grSLifeSystem::GenOpt1 )
 	{}
 	grSLifeSystem( const grSLifeSystem& ) = default;
 	grSLifeSystem& operator=( const grSLifeSystem& ) = default;
@@ -762,7 +762,7 @@ struct grSLifeSystem : public grSBaseSystem
 
 		rData.LifeData.Dist = rData.LifeData.Rand.DistF( rData.LifeData.MinMax.x, rData.LifeData.MinMax.y );
 
-		GenOption =
+		GenerateOpt =
 			rData.LifeData.Equal == EEqualValue::NO ?
 			&grSLifeSystem::GenOpt0 :
 			&grSLifeSystem::GenOpt1;
@@ -780,6 +780,10 @@ struct grSLifeSystem : public grSBaseSystem
 		grAlgo::Swap<grV2f>( rData.ArrayData.Velocity[ nowIdx ], rData.ArrayData.Velocity[ last ] );
 		grAlgo::Swap<grV2f>( rData.ArrayData.Position[ nowIdx ], rData.ArrayData.Position[ last ] );
 		grAlgo::Swap<float>( rData.ArrayData.Life[ nowIdx ], rData.ArrayData.Life[ last ] );
+
+		// TODO: Remove this when some kind of draw system exists
+		grAlgo::Swap<sf::Vertex>( rData.ArrayData.Verts[ nowIdx ], rData.ArrayData.Verts[ last ] );
+		//
 
 		// Most values are generated and set by operator= and does not need zeroing (all above)
 		// Values that are generated and set by operator+= needs resetting (all below) with the exception of position
@@ -801,7 +805,7 @@ struct grSLifeSystem : public grSBaseSystem
 	void Generate()
 	{
 		sizeT startIdx{ rData.EmitData.StartIdx }, endIdx{ rData.EmitData.EndIdx };
-		( this->*GenOption )( startIdx, endIdx );
+		( this->*GenerateOpt )( startIdx, endIdx );
 	}
 
 	void Update()
@@ -819,28 +823,6 @@ struct grSLifeSystem : public grSBaseSystem
 class grCParticleSystem
 {
 public:
-	grCParticleSystem( grCParticleData& rParticleData )
-		: EmitSystem( rParticleData )
-		, ColorSystem( rParticleData )
-		, ScaleSystem( rParticleData )
-		, MassSystem( rParticleData )
-		, VelocitySystem( rParticleData )
-		, PositionSystem( rParticleData )
-		, LifeSystem( rParticleData )
-		, rData( rParticleData )
-	{}
-	grCParticleSystem( const grCParticleSystem& ) = delete;
-	grCParticleSystem& operator=( const grCParticleSystem& ) = delete;
-	grCParticleSystem( grCParticleSystem&& ) noexcept = delete;
-	grCParticleSystem& operator=( grCParticleSystem&& ) noexcept = delete;
-
-	void Run()
-	{
-		grStruct::grSTimer t( "Run", grStruct::grSTimer::ETimeType::NS );
-		Generate();
-		Update();
-	}
-
 	grSEmitSystem EmitSystem;
 	grSColorSystem ColorSystem;
 	grSScaleSystem ScaleSystem;
@@ -849,11 +831,38 @@ public:
 	grSPositionSystem PositionSystem;
 	grSLifeSystem LifeSystem;
 
+	grCParticleSystem( grCParticleData& rParticleData )
+		: EmitSystem( rParticleData )
+		, ColorSystem( rParticleData )
+		, ScaleSystem( rParticleData )
+		, MassSystem( rParticleData )
+		, VelocitySystem( rParticleData )
+		, PositionSystem( rParticleData )
+		, LifeSystem( rParticleData )
+	{}
+	grCParticleSystem( const grCParticleSystem& ) = delete;
+	grCParticleSystem& operator=( const grCParticleSystem& ) = delete;
+	grCParticleSystem( grCParticleSystem&& ) noexcept = delete;
+	grCParticleSystem& operator=( grCParticleSystem&& ) noexcept = delete;
+
+	void Run()
+	{
+		Generate();
+		Update();
+	}
+
+	void Render( sf::RenderWindow& rRenderWin )
+	{
+		// TODO: Remove this when some kind of draw system exists
+		rRenderWin.draw( &LifeSystem.rData.ArrayData.Verts.get()[ 0 ], LifeSystem.rData.EmitData.Alive, sf::PrimitiveType::Points );
+		//
+	}
+
 private:
 	void Generate()
 	{
 		EmitSystem.Generate();
-		if ( rData.EmitData.EmitAcc > 0 )
+		if ( EmitSystem.rData.EmitData.EmitAcc > 0 )
 		{
 			ColorSystem.Generate();
 			ScaleSystem.Generate();
@@ -861,22 +870,45 @@ private:
 			VelocitySystem.Generate();
 			PositionSystem.Generate();
 			LifeSystem.Generate();
+
+			// TODO: Fix this when some kind of draw system exists
+			sizeT startIdx{ LifeSystem.rData.EmitData.StartIdx }, endIdx{ LifeSystem.rData.EmitData.EndIdx };
+
+			auto& arrPos{ LifeSystem.rData.ArrayData.Position };
+			for ( sizeT i = startIdx; i < endIdx; ++i )
+				EmitSystem.rData.ArrayData.Verts[ i ].position = { arrPos[ i ].x, arrPos[ i ].y };
+
+			auto& arrCol{ LifeSystem.rData.ArrayData.ColorStart };
+			for ( sizeT i = startIdx; i < endIdx; ++i )
+				EmitSystem.rData.ArrayData.Verts[ i ].color = { arrCol[ i ].R, arrCol[ i ].G, arrCol[ i ].B, arrCol[ i ].A };
+			//
 		}
 	}
 
 	void Update()
 	{
-		if ( rData.EmitData.Alive > 0 )
+		if ( EmitSystem.rData.EmitData.Alive > 0 )
 		{
 			ColorSystem.Update();
 			ScaleSystem.Update();
 			VelocitySystem.Update();
 			PositionSystem.Update();
 			LifeSystem.Update();
+
+			// TODO: Fix this when some kind of draw system exists
+			float dt{ LifeSystem.rData.EmitData.Dt };
+			sizeT alive{ LifeSystem.rData.EmitData.Alive };
+
+			auto& arrPos{ LifeSystem.rData.ArrayData.Position };
+			for ( sizeT i = 0; i < alive; ++i )
+				EmitSystem.rData.ArrayData.Verts[ i ].position = { arrPos[ i ].x, arrPos[ i ].y };
+
+			auto& arrCol{ LifeSystem.rData.ArrayData.ColorStart };
+			for ( sizeT i = 0; i < alive; ++i )
+				EmitSystem.rData.ArrayData.Verts[ i ].color = { arrCol[ i ].R, arrCol[ i ].G, arrCol[ i ].B, arrCol[ i ].A };
+			//
 		}
 	}
-
-	grCParticleData& rData;
 };
 
 #endif // _H_GRPARTICLESYSTEM_

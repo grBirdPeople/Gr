@@ -24,6 +24,24 @@ enum class EPositionType
 };
 
 
+struct grSArrayData
+{
+	pU<grColor::Rgba[]> ColorStart;
+	pU<grColor::Rgba[]> ColorEnd;
+	pU<grV2f[]> ScaleStart;
+	pU<grV2f[]> ScaleEnd;
+	pU<float[]> Mass;
+	pU<grV2f[]> Acceleration;
+	pU<grV2f[]> Velocity;
+	pU<grV2f[]> Position;
+	pU<float[]> Life;
+
+	// TODO: Remove this when some kind of draw system exists
+	pU<sf::Vertex[]> Verts;
+	//
+};
+
+
 struct grSEmitData
 {
 	grV2f SystemPosition = grV2f( ( float )grCore::Instance().GetWindowSize().x * 0.5f, ( float )grCore::Instance().GetWindowSize().y * 0.5f );
@@ -127,23 +145,21 @@ struct grSLifeData
 };
 
 
-struct grSArrayData
-{
-	pU<grColor::Rgba[]> ColorStart;
-	pU<grColor::Rgba[]> ColorEnd;
-	pU<grV2f[]> ScaleStart;
-	pU<grV2f[]> ScaleEnd;
-	pU<float[]> Mass;
-	pU<grV2f[]> Acceleration;
-	pU<grV2f[]> Velocity;
-	pU<grV2f[]> Position;
-	pU<float[]> Life;
-};
-
-
 class grCParticleData
 {
 public:
+	// Unique data that represents particles
+	grSArrayData ArrayData;
+	// General data for spawning new particles
+	grSEmitData EmitData;
+	// Specific data for spawning new particles
+	grSColorData ColorData;
+	grSScaleData ScaleData;
+	grSMassData MassData;
+	grSVelocityData VelocityData;
+	grSPositionData PositionData;
+	grSLifeData LifeData;
+
 	grCParticleData( const sizeT size )
 	{
 		ArrayData.ColorStart = std::make_unique<grColor::Rgba[]>( size );
@@ -156,24 +172,16 @@ public:
 		ArrayData.Mass = std::make_unique<float[]>( size );
 		ArrayData.Life = std::make_unique<float[]>( size );
 
+		// TODO: Fix this when some kind of draw system exists
+		ArrayData.Verts = std::make_unique<sf::Vertex[]>( size );
+		//
+
 		EmitData.Size = size;
 	}
 	grCParticleData( const grCParticleData& ) = delete;
 	grCParticleData& operator=( const grCParticleData& ) = delete;
 	grCParticleData( grCParticleData&& ) noexcept = delete;
 	grCParticleData& operator=( grCParticleData&& ) noexcept = delete;
-
-	// Unique data that represents particles
-	grSArrayData ArrayData;
-	// General data for spawning new particles
-	grSEmitData EmitData;
-	// Specific data for spawning new particles
-	grSColorData ColorData;
-	grSScaleData ScaleData;
-	grSMassData MassData;
-	grSVelocityData VelocityData;
-	grSPositionData PositionData;
-	grSLifeData LifeData;
 };
 
 #endif // _H_GRPARTICLEDATA_
