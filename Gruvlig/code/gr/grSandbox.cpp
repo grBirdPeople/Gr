@@ -189,7 +189,7 @@ grSandbox::grSandbox( void )
 	// Other particles
 	grV2f winOrigo{ ( float )grCore::Instance().GetWindowSize().x * 0.5f, ( float )grCore::Instance().GetWindowSize().y * 0.5f };
 
-	m_pParticle->SetEmitRate( 6500.0f );
+	m_pParticle->SetEmitRate( 12000.0f );
 	m_pParticle->AddColor( { 255, 0, 0, 63 }, { 255, 255, 0, 255 }, { 255, 255, 255, 0 }, { 255, 255, 255, 255 }, true );
 	//m_pParticle->AddScale( { 0.1f, 0.1f }, { 0.1f, 0.1f }, { 5.0f, 5.0f }, { 10.0f, 10.0f } );
 	//m_pParticle->AddPositionBox( { -50.0f, -75.0f }, { 50.0f, 75.0f }, 25.0f );

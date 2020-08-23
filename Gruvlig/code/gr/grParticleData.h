@@ -36,7 +36,7 @@ struct grSArrayData
 	pU<grV2f[]> Position;
 	pU<float[]> Life;
 
-	// TODO: Remove this when some kind of draw system exists
+	// TODO: Fix this when some kind of draw system exists
 	pU<sf::Vertex[]> Verts;
 	//
 };

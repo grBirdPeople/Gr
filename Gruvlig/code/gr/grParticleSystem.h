@@ -4,6 +4,7 @@
 #include "grAlgo.h"
 #include "grParticleData.h"
 
+// Different options for generating and updating based on the parameters set on system init's
 template<typename T>
 using GenOpt = void( T::* )( const sizeT startIdx, const sizeT endIdx );
 template<typename T>
@@ -247,19 +248,16 @@ struct grSColorSystem : public grSBaseSystem
 		}
 	}
 
-	void Generate()
+	void Generate( const sizeT startIdx, const sizeT endIdx )
 	{
-		sizeT startIdx{ rData.EmitData.StartIdx }, endIdx{ rData.EmitData.EndIdx };
 		( this->*GenerateOpt )( startIdx, endIdx );
 	}
 
-	void Update()
+	void Update( const sizeT alive, const float dt )
 	{
 		if ( rData.ColorData.LerpEqual == EEqualValue::YES )
 			return;
 
-		float dt{ rData.EmitData.Dt };
-		sizeT alive{ rData.EmitData.Alive };
 		( this->*UpdateOpt )( alive, dt );
 	}
 };
@@ -371,16 +369,13 @@ struct grSScaleSystem : public grSBaseSystem
 			rData.ArrayData.ScaleStart[ i ] = rData.ArrayData.ScaleStart[ i ];
 	}
 
-	void Generate()
+	void Generate( const sizeT startIdx, const sizeT endIdx )
 	{
-		sizeT startIdx{ rData.EmitData.StartIdx }, endIdx{ rData.EmitData.EndIdx };
 		( this->*GenerateOpt )( startIdx, endIdx );
 	}
 
-	void Update()
+	void Update( const sizeT alive, const float dt )
 	{
-		float dt{ rData.EmitData.Dt };
-		sizeT alive{ rData.EmitData.Alive };
 		( this->*UpdateOpt )( alive, dt );
 	}
 };
@@ -426,9 +421,8 @@ struct grSMassSystem : public grSBaseSystem
 			rData.ArrayData.Mass[ i ] = rData.MassData.MinMax.x;
 	}
 
-	void Generate()
+	void Generate( const sizeT startIdx, const sizeT endIdx )
 	{
-		sizeT startIdx{ rData.EmitData.StartIdx }, endIdx{ rData.EmitData.EndIdx };
 		( this->*GenerateOpt )( startIdx, endIdx );
 	}
 };
@@ -488,12 +482,11 @@ struct grSVelocitySystem : public grSBaseSystem
 		return rData.VelocityData.ForceMinMax.x;
 	}
 
-	void Generate()
+	void Generate( const sizeT startIdx, const sizeT endIdx )
 	{
-		// This is retarded but I couldn't figure out how to do it without using 6 different loops which would be better but read worse
-		// It shall remain retarded for the moment(s)
+		// This is stupid but I couldn't figure out how to do it without using 6 different loops which would be better but read worse
+		// It shall remain stupid for the moment(s)
 
-		sizeT startIdx{ rData.EmitData.StartIdx }, endIdx{ rData.EmitData.EndIdx };
 		for ( sizeT i = startIdx; i < endIdx; ++i )
 		{
 			float d{ FindDegrees() };
@@ -503,10 +496,8 @@ struct grSVelocitySystem : public grSBaseSystem
 		}
 	}
 
-	void Update()
+	void Update( const sizeT alive, const float dt )
 	{
-		float dt{ rData.EmitData.Dt };
-		sizeT alive{ rData.EmitData.Alive };
 		for ( sizeT i = 0; i < alive; ++i )
 			rData.ArrayData.Velocity[ i ] += rData.ArrayData.Acceleration[ i ].x * dt;
 	}
@@ -725,16 +716,13 @@ struct grSPositionSystem : public grSBaseSystem // Position system doubles as sp
 		}
 	}
 
-	void Generate()
+	void Generate( const sizeT startIdx, const sizeT endIdx )
 	{
-		sizeT startIdx{ rData.EmitData.StartIdx }, endIdx{ rData.EmitData.EndIdx };
 		( this->*GenerateOpt )( startIdx, endIdx );
 	}
 
-	void Update()
+	void Update( const sizeT alive, const float dt )
 	{
-		float dt{ rData.EmitData.Dt };
-		sizeT alive{ rData.EmitData.Alive };
 		for ( sizeT i = 0; i < alive; ++i )
 			rData.ArrayData.Position[ i ] += rData.ArrayData.Velocity[ i ] * dt;
 	}
@@ -781,7 +769,7 @@ struct grSLifeSystem : public grSBaseSystem
 		grAlgo::Swap<grV2f>( rData.ArrayData.Position[ nowIdx ], rData.ArrayData.Position[ last ] );
 		grAlgo::Swap<float>( rData.ArrayData.Life[ nowIdx ], rData.ArrayData.Life[ last ] );
 
-		// TODO: Remove this when some kind of draw system exists
+		// TODO: Fix this when some kind of draw system exists
 		grAlgo::Swap<sf::Vertex>( rData.ArrayData.Verts[ nowIdx ], rData.ArrayData.Verts[ last ] );
 		//
 
@@ -802,17 +790,16 @@ struct grSLifeSystem : public grSBaseSystem
 			rData.ArrayData.Life[ i ] = rData.LifeData.MinMax.x;
 	}
 
-	void Generate()
+	void Generate( const sizeT startIdx, const sizeT endIdx )
 	{
-		sizeT startIdx{ rData.EmitData.StartIdx }, endIdx{ rData.EmitData.EndIdx };
 		( this->*GenerateOpt )( startIdx, endIdx );
 	}
 
-	void Update()
+	void Update( const sizeT alive, const float dt )
 	{
-		for ( sizeT i = 0; i < rData.EmitData.Alive; ++i )
+		for ( sizeT i = 0; i < alive; ++i )
 		{
-			rData.ArrayData.Life[ i ] -= rData.EmitData.Dt;;
+			rData.ArrayData.Life[ i ] -= dt;
 			if ( rData.ArrayData.Life[ i ] <= 0.0f )
 				Kill( i, --rData.EmitData.Alive );
 		}
@@ -853,7 +840,7 @@ public:
 
 	void Render( sf::RenderWindow& rRenderWin )
 	{
-		// TODO: Remove this when some kind of draw system exists
+		// TODO: Fix this when some kind of draw system exists
 		rRenderWin.draw( &LifeSystem.rData.ArrayData.Verts.get()[ 0 ], LifeSystem.rData.EmitData.Alive, sf::PrimitiveType::Points );
 		//
 	}
@@ -864,16 +851,17 @@ private:
 		EmitSystem.Generate();
 		if ( EmitSystem.rData.EmitData.EmitAcc > 0 )
 		{
-			ColorSystem.Generate();
-			ScaleSystem.Generate();
-			MassSystem.Generate();
-			VelocitySystem.Generate();
-			PositionSystem.Generate();
-			LifeSystem.Generate();
+			sizeT startIdx{ EmitSystem.rData.EmitData.StartIdx };
+			sizeT endIdx{ EmitSystem.rData.EmitData.EndIdx };
+
+			ColorSystem.Generate( startIdx, endIdx );
+			ScaleSystem.Generate( startIdx, endIdx );
+			MassSystem.Generate( startIdx, endIdx );
+			VelocitySystem.Generate( startIdx, endIdx );
+			PositionSystem.Generate( startIdx, endIdx );
+			LifeSystem.Generate( startIdx, endIdx );
 
 			// TODO: Fix this when some kind of draw system exists
-			sizeT startIdx{ LifeSystem.rData.EmitData.StartIdx }, endIdx{ LifeSystem.rData.EmitData.EndIdx };
-
 			auto& arrPos{ LifeSystem.rData.ArrayData.Position };
 			for ( sizeT i = startIdx; i < endIdx; ++i )
 				EmitSystem.rData.ArrayData.Verts[ i ].position = { arrPos[ i ].x, arrPos[ i ].y };
@@ -889,16 +877,16 @@ private:
 	{
 		if ( EmitSystem.rData.EmitData.Alive > 0 )
 		{
-			ColorSystem.Update();
-			ScaleSystem.Update();
-			VelocitySystem.Update();
-			PositionSystem.Update();
-			LifeSystem.Update();
+			float dt{ EmitSystem.rData.EmitData.Dt };
+			sizeT alive{ EmitSystem.rData.EmitData.Alive };
+
+			ColorSystem.Update( alive, dt );
+			ScaleSystem.Update( alive, dt );
+			VelocitySystem.Update( alive, dt );
+			PositionSystem.Update( alive, dt );
+			LifeSystem.Update( alive, dt );
 
 			// TODO: Fix this when some kind of draw system exists
-			float dt{ LifeSystem.rData.EmitData.Dt };
-			sizeT alive{ LifeSystem.rData.EmitData.Alive };
-
 			auto& arrPos{ LifeSystem.rData.ArrayData.Position };
 			for ( sizeT i = 0; i < alive; ++i )
 				EmitSystem.rData.ArrayData.Verts[ i ].position = { arrPos[ i ].x, arrPos[ i ].y };
