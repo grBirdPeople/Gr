@@ -5,8 +5,8 @@
 #include "grRandom.h"
 #include "grV2.h"
 
-typedef std::uniform_real_distribution<float> DistF;
-typedef std::uniform_int_distribution<unsigned int> DistUI;
+using DistF = std::uniform_real_distribution<float>;
+using DistUI = std::uniform_int_distribution<unsigned int>;
 
 
 enum class EEqualValue
