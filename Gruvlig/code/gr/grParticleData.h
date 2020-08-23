@@ -138,53 +138,42 @@ struct grSArrayData
 	pU<grV2f[]> Velocity;
 	pU<grV2f[]> Position;
 	pU<float[]> Life;
-
-	grSArrayData( const sizeT size )
-		: ColorStart( std::make_unique<grColor::Rgba[]>( size ) )
-		, ColorEnd( std::make_unique<grColor::Rgba[]>( size ) )
-		, ScaleStart( std::make_unique<grV2f[]>( size ) )
-		, ScaleEnd( std::make_unique<grV2f[]>( size ) )
-		, Acceleration( std::make_unique<grV2f[]>( size ) )
-		, Velocity( std::make_unique<grV2f[]>( size ) )
-		, Position( std::make_unique<grV2f[]>( size ) )
-		, Mass( std::make_unique<float[]>( size ) )
-		, Life( std::make_unique<float[]>( size ) )
-	{}
-	grSArrayData( const grSArrayData& ) = delete;
-	grSArrayData& operator=( const grSArrayData& ) = delete;
-	grSArrayData( grSArrayData&& ) noexcept = delete;
-	grSArrayData& operator=( grSArrayData&& ) noexcept = delete;
 };
 
 
-struct grSParticleData
+class grCParticleData
 {
-	pU<grSEmitData> puEmit;
-	pU<grSColorData> puColor;
-	pU<grSScaleData> puScale;
-	pU<grSMassData> puMass;
-	pU<grSVelocityData> puVelocity;
-	pU<grSPositionData> puPosition;
-	pU<grSLifeData> puLife;
-	pU<grSArrayData> puArray;
-
-	void Init( const sizeT size )
+public:
+	grCParticleData( const sizeT size )
 	{
-		// General data for spawning new particles
-		puEmit = std::make_unique<grSEmitData>();
-		puEmit->Size = size;
+		ArrayData.ColorStart = std::make_unique<grColor::Rgba[]>( size );
+		ArrayData.ColorEnd = std::make_unique<grColor::Rgba[]>( size );
+		ArrayData.ScaleStart = std::make_unique<grV2f[]>( size );
+		ArrayData.ScaleEnd = std::make_unique<grV2f[]>( size );
+		ArrayData.Acceleration = std::make_unique<grV2f[]>( size );
+		ArrayData.Velocity = std::make_unique<grV2f[]>( size );
+		ArrayData.Position = std::make_unique<grV2f[]>( size );
+		ArrayData.Mass = std::make_unique<float[]>( size );
+		ArrayData.Life = std::make_unique<float[]>( size );
 
-		// Specific data for spawning new particles
-		puColor = std::make_unique<grSColorData>();
-		puScale = std::make_unique<grSScaleData>();
-		puMass = std::make_unique<grSMassData>();
-		puVelocity = std::make_unique<grSVelocityData>();
-		puPosition = std::make_unique<grSPositionData>();
-		puLife = std::make_unique<grSLifeData>();
-
-		// Unique data that represents particles
-		puArray = std::make_unique<grSArrayData>( size );
+		EmitData.Size = size;
 	}
+	grCParticleData( const grCParticleData& ) = delete;
+	grCParticleData& operator=( const grCParticleData& ) = delete;
+	grCParticleData( grCParticleData&& ) noexcept = delete;
+	grCParticleData& operator=( grCParticleData&& ) noexcept = delete;
+
+	// Unique data that represents particles
+	grSArrayData ArrayData;
+	// General data for spawning new particles
+	grSEmitData EmitData;
+	// Specific data for spawning new particles
+	grSColorData ColorData;
+	grSScaleData ScaleData;
+	grSMassData MassData;
+	grSVelocityData VelocityData;
+	grSPositionData PositionData;
+	grSLifeData LifeData;
 };
 
 #endif // _H_GRPARTICLEDATA_
