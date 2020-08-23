@@ -5,8 +5,8 @@
 #include "grRandom.h"
 #include "grV2.h"
 
-typedef std::uniform_real_distribution<float> DistF;
-typedef std::uniform_int_distribution<unsigned int> DistUI;
+using DistF = std::uniform_real_distribution<float>;
+using DistUI = std::uniform_int_distribution<unsigned int>;
 
 
 enum class EEqualValue
@@ -24,6 +24,24 @@ enum class EPositionType
 };
 
 
+struct grSArrayData
+{
+	pU<grColor::Rgba[]> ColorStart;
+	pU<grColor::Rgba[]> ColorEnd;
+	pU<grV2f[]> ScaleStart;
+	pU<grV2f[]> ScaleEnd;
+	pU<float[]> Mass;
+	pU<grV2f[]> Acceleration;
+	pU<grV2f[]> Velocity;
+	pU<grV2f[]> Position;
+	pU<float[]> Life;
+
+	// TODO: Remove this when some kind of draw system exists
+	pU<sf::Vertex[]> Verts;
+	//
+};
+
+
 struct grSEmitData
 {
 	grV2f SystemPosition = grV2f( ( float )grCore::Instance().GetWindowSize().x * 0.5f, ( float )grCore::Instance().GetWindowSize().y * 0.5f );
@@ -36,14 +54,6 @@ struct grSEmitData
 	sizeT Alive = 0;
 	sizeT StartIdx = 0;
 	sizeT EndIdx = 0;
-
-	grSEmitData( const sizeT size )
-		: Size( size )
-	{}
-	grSEmitData( const grSEmitData& ) = delete;
-	grSEmitData& operator=( const grSEmitData& ) = delete;
-	grSEmitData( grSEmitData&& ) noexcept = delete;
-	grSEmitData& operator=( grSEmitData&& ) noexcept = delete;
 };
 
 
@@ -95,14 +105,16 @@ struct grSVelocityData
 
 struct grSPositionData
 {
-	// For filled box: X[ 0 ], Y[ 1 ] // For framedbox: Hori[ 0 ], Vert[ 1 ], ThicknessX[ 2 ], ThicknessY[ 3 ]
+	// For filled box: X[ 0 ], Y[ 1 ], Unused[ 2 ], Unused[ 3 ] // For framedbox: Hori[ 0 ], Vert[ 1 ], ThicknessX[ 2 ], ThicknessY[ 3 ]
 	DistF ArrDistBox[ 4 ];
 	// Min[ 0 ], Max[ 1 ]
 	grV2f ArrMinMax[ 2 ] = { { 0.0f, 0.0f }, { 0.0f, 0.0f } };
 	grV2f BoxOrigoSN = { 0.0f, 1.0f };
 	grV2f BoxOrigoEW = { 1.0f, 0.0f };
-	grRandXOR Rand;
+	grV2f BoxFrameOffset = { 0.0f, 0.0f };
 	float BoxFrameThickness = 0.0f;
+	float BoxFrameDegAcc = 360.0f;
+	grRandXOR Rand;
 	EEqualValue EqualBoxX = EEqualValue::YES;
 	EEqualValue EqualBoxY = EEqualValue::YES;
 	EPositionType PositionType = EPositionType::BOX_FILLED;
@@ -133,63 +145,43 @@ struct grSLifeData
 };
 
 
-struct grSArrayData
+class grCParticleData
 {
-	pU<grColor::Rgba[]> ColorStart;
-	pU<grColor::Rgba[]> ColorEnd;
-	pU<grV2f[]> ScaleStart;
-	pU<grV2f[]> ScaleEnd;
-	pU<float[]> Mass;
-	pU<grV2f[]> Acceleration;
-	pU<grV2f[]> Velocity;
-	pU<grV2f[]> Position;
-	pU<float[]> Life;
+public:
+	// Unique data that represents particles
+	grSArrayData ArrayData;
+	// General data for spawning new particles
+	grSEmitData EmitData;
+	// Specific data for spawning new particles
+	grSColorData ColorData;
+	grSScaleData ScaleData;
+	grSMassData MassData;
+	grSVelocityData VelocityData;
+	grSPositionData PositionData;
+	grSLifeData LifeData;
 
-	grSArrayData( const sizeT size )
-		: ColorStart( std::make_unique<grColor::Rgba[]>( size ) )
-		, ColorEnd( std::make_unique<grColor::Rgba[]>( size ) )
-		, ScaleStart( std::make_unique<grV2f[]>( size ) )
-		, ScaleEnd( std::make_unique<grV2f[]>( size ) )
-		, Acceleration( std::make_unique<grV2f[]>( size ) )
-		, Velocity( std::make_unique<grV2f[]>( size ) )
-		, Position( std::make_unique<grV2f[]>( size ) )
-		, Mass( std::make_unique<float[]>( size ) )
-		, Life( std::make_unique<float[]>( size ) )
-	{}
-	grSArrayData( const grSArrayData& ) = delete;
-	grSArrayData& operator=( const grSArrayData& ) = delete;
-	grSArrayData( grSArrayData&& ) noexcept = delete;
-	grSArrayData& operator=( grSArrayData&& ) noexcept = delete;
-};
-
-
-struct grSParticleData
-{
-	pU<grSEmitData> puEmit;
-	pU<grSColorData> puColor;
-	pU<grSScaleData> puScale;
-	pU<grSMassData> puMass;
-	pU<grSVelocityData> puVelocity;
-	pU<grSPositionData> puPosition;
-	pU<grSLifeData> puLife;
-	pU<grSArrayData> puArray;
-
-	void Init( const sizeT size )
+	grCParticleData( const sizeT size )
 	{
-		// General data for spawning new particles
-		puEmit = std::make_unique<grSEmitData>( size );
+		ArrayData.ColorStart = std::make_unique<grColor::Rgba[]>( size );
+		ArrayData.ColorEnd = std::make_unique<grColor::Rgba[]>( size );
+		ArrayData.ScaleStart = std::make_unique<grV2f[]>( size );
+		ArrayData.ScaleEnd = std::make_unique<grV2f[]>( size );
+		ArrayData.Acceleration = std::make_unique<grV2f[]>( size );
+		ArrayData.Velocity = std::make_unique<grV2f[]>( size );
+		ArrayData.Position = std::make_unique<grV2f[]>( size );
+		ArrayData.Mass = std::make_unique<float[]>( size );
+		ArrayData.Life = std::make_unique<float[]>( size );
 
-		// Specific data for spawning new particles
-		puColor = std::make_unique<grSColorData>();
-		puScale = std::make_unique<grSScaleData>();
-		puMass = std::make_unique<grSMassData>();
-		puVelocity = std::make_unique<grSVelocityData>();
-		puPosition = std::make_unique<grSPositionData>();
-		puLife = std::make_unique<grSLifeData>();
+		// TODO: Fix this when some kind of draw system exists
+		ArrayData.Verts = std::make_unique<sf::Vertex[]>( size );
+		//
 
-		// Unique data that represents particles
-		puArray = std::make_unique<grSArrayData>( size );
+		EmitData.Size = size;
 	}
+	grCParticleData( const grCParticleData& ) = delete;
+	grCParticleData& operator=( const grCParticleData& ) = delete;
+	grCParticleData( grCParticleData&& ) noexcept = delete;
+	grCParticleData& operator=( grCParticleData&& ) noexcept = delete;
 };
 
 #endif // _H_GRPARTICLEDATA_
