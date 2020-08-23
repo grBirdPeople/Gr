@@ -55,7 +55,7 @@ struct grSEmitSystem
 };
 
 
-struct grSBaseSystem
+struct grSBaseSystem // Some helper functions and as some are shared between systems this struct is inherited
 {
 	void EqualCheck( grV2f& rMinMax, EEqualValue& rEqual )
 	{
@@ -121,7 +121,7 @@ struct grSColorSystem : public grSBaseSystem
 	grSArrayData& rArrData;
 
 	ColGenOpt GenOption;
-	ColUpdOpt UpdOption;
+	ColUpdOpt UpdOption; // HSV or RGB lerping
 
 	grSColorSystem( const grSParticleData& rData )
 		: rEmiData( *rData.puEmit )
@@ -147,10 +147,9 @@ struct grSColorSystem : public grSBaseSystem
 		rColData.LerpEqual = EEqualValue::NO; // A cheat if the default values set in the data struct would be used it doesn't trigger lerping
 		EqualCheckColor( rColData.ArrMinMax, rColData.StartEqual, rColData.EndEqual, rColData.LerpEqual );
 
-		// Update option // HSV or RGB lerp
 		UpdOption = rColData.bHsv ? &grSColorSystem::UpdOpt0 : &grSColorSystem::UpdOpt1;
 
-		// Dislike all below code but I don't wan't to bloat with states or more weird looking functions so it will do for now
+		// Dislike all below code but I don't wan't to bloat with states or more weird looking functions so it will do for now/ever
 		if ( rColData.StartEqual == EEqualValue::NO && rColData.EndEqual == EEqualValue::NO )
 		{
 			InitDist( 0, 0, 1 );
@@ -229,38 +228,38 @@ struct grSColorSystem : public grSBaseSystem
 			rArrData.ColorEnd[ i ] = rColData.ArrMinMax[ 2 ];
 	}
 
-	void UpdOpt0( const sizeT alive, const float dt ) // HSV
+	void UpdOpt0( const sizeT alive, const float dt )
 	{
 		for ( sizeT i = 0; i < alive; ++i )
 		{
-			float lerpValue{ 1.0f / rArrData.Life[ i ] * dt };
+			float step{ 1.0f / rArrData.Life[ i ] * dt };
 
 			// Faster to first store localy and then lerp instead of passing to lerp directly by indexing the array // Measured with std::chronos
 			grColor::Hsva start{ grColor::Rgba2Hsva( rArrData.ColorStart[ i ] ) };
 			grColor::Hsva end{ grColor::Rgba2Hsva( rArrData.ColorEnd[ i ] ) };
 
-			start.H = grMath::Lerp( start.H, end.H, lerpValue );
-			start.S = grMath::Lerp( start.S, end.S, lerpValue );
-			start.V = grMath::Lerp( start.V, end.V, lerpValue );
-			start.A = grMath::Lerp( start.A, end.A, lerpValue );
+			start.H = grMath::Lerp( start.H, end.H, step );
+			start.S = grMath::Lerp( start.S, end.S, step );
+			start.V = grMath::Lerp( start.V, end.V, step );
+			start.A = grMath::Lerp( start.A, end.A, step );
 
 			rArrData.ColorStart[ i ] = grColor::Hsva2Rgba( start );
 		}
 	}
 
-	void UpdOpt1( const sizeT alive, const float dt ) // RGB
+	void UpdOpt1( const sizeT alive, const float dt )
 	{
 		for ( sizeT i = 0; i < alive; ++i )
 		{
-			float lerpValue{ 1.0f / rArrData.Life[ i ] * dt };
+			float step{ 1.0f / rArrData.Life[ i ] * dt };
 
 			grColor::Rgba start{ rArrData.ColorStart[ i ] };
 			grColor::Rgba end{ rArrData.ColorEnd[ i ] };
 
-			rArrData.ColorStart[ i ].R = ( uint8_t )grMath::Lerp( ( float )start.R, ( float )end.R, lerpValue );
-			rArrData.ColorStart[ i ].G = ( uint8_t )grMath::Lerp( ( float )start.G, ( float )end.G, lerpValue );
-			rArrData.ColorStart[ i ].B = ( uint8_t )grMath::Lerp( ( float )start.B, ( float )end.B, lerpValue );
-			rArrData.ColorStart[ i ].A = ( uint8_t )grMath::Lerp( ( float )start.A, ( float )end.A, lerpValue );
+			rArrData.ColorStart[ i ].R = ( uint8_t )grMath::Lerp( ( float )start.R, ( float )end.R, step );
+			rArrData.ColorStart[ i ].G = ( uint8_t )grMath::Lerp( ( float )start.G, ( float )end.G, step );
+			rArrData.ColorStart[ i ].B = ( uint8_t )grMath::Lerp( ( float )start.B, ( float )end.B, step );
+			rArrData.ColorStart[ i ].A = ( uint8_t )grMath::Lerp( ( float )start.A, ( float )end.A, step );
 		}
 	}
 
@@ -289,7 +288,7 @@ struct grSScaleSystem : public grSBaseSystem
 	grSArrayData& rArrData;
 
 	ScaGenOpt GenOption;
-	ScaUpdOpt UpdOption;
+	ScaUpdOpt UpdOption; // Scale lerp or not
 
 	grSScaleSystem( const grSParticleData& rData )
 		: rEmiData( *rData.puEmit )
@@ -521,7 +520,7 @@ struct grSVelocitySystem : public grSBaseSystem
 
 	void Generate()
 	{
-		// This is retarded but I'm retarded and can't figure out how to do it without using 6 different loops which would be better but look more retarded
+		// This is retarded but I couldn't figure out how to do it without using 6 different loops which would be better but read worse
 		// It shall remain retarded for the moment(s)
 
 		sizeT startIdx{ rEmiData.StartIdx }, endIdx{ rEmiData.EndIdx };
@@ -543,8 +542,7 @@ struct grSVelocitySystem : public grSBaseSystem
 };
 
 
-// Position system doubles as spawn shape and position update
-struct grSPositionSystem : public grSBaseSystem
+struct grSPositionSystem : public grSBaseSystem // Position system doubles as spawn shape and position update
 {
 	grSEmitData& rEmiData;
 	grSPositionData& rPosData;
@@ -603,7 +601,7 @@ struct grSPositionSystem : public grSBaseSystem
 
 		// rPosData.PositionType == EPositionType::BOX_FRAMED
 
-		// This is really stupid but it works // Commeneted as it's not obvious what's going on
+		// This is really stupid but it works // Commented as it's not really obvious what's going on
 		// Final position is dependent of the system position, the box dimension and the potential box offset relative to the system position
 
 		// Have to get the offset somehow so I came up with this elegant beauty
@@ -646,7 +644,7 @@ struct grSPositionSystem : public grSBaseSystem
 		rPosData.ArrDistBox[ 1 ] = rPosData.Rand.DistF( radX - rPosData.BoxFrameThickness, radX );
 
 		// Length of the frames for x and y
-		// Y is modded so the corners of x and y doesn't overlap
+		// Y is modded so the corners of x and y frames doesn't overlap
 		rPosData.ArrDistBox[ 2 ] = rPosData.Rand.DistF( -radX, radX );
 		rPosData.ArrDistBox[ 3 ] = rPosData.Rand.DistF( -radY + rPosData.BoxFrameThickness, radY - rPosData.BoxFrameThickness );
 		GenOption = &grSPositionSystem::BoxFramedGenOpt;

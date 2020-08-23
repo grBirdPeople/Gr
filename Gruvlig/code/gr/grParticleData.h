@@ -36,14 +36,6 @@ struct grSEmitData
 	sizeT Alive = 0;
 	sizeT StartIdx = 0;
 	sizeT EndIdx = 0;
-
-	grSEmitData( const sizeT size )
-		: Size( size )
-	{}
-	grSEmitData( const grSEmitData& ) = delete;
-	grSEmitData& operator=( const grSEmitData& ) = delete;
-	grSEmitData( grSEmitData&& ) noexcept = delete;
-	grSEmitData& operator=( grSEmitData&& ) noexcept = delete;
 };
 
 
@@ -179,7 +171,8 @@ struct grSParticleData
 	void Init( const sizeT size )
 	{
 		// General data for spawning new particles
-		puEmit = std::make_unique<grSEmitData>( size );
+		puEmit = std::make_unique<grSEmitData>();
+		puEmit->Size = size;
 
 		// Specific data for spawning new particles
 		puColor = std::make_unique<grSColorData>();

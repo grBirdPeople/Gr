@@ -83,7 +83,7 @@ public:
 			grDebugManager::Instance().AddBBox( b, c );
 		}
 
-		printf( "%d\n", alive );
+		//printf( "%d\n", alive );
 		// TEST DRAW
 	}
 
