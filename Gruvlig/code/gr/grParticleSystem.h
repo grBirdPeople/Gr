@@ -440,7 +440,14 @@ struct grSVelocitySystem : public grSBaseSystem
 
 	void Init( const grV2f& rDegreeMinMax, const grV2f& rForceMinMax )
 	{
-		rData.VelocityData.DegreeMinMax = grV2f( grMath::Clamp<float>( rDegreeMinMax.x, 0.0f, 359.9f ), grMath::Clamp<float>( rDegreeMinMax.y, 0.0f, 359.9f ) );
+		rData.VelocityData.DegreeMinMax = { grMath::Clamp<float>( rDegreeMinMax.x, -359.9f, 359.9f ),
+			grMath::Clamp<float>( rDegreeMinMax.y, -359.9f, 359.9f ) };
+
+		if ( rData.VelocityData.DegreeMinMax.x < 0.0f )
+			rData.VelocityData.DegreeMinMax.x = 360.0f + rData.VelocityData.DegreeMinMax.x;
+		if ( rData.VelocityData.DegreeMinMax.y < 0.0f )
+			rData.VelocityData.DegreeMinMax.y = 360.0f + rData.VelocityData.DegreeMinMax.y;
+
 		rData.VelocityData.ForceMinMax = rForceMinMax;
 
 		SwapCheck( rData.VelocityData.ForceMinMax );

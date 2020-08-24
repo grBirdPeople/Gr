@@ -25,6 +25,7 @@ public:
 
 	void SetEmitRate( const float emitRateSec )
 	{
+		// TODO: Add init function to emit system
 		m_puData->EmitData.EmitRateSec = emitRateSec;
 		m_puData->EmitData.EmitRateMs = 1.0f / emitRateSec;
 		m_puData->EmitData.SpawnTimeAcc = m_puData->EmitData.EmitRateMs;
@@ -69,7 +70,7 @@ public:
 	{
 		//grStruct::grSTimer t( "Run", grStruct::grSTimer::ETimeType::MS );
 		sizeT alive{ m_puData->EmitData.Alive };
-		printf( "%d\n", alive );
+		//printf( "Alive: %d\n", alive );
 
 
 		m_puData->EmitData.Dt = dt;
