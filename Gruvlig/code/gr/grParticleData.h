@@ -9,10 +9,17 @@ using DistF = std::uniform_real_distribution<float>;
 using DistUI = std::uniform_int_distribution<unsigned int>;
 
 
+enum class EEmissionType
+{
+	UNITE = 0,
+	BURST
+};
+
+
 enum class EEqualValue
 {
-	NO = 0,
-	YES
+	YES = 0,
+	NO
 };
 
 
@@ -42,7 +49,7 @@ struct grSArrayData
 };
 
 
-struct grSEmitData
+struct grSEmissionData
 {
 	grV2f SystemPosition = grV2f( ( float )grCore::Instance().GetWindowSize().x * 0.5f, ( float )grCore::Instance().GetWindowSize().y * 0.5f );
 	float Dt = 0.0f;
@@ -54,6 +61,12 @@ struct grSEmitData
 	sizeT Alive = 0;
 	sizeT StartIdx = 0;
 	sizeT EndIdx = 0;
+
+
+	float BurstTimeSec = 0.5f;
+	float BurstTimeAcc = 0.0f;
+	bool bGenerate = true;
+	EEmissionType EmissionType = EEmissionType::UNITE;
 };
 
 
@@ -151,7 +164,7 @@ public:
 	// Unique data that represents particles
 	grSArrayData ArrayData;
 	// General data for spawning new particles
-	grSEmitData EmitData;
+	grSEmissionData EmissionData;
 	// Specific data for spawning new particles
 	grSColorData ColorData;
 	grSScaleData ScaleData;
@@ -176,7 +189,7 @@ public:
 		ArrayData.Verts = std::make_unique<sf::Vertex[]>( size );
 		//
 
-		EmitData.Size = size;
+		EmissionData.Size = size;
 	}
 	grCParticleData( const grCParticleData& ) = delete;
 	grCParticleData& operator=( const grCParticleData& ) = delete;

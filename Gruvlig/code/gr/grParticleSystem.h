@@ -4,50 +4,95 @@
 #include "grAlgo.h"
 #include "grParticleData.h"
 
-// Different options for generating and updating based on the parameters set on system init's
+// Different options for generating and updating based on the parameters set on system's set call
+template<typename T>
+using EmitGenOpt = void( T::* )();
 template<typename T>
 using GenOpt = void( T::* )( const sizeT startIdx, const sizeT endIdx );
 template<typename T>
 using UpdOpt = void( T::* )( const sizeT alive, const float dt );
 
 
-struct grSEmitSystem
+struct grSEmissionSystem
 {
 	grCParticleData& rData;
+	EmitGenOpt<grSEmissionSystem> GenOption;
 
-	grSEmitSystem( grCParticleData& rParticleData )
+	grSEmissionSystem( grCParticleData& rParticleData )
 		: rData( rParticleData )
+		, GenOption( &grSEmissionSystem::Unite )
 	{}
-	grSEmitSystem( const grSEmitSystem& ) = default;
-	grSEmitSystem& operator=( const grSEmitSystem& ) = default;
+	grSEmissionSystem( const grSEmissionSystem& ) = default;
+	grSEmissionSystem& operator=( const grSEmissionSystem& ) = default;
 
-	void Init( const float emitRateSec )
+	void SetData( const float emitRateSec, const float burstTimeSec )
 	{
-		rData.EmitData.EmitRateSec =  grMath::AbsF( emitRateSec );
-		rData.EmitData.EmitRateMs = 1.0f / rData.EmitData.EmitRateSec;
-		rData.EmitData.SpawnTimeAcc = rData.EmitData.EmitRateMs;
+		rData.EmissionData.EmitRateSec =  grMath::AbsF( emitRateSec );
+		rData.EmissionData.EmitRateMs = 1.0f / rData.EmissionData.EmitRateSec;
+		rData.EmissionData.SpawnTimeAcc = rData.EmissionData.EmitRateMs;
+
+		rData.EmissionData.BurstTimeSec = grMath::AbsF( burstTimeSec );
+
+		rData.EmissionData.EmissionType = rData.EmissionData.BurstTimeSec == 0.0f ? EEmissionType::UNITE : EEmissionType::BURST;
+		GenOption = rData.EmissionData.EmissionType == EEmissionType::UNITE ? &grSEmissionSystem::Unite : &grSEmissionSystem::Burst;
+	}
+
+	void Start()
+	{
+		if ( !rData.EmissionData.bGenerate )
+		{
+			rData.EmissionData.SpawnTimeAcc = 0.0f;
+			rData.EmissionData.BurstTimeAcc = 0.0f;
+			rData.EmissionData.bGenerate = true;
+		}
+	}
+
+	void Stop()
+	{
+		rData.EmissionData.bGenerate = false;
+	}
+
+	void Unite()
+	{
+		FindStartEnd();
+	}
+
+	void Burst()
+	{
+		rData.EmissionData.BurstTimeAcc += rData.EmissionData.Dt;
+		FindStartEnd();
+
+		if ( rData.EmissionData.BurstTimeAcc > rData.EmissionData.BurstTimeSec )
+			Stop();
+	}
+
+	void FindStartEnd()
+	{
+		rData.EmissionData.SpawnTimeAcc += rData.EmissionData.Dt;
+		rData.EmissionData.EmitAcc = 0;
+		while ( rData.EmissionData.SpawnTimeAcc >= rData.EmissionData.EmitRateMs )
+		{
+			rData.EmissionData.SpawnTimeAcc -= rData.EmissionData.EmitRateMs;
+			rData.EmissionData.EmitAcc += 1;
+		}
+
+		if ( rData.EmissionData.EmitAcc > 0 )
+		{
+			sizeT last{ rData.EmissionData.Size - 1 };
+			rData.EmissionData.StartIdx = rData.EmissionData.Alive;
+			rData.EmissionData.EndIdx = grMath::Min<sizeT>( rData.EmissionData.StartIdx + rData.EmissionData.EmitAcc, last );
+
+			rData.EmissionData.Alive +=
+				rData.EmissionData.StartIdx < rData.EmissionData.EndIdx ?
+				rData.EmissionData.EndIdx - rData.EmissionData.StartIdx :
+				0;
+		}
 	}
 
 	void Generate()
 	{
-		rData.EmitData.SpawnTimeAcc += rData.EmitData.Dt;
-		rData.EmitData.EmitAcc = 0;
-		while ( rData.EmitData.SpawnTimeAcc >= rData.EmitData.EmitRateMs )
-		{
-			rData.EmitData.SpawnTimeAcc -= rData.EmitData.EmitRateMs;
-			rData.EmitData.EmitAcc += 1;
-		}
-
-		if ( rData.EmitData.EmitAcc > 0 )
-		{
-			sizeT last{ rData.EmitData.Size - 1 };
-			rData.EmitData.StartIdx = rData.EmitData.Alive;
-			rData.EmitData.EndIdx = grMath::Min<sizeT>( rData.EmitData.StartIdx + rData.EmitData.EmitAcc, last );
-			if ( rData.EmitData.StartIdx == rData.EmitData.EndIdx )
-				return;
-
-			rData.EmitData.Alive += rData.EmitData.EndIdx - rData.EmitData.StartIdx;
-		}
+		if ( rData.EmissionData.bGenerate )
+			( this->*GenOption )( );
 	}
 };
 
@@ -125,7 +170,7 @@ struct grSColorSystem : public grSBaseSystem
 	grSColorSystem( const grSColorSystem& ) = default;
 	grSColorSystem& operator=( const grSColorSystem& ) = default;
 
-	void Init( const grColor::Rgba& rStartMin, const grColor::Rgba& rStartMax, const grColor::Rgba& rEndMin, const grColor::Rgba& rEndMax, const bool hsv )
+	void SetData( const grColor::Rgba& rStartMin, const grColor::Rgba& rStartMax, const grColor::Rgba& rEndMin, const grColor::Rgba& rEndMax, const bool hsv )
 	{
 		rData.ColorData.ArrMinMax[ 0 ] = rStartMin;
 		rData.ColorData.ArrMinMax[ 1 ] = rStartMax;
@@ -144,22 +189,22 @@ struct grSColorSystem : public grSBaseSystem
 		// Dislike all below code but I don't wan't to bloat with states or more weird looking functions so it will do for now/ever
 		if ( rData.ColorData.StartEqual == EEqualValue::NO && rData.ColorData.EndEqual == EEqualValue::NO )
 		{
-			InitDist( 0, 0, 1 );
-			InitDist( 4, 2, 3 );
+			SetDistData( 0, 0, 1 );
+			SetDistData( 4, 2, 3 );
 			GenerateOpt = &grSColorSystem::GenOpt0;
 			return;
 		}
 
 		if ( rData.ColorData.StartEqual == EEqualValue::NO && rData.ColorData.EndEqual == EEqualValue::YES )
 		{
-			InitDist( 0, 0, 1 );
+			SetDistData( 0, 0, 1 );
 			GenerateOpt = &grSColorSystem::GenOpt1;
 			return;
 		}
 
 		if ( rData.ColorData.StartEqual == EEqualValue::YES && rData.ColorData.EndEqual == EEqualValue::NO )
 		{
-			InitDist( 4, 2, 3 );
+			SetDistData( 4, 2, 3 );
 			GenerateOpt = &grSColorSystem::GenOpt2;
 			return;
 		}
@@ -168,7 +213,7 @@ struct grSColorSystem : public grSBaseSystem
 		GenerateOpt = &grSColorSystem::GenOpt3;
 	}
 
-	void InitDist( const sizeT arrDistIdx, const sizeT arrMinMaxIdx1, const sizeT arrMinMaxIdx2 )
+	void SetDistData( const sizeT arrDistIdx, const sizeT arrMinMaxIdx1, const sizeT arrMinMaxIdx2 )
 	{
 		rData.ColorData.ArrDist[ arrDistIdx ] = rData.ColorData.Rand.DistU( rData.ColorData.ArrMinMax[ arrMinMaxIdx1 ].R, rData.ColorData.ArrMinMax[ arrMinMaxIdx2 ].R );
 		rData.ColorData.ArrDist[ arrDistIdx + 1 ] = rData.ColorData.Rand.DistU( rData.ColorData.ArrMinMax[ arrMinMaxIdx1 ].G, rData.ColorData.ArrMinMax[ arrMinMaxIdx2 ].G );
@@ -176,7 +221,7 @@ struct grSColorSystem : public grSBaseSystem
 		rData.ColorData.ArrDist[ arrDistIdx + 3 ] = rData.ColorData.Rand.DistU( rData.ColorData.ArrMinMax[ arrMinMaxIdx1 ].A, rData.ColorData.ArrMinMax[ arrMinMaxIdx2 ].A );
 	}
 
-	void InitRandColor( pU<grColor::Rgba[]>& rArr, const sizeT arrColorIdx, const sizeT arrDistIdx )
+	void SetRandColorData( pU<grColor::Rgba[]>& rArr, const sizeT arrColorIdx, const sizeT arrDistIdx )
 	{
 		rArr[ arrColorIdx ].R = ( uint8_t )( rData.ColorData.Rand.IntU( rData.ColorData.ArrDist[ arrDistIdx ] ) );
 		rArr[ arrColorIdx ].G = ( uint8_t )( rData.ColorData.Rand.IntU( rData.ColorData.ArrDist[ arrDistIdx + 1 ] ) );
@@ -187,16 +232,16 @@ struct grSColorSystem : public grSBaseSystem
 	void GenOpt0( const sizeT startIdx, const sizeT endIdx )
 	{
 		for ( sizeT i = startIdx; i < endIdx; ++i )
-			InitRandColor( rData.ArrayData.ColorStart, i, 0 );
+			SetRandColorData( rData.ArrayData.ColorStart, i, 0 );
 
 		for ( sizeT i = startIdx; i < endIdx; ++i )
-			InitRandColor( rData.ArrayData.ColorEnd, i, 4 );
+			SetRandColorData( rData.ArrayData.ColorEnd, i, 4 );
 	}
 
 	void GenOpt1( const sizeT startIdx, const sizeT endIdx )
 	{
 		for ( sizeT i = startIdx; i < endIdx; ++i )
-			InitRandColor( rData.ArrayData.ColorStart, i, 0 );
+			SetRandColorData( rData.ArrayData.ColorStart, i, 0 );
 
 		for ( sizeT i = startIdx; i < endIdx; ++i )
 			rData.ArrayData.ColorEnd[ i ] = rData.ColorData.ArrMinMax[ 2 ];
@@ -208,7 +253,7 @@ struct grSColorSystem : public grSBaseSystem
 			rData.ArrayData.ColorStart[ i ] = rData.ColorData.ArrMinMax[ 0 ];
 
 		for ( sizeT i = startIdx; i < endIdx; ++i )
-			InitRandColor( rData.ArrayData.ColorEnd, i, 4 );
+			SetRandColorData( rData.ArrayData.ColorEnd, i, 4 );
 	}
 
 	void GenOpt3( const sizeT startIdx, const sizeT endIdx )
@@ -284,7 +329,7 @@ struct grSScaleSystem : public grSBaseSystem
 	grSScaleSystem( const grSScaleSystem& ) = default;
 	grSScaleSystem& operator=( const grSScaleSystem& ) = default;
 
-	void Init( const grV2f& rStartMin, const grV2f& rStartMax, const grV2f& rEndMin, const grV2f& rEndMax )
+	void SetData( const grV2f& rStartMin, const grV2f& rStartMax, const grV2f& rEndMin, const grV2f& rEndMax )
 	{
 		rData.ScaleData.ArrMinMax[ 0 ] = rStartMin;
 		rData.ScaleData.ArrMinMax[ 1 ] = rStartMax;
@@ -297,10 +342,10 @@ struct grSScaleSystem : public grSBaseSystem
 			 rData.ScaleData.StartEqual == EEqualValue::NO && rData.ScaleData.EndEqual == EEqualValue::YES ||
 			 rData.ScaleData.StartEqual == EEqualValue::YES && rData.ScaleData.EndEqual == EEqualValue::NO )
 		{
-			rData.ScaleData.ArrDist[ 0 ] = InitDist( rData.ScaleData.ArrMinMax[ 0 ].x, rData.ScaleData.ArrMinMax[ 1 ].x );
-			rData.ScaleData.ArrDist[ 1 ] = InitDist( rData.ScaleData.ArrMinMax[ 0 ].y, rData.ScaleData.ArrMinMax[ 1 ].y );
-			rData.ScaleData.ArrDist[ 2 ] = InitDist( rData.ScaleData.ArrMinMax[ 2 ].x, rData.ScaleData.ArrMinMax[ 3 ].x );
-			rData.ScaleData.ArrDist[ 3 ] = InitDist( rData.ScaleData.ArrMinMax[ 2 ].y, rData.ScaleData.ArrMinMax[ 3 ].y );
+			rData.ScaleData.ArrDist[ 0 ] = SetDistData( rData.ScaleData.ArrMinMax[ 0 ].x, rData.ScaleData.ArrMinMax[ 1 ].x );
+			rData.ScaleData.ArrDist[ 1 ] = SetDistData( rData.ScaleData.ArrMinMax[ 0 ].y, rData.ScaleData.ArrMinMax[ 1 ].y );
+			rData.ScaleData.ArrDist[ 2 ] = SetDistData( rData.ScaleData.ArrMinMax[ 2 ].x, rData.ScaleData.ArrMinMax[ 3 ].x );
+			rData.ScaleData.ArrDist[ 3 ] = SetDistData( rData.ScaleData.ArrMinMax[ 2 ].y, rData.ScaleData.ArrMinMax[ 3 ].y );
 		}
 
 		GenerateOpt =
@@ -318,7 +363,7 @@ struct grSScaleSystem : public grSBaseSystem
 			&grSScaleSystem::UpdOpt1;
 	}
 
-	DistF InitDist( const float a, const float b )
+	DistF SetDistData( const float a, const float b )
 	{
 		return a < b ? rData.ScaleData.Rand.DistF( a, b ) : rData.ScaleData.Rand.DistF( b, a );
 	}
@@ -400,7 +445,7 @@ struct grSMassSystem : public grSBaseSystem
 	grSMassSystem( const grSMassSystem& ) = default;
 	grSMassSystem& operator=( const grSMassSystem& ) = default;
 
-	void Init( const grV2f& rMinMax )
+	void SetData( const grV2f& rMinMax )
 	{
 		rData.MassData.MinMax.x = grMath::Max( rMinMax.x, 1.0f );
 		rData.MassData.MinMax.y = grMath::Max( rMinMax.y, 1.0f );
@@ -410,10 +455,7 @@ struct grSMassSystem : public grSBaseSystem
 
 		rData.MassData.Dist = rData.MassData.Rand.DistF( rData.MassData.MinMax.x, rData.MassData.MinMax.y );
 
-		GenerateOpt =
-			rData.MassData.Equal == EEqualValue::NO ?
-			&grSMassSystem::GenOpt0 :
-			&grSMassSystem::GenOpt1;
+		GenerateOpt = rData.MassData.Equal == EEqualValue::NO ? &grSMassSystem::GenOpt0 : &grSMassSystem::GenOpt1;
 	}
 
 	void GenOpt0( const sizeT startIdx, const sizeT endIdx )
@@ -447,7 +489,7 @@ struct grSVelocitySystem : public grSBaseSystem
 	grSVelocitySystem( const grSVelocitySystem& ) = default;
 	grSVelocitySystem& operator=( const grSVelocitySystem& ) = default;
 
-	void Init( const grV2f& rDegreeMinMax, const grV2f& rForceMinMax )
+	void SetData( const grV2f& rDegreeMinMax, const grV2f& rForceMinMax )
 	{
 		rData.VelocityData.DegreeMinMax = { grMath::Clamp<float>( rDegreeMinMax.x, -359.9f, 359.9f ),
 			grMath::Clamp<float>( rDegreeMinMax.y, -359.9f, 359.9f ) };
@@ -529,7 +571,7 @@ struct grSPositionSystem : public grSBaseSystem // Position system doubles as in
 	grSPositionSystem( const grSPositionSystem& ) = default;
 	grSPositionSystem& operator=( const grSPositionSystem& ) = default;
 
-	void InitBox( const grV2f& rBoxOffsetMin, const grV2f& rBoxOffsetMax, const float frameThickness ) // Radius == 0.0f equals filled box // Radius != 0.0f equals framed box
+	void SetBoxData( const grV2f& rBoxOffsetMin, const grV2f& rBoxOffsetMax, const float frameThickness ) // Radius == 0.0f is filled box // Radius != 0.0f is framed box
 	{
 		rData.PositionData.ArrMinMax[ 0 ] = rBoxOffsetMin;
 		rData.PositionData.ArrMinMax[ 1 ] = rBoxOffsetMax;
@@ -571,10 +613,10 @@ struct grSPositionSystem : public grSBaseSystem // Position system doubles as in
 
 		// rPosData.PositionType == EPositionType::BOX_FRAMED
 
-		// This is really stupid but it works // Commented as it's not really obvious what's going on
+		// This is really stupid but works // Commented as it's a pain to read
 		// Final position is dependent of the system position, the box dimension and the potential box offset relative to the system position
 
-		// Have to get the offset somehow so I came up with this elegant beauty
+		// Have to get the offset somehow so this elegant beauty
 		rData.PositionData.BoxFrameOffset.x =
 			rData.PositionData.ArrMinMax[ 0 ].x <= 0.0f && rData.PositionData.ArrMinMax[ 1 ].x <= 0.0f ?
 			rData.PositionData.ArrMinMax[ 0 ].x - rData.PositionData.ArrMinMax[ 1 ].x :
@@ -608,8 +650,8 @@ struct grSPositionSystem : public grSBaseSystem // Position system doubles as in
 			grMath::Clamp<float>( rData.PositionData.BoxFrameThickness, 0.0f, radX ) :
 			grMath::Clamp<float>( rData.PositionData.BoxFrameThickness, 0.0f, radY );
 
-		// How much the vector going out from origo should deviate in length based on frame thickness which results in the, uh, frames thickness
-		// Thickness is calculated from x and y box didmensions and offsetted inwards dependent of the thickness var
+		// How much the vector going out from origo should deviate in length based on frame thickness which results in the, uh, frame thickness
+		// Thickness is calculated from x and y box didmensions and offsetted towards origo dependent of the thickness var
 		rData.PositionData.ArrDistBox[ 0 ] = rData.PositionData.Rand.DistF( radY - rData.PositionData.BoxFrameThickness, radY );
 		rData.PositionData.ArrDistBox[ 1 ] = rData.PositionData.Rand.DistF( radX - rData.PositionData.BoxFrameThickness, radX );
 
@@ -617,10 +659,12 @@ struct grSPositionSystem : public grSBaseSystem // Position system doubles as in
 		// Y is modded so the corners of x and y frames doesn't overlap
 		rData.PositionData.ArrDistBox[ 2 ] = rData.PositionData.Rand.DistF( -radX, radX );
 		rData.PositionData.ArrDistBox[ 3 ] = rData.PositionData.Rand.DistF( -radY + rData.PositionData.BoxFrameThickness, radY - rData.PositionData.BoxFrameThickness );
+
+		// Assign function pointer
 		GenerateOpt = &grSPositionSystem::BoxFramedGenOpt;
 	}
 
-	void InitEllipse( const grV2f& rRadiusMinMax )
+	void SetEllipseData( const grV2f& rRadiusMinMax )
 	{
 		rData.PositionData.ArrMinMax[ 0 ] = rRadiusMinMax;
 		EqualCheck( rData.PositionData.ArrMinMax[ 0 ], rData.PositionData.EqualCircle );
@@ -634,7 +678,7 @@ struct grSPositionSystem : public grSBaseSystem // Position system doubles as in
 
 	void CircleGenOption0( const sizeT startIdx, const sizeT endIdx )
 	{
-		grV2f sysPos{ rData.EmitData.SystemPosition };
+		grV2f sysPos{ rData.EmissionData.SystemPosition };
 		DistF distRad{ rData.PositionData.Rand.DistF( rData.PositionData.ArrMinMax[ 0 ] ) };
 		DistF distDeg{ rData.PositionData.Rand.DistF( 0.0f, 359.9f ) };
 		for ( sizeT i = startIdx; i < endIdx; ++i )
@@ -647,7 +691,7 @@ struct grSPositionSystem : public grSBaseSystem // Position system doubles as in
 
 	void CircleGenOption1( const sizeT startIdx, const sizeT endIdx )
 	{
-		grV2f sysPos{ rData.EmitData.SystemPosition };
+		grV2f sysPos{ rData.EmissionData.SystemPosition };
 		DistF distDeg{ rData.PositionData.Rand.DistF( 0.0f, 359.9f ) };
 		for ( sizeT i = startIdx; i < endIdx; ++i )
 		{
@@ -670,7 +714,7 @@ struct grSPositionSystem : public grSBaseSystem // Position system doubles as in
 
 	void BoxFilledGenOpt0( const sizeT startIdx, const sizeT endIdx )
 	{
-		grV2f sysPos{ rData.EmitData.SystemPosition };
+		grV2f sysPos{ rData.EmissionData.SystemPosition };
 		for ( sizeT i = startIdx; i < endIdx; ++i )
 		{
 			grV2f v{ rData.PositionData.Rand.Float( rData.PositionData.ArrDistBox[ 0 ] ), rData.PositionData.Rand.Float( rData.PositionData.ArrDistBox[ 1 ] ) };
@@ -680,7 +724,7 @@ struct grSPositionSystem : public grSBaseSystem // Position system doubles as in
 
 	void BoxFilledGenOpt1( const sizeT startIdx, const sizeT endIdx )
 	{
-		grV2f v{ grV2f( 0.0f, rData.PositionData.ArrMinMax[ 0 ].y ) + rData.EmitData.SystemPosition };
+		grV2f v{ grV2f( 0.0f, rData.PositionData.ArrMinMax[ 0 ].y ) + rData.EmissionData.SystemPosition };
 		for ( sizeT i = startIdx; i < endIdx; ++i )
 		{
 			v.x += rData.PositionData.Rand.Float( rData.PositionData.ArrDistBox[ 0 ] );
@@ -690,7 +734,7 @@ struct grSPositionSystem : public grSBaseSystem // Position system doubles as in
 
 	void BoxFilledGenOpt2( const sizeT startIdx, const sizeT endIdx )
 	{
-		grV2f v{ grV2f( rData.PositionData.ArrMinMax[ 0 ].x, 0.0f ) + rData.EmitData.SystemPosition };
+		grV2f v{ grV2f( rData.PositionData.ArrMinMax[ 0 ].x, 0.0f ) + rData.EmissionData.SystemPosition };
 		for ( sizeT i = startIdx; i < endIdx; ++i )
 		{
 			v.y += rData.PositionData.Rand.Float( rData.PositionData.ArrDistBox[ 1 ] );
@@ -700,14 +744,14 @@ struct grSPositionSystem : public grSBaseSystem // Position system doubles as in
 
 	void BoxFilledGenOpt3( const sizeT startIdx, const sizeT endIdx )
 	{
-		grV2f v{ grV2f( rData.PositionData.ArrMinMax[ 0 ] ) + rData.EmitData.SystemPosition };
+		grV2f v{ grV2f( rData.PositionData.ArrMinMax[ 0 ] ) + rData.EmissionData.SystemPosition };
 		for ( sizeT i = startIdx; i < endIdx; ++i )
 			rData.ArrayData.Position[ i ] = v;
 	}
 
 	void BoxFramedGenOpt( const sizeT startIdx, const sizeT endIdx )
 	{
-		grV2f sysPos{ rData.EmitData.SystemPosition };
+		grV2f sysPos{ rData.EmissionData.SystemPosition };
 		for ( sizeT i = startIdx; i < endIdx; ++i )
 		{
 			rData.PositionData.BoxFrameDegAcc = rData.PositionData.BoxFrameDegAcc >= 270.0f ? 0.0f : rData.PositionData.BoxFrameDegAcc + 90.0f;
@@ -754,7 +798,7 @@ struct grSLifeSystem : public grSBaseSystem
 	grSLifeSystem( const grSLifeSystem& ) = default;
 	grSLifeSystem& operator=( const grSLifeSystem& ) = default;
 
-	void Init( const grV2f& rMinMax )
+	void SetData( const grV2f& rMinMax )
 	{
 		rData.LifeData.MinMax = rMinMax;
 
@@ -814,7 +858,7 @@ struct grSLifeSystem : public grSBaseSystem
 		{
 			rData.ArrayData.Life[ i ] -= dt;
 			if ( rData.ArrayData.Life[ i ] <= 0.0f )
-				Kill( i, --rData.EmitData.Alive );
+				Kill( i, --rData.EmissionData.Alive );
 		}
 	}
 };
@@ -823,7 +867,9 @@ struct grSLifeSystem : public grSBaseSystem
 class grCParticleSystem
 {
 public:
-	grSEmitSystem EmitSystem;
+	grCParticleData& rData;
+
+	grSEmissionSystem EmissionSystem;
 	grSColorSystem ColorSystem;
 	grSScaleSystem ScaleSystem;
 	grSMassSystem MassSystem;
@@ -832,7 +878,8 @@ public:
 	grSLifeSystem LifeSystem;
 
 	grCParticleSystem( grCParticleData& rParticleData )
-		: EmitSystem( rParticleData )
+		: rData( rParticleData )
+		, EmissionSystem( rParticleData )
 		, ColorSystem( rParticleData )
 		, ScaleSystem( rParticleData )
 		, MassSystem( rParticleData )
@@ -845,8 +892,10 @@ public:
 	grCParticleSystem( grCParticleSystem&& ) noexcept = delete;
 	grCParticleSystem& operator=( grCParticleSystem&& ) noexcept = delete;
 
-	void Run()
+	void Run( const float dt )
 	{
+		rData.EmissionData.Dt = dt;
+
 		Generate();
 		Update();
 	}
@@ -854,18 +903,18 @@ public:
 	void Render( sf::RenderWindow& rRenderWin )
 	{
 		// TODO: Fix this when some kind of draw system exists
-		rRenderWin.draw( &LifeSystem.rData.ArrayData.Verts.get()[ 0 ], LifeSystem.rData.EmitData.Alive, sf::PrimitiveType::Points );
+		rRenderWin.draw( &rData.ArrayData.Verts.get()[ 0 ], rData.EmissionData.Alive, sf::PrimitiveType::Points );
 		//
 	}
 
 private:
 	void Generate()
 	{
-		EmitSystem.Generate();
-		if ( EmitSystem.rData.EmitData.EmitAcc > 0 )
+		EmissionSystem.Generate();
+		if ( rData.EmissionData.EmitAcc > 0 )
 		{
-			sizeT startIdx{ EmitSystem.rData.EmitData.StartIdx };
-			sizeT endIdx{ EmitSystem.rData.EmitData.EndIdx };
+			sizeT endIdx{ rData.EmissionData.EndIdx };
+			sizeT startIdx{ rData.EmissionData.StartIdx };
 
 			ColorSystem.Generate( startIdx, endIdx );
 			ScaleSystem.Generate( startIdx, endIdx );
@@ -875,23 +924,23 @@ private:
 			LifeSystem.Generate( startIdx, endIdx );
 
 			// TODO: Fix this when some kind of draw system exists
-			auto& arrPos{ LifeSystem.rData.ArrayData.Position };
+			auto& arrPos{ rData.ArrayData.Position };
 			for ( sizeT i = startIdx; i < endIdx; ++i )
-				EmitSystem.rData.ArrayData.Verts[ i ].position = { arrPos[ i ].x, arrPos[ i ].y };
+				rData.ArrayData.Verts[ i ].position = { arrPos[ i ].x, arrPos[ i ].y };
 
-			auto& arrCol{ LifeSystem.rData.ArrayData.ColorStart };
+			auto& arrCol{ rData.ArrayData.ColorStart };
 			for ( sizeT i = startIdx; i < endIdx; ++i )
-				EmitSystem.rData.ArrayData.Verts[ i ].color = { arrCol[ i ].R, arrCol[ i ].G, arrCol[ i ].B, arrCol[ i ].A };
+				rData.ArrayData.Verts[ i ].color = { arrCol[ i ].R, arrCol[ i ].G, arrCol[ i ].B, arrCol[ i ].A };
 			//
 		}
 	}
 
 	void Update()
 	{
-		if ( EmitSystem.rData.EmitData.Alive > 0 )
+		if ( rData.EmissionData.Alive > 0 )
 		{
-			float dt{ EmitSystem.rData.EmitData.Dt };
-			sizeT alive{ EmitSystem.rData.EmitData.Alive };
+			float dt{ rData.EmissionData.Dt };
+			sizeT alive{ rData.EmissionData.Alive };
 
 			ColorSystem.Update( alive, dt );
 			ScaleSystem.Update( alive, dt );
@@ -900,13 +949,13 @@ private:
 			LifeSystem.Update( alive, dt );
 
 			// TODO: Fix this when some kind of draw system exists
-			auto& arrPos{ LifeSystem.rData.ArrayData.Position };
+			auto& arrPos{ rData.ArrayData.Position };
 			for ( sizeT i = 0; i < alive; ++i )
-				EmitSystem.rData.ArrayData.Verts[ i ].position = { arrPos[ i ].x, arrPos[ i ].y };
+				rData.ArrayData.Verts[ i ].position = { arrPos[ i ].x, arrPos[ i ].y };
 
-			auto& arrCol{ LifeSystem.rData.ArrayData.ColorStart };
+			auto& arrCol{ rData.ArrayData.ColorStart };
 			for ( sizeT i = 0; i < alive; ++i )
-				EmitSystem.rData.ArrayData.Verts[ i ].color = { arrCol[ i ].R, arrCol[ i ].G, arrCol[ i ].B, arrCol[ i ].A };
+				rData.ArrayData.Verts[ i ].color = { arrCol[ i ].R, arrCol[ i ].G, arrCol[ i ].B, arrCol[ i ].A };
 			//
 		}
 	}
