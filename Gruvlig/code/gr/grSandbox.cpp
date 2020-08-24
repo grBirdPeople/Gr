@@ -236,11 +236,11 @@ grSandbox::Update( const float deltaT )
 	if ( m_ParticleAnimCountT < 0.0f )
 	{
 		m_ParticleAnimCountT += m_ParticleAnimT;
-		m_ParticleDegAcc += 45.0f;
-		if( m_ParticleDegAcc >= 360.0f )
+		m_ParticleDegAcc += 2.0f;
+		if( m_ParticleDegAcc >= 359.9f )
 			m_ParticleDegAcc = 0.0f;
 
-		m_pParticle->AddVelocity( { m_ParticleDegAcc - 22.5f, m_ParticleDegAcc + 22.5f }, { 50.0f, 125.0f } );
+		m_pParticle->AddVelocity( { m_ParticleDegAcc - 5.0f, m_ParticleDegAcc + 5.0f }, { 50.0f, 125.0f } );
 	}
 	
 

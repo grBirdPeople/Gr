@@ -25,10 +25,7 @@ public:
 
 	void SetEmitRate( const float emitRateSec )
 	{
-		// TODO: Add init function to emit system
-		m_puData->EmitData.EmitRateSec = emitRateSec;
-		m_puData->EmitData.EmitRateMs = 1.0f / emitRateSec;
-		m_puData->EmitData.SpawnTimeAcc = m_puData->EmitData.EmitRateMs;
+		m_puSystem->EmitSystem.Init( emitRateSec );
 	}
 
 	void AddColor( const grColor::Rgba& rStartMin, const grColor::Rgba& rStartMax, const grColor::Rgba& rEndMin, const grColor::Rgba& rEndMax, const bool hsv = true )
@@ -53,7 +50,7 @@ public:
 
 	void AddPositionEllipse( const grV2f& rRadiusMinMax )
 	{
-		m_puSystem->PositionSystem.InitCircle( rRadiusMinMax );
+		m_puSystem->PositionSystem.InitEllipse( rRadiusMinMax );
 	}
 
 	void AddMass( const grV2f& rMinMax )

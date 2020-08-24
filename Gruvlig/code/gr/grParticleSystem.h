@@ -21,6 +21,13 @@ struct grSEmitSystem
 	grSEmitSystem( const grSEmitSystem& ) = default;
 	grSEmitSystem& operator=( const grSEmitSystem& ) = default;
 
+	void Init( const float emitRateSec )
+	{
+		rData.EmitData.EmitRateSec =  grMath::AbsF( emitRateSec );
+		rData.EmitData.EmitRateMs = 1.0f / rData.EmitData.EmitRateSec;
+		rData.EmitData.SpawnTimeAcc = rData.EmitData.EmitRateMs;
+	}
+
 	void Generate()
 	{
 		rData.EmitData.SpawnTimeAcc += rData.EmitData.Dt;
@@ -430,6 +437,8 @@ struct grSMassSystem : public grSBaseSystem
 
 struct grSVelocitySystem : public grSBaseSystem
 {
+	// TODO: This systems generation function is extra weird and needs rebuild
+
 	grCParticleData& rData;
 
 	grSVelocitySystem( grCParticleData& rParticleData )
@@ -491,9 +500,6 @@ struct grSVelocitySystem : public grSBaseSystem
 
 	void Generate( const sizeT startIdx, const sizeT endIdx )
 	{
-		// This is stupid but I couldn't figure out how to do it without using 6 different loops which would be better but read worse
-		// It shall remain stupid for the moment(s)
-
 		for ( sizeT i = startIdx; i < endIdx; ++i )
 		{
 			float d{ FindDegrees() };
@@ -511,7 +517,7 @@ struct grSVelocitySystem : public grSBaseSystem
 };
 
 
-struct grSPositionSystem : public grSBaseSystem // Position system doubles as spawn shape and position update
+struct grSPositionSystem : public grSBaseSystem // Position system doubles as initial spawn shape and position update
 {
 	grCParticleData& rData;
 	GenOpt<grSPositionSystem> GenerateOpt;
@@ -614,7 +620,7 @@ struct grSPositionSystem : public grSBaseSystem // Position system doubles as sp
 		GenerateOpt = &grSPositionSystem::BoxFramedGenOpt;
 	}
 
-	void InitCircle( const grV2f& rRadiusMinMax )
+	void InitEllipse( const grV2f& rRadiusMinMax )
 	{
 		rData.PositionData.ArrMinMax[ 0 ] = rRadiusMinMax;
 		EqualCheck( rData.PositionData.ArrMinMax[ 0 ], rData.PositionData.EqualCircle );
