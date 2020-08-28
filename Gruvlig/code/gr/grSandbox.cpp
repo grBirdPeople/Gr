@@ -190,15 +190,15 @@ grSandbox::grSandbox( void )
 	grV2f winOrigo{ ( float )grCore::Instance().GetWindowSize().x * 0.5f, ( float )grCore::Instance().GetWindowSize().y * 0.5f };
 
 	m_pParticle->Stop();
-	m_pParticle->SetEmission( 1.0f, 0.5f );
-	//m_pParticle->SetColor( { 125, 255, 125, 255 }, { 255, 255, 255, 255 }, { 125, 0, 0, 255 }, { 255, 0, 255, 255 }, true );
+	m_pParticle->SetEmission( 100.0f, 0.1f );
+	m_pParticle->SetColor( { 255, 255, 0, 255 }, { 255, 255, 0, 255 }, { 255, 0, 0, 0 }, { 255, 0, 0, 0 }, true );
 	//m_pParticle->SetScale( { 0.1f, 0.1f }, { 0.1f, 0.1f }, { 1.0f, 1.0f }, { 5.0f, 5.0f } );
 	m_pParticle->SetPositionBox( { 0.0f, 0.0f }, { 0.0f, 0.0f }, 0.0f );
 	//m_pParticle->SetPositionEllipse( { 10.0f, 20.0f } );
-	m_pParticle->SetVelocity( { 0.0f, 0.0f }, { 25.0f, 25.0f } );
+	m_pParticle->SetVelocity( { 315.0f, 45.0f }, { 200.0f, 500.0f } );
 	//m_pParticle->SetVelocity( { 0.0f, 0.0f }, { 0.0f, 0.0f } );
-	//m_pParticle->SetMass( { 1.0f, 1.0f } );
-	m_pParticle->SetLife( { 2.0f, 2.0f } );
+	m_pParticle->SetMass( { 1.0f, 2.0f } );
+	m_pParticle->SetLife( { 0.25f, 0.5f } );
 
 
 

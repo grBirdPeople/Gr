@@ -39,14 +39,14 @@ struct grSEmissionSystem
 
 	void Start()
 	{
-		rData.EmitData.bGenerate = true;
+		rData.EmitData.bEmit = true;
 	}
 
 	void Stop()
 	{
 		rData.EmitData.SpawnTimeAcc = rData.EmitData.EmitRateMs;
 		rData.EmitData.BurstTimeAcc = 0.0f;
-		rData.EmitData.bGenerate = false;
+		rData.EmitData.bEmit = false;
 	}
 
 	void FindStartEnd()
@@ -64,7 +64,6 @@ struct grSEmissionSystem
 			sizeT last{ rData.EmitData.Capacity - 1 };
 			rData.EmitData.StartIdx = rData.EmitData.Size;
 			rData.EmitData.EndIdx = grMath::Min<sizeT>( rData.EmitData.StartIdx + rData.EmitData.EmitAcc, last );
-
 			rData.EmitData.Size += rData.EmitData.EndIdx - rData.EmitData.StartIdx;
 		}
 	}
@@ -88,7 +87,7 @@ struct grSEmissionSystem
 
 	void Generate()
 	{
-		if ( rData.EmitData.bGenerate )
+		if ( rData.EmitData.bEmit )
 			( this->*GenOption )();
 	}
 };
@@ -812,6 +811,13 @@ struct grSLifeSystem : public grSBaseSystem
 
 	void Kill( const sizeT nowIdx, const sizeT last )
 	{
+		float life0{ rData.ArrayData.Life[ 0 ] };
+		float life1{ rData.ArrayData.Life[ 1 ] };
+		float life2{ rData.ArrayData.Life[ 2 ] };
+
+		float lifeNow1{ rData.ArrayData.Life[ nowIdx ] };
+		float lifeLast1{ rData.ArrayData.Life[ last ] };
+
 		//grAlgo::Swap( Array.puVerts[ nowIdx ], Array.puVerts[ last ] );
 		grAlgo::Swap<grColor::Rgba>( rData.ArrayData.ColorStart[ nowIdx ], rData.ArrayData.ColorStart[ last ] );
 		grAlgo::Swap<grColor::Rgba>( rData.ArrayData.ColorEnd[ nowIdx ], rData.ArrayData.ColorEnd[ last ] );
@@ -822,6 +828,9 @@ struct grSLifeSystem : public grSBaseSystem
 		grAlgo::Swap<grV2f>( rData.ArrayData.Velocity[ nowIdx ], rData.ArrayData.Velocity[ last ] );
 		grAlgo::Swap<grV2f>( rData.ArrayData.Position[ nowIdx ], rData.ArrayData.Position[ last ] );
 		grAlgo::Swap<float>( rData.ArrayData.Life[ nowIdx ], rData.ArrayData.Life[ last ] );
+
+		float lifeNow2{ rData.ArrayData.Life[ nowIdx ] };
+		float lifeLast2{ rData.ArrayData.Life[ last ] };
 
 		// TODO: Fix this when some kind of draw system exists
 		grAlgo::Swap<sf::Vertex>( rData.ArrayData.Verts[ nowIdx ], rData.ArrayData.Verts[ last ] );
@@ -849,17 +858,13 @@ struct grSLifeSystem : public grSBaseSystem
 		( this->*GenerateOpt )( startIdx, endIdx );
 	}
 
-	void Update( const sizeT size, const float dt )
+	void Update( sizeT& rSize, const float dt )
 	{
-		for ( sizeT i = 0; i < size; ++i )
+		for ( sizeT i = 0; i < rSize; ++i )
 		{
 			rData.ArrayData.Life[ i ] -= dt;
 			if ( rData.ArrayData.Life[ i ] <= 0.0f )
-			{
-				--rData.EmitData.Size;
-				if( rData.EmitData.Size > 0 )
-					Kill( i, rData.EmitData.Size );
-			}
+				Kill( i, --rSize );
 		}
 	}
 };
@@ -914,11 +919,12 @@ private:
 		EmissionSystem.Generate();
 		if ( rData.EmitData.EmitAcc > 0 )
 		{
+			rData.EmitData.EmitAcc = 0;
 			sizeT endIdx{ rData.EmitData.EndIdx };
 			sizeT startIdx{ rData.EmitData.StartIdx };
 
-			//ColorSystem.Generate( startIdx, endIdx );
-			//ScaleSystem.Generate( startIdx, endIdx );
+			ColorSystem.Generate( startIdx, endIdx );
+			ScaleSystem.Generate( startIdx, endIdx );
 			MassSystem.Generate( startIdx, endIdx );
 			VelocitySystem.Generate( startIdx, endIdx );
 			PositionSystem.Generate( startIdx, endIdx );
@@ -938,24 +944,24 @@ private:
 
 	void Update()
 	{
-		sizeT size{ rData.EmitData.Size };
-		if ( size > 0 )
+		sizeT& rSize = rData.EmitData.Size;
+		if ( rSize > 0 )
 		{
 			float dt{ rData.EmitData.Dt };
 
-			//ColorSystem.Update( size, dt );
-			//ScaleSystem.Update( size, dt );
-			VelocitySystem.Update( size, dt );
-			PositionSystem.Update( size, dt );
-			LifeSystem.Update( size, dt );
+			ColorSystem.Update( rSize, dt );
+			ScaleSystem.Update( rSize, dt );
+			VelocitySystem.Update( rSize, dt );
+			PositionSystem.Update( rSize, dt );
+			LifeSystem.Update( rSize, dt );
 
 			// TODO: Fix this when some kind of draw system exists
 			auto& arrPos{ rData.ArrayData.Position };
-			for ( sizeT i = 0; i < size; ++i )
+			for ( sizeT i = 0; i < rSize; ++i )
 				rData.ArrayData.Verts[ i ].position = { arrPos[ i ].x, arrPos[ i ].y };
 
 			auto& arrCol{ rData.ArrayData.ColorStart };
-			for ( sizeT i = 0; i < size; ++i )
+			for ( sizeT i = 0; i < rSize; ++i )
 				rData.ArrayData.Verts[ i ].color = { arrCol[ i ].R, arrCol[ i ].G, arrCol[ i ].B, arrCol[ i ].A };
 			//
 		}

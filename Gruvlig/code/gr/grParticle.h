@@ -82,7 +82,7 @@ public:
 
 		m_puSystem->Run( dt );
 
-		printf( "Alive: %d\n", m_puData->EmitData.Size );
+		//printf( "Alive: %d\n", m_puData->EmitData.Size );
 	}
 
 	void Render( sf::RenderWindow& rRenderWin )

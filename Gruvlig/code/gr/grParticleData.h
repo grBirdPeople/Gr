@@ -65,7 +65,7 @@ struct grSEmitData
 
 	float BurstTimeSec = 0.5f;
 	float BurstTimeAcc = 0.0f;
-	bool bGenerate = true;
+	bool bEmit = true;
 	EEmitType EmitType = EEmitType::ETERNAL;
 };
 
