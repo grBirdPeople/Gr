@@ -41,8 +41,9 @@ grCore::~grCore()
 // Input
 //////////////////////////////////////////////////
 inline void
-grCore::Input( grInputManager& rInputMan )
+grCore::Input()
 {
+	grInputManager& rInputMan = grInputManager::Instance();
 	rInputMan.Update(); // Resets some vars for mouse
 
 	while ( m_puRenderWin->pollEvent( *m_puEvent ) )
@@ -150,16 +151,14 @@ grCore::Init( const str& rAppName, const intU winWidth, const intU winHeight, co
 void
 grCore::Run()
 {
-	grInputManager& rInputMan = grInputManager::Instance();
 	float timeLast	= m_puClock->getElapsedTime().asSeconds();
-
 	while ( m_puRenderWin->isOpen() )
 	{
 		m_TotalElapsedT = m_puClock->getElapsedTime().asSeconds();
 		m_Dt = m_TotalElapsedT - timeLast;
 		timeLast = m_TotalElapsedT;
 		
-		Input( rInputMan );
+		Input();
 		Update();
 		Render();
 	}

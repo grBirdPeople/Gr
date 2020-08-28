@@ -4,13 +4,13 @@
 #include "grAlgo.h"
 #include "grParticleData.h"
 
-// Different options for generating and updating based on the parameters set on system's set call
-template<typename T>
-using EmitGenOpt = void( T::* )();
-template<typename T>
-using GenOpt = void( T::* )( const sizeT startIdx, const sizeT endIdx );
-template<typename T>
-using UpdOpt = void( T::* )( const sizeT alive, const float dt );
+// Different options for generating and updating based on the parameters set on system's SetData call
+// Unsure how much the indirection effects performance but it's cleaner then switches which was the alternative with similar simplicity
+// Might change to virtual functions in an inherited struct as that might be faster (c++ zero overhead principal)
+
+template<typename T> using EmitGenOpt = void( T::* )(); // Template here to avoid forwarding and keep it consistent with the other func ptr's
+template<typename T> using GenericGenOpt = void( T::* )( const sizeT startIdx, const sizeT endIdx );
+template<typename T> using GenericUpdOpt = void( T::* )( const sizeT alive, const float dt );
 
 
 struct grSEmissionSystem
@@ -20,84 +20,81 @@ struct grSEmissionSystem
 
 	grSEmissionSystem( grCParticleData& rParticleData )
 		: rData( rParticleData )
-		, GenOption( &grSEmissionSystem::Unite )
+		, GenOption( &grSEmissionSystem::GenEnternal )
 	{}
 	grSEmissionSystem( const grSEmissionSystem& ) = default;
 	grSEmissionSystem& operator=( const grSEmissionSystem& ) = default;
 
 	void SetData( const float emitRateSec, const float burstTimeSec )
 	{
-		rData.EmissionData.EmitRateSec =  grMath::AbsF( emitRateSec );
-		rData.EmissionData.EmitRateMs = 1.0f / rData.EmissionData.EmitRateSec;
-		rData.EmissionData.SpawnTimeAcc = rData.EmissionData.EmitRateMs;
+		rData.EmitData.EmitRateSec =  grMath::AbsF( emitRateSec );
+		rData.EmitData.EmitRateMs = 1.0f / rData.EmitData.EmitRateSec;
+		rData.EmitData.SpawnTimeAcc = rData.EmitData.EmitRateMs;
 
-		rData.EmissionData.BurstTimeSec = grMath::AbsF( burstTimeSec );
+		rData.EmitData.BurstTimeSec = grMath::AbsF( burstTimeSec );
 
-		rData.EmissionData.EmissionType = rData.EmissionData.BurstTimeSec == 0.0f ? EEmissionType::UNITE : EEmissionType::BURST;
-		GenOption = rData.EmissionData.EmissionType == EEmissionType::UNITE ? &grSEmissionSystem::Unite : &grSEmissionSystem::Burst;
+		rData.EmitData.EmitType = rData.EmitData.BurstTimeSec == 0.0f ? EEmitType::ETERNAL : EEmitType::BURST;
+		GenOption = rData.EmitData.EmitType == EEmitType::ETERNAL ? &grSEmissionSystem::GenEnternal : &grSEmissionSystem::GenBurst;
 	}
 
 	void Start()
 	{
-		if ( !rData.EmissionData.bGenerate )
-		{
-			rData.EmissionData.SpawnTimeAcc = 0.0f;
-			rData.EmissionData.BurstTimeAcc = 0.0f;
-			rData.EmissionData.bGenerate = true;
-		}
+		rData.EmitData.bGenerate = true;
 	}
 
 	void Stop()
 	{
-		rData.EmissionData.bGenerate = false;
-	}
-
-	void Unite()
-	{
-		FindStartEnd();
-	}
-
-	void Burst()
-	{
-		rData.EmissionData.BurstTimeAcc += rData.EmissionData.Dt;
-		FindStartEnd();
-
-		if ( rData.EmissionData.BurstTimeAcc > rData.EmissionData.BurstTimeSec )
-			Stop();
+		rData.EmitData.SpawnTimeAcc = rData.EmitData.EmitRateMs;
+		rData.EmitData.BurstTimeAcc = 0.0f;
+		rData.EmitData.bGenerate = false;
 	}
 
 	void FindStartEnd()
 	{
-		rData.EmissionData.SpawnTimeAcc += rData.EmissionData.Dt;
-		rData.EmissionData.EmitAcc = 0;
-		while ( rData.EmissionData.SpawnTimeAcc >= rData.EmissionData.EmitRateMs )
+		rData.EmitData.SpawnTimeAcc += rData.EmitData.Dt;
+		rData.EmitData.EmitAcc = 0;
+		while ( rData.EmitData.SpawnTimeAcc > rData.EmitData.EmitRateMs )
 		{
-			rData.EmissionData.SpawnTimeAcc -= rData.EmissionData.EmitRateMs;
-			rData.EmissionData.EmitAcc += 1;
+			rData.EmitData.SpawnTimeAcc -= rData.EmitData.EmitRateMs;
+			rData.EmitData.EmitAcc += 1;
 		}
 
-		if ( rData.EmissionData.EmitAcc > 0 )
+		if ( rData.EmitData.EmitAcc > 0 )
 		{
-			sizeT last{ rData.EmissionData.Size - 1 };
-			rData.EmissionData.StartIdx = rData.EmissionData.Alive;
-			rData.EmissionData.EndIdx = grMath::Min<sizeT>( rData.EmissionData.StartIdx + rData.EmissionData.EmitAcc, last );
+			sizeT last{ rData.EmitData.Capacity - 1 };
+			rData.EmitData.StartIdx = rData.EmitData.Size;
+			rData.EmitData.EndIdx = grMath::Min<sizeT>( rData.EmitData.StartIdx + rData.EmitData.EmitAcc, last );
 
-			rData.EmissionData.Alive +=
-				rData.EmissionData.StartIdx < rData.EmissionData.EndIdx ?
-				rData.EmissionData.EndIdx - rData.EmissionData.StartIdx :
-				0;
+			rData.EmitData.Size += rData.EmitData.EndIdx - rData.EmitData.StartIdx;
 		}
+	}
+
+	void GenEnternal()
+	{
+		FindStartEnd();
+	}
+
+	void GenBurst()
+	{
+		rData.EmitData.BurstTimeAcc += rData.EmitData.Dt;
+		if ( rData.EmitData.BurstTimeAcc > rData.EmitData.BurstTimeSec )
+		{
+			Stop();
+			return;
+		}
+
+		FindStartEnd();
 	}
 
 	void Generate()
 	{
-		if ( rData.EmissionData.bGenerate )
-			( this->*GenOption )( );
+		if ( rData.EmitData.bGenerate )
+			( this->*GenOption )();
 	}
 };
 
 
-struct grSBaseSystem // Some helper functions
+struct grSBaseSystem // Some common helper functions
 {
 	void EqualCheck( grV2f& rMinMax, EEqualValue& rEqual )
 	{
@@ -159,8 +156,8 @@ struct grSBaseSystem // Some helper functions
 struct grSColorSystem : public grSBaseSystem
 {
 	grCParticleData& rData;
-	GenOpt<grSColorSystem> GenerateOpt;
-	UpdOpt<grSColorSystem> UpdateOpt; // Lerp HSV or RGB
+	GenericGenOpt<grSColorSystem> GenerateOpt;
+	GenericUpdOpt<grSColorSystem> UpdateOpt; // Lerp HSV or RGB
 
 	grSColorSystem( grCParticleData& rParticleData )
 		: rData( rParticleData )
@@ -265,9 +262,9 @@ struct grSColorSystem : public grSBaseSystem
 			rData.ArrayData.ColorEnd[ i ] = rData.ColorData.ArrMinMax[ 2 ];
 	}
 
-	void UpdOpt0( const sizeT alive, const float dt )
+	void UpdOpt0( const sizeT size, const float dt )
 	{
-		for ( sizeT i = 0; i < alive; ++i )
+		for ( sizeT i = 0; i < size; ++i )
 		{
 			float step{ 1.0f / rData.ArrayData.Life[ i ] * dt };
 
@@ -284,9 +281,9 @@ struct grSColorSystem : public grSBaseSystem
 		}
 	}
 
-	void UpdOpt1( const sizeT alive, const float dt )
+	void UpdOpt1( const sizeT size, const float dt )
 	{
-		for ( sizeT i = 0; i < alive; ++i )
+		for ( sizeT i = 0; i < size; ++i )
 		{
 			float step{ 1.0f / rData.ArrayData.Life[ i ] * dt };
 
@@ -305,12 +302,12 @@ struct grSColorSystem : public grSBaseSystem
 		( this->*GenerateOpt )( startIdx, endIdx );
 	}
 
-	void Update( const sizeT alive, const float dt )
+	void Update( const sizeT size, const float dt )
 	{
 		if ( rData.ColorData.LerpEqual == EEqualValue::YES )
 			return;
 
-		( this->*UpdateOpt )( alive, dt );
+		( this->*UpdateOpt )( size, dt );
 	}
 };
 
@@ -318,8 +315,8 @@ struct grSColorSystem : public grSBaseSystem
 struct grSScaleSystem : public grSBaseSystem
 {
 	grCParticleData& rData;
-	GenOpt<grSScaleSystem> GenerateOpt;
-	UpdOpt<grSScaleSystem> UpdateOpt; // Lerp or not
+	GenericGenOpt<grSScaleSystem> GenerateOpt;
+	GenericUpdOpt<grSScaleSystem> UpdateOpt; // Lerp or not
 
 	grSScaleSystem( grCParticleData& rParticleData )
 		: rData( rParticleData )
@@ -404,9 +401,9 @@ struct grSScaleSystem : public grSBaseSystem
 			rData.ArrayData.ScaleEnd[ i ] = rData.ScaleData.ArrMinMax[ 2 ];
 	}
 
-	void UpdOpt0( const sizeT alive, const float dt )
+	void UpdOpt0( const sizeT size, const float dt )
 	{
-		for ( sizeT i = 0; i < alive; ++i )
+		for ( sizeT i = 0; i < size; ++i )
 		{
 			float step{ ( 1.0f / rData.ArrayData.Life[ i ] ) * dt };
 			grV2f start{ rData.ArrayData.ScaleStart[ i ] };
@@ -415,9 +412,9 @@ struct grSScaleSystem : public grSBaseSystem
 		}
 	}
 
-	void UpdOpt1( const sizeT alive, const float dt )
+	void UpdOpt1( const sizeT size, const float dt )
 	{
-		for ( sizeT i = 0; i < alive; ++i )
+		for ( sizeT i = 0; i < size; ++i )
 			rData.ArrayData.ScaleStart[ i ] = rData.ArrayData.ScaleStart[ i ];
 	}
 
@@ -426,9 +423,9 @@ struct grSScaleSystem : public grSBaseSystem
 		( this->*GenerateOpt )( startIdx, endIdx );
 	}
 
-	void Update( const sizeT alive, const float dt )
+	void Update( const sizeT size, const float dt )
 	{
-		( this->*UpdateOpt )( alive, dt );
+		( this->*UpdateOpt )( size, dt );
 	}
 };
 
@@ -436,7 +433,7 @@ struct grSScaleSystem : public grSBaseSystem
 struct grSMassSystem : public grSBaseSystem
 {
 	grCParticleData& rData;
-	GenOpt<grSMassSystem> GenerateOpt;
+	GenericGenOpt<grSMassSystem> GenerateOpt;
 
 	grSMassSystem( grCParticleData& rParticleData )
 		: rData( rParticleData )
@@ -551,9 +548,9 @@ struct grSVelocitySystem : public grSBaseSystem
 		}
 	}
 
-	void Update( const sizeT alive, const float dt )
+	void Update( const sizeT size, const float dt )
 	{
-		for ( sizeT i = 0; i < alive; ++i )
+		for ( sizeT i = 0; i < size; ++i )
 			rData.ArrayData.Velocity[ i ] += rData.ArrayData.Acceleration[ i ].x * dt;
 	}
 };
@@ -562,7 +559,7 @@ struct grSVelocitySystem : public grSBaseSystem
 struct grSPositionSystem : public grSBaseSystem // Position system doubles as initial spawn shape and position update
 {
 	grCParticleData& rData;
-	GenOpt<grSPositionSystem> GenerateOpt;
+	GenericGenOpt<grSPositionSystem> GenerateOpt;
 
 	grSPositionSystem( grCParticleData& rParticleData )
 		: rData( rParticleData )
@@ -678,7 +675,7 @@ struct grSPositionSystem : public grSBaseSystem // Position system doubles as in
 
 	void CircleGenOption0( const sizeT startIdx, const sizeT endIdx )
 	{
-		grV2f sysPos{ rData.EmissionData.SystemPosition };
+		grV2f sysPos{ rData.EmitData.SystemPosition };
 		DistF distRad{ rData.PositionData.Rand.DistF( rData.PositionData.ArrMinMax[ 0 ] ) };
 		DistF distDeg{ rData.PositionData.Rand.DistF( 0.0f, 359.9f ) };
 		for ( sizeT i = startIdx; i < endIdx; ++i )
@@ -691,7 +688,7 @@ struct grSPositionSystem : public grSBaseSystem // Position system doubles as in
 
 	void CircleGenOption1( const sizeT startIdx, const sizeT endIdx )
 	{
-		grV2f sysPos{ rData.EmissionData.SystemPosition };
+		grV2f sysPos{ rData.EmitData.SystemPosition };
 		DistF distDeg{ rData.PositionData.Rand.DistF( 0.0f, 359.9f ) };
 		for ( sizeT i = startIdx; i < endIdx; ++i )
 		{
@@ -714,7 +711,7 @@ struct grSPositionSystem : public grSBaseSystem // Position system doubles as in
 
 	void BoxFilledGenOpt0( const sizeT startIdx, const sizeT endIdx )
 	{
-		grV2f sysPos{ rData.EmissionData.SystemPosition };
+		grV2f sysPos{ rData.EmitData.SystemPosition };
 		for ( sizeT i = startIdx; i < endIdx; ++i )
 		{
 			grV2f v{ rData.PositionData.Rand.Float( rData.PositionData.ArrDistBox[ 0 ] ), rData.PositionData.Rand.Float( rData.PositionData.ArrDistBox[ 1 ] ) };
@@ -724,7 +721,7 @@ struct grSPositionSystem : public grSBaseSystem // Position system doubles as in
 
 	void BoxFilledGenOpt1( const sizeT startIdx, const sizeT endIdx )
 	{
-		grV2f v{ grV2f( 0.0f, rData.PositionData.ArrMinMax[ 0 ].y ) + rData.EmissionData.SystemPosition };
+		grV2f v{ grV2f( 0.0f, rData.PositionData.ArrMinMax[ 0 ].y ) + rData.EmitData.SystemPosition };
 		for ( sizeT i = startIdx; i < endIdx; ++i )
 		{
 			v.x += rData.PositionData.Rand.Float( rData.PositionData.ArrDistBox[ 0 ] );
@@ -734,7 +731,7 @@ struct grSPositionSystem : public grSBaseSystem // Position system doubles as in
 
 	void BoxFilledGenOpt2( const sizeT startIdx, const sizeT endIdx )
 	{
-		grV2f v{ grV2f( rData.PositionData.ArrMinMax[ 0 ].x, 0.0f ) + rData.EmissionData.SystemPosition };
+		grV2f v{ grV2f( rData.PositionData.ArrMinMax[ 0 ].x, 0.0f ) + rData.EmitData.SystemPosition };
 		for ( sizeT i = startIdx; i < endIdx; ++i )
 		{
 			v.y += rData.PositionData.Rand.Float( rData.PositionData.ArrDistBox[ 1 ] );
@@ -744,14 +741,14 @@ struct grSPositionSystem : public grSBaseSystem // Position system doubles as in
 
 	void BoxFilledGenOpt3( const sizeT startIdx, const sizeT endIdx )
 	{
-		grV2f v{ grV2f( rData.PositionData.ArrMinMax[ 0 ] ) + rData.EmissionData.SystemPosition };
+		grV2f v{ grV2f( rData.PositionData.ArrMinMax[ 0 ] ) + rData.EmitData.SystemPosition };
 		for ( sizeT i = startIdx; i < endIdx; ++i )
 			rData.ArrayData.Position[ i ] = v;
 	}
 
 	void BoxFramedGenOpt( const sizeT startIdx, const sizeT endIdx )
 	{
-		grV2f sysPos{ rData.EmissionData.SystemPosition };
+		grV2f sysPos{ rData.EmitData.SystemPosition };
 		for ( sizeT i = startIdx; i < endIdx; ++i )
 		{
 			rData.PositionData.BoxFrameDegAcc = rData.PositionData.BoxFrameDegAcc >= 270.0f ? 0.0f : rData.PositionData.BoxFrameDegAcc + 90.0f;
@@ -778,9 +775,9 @@ struct grSPositionSystem : public grSBaseSystem // Position system doubles as in
 		( this->*GenerateOpt )( startIdx, endIdx );
 	}
 
-	void Update( const sizeT alive, const float dt )
+	void Update( const sizeT size, const float dt )
 	{
-		for ( sizeT i = 0; i < alive; ++i )
+		for ( sizeT i = 0; i < size; ++i )
 			rData.ArrayData.Position[ i ] += rData.ArrayData.Velocity[ i ] * dt;
 	}
 };
@@ -789,7 +786,7 @@ struct grSPositionSystem : public grSBaseSystem // Position system doubles as in
 struct grSLifeSystem : public grSBaseSystem
 {
 	grCParticleData& rData;
-	GenOpt<grSLifeSystem> GenerateOpt;
+	GenericGenOpt<grSLifeSystem> GenerateOpt;
 
 	grSLifeSystem( grCParticleData& rParticleData )
 		: rData( rParticleData )
@@ -852,13 +849,17 @@ struct grSLifeSystem : public grSBaseSystem
 		( this->*GenerateOpt )( startIdx, endIdx );
 	}
 
-	void Update( const sizeT alive, const float dt )
+	void Update( const sizeT size, const float dt )
 	{
-		for ( sizeT i = 0; i < alive; ++i )
+		for ( sizeT i = 0; i < size; ++i )
 		{
 			rData.ArrayData.Life[ i ] -= dt;
 			if ( rData.ArrayData.Life[ i ] <= 0.0f )
-				Kill( i, --rData.EmissionData.Alive );
+			{
+				--rData.EmitData.Size;
+				if( rData.EmitData.Size > 0 )
+					Kill( i, rData.EmitData.Size );
+			}
 		}
 	}
 };
@@ -894,7 +895,7 @@ public:
 
 	void Run( const float dt )
 	{
-		rData.EmissionData.Dt = dt;
+		rData.EmitData.Dt = dt;
 
 		Generate();
 		Update();
@@ -903,7 +904,7 @@ public:
 	void Render( sf::RenderWindow& rRenderWin )
 	{
 		// TODO: Fix this when some kind of draw system exists
-		rRenderWin.draw( &rData.ArrayData.Verts.get()[ 0 ], rData.EmissionData.Alive, sf::PrimitiveType::Points );
+		rRenderWin.draw( &rData.ArrayData.Verts.get()[ 0 ], rData.EmitData.Size, sf::PrimitiveType::Points );
 		//
 	}
 
@@ -911,13 +912,13 @@ private:
 	void Generate()
 	{
 		EmissionSystem.Generate();
-		if ( rData.EmissionData.EmitAcc > 0 )
+		if ( rData.EmitData.EmitAcc > 0 )
 		{
-			sizeT endIdx{ rData.EmissionData.EndIdx };
-			sizeT startIdx{ rData.EmissionData.StartIdx };
+			sizeT endIdx{ rData.EmitData.EndIdx };
+			sizeT startIdx{ rData.EmitData.StartIdx };
 
-			ColorSystem.Generate( startIdx, endIdx );
-			ScaleSystem.Generate( startIdx, endIdx );
+			//ColorSystem.Generate( startIdx, endIdx );
+			//ScaleSystem.Generate( startIdx, endIdx );
 			MassSystem.Generate( startIdx, endIdx );
 			VelocitySystem.Generate( startIdx, endIdx );
 			PositionSystem.Generate( startIdx, endIdx );
@@ -937,24 +938,24 @@ private:
 
 	void Update()
 	{
-		if ( rData.EmissionData.Alive > 0 )
+		sizeT size{ rData.EmitData.Size };
+		if ( size > 0 )
 		{
-			float dt{ rData.EmissionData.Dt };
-			sizeT alive{ rData.EmissionData.Alive };
+			float dt{ rData.EmitData.Dt };
 
-			ColorSystem.Update( alive, dt );
-			ScaleSystem.Update( alive, dt );
-			VelocitySystem.Update( alive, dt );
-			PositionSystem.Update( alive, dt );
-			LifeSystem.Update( alive, dt );
+			//ColorSystem.Update( size, dt );
+			//ScaleSystem.Update( size, dt );
+			VelocitySystem.Update( size, dt );
+			PositionSystem.Update( size, dt );
+			LifeSystem.Update( size, dt );
 
 			// TODO: Fix this when some kind of draw system exists
 			auto& arrPos{ rData.ArrayData.Position };
-			for ( sizeT i = 0; i < alive; ++i )
+			for ( sizeT i = 0; i < size; ++i )
 				rData.ArrayData.Verts[ i ].position = { arrPos[ i ].x, arrPos[ i ].y };
 
 			auto& arrCol{ rData.ArrayData.ColorStart };
-			for ( sizeT i = 0; i < alive; ++i )
+			for ( sizeT i = 0; i < size; ++i )
 				rData.ArrayData.Verts[ i ].color = { arrCol[ i ].R, arrCol[ i ].G, arrCol[ i ].B, arrCol[ i ].A };
 			//
 		}

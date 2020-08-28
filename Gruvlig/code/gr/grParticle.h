@@ -5,6 +5,9 @@
 #include "grParticleSystem.h"
 
 
+// Interface class which will be returned on system creation by the particle manager when that exists
+// An id will be added here and instances of grCParticleData and grCParticleSystem will live in the manager and possible be stored as ref's here
+// Update and render will be moved to the manager
 class grCParticle
 {
 public:
@@ -30,7 +33,7 @@ public:
 
 	void SetPositionSystem( const grV2f& rPosition )
 	{
-		m_puData->EmissionData.SystemPosition = rPosition;
+		m_puData->EmitData.SystemPosition = rPosition;
 	}
 
 	void SetEmission( const float emitRateSec, const float burstTimeSec = 0.0f )
@@ -79,7 +82,7 @@ public:
 
 		m_puSystem->Run( dt );
 
-		printf( "Alive: %d\n", m_puData->EmissionData.Alive );
+		printf( "Alive: %d\n", m_puData->EmitData.Size );
 	}
 
 	void Render( sf::RenderWindow& rRenderWin )
@@ -88,12 +91,12 @@ public:
 
 		//// SCALE TEST
 		//grSArrayData& rArray{ m_puData->ArrayData };
-		//sizeT alive{ m_puData->EmissionData.Alive };
-		//for ( sizeT i = 0; i < alive; ++i )
+		//sizeT size{ m_puData->EmitData.Size };
+		//for ( sizeT i = 0; i < size; ++i )
 		//{
 		//	grColor::Rgba& rgba = rArray.ColorStart[ i ];
 		//	sf::Color c{ rgba.R, rgba.G, rgba.B, rgba.A };
-		//	grBBox b{ rArray.ScaleStart[ i ], rArray.Position[ i ] };
+		//	grBBox b{ 0.5f, rArray.Position[ i ] };
 		//	grDebugManager::Instance().AddBBox( b, c );
 		//}
 		////
