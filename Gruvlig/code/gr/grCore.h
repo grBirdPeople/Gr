@@ -92,7 +92,7 @@ private:
 	inline void InitRenderWin();
 	inline void InitManager();
 	inline void DeInitManager();
-	inline void Input( grInputManager& rInputMan );
+	inline void Input();
 	inline void Update();
 	inline void Render();
 	inline void	Terminate();

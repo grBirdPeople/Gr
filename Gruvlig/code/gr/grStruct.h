@@ -405,7 +405,7 @@ namespace grStruct
 				return;
 			}
 
-			grHashNode<T>* pNode = m_vecNode[ hashIdx ];
+			grHashNode<T> pNode = m_vecNode[ hashIdx ];
 			//while ( pNode->m_Key != -1 )
 			//{
 			//	++hashIdx;

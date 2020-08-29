@@ -5,6 +5,9 @@
 #include "grParticleSystem.h"
 
 
+// Interface class which will be returned on system creation by the particle manager when that exists
+// An id will be added here and instances of grCParticleData and grCParticleSystem will live in the manager and possible be stored as ref's here
+// Update and render will be moved to the manager
 class grCParticle
 {
 public:
@@ -18,62 +21,68 @@ public:
 	grCParticle( grCParticle&& ) noexcept = delete;
 	grCParticle& operator=( grCParticle&& ) noexcept = delete;
 
-	void SetSystemPosition( const grV2f& rPosition )
+	void Start()
+	{
+		m_puSystem->EmissionSystem.Start();
+	}
+
+	void Stop()
+	{
+		m_puSystem->EmissionSystem.Stop();
+	}
+
+	void SetPositionSystem( const grV2f& rPosition )
 	{
 		m_puData->EmitData.SystemPosition = rPosition;
 	}
 
-	void SetEmitRate( const float emitRateSec )
+	void SetEmission( const float emitRateSec, const float burstTimeSec = 0.0f )
 	{
-		m_puData->EmitData.EmitRateSec = emitRateSec;
-		m_puData->EmitData.EmitRateMs = 1.0f / emitRateSec;
-		m_puData->EmitData.SpawnTimeAcc = m_puData->EmitData.EmitRateMs;
+		m_puSystem->EmissionSystem.SetData( emitRateSec, burstTimeSec );
 	}
 
-	void AddColor( const grColor::Rgba& rStartMin, const grColor::Rgba& rStartMax, const grColor::Rgba& rEndMin, const grColor::Rgba& rEndMax, const bool hsv = true )
+	void SetColor( const grColor::Rgba& rStartMin, const grColor::Rgba& rStartMax, const grColor::Rgba& rEndMin, const grColor::Rgba& rEndMax, const bool hsv = true )
 	{
-		m_puSystem->ColorSystem.Init( rStartMin, rStartMax, rEndMin, rEndMax, hsv );
+		m_puSystem->ColorSystem.SetData( rStartMin, rStartMax, rEndMin, rEndMax, hsv );
 	}
 
-	void AddScale( const grV2f& rStartMin, const grV2f& rStartMax, const grV2f& rEndMin, const grV2f& rEndMax )
+	void SetScale( const grV2f& rStartMin, const grV2f& rStartMax, const grV2f& rEndMin, const grV2f& rEndMax )
 	{
-		m_puSystem->ScaleSystem.Init( rStartMin, rStartMax, rEndMin, rEndMax );
+		m_puSystem->ScaleSystem.SetData( rStartMin, rStartMax, rEndMin, rEndMax );
 	}
 
-	void AddVelocity( const grV2f& rDegreeMinMax, const grV2f& rForceMinMax )
+	void SetVelocity( const grV2f& rDegreeMinMax, const grV2f& rForceMinMax )
 	{
-		m_puSystem->VelocitySystem.Init( rDegreeMinMax, rForceMinMax );
+		m_puSystem->VelocitySystem.SetData( rDegreeMinMax, rForceMinMax );
 	}
 
-	void AddPositionBox( const grV2f& rOffsetMin, const grV2f& rOffsetMax, const float frameThickness = 0.0f )
+	void SetPositionBox( const grV2f& rOffsetMin, const grV2f& rOffsetMax, const float frameThickness = 0.0f )
 	{
-		m_puSystem->PositionSystem.InitBox( rOffsetMin, rOffsetMax, frameThickness );
+		m_puSystem->PositionSystem.SetBoxData( rOffsetMin, rOffsetMax, frameThickness );
 	}
 
-	void AddPositionEllipse( const grV2f& rRadiusMinMax )
+	void SetPositionEllipse( const grV2f& rRadiusMinMax )
 	{
-		m_puSystem->PositionSystem.InitCircle( rRadiusMinMax );
+		m_puSystem->PositionSystem.SetEllipseData( rRadiusMinMax );
 	}
 
-	void AddMass( const grV2f& rMinMax )
+	void SetMass( const grV2f& rMinMax )
 	{
-		m_puSystem->MassSystem.Init( rMinMax );
+		m_puSystem->MassSystem.SetData( rMinMax );
 	}
 
-	void AddLife( const grV2f& rMinMax )
+	void SetLife( const grV2f& rMinMax )
 	{
-		m_puSystem->LifeSystem.Init( rMinMax );
+		m_puSystem->LifeSystem.SetData( rMinMax );
 	}
 
 	void Update( const float dt )
 	{
 		//grStruct::grSTimer t( "Run", grStruct::grSTimer::ETimeType::MS );
-		sizeT alive{ m_puData->EmitData.Alive };
-		printf( "%d\n", alive );
 
+		m_puSystem->Run( dt );
 
-		m_puData->EmitData.Dt = dt;
-		m_puSystem->Run();
+		//printf( "Alive: %d\n", m_puData->EmitData.Size );
 	}
 
 	void Render( sf::RenderWindow& rRenderWin )
@@ -82,19 +91,19 @@ public:
 
 		//// SCALE TEST
 		//grSArrayData& rArray{ m_puData->ArrayData };
-		//sizeT alive{ m_puData->EmitData.Alive };
-		//for ( sizeT i = 0; i < alive; ++i )
+		//sizeT size{ m_puData->EmitData.Size };
+		//for ( sizeT i = 0; i < size; ++i )
 		//{
 		//	grColor::Rgba& rgba = rArray.ColorStart[ i ];
 		//	sf::Color c{ rgba.R, rgba.G, rgba.B, rgba.A };
 		//	grBBox b{ rArray.ScaleStart[ i ], rArray.Position[ i ] };
 		//	grDebugManager::Instance().AddBBox( b, c );
 		//}
-		////printf( "%d\n", alive );
 		////
 	}
 
 private:
+	// TODO: Move this when/if a particle manager exists
 	pU<grCParticleData> m_puData;
 	pU<grCParticleSystem> m_puSystem;	
 };

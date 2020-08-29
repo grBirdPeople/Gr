@@ -9,10 +9,17 @@ using DistF = std::uniform_real_distribution<float>;
 using DistUI = std::uniform_int_distribution<unsigned int>;
 
 
+enum class EEmitType
+{
+	ETERNAL = 0,
+	BURST
+};
+
+
 enum class EEqualValue
 {
-	NO = 0,
-	YES
+	YES = 0,
+	NO
 };
 
 
@@ -36,7 +43,7 @@ struct grSArrayData
 	pU<grV2f[]> Position;
 	pU<float[]> Life;
 
-	// TODO: Remove this when some kind of draw system exists
+	// TODO: Fix this when some kind of draw system exists
 	pU<sf::Vertex[]> Verts;
 	//
 };
@@ -48,12 +55,18 @@ struct grSEmitData
 	float Dt = 0.0f;
 	float EmitRateSec = 200.0f;;
 	float EmitRateMs = 1.0f / EmitRateSec;
-	float SpawnTimeAcc = 0.0f;
+	float SpawnTimeAcc = EmitRateMs;
 	sizeT EmitAcc = 0;
+	sizeT Capacity = 0;
 	sizeT Size = 0;
-	sizeT Alive = 0;
 	sizeT StartIdx = 0;
 	sizeT EndIdx = 0;
+
+
+	float BurstTimeSec = 0.5f;
+	float BurstTimeAcc = 0.0f;
+	bool bEmit = true;
+	EEmitType EmitType = EEmitType::ETERNAL;
 };
 
 
@@ -176,7 +189,7 @@ public:
 		ArrayData.Verts = std::make_unique<sf::Vertex[]>( size );
 		//
 
-		EmitData.Size = size;
+		EmitData.Capacity = size;
 	}
 	grCParticleData( const grCParticleData& ) = delete;
 	grCParticleData& operator=( const grCParticleData& ) = delete;

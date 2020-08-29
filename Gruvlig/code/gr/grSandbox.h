@@ -48,7 +48,7 @@ private:
 	grIEntity* m_pEnemy;
 	bool m_bFlipFlop = true;
 	grV2f m_LastMousePos;
-	float m_ParticleAnimT = 0.5f, m_ParticleAnimCountT = 0.0f, m_ParticleDegAcc = 0.0f;
+	float m_ParticleAnimT = 0.01f, m_ParticleAnimCountT = 0.0f, m_ParticleDegAcc = 0.0f;
 	grRandMT* m_Rand;
 };
 

@@ -91,5 +91,6 @@ typedef	grV2<double>	grV2d;
 typedef	grV2<float>		grV2f;
 typedef	grV2<intS>		grV2s;
 typedef	grV2<intU>		grV2u;
+typedef	grV2<sizeT>		grV2t;
 
 #endif		//_GRV2_

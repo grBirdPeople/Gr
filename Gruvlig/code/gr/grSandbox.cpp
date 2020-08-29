@@ -189,15 +189,16 @@ grSandbox::grSandbox( void )
 	// Other particles
 	grV2f winOrigo{ ( float )grCore::Instance().GetWindowSize().x * 0.5f, ( float )grCore::Instance().GetWindowSize().y * 0.5f };
 
-	m_pParticle->SetEmitRate( 6500.0f );
-	m_pParticle->AddColor( { 255, 0, 0, 63 }, { 255, 255, 0, 255 }, { 255, 255, 255, 0 }, { 255, 255, 255, 255 }, true );
-	//m_pParticle->AddScale( { 0.1f, 0.1f }, { 0.1f, 0.1f }, { 5.0f, 5.0f }, { 10.0f, 10.0f } );
-	//m_pParticle->AddPositionBox( { -50.0f, -75.0f }, { 50.0f, 75.0f }, 25.0f );
-	//m_pParticle->AddPositionEllipse( { 10.0f, 20.0f } );
-	m_pParticle->AddVelocity( { 315.0f, 45.0f }, { 50.0f, 125.0f } );
-	//m_pParticle->AddVelocity( { 0.0f, 0.0f }, { 0.0f, 0.0f } );
-	m_pParticle->AddMass( { 1.0f, 2.0f } );
-	m_pParticle->AddLife( { 1.0f, 3.0f } );
+	m_pParticle->Stop();
+	m_pParticle->SetEmission( 2500.0f, 0.0f );
+	m_pParticle->SetColor( { 255, 123, 0, 255 }, { 255, 255, 0, 255 }, { 255, 0, 0, 0 }, { 255, 0, 0, 123 }, true );
+	//m_pParticle->SetScale( { 0.1f, 0.1f }, { 5.1f, 5.1f }, { 5.0f, 5.0f }, { 10.0f, 10.0f } );
+	m_pParticle->SetPositionBox( { 0.0f, 0.0f }, { 0.0f, 0.0f }, 0.0f );
+	//m_pParticle->SetPositionEllipse( { 0.1f, 0.0f } );
+	m_pParticle->SetVelocity( { 315.0f, 45.0f }, { 200.0f, 500.0f } );
+	//m_pParticle->SetVelocity( { 0.0f, 0.0f }, { 0.0f, 0.0f } );
+	m_pParticle->SetMass( { 1.0f, 2.0f } );
+	m_pParticle->SetLife( { 0.25f, 0.75f } );
 
 
 
@@ -226,22 +227,23 @@ grSandbox::Update( const float deltaT )
 	m_pParticle->Update( deltaT );
 
 	if ( m_rInputMan.GetMouseMoved() )
-	{
-		//m_pPartSys1->SetSystemPosition( m_rInputMan.GetMousePos() );
-		m_pParticle->SetSystemPosition( m_rInputMan.GetMousePos() );
-	}
-	m_LastMousePos = m_rInputMan.GetMousePos();
+		m_pParticle->SetPositionSystem( m_rInputMan.GetMousePos() );
 
-	//// Particles spiral test
+	if ( m_rInputMan.GetMouseDown( sf::Mouse::Left ) )
+		m_pParticle->Start();
+	if ( m_rInputMan.GetMouseDown( sf::Mouse::Right ) )
+		m_pParticle->Stop();
+
+	// Particles spiral test
 	//m_ParticleAnimCountT -= deltaT;
 	//if ( m_ParticleAnimCountT < 0.0f )
 	//{
 	//	m_ParticleAnimCountT += m_ParticleAnimT;
-	//	m_ParticleDegAcc += 45.0f;
-	//	if( m_ParticleDegAcc >= 360.0f )
+	//	m_ParticleDegAcc += 2.0f;
+	//	if( m_ParticleDegAcc >= 359.9f )
 	//		m_ParticleDegAcc = 0.0f;
 
-	//	m_pPartSys1->SetGravity( m_ParticleDegAcc, 1.0f );
+	//	m_pParticle->SetVelocity( { m_ParticleDegAcc - 5.0f, m_ParticleDegAcc + 5.0f }, { 50.0f, 125.0f } );
 	//}
 	
 
@@ -257,19 +259,19 @@ grSandbox::Update( const float deltaT )
 	}
 
 
-	// Scenegraph things
-	if ( m_rInputMan.GetMouseDown( sf::Mouse::Left ) )
-	{
+	//// Scenegraph things
+	//if ( m_rInputMan.GetMouseDown( sf::Mouse::Left ) )
+	//{
 		//m_pPlayer->ReleaseChildByIdx( 0 );		
 		//grEntityManager::Instance().DestroyEntity( m_pPlayer );
 		//grEntityManager::Instance().DestroyEntity( m_pEnemy );
 
-		m_bFlipFlop = !m_bFlipFlop;
+		//m_bFlipFlop = !m_bFlipFlop;
 		//m_pEnemy->SetEnable( hej );
 		//m_pPlayer->SetEnable( hej );
 
-		( m_bFlipFlop == false ) ? m_pPlayer->ReleaseChildById( m_pEnemy->GetId() ) : m_pPlayer->AddChild( m_pEnemy );
-	}
+		//( m_bFlipFlop == false ) ? m_pPlayer->ReleaseChildById( m_pEnemy->GetId() ) : m_pPlayer->AddChild( m_pEnemy );
+	//}
 
 	// Navmesh things
 	if ( m_pMap != nullptr )
