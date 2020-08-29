@@ -12,6 +12,21 @@ using uniform_sInt = std::uniform_int_distribution<signed int>;
 using uniform_uInt = std::uniform_int_distribution<unsigned int>;
 
 
+// sfrand
+//////////////////////////////////////////////////
+namespace grRand
+{
+	static unsigned int mirand = 1;
+	static float sfrand( void )
+	{
+		unsigned int a;
+		mirand *= 16807;
+		a = ( mirand & 0x007fffff ) | 0x40000000;
+		return( *( ( float* )&a ) - 3.0f );
+	}
+}
+
+
 // grRandXOR // Faster then mersenne twister
 //////////////////////////////////////////////////
 class grRandXOR

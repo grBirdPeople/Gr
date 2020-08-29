@@ -20,7 +20,6 @@
 #include "grAlgo.h"
 #include "grRandom.h"
 
-#include "grParticleTest.h"
 #include "grParticle.h"
 
 #include "grBoidSys.h"
@@ -30,8 +29,7 @@
 //////////////////////////////////////////////////
 grSandbox::grSandbox( void )
 	: m_rInputMan( grInputManager::Instance() )
-	, m_pPartSys1( new grCParticleSys( 10000, 2000.0f ) )
-	, m_pParticle( new grCParticle() )
+	, m_pParticle( new grCParticle( 20000 ) )
 	, m_pBoidSys( new grCBoidSys() )
 	, m_RendWin( grCore::Instance().GetRenderWin() )
 	, m_Rand( new grRandMT() )
@@ -192,7 +190,7 @@ grSandbox::grSandbox( void )
 	m_pParticle->Stop();
 	m_pParticle->SetEmission( 2500.0f, 0.0f );
 	m_pParticle->SetColor( { 255, 123, 0, 255 }, { 255, 255, 0, 255 }, { 255, 0, 0, 0 }, { 255, 0, 0, 123 }, true );
-	//m_pParticle->SetScale( { 0.1f, 0.1f }, { 5.1f, 5.1f }, { 5.0f, 5.0f }, { 10.0f, 10.0f } );
+	m_pParticle->SetScale( { 0.1f, 0.1f }, { 5.1f, 5.1f }, { 5.0f, 5.0f }, { 10.0f, 10.0f } );
 	m_pParticle->SetPositionBox( { 0.0f, 0.0f }, { 0.0f, 0.0f }, 0.0f );
 	//m_pParticle->SetPositionEllipse( { 0.1f, 0.0f } );
 	m_pParticle->SetVelocity( { 315.0f, 45.0f }, { 200.0f, 500.0f } );
@@ -200,7 +198,7 @@ grSandbox::grSandbox( void )
 	m_pParticle->SetMass( { 1.0f, 2.0f } );
 	m_pParticle->SetLife( { 0.25f, 0.75f } );
 
-
+	
 
 
 	//// Boids
