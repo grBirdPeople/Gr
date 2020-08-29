@@ -96,7 +96,7 @@ public:
 		//{
 		//	grColor::Rgba& rgba = rArray.ColorStart[ i ];
 		//	sf::Color c{ rgba.R, rgba.G, rgba.B, rgba.A };
-		//	grBBox b{ 0.5f, rArray.Position[ i ] };
+		//	grBBox b{ rArray.ScaleStart[ i ], rArray.Position[ i ] };
 		//	grDebugManager::Instance().AddBBox( b, c );
 		//}
 		////
