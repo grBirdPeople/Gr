@@ -203,7 +203,7 @@ namespace grStruct
 			S
 		};
 
-		grSTimer( const char* name = "Timer", ETimeType timeType = ETimeType::MS )
+		grSTimer( const char* name = "Time", ETimeType timeType = ETimeType::NS )
 			: Start		( std::chrono::high_resolution_clock::now() )
 			, Name		( name )
 			, TimeType	( timeType )
@@ -227,8 +227,8 @@ namespace grStruct
 
 	private:
 		std::chrono::steady_clock::time_point Start;
-		const char* Name;
 		ETimeType TimeType;
+		const char* Name;
 	};
 
 

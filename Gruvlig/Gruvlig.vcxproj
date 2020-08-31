@@ -172,7 +172,6 @@
     <ClCompile Include="code\gr\grMapManager.cpp" />
     <ClCompile Include="code\gr\grNavMesh.cpp" />
     <ClCompile Include="code\gr\grNavMeshManager.cpp" />
-    <ClCompile Include="code\gr\grParticleTest.cpp" />
     <ClCompile Include="code\gr\grSandbox.cpp" />
     <ClCompile Include="code\gr\main.cpp" />
     <ClCompile Include="code\xorshift\xorshift.cpp" />
@@ -243,7 +242,6 @@
     <ClInclude Include="code\gr\grParticle.h" />
     <ClInclude Include="code\gr\grParticleData.h" />
     <ClInclude Include="code\gr\grParticleSystem.h" />
-    <ClInclude Include="code\gr\grParticleTest.h" />
     <ClInclude Include="code\gr\grSPartAttribute.h" />
     <ClInclude Include="code\gr\grRandom.h" />
     <ClInclude Include="code\gr\grSandbox.h" />

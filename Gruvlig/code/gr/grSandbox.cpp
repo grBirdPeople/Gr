@@ -20,7 +20,6 @@
 #include "grAlgo.h"
 #include "grRandom.h"
 
-#include "grParticleTest.h"
 #include "grParticle.h"
 
 #include "grBoidSys.h"
@@ -30,8 +29,7 @@
 //////////////////////////////////////////////////
 grSandbox::grSandbox( void )
 	: m_rInputMan( grInputManager::Instance() )
-	, m_pPartSys1( new grCParticleSys( 10000, 2000.0f ) )
-	, m_pParticle( new grCParticle() )
+	, m_pParticle( new grCParticle( 20000 ) )
 	, m_pBoidSys( new grCBoidSys() )
 	, m_RendWin( grCore::Instance().GetRenderWin() )
 	, m_Rand( new grRandMT() )
@@ -189,18 +187,28 @@ grSandbox::grSandbox( void )
 	// Other particles
 	grV2f winOrigo{ ( float )grCore::Instance().GetWindowSize().x * 0.5f, ( float )grCore::Instance().GetWindowSize().y * 0.5f };
 
-	m_pParticle->Stop();
-	m_pParticle->SetEmission( 2500.0f, 0.0f );
-	m_pParticle->SetColor( { 255, 123, 0, 255 }, { 255, 255, 0, 255 }, { 255, 0, 0, 0 }, { 255, 0, 0, 123 }, true );
+	//m_pParticle->Stop();
+	m_pParticle->SetPositionSystem( { winOrigo.x, winOrigo.y } );
+	m_pParticle->SetEmission( 500.0f, 0.0f );
+	m_pParticle->SetColor( { 255, 123, 0, 255 }, { 255, 255, 0, 255 }, { 255, 0, 0, 0}, { 255, 0, 0, 0 }, true );
 	//m_pParticle->SetScale( { 0.1f, 0.1f }, { 5.1f, 5.1f }, { 5.0f, 5.0f }, { 10.0f, 10.0f } );
-	m_pParticle->SetPositionBox( { 0.0f, 0.0f }, { 0.0f, 0.0f }, 0.0f );
-	//m_pParticle->SetPositionEllipse( { 0.1f, 0.0f } );
-	m_pParticle->SetVelocity( { 315.0f, 45.0f }, { 200.0f, 500.0f } );
-	//m_pParticle->SetVelocity( { 0.0f, 0.0f }, { 0.0f, 0.0f } );
+	//m_pParticle->SetPositionBox( { -20.0f, 0.0f }, { 20.0f, 0.0f }, 0.0f );
+	m_pParticle->SetPositionEllipse( { 5.0f, 0.0f } );
+
+	m_pParticle->SetAttractor( { winOrigo.x - 50.0f, winOrigo.y - 50.0f }, 50.0f );
+	m_pParticle->SetAttractor( { winOrigo.x - 50.0f, winOrigo.y }, 50.0f );
+	m_pParticle->SetAttractor( { winOrigo.x - 50.0f, winOrigo.y + 50.0f }, 50.0f );
+	m_pParticle->SetAttractor( { winOrigo.x, winOrigo.y + 50.0f }, 50.0f );
+	m_pParticle->SetAttractor( { winOrigo.x + 50.0f, winOrigo.y + 50.0f }, 50.0f );
+	m_pParticle->SetAttractor( { winOrigo.x + 50.0f, winOrigo.y }, 50.0f );
+	m_pParticle->SetAttractor( { winOrigo.x + 50.0f, winOrigo.y - 50.0f }, 50.0f );
+	m_pParticle->SetAttractor( { winOrigo.x, winOrigo.y - 50.0f }, 50.0f );
+
+	m_pParticle->SetVelocity( { 0.0f, 0.0f }, { 0.0f, 0.0f } );
 	m_pParticle->SetMass( { 1.0f, 2.0f } );
-	m_pParticle->SetLife( { 0.25f, 0.75f } );
+	m_pParticle->SetLife( { 10.0f, 10.0f } );
 
-
+	
 
 
 	//// Boids
@@ -247,16 +255,24 @@ grSandbox::Update( const float deltaT )
 	//}
 	
 
+	//if ( m_rInputMan.GetMouseScrollForwards() )
+	//{
+	//	m_ParticleDegAcc += 10.0f;
+	//	if( m_ParticleDegAcc > 359.9f )
+	//		m_ParticleDegAcc = 0.1f;
+
+	//	m_pParticle->SetVelocity( { m_ParticleDegAcc, m_ParticleDegAcc }, { 100.0f, 500.0f } );
+	//}
+	//if ( m_rInputMan.GetMouseScrollBackwards () )
+	//{
+	//	if ( m_ParticleDegAcc < 0.0f )
+	//		m_ParticleDegAcc = 359.9f;
+	//	m_ParticleDegAcc -= 10.0f;
+
+	//	m_pParticle->SetVelocity( { m_ParticleDegAcc, m_ParticleDegAcc }, { 100.0f, 500.0f } );
+	//}
 
 
-	if ( m_rInputMan.GetMouseScrollForwards() )
-	{
-		//m_pPartSys1->SetEmitRate( m_pPartSys1->GetEmitRate() + 100.0f );
-	}
-	if ( m_rInputMan.GetMouseScrollBackwards () )
-	{
-		//m_pPartSys1->SetEmitRate( m_pPartSys1->GetEmitRate() - 100.0f );
-	}
 
 
 	//// Scenegraph things

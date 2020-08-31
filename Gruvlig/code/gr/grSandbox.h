@@ -11,7 +11,6 @@ class grMap;
 class grIEntity;
 class grInputManager;
 class grRandMT;
-class grCParticleSys;
 class grCParticle;
 class grCBoidSys;
 
@@ -39,7 +38,6 @@ public:
 private:
 	sf::RenderWindow& m_RendWin;
 	grInputManager& m_rInputMan;
-	grCParticleSys* m_pPartSys1;
 	grCParticle* m_pParticle;
 	grCBoidSys* m_pBoidSys;
 	grMap* m_pMap;

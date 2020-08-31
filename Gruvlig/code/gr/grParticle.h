@@ -5,13 +5,13 @@
 #include "grParticleSystem.h"
 
 
-// Interface class which will be returned on system creation by the particle manager when that exists
+// Interface class which will be returned on system creation as ref by the particle manager when that exists
 // An id will be added here and instances of grCParticleData and grCParticleSystem will live in the manager and possible be stored as ref's here
 // Update and render will be moved to the manager
 class grCParticle
 {
 public:
-	grCParticle( const intU size = 20000 )
+	grCParticle( const sizeT size )
 	{
 		m_puData = std::make_unique<grCParticleData>( size );
 		m_puSystem = std::make_unique<grCParticleSystem>( *m_puData );
@@ -51,6 +51,11 @@ public:
 		m_puSystem->ScaleSystem.SetData( rStartMin, rStartMax, rEndMin, rEndMax );
 	}
 
+	void SetAttractor( const grV2f& rPosistion, const float rForce )
+	{
+		m_puSystem->AttractorSytem.SetData( rPosistion, rForce );
+	}
+
 	void SetVelocity( const grV2f& rDegreeMinMax, const grV2f& rForceMinMax )
 	{
 		m_puSystem->VelocitySystem.SetData( rDegreeMinMax, rForceMinMax );
@@ -82,7 +87,7 @@ public:
 
 		m_puSystem->Run( dt );
 
-		//printf( "Alive: %d\n", m_puData->EmitData.Size );
+		printf( "Alive: %d\n", m_puData->EmitData.Size );
 	}
 
 	void Render( sf::RenderWindow& rRenderWin )
