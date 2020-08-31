@@ -9,5 +9,6 @@ Gruvlig/build/intermediates/
 *.idb
 *.obj
 *.jpg
+*.user
 
 *.vcxproj.filters
