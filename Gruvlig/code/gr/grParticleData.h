@@ -31,24 +31,6 @@ enum class EPositionType
 };
 
 
-struct grSArrayData
-{
-	// TODO: Fix this when some kind of draw system exists
-	pU<sf::Vertex[]> Verts;
-	//
-
-	pU<grColor::Rgba[]> ColorStart;
-	pU<grColor::Rgba[]> ColorEnd;
-	pU<grV2f[]> ScaleStart;
-	pU<grV2f[]> ScaleEnd;
-	pU<float[]> Mass;
-	pU<grV2f[]> Acceleration;
-	pU<grV2f[]> Velocity;
-	pU<grV2f[]> Position;
-	pU<float[]> Life;
-};
-
-
 struct grSEmitData
 {
 	grV2f SystemPosition = grV2f( ( float )grCore::Instance().GetWindowSize().x * 0.5f, ( float )grCore::Instance().GetWindowSize().y * 0.5f );
@@ -103,6 +85,19 @@ struct grSMassData
 };
 
 
+struct grAttractorData
+{
+	grV2f ArrPos[ 8 ] { { 0.0f, 0.0f }, { 0.0f, 0.0f }, { 0.0f, 0.0f }, { 0.0f, 0.0f } }; // Max attractors
+	float ArrForce[ 8 ] { { 1.0f }, { 1.0f }, { 1.0f }, { 1.0f }, { 1.0f }, { 1.0f }, { 1.0f }, { 1.0f } }; // Max force
+	grRandXOR Rand;
+	DistF Dist;
+	sizeT IdxCount{ 0 };
+	sizeT Capacity{ 8 };
+	sizeT Size{ 0 };
+	EEqualValue Equal = EEqualValue::YES;
+};
+
+
 struct grSVelocityData
 {
 	grRandXOR Rand;
@@ -131,7 +126,6 @@ struct grSPositionData
 	EEqualValue EqualCircle = EEqualValue::YES;
 	EPositionType PositionType = EPositionType::BOX_FILLED;
 
-
 	//DistF DistX;
 	//DistF DistY;
 	//grV2f PositionOffsetMin = grV2f( 0.0f, 0.0f );
@@ -151,20 +145,39 @@ struct grSLifeData
 };
 
 
+struct grSArrayData
+{
+	// TODO: Fix this when some kind of draw system exists
+	pU<sf::Vertex[]> Verts;
+	//
+
+	pU<grColor::Rgba[]> ColorStart;
+	pU<grColor::Rgba[]> ColorEnd;
+	pU<grV2f[]> ScaleStart;
+	pU<grV2f[]> ScaleEnd;
+	pU<float[]> Mass;
+	pU<grV2f[]> Acceleration;
+	pU<grV2f[]> Velocity;
+	pU<grV2f[]> Position;
+	pU<float[]> Life;
+};
+
+
 class grCParticleData
 {
 public:
-	// Unique data that represents particles
-	grSArrayData ArrayData;
 	// General data for spawning new particles
 	grSEmitData EmitData;
 	// Specific data for spawning new particles
 	grSColorData ColorData;
 	grSScaleData ScaleData;
 	grSMassData MassData;
+	grAttractorData AttractorData;
 	grSVelocityData VelocityData;
 	grSPositionData PositionData;
 	grSLifeData LifeData;
+	// Unique data that represents particles
+	grSArrayData ArrayData;
 
 	grCParticleData( const sizeT size )
 	{

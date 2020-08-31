@@ -477,6 +477,56 @@ struct grSMassSystem : public grSBaseSystem
 };
 
 
+struct grAttractorSystem : public grSBaseSystem
+{
+	grCParticleData& rData;
+
+	grAttractorSystem( grCParticleData& rParticleData )
+		: rData( rParticleData )
+	{}
+	grAttractorSystem( const grAttractorSystem& ) = default;
+	grAttractorSystem& operator=( const grAttractorSystem& ) = default;
+
+	void SetData( const grV2f& rPosistion, const float rForce )
+	{
+		rData.AttractorData.ArrPos[ rData.AttractorData.IdxCount ] = rPosistion;
+		rData.AttractorData.ArrForce[ rData.AttractorData.IdxCount ] = rForce;
+
+		rData.AttractorData.IdxCount =
+			rData.AttractorData.IdxCount < rData.AttractorData.Capacity - 1 ?
+			rData.AttractorData.IdxCount + 1 :
+			0;
+
+		rData.AttractorData.Size =
+			rData.AttractorData.Size < rData.AttractorData.Capacity ?
+			rData.AttractorData.Size + 1 :
+			rData.AttractorData.Size;
+	}
+
+	void Update( const sizeT size, const float dt )
+	{
+		if ( rData.AttractorData.Size > 0 )
+		{
+			for ( sizeT i = 0; i < size; ++i )
+			{
+				grV2f& accel{ rData.ArrayData.Acceleration[ i ] };
+				grV2f pos{ rData.ArrayData.Position[ i ] };
+
+				for ( sizeT j = 0; j < rData.AttractorData.Size; ++j )
+				{
+					grV2f att{ rData.AttractorData.ArrPos[ j ] };
+					float force{ rData.AttractorData.ArrForce[ j ] };
+					grV2f between{ pos.Between( att ) };
+					float squared = between.MagnitudeSqr();
+					squared = force / squared;
+					accel += between * squared;
+				}
+			}
+		}
+	}
+};
+
+
 struct grSVelocitySystem : public grSBaseSystem
 {
 	// TODO: This systems generation function is extra weird and needs rebuild
@@ -554,7 +604,7 @@ struct grSVelocitySystem : public grSBaseSystem
 	void Update( const sizeT size, const float dt )
 	{
 		for ( sizeT i = 0; i < size; ++i )
-			rData.ArrayData.Velocity[ i ] += rData.ArrayData.Acceleration[ i ].x * dt;
+			rData.ArrayData.Velocity[ i ] += rData.ArrayData.Acceleration[ i ].LimitMax( 25.0f ) * dt;
 	}
 };
 
@@ -871,6 +921,7 @@ public:
 	grSColorSystem ColorSystem;
 	grSScaleSystem ScaleSystem;
 	grSMassSystem MassSystem;
+	grAttractorSystem AttractorSytem;
 	grSVelocitySystem VelocitySystem;
 	grSPositionSystem PositionSystem;
 	grSLifeSystem LifeSystem;
@@ -882,6 +933,7 @@ public:
 		, ColorSystem( rParticleData )
 		, ScaleSystem( rParticleData )
 		, MassSystem( rParticleData )
+		, AttractorSytem( rParticleData )
 		, VelocitySystem( rParticleData )
 		, PositionSystem( rParticleData )
 		, LifeSystem( rParticleData )
@@ -937,8 +989,6 @@ private:
 
 	void Update()
 	{
-		grStruct::grSTimer t;
-
 		if ( rData.EmitData.Size > 0 )
 		{
 			float dt{ rData.EmitData.Dt };
@@ -946,6 +996,7 @@ private:
 
 			ColorSystem.Update( size, dt );
 			ScaleSystem.Update( size, dt );
+			AttractorSytem.Update( size, dt );
 			VelocitySystem.Update( size, dt );
 			PositionSystem.Update( size, dt );
 			LifeSystem.Update( dt );

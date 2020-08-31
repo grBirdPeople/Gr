@@ -51,6 +51,11 @@ public:
 		m_puSystem->ScaleSystem.SetData( rStartMin, rStartMax, rEndMin, rEndMax );
 	}
 
+	void SetAttractor( const grV2f& rPosistion, const float rForce )
+	{
+		m_puSystem->AttractorSytem.SetData( rPosistion, rForce );
+	}
+
 	void SetVelocity( const grV2f& rDegreeMinMax, const grV2f& rForceMinMax )
 	{
 		m_puSystem->VelocitySystem.SetData( rDegreeMinMax, rForceMinMax );
@@ -82,7 +87,7 @@ public:
 
 		m_puSystem->Run( dt );
 
-		//printf( "Alive: %d\n", m_puData->EmitData.Size );
+		printf( "Alive: %d\n", m_puData->EmitData.Size );
 	}
 
 	void Render( sf::RenderWindow& rRenderWin )
